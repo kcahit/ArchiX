@@ -1,0 +1,75 @@
+## Build outputs
+bin/
+obj/
+out/
+
+## Visual Studio cache/metadata
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Rider / JetBrains
+.idea/
+*.sln.iml
+
+## Logs
+*.log
+logs/
+*.tlog
+
+## NuGet
+*.nupkg
+*.snupkg
+packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+## Coverage
+*.coverage
+*.coveragexml
+coverage*.json
+TestResult*/
+*.trx
+
+## Temporary files
+*.tmp
+*.temp
+*.bak
+*.old
+
+## OS files
+[Dd]esktop.ini
+[Tt]humbs.db
+ehthumbs.db
+*.DS_Store
+
+## Publish
+publish/
+wwwroot/dist/
+node_modules/
+bower_components/
+
+## EF Core migrations (opsiyonel: sadece local’de tutmak istersen)
+#Migrations/
+
+## Secrets
+secrets.json
+appsettings.Development.json
+appsettings.Local.json
+
+## Rider
+.idea/
+*.sln.iml
+
+## Other
+*.dbmdl
+*.bak
+*.sql
