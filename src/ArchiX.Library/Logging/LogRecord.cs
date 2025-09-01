@@ -1,25 +1,44 @@
 ﻿namespace ArchiX.Library.Logging;
 
+/// <summary>
+/// Tek bir log kaydını temsil eder. 
+/// Zaman, seviye, korelasyon, HTTP, uygulama ve exception bilgilerini içerir.
+/// </summary>
 public sealed class LogRecord
 {
-    // 1) Time
+    /// <summary>
+    /// Zaman bilgileri (UTC, local, timezone).
+    /// </summary>
     public LogTime? Time { get; set; }
 
-    // 2) Severity & Code
+    /// <summary>
+    /// Log seviyesi ve hata kodu bilgisi.
+    /// </summary>
     public LogSeverity? Severity { get; set; }
 
-    // 3) Correlation
+    /// <summary>
+    /// Correlation ve Trace ID bilgileri.
+    /// </summary>
     public LogCorrelation? Correlation { get; set; }
 
-    // 4) HTTP
+    /// <summary>
+    /// HTTP isteği/yanıtı bilgileri.
+    /// </summary>
     public LogHttp? Http { get; set; }
 
-    // 5) App/Server
+    /// <summary>
+    /// Uygulama ve sunucu bilgileri.
+    /// </summary>
     public LogApp? App { get; set; }
 
-    // 6) Exception
+    /// <summary>
+    /// Exception bilgileri.
+    /// </summary>
     public LogException? Exception { get; set; }
 
-    // 7) Opsiyonel
+    /// <summary>
+    /// İşlemin toplam süresi (ms).
+    /// Opsiyonel alan.
+    /// </summary>
     public long? DurationMs { get; set; }
 }

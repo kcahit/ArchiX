@@ -2,8 +2,33 @@
 
 namespace ArchiX.Library.Logging;
 
+/// <summary>
+/// LogRecord nesnelerini üretmek için fabrika sınıfı.
+/// </summary>
 public static class LogRecordFactory
 {
+    /// <summary>
+    /// Bir Exception nesnesinden LogRecord oluşturur.
+    /// </summary>
+    /// <param name="ex">Yakalanan exception.</param>
+    /// <param name="status">HTTP status kodu.</param>
+    /// <param name="method">HTTP method (GET, POST, ...).</param>
+    /// <param name="path">Request path.</param>
+    /// <param name="route">Route şablonu.</param>
+    /// <param name="query">Query parametreleri.</param>
+    /// <param name="headers">Header bilgileri.</param>
+    /// <param name="clientIp">İstemci IP adresi.</param>
+    /// <param name="userAgent">User-Agent bilgisi.</param>
+    /// <param name="requestId">Request ID.</param>
+    /// <param name="correlationId">Correlation ID.</param>
+    /// <param name="traceId">Trace ID.</param>
+    /// <param name="appName">Uygulama adı.</param>
+    /// <param name="environment">Çalışma ortamı (Dev/Staging/Prod).</param>
+    /// <param name="version">Uygulama versiyonu.</param>
+    /// <param name="timeZoneId">Zaman dilimi ID (örn. Europe/Istanbul).</param>
+    /// <param name="detailsIfDev">Sadece development modunda eklenen detaylar.</param>
+    /// <param name="durationMs">İsteğin süresi (ms).</param>
+    /// <returns>Hazır LogRecord nesnesi.</returns>
     public static LogRecord FromException(
         Exception ex,
         int status,
@@ -37,10 +62,10 @@ public static class LogRecordFactory
         {
             Time = new LogTime
             {
-                ServerTimeUtc = nowUtc,          // Sabit referans (UTC)
-                ServerLocalTime = serverLocal,   // Server’ın kendi lokal saati (örn. Europe/Berlin)
-                LocalTime = local,               // Config ile belirlenen TZ (örn. Europe/Istanbul)
-                TimeZoneId = tz.Id               // Kullanılan TZ kimliği (fallback sonrası kesin)
+                ServerTimeUtc = nowUtc,
+                ServerLocalTime = serverLocal,
+                LocalTime = local,
+                TimeZoneId = tz.Id
             },
             Severity = new LogSeverity
             {
@@ -90,6 +115,9 @@ public static class LogRecordFactory
         };
     }
 
+    /// <summary>
+    /// Güvenli timezone bulucu (geçersiz ID gelirse Local’a düşer).
+    /// </summary>
     private static TimeZoneInfo SafeFindTimeZone(string? id)
     {
         try
@@ -104,6 +132,9 @@ public static class LogRecordFactory
         return TimeZoneInfo.Local;
     }
 
+    /// <summary>
+    /// Inner exception sayısını döndürür.
+    /// </summary>
     private static int CountInner(Exception ex)
     {
         int i = 0;
@@ -116,6 +147,9 @@ public static class LogRecordFactory
         return i;
     }
 
+    /// <summary>
+    /// String’i maksimum uzunluğa kısaltır.
+    /// </summary>
     private static string? Truncate(string? s, int max)
     {
         if (string.IsNullOrEmpty(s)) return s;
