@@ -1,95 +1,117 @@
-﻿using System;
-
-namespace ArchiX.Library.Result
+﻿namespace ArchiX.Library.Result
 {
     /// <summary>
-    /// Hata bilgisini temsil eden model sınıfıdır.
-    /// Basit (code+message) veya detaylı (log bilgileri) kullanım için uygundur.
+    /// Uygulama genelinde hata modelini temsil eder.
     /// </summary>
-    public class Error
+    public sealed class Error : IEquatable<Error>
     {
-        /// <summary> Hata kodu (ör: E1001). </summary>
+        /// <summary>Hata kodunu temsil eder (örnek: VAL001).</summary>
         public string Code { get; }
 
-        /// <summary> Hata mesajı. </summary>
+        /// <summary>Hata mesajını içerir.</summary>
         public string Message { get; }
 
-        /// <summary> İstekle ilişkili CorrelationId. </summary>
+        /// <summary>Ek hata detaylarını içerir (opsiyonel).</summary>
+        public string? Details { get; }
+
+        /// <summary>Sunucunun UTC zaman damgası.</summary>
+        public DateTimeOffset? ServerTimeUtc { get; }
+
+        /// <summary>Yerel zaman damgası (istemciye göre).</summary>
+        public DateTimeOffset? LocalTime { get; }
+
+        /// <summary>Zaman dilimi kimliği (örnek: Europe/Istanbul).</summary>
+        public string? TimeZoneId { get; }
+
+        /// <summary>İstek ile ilişkili korelasyon kimliği.</summary>
         public string? CorrelationId { get; set; }
 
-        /// <summary> Hatanın oluştuğu zaman. </summary>
-        public DateTimeOffset? Time { get; set; }
-
-        /// <summary> TraceId bilgisi. </summary>
+        /// <summary>İstek için izleme kimliği (trace id).</summary>
         public string? TraceId { get; set; }
 
-        /// <summary> Hata detay mesajı. </summary>
-        public string? Details { get; set; }
+        /// <summary>Hata ciddiyet seviyesini belirtir.</summary>
+        public ErrorSeverity Severity { get; }
 
-        /// <summary> Hata kaynağı (Exception.Source). </summary>
-        public string? Source { get; set; }
-
-        /// <summary> Hatanın gerçekleştiği metot (Exception.TargetSite). </summary>
-        public string? TargetSite { get; set; }
-
-        /// <summary> Hata şiddeti (Info, Warning, Error, Critical). </summary>
-        public ErrorSeverity? Severity { get; set; } = ErrorSeverity.None;
-
-        /// <summary> Stack trace bilgisi. </summary>
-        public string? Stack { get; set; }
+        /// <summary>Hiçbir hata olmadığını temsil eden sabit değer.</summary>
+        public static readonly Error None = new("NONE", string.Empty);
 
         /// <summary>
-        /// Hata olmadığı durumda kullanılacak özel nesne.
-        /// "Hiç hata yok" anlamına gelir.
+        /// Yeni bir hata nesnesi oluşturur.
         /// </summary>
-        public static Error None => new Error("NONE", string.Empty);
-
-        /// <summary>
-        /// Basit kurucu: sadece kod ve mesaj.
-        /// </summary>
-        /// <param name="code">Hata kodu.</param>
-        /// <param name="message">Hata mesajı.</param>
-        public Error(string code, string message)
-        {
-            Code = code ?? throw new ArgumentNullException(nameof(code));
-            Message = message ?? throw new ArgumentNullException(nameof(message));
-        }
-
-        /// <summary>
-        /// Detaylı kurucu: hata hakkında tüm alanları set edebilmek için.
-        /// </summary>
-        /// <param name="code">Hata kodu.</param>
-        /// <param name="message">Hata mesajı.</param>
-        /// <param name="correlationId">CorrelationId bilgisi.</param>
-        /// <param name="time">Hatanın oluştuğu zaman.</param>
-        /// <param name="traceId">TraceId bilgisi.</param>
-        /// <param name="details">Hata detay mesajı.</param>
-        /// <param name="source">Hata kaynağı.</param>
-        /// <param name="targetSite">Hatanın gerçekleştiği metot.</param>
-        /// <param name="severity">Hata şiddeti (nullable).</param>
-        /// <param name="stack">Stack trace bilgisi (opsiyonel).</param>
         public Error(
             string code,
             string message,
-            string? correlationId,
-            DateTimeOffset? time,
-            string? traceId,
-            string? details,
-            string? source,
-            string? targetSite,
-            ErrorSeverity? severity,
-            string? stack = null)
+            string? details = null,
+            DateTimeOffset? serverTimeUtc = null,
+            DateTimeOffset? localTime = null,
+            string? timeZoneId = null,
+            string? correlationId = null,
+            string? traceId = null,
+            ErrorSeverity severity = ErrorSeverity.None)
         {
             Code = code;
             Message = message;
-            CorrelationId = correlationId;
-            Time = time;
-            TraceId = traceId;
             Details = details;
-            Source = source;
-            TargetSite = targetSite;
+            ServerTimeUtc = serverTimeUtc;
+            LocalTime = localTime;
+            TimeZoneId = timeZoneId;
+            CorrelationId = correlationId;
+            TraceId = traceId;
             Severity = severity;
-            Stack = stack;
         }
+
+        /// <summary>
+        /// Nesneler arası eşitlik kontrolü (referans yerine değer bazlı).
+        /// </summary>
+        public bool Equals(Error? other)
+        {
+            if (other is null) return false;
+            if (ReferenceEquals(this, other)) return true;
+
+            return Code == other.Code &&
+                   Message == other.Message &&
+                   Details == other.Details &&
+                   ServerTimeUtc == other.ServerTimeUtc &&
+                   LocalTime == other.LocalTime &&
+                   TimeZoneId == other.TimeZoneId &&
+                   CorrelationId == other.CorrelationId &&
+                   TraceId == other.TraceId &&
+                   Severity == other.Severity;
+        }
+
+        /// <summary>
+        /// Obje tabanlı eşitlik kontrolü.
+        /// </summary>
+        public override bool Equals(object? obj) => Equals(obj as Error);
+
+        /// <summary>
+        /// Nesne için hash kodu üretir.
+        /// </summary>
+        public override int GetHashCode()
+        {
+            var hash = new HashCode();
+            hash.Add(Code);
+            hash.Add(Message);
+            hash.Add(Details);
+            hash.Add(ServerTimeUtc);
+            hash.Add(LocalTime);
+            hash.Add(TimeZoneId);
+            hash.Add(CorrelationId);
+            hash.Add(TraceId);
+            hash.Add(Severity);
+            return hash.ToHashCode();
+        }
+
+        /// <summary>
+        /// İki Error nesnesi eşitse true döner.
+        /// </summary>
+        public static bool operator ==(Error? left, Error? right) =>
+            Equals(left, right);
+
+        /// <summary>
+        /// İki Error nesnesi eşit değilse true döner.
+        /// </summary>
+        public static bool operator !=(Error? left, Error? right) =>
+            !Equals(left, right);
     }
 }
