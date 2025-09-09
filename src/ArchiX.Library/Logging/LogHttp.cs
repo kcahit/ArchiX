@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace ArchiX.Library.Logging;
+﻿namespace ArchiX.Library.Logging;
 
 /// <summary>
 /// HTTP isteği/yanıtı ile ilgili log bilgilerini tutar.

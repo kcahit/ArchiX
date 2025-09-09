@@ -1,5 +1,5 @@
-﻿using System;
-using ArchiX.Library.Diagnostics;
+﻿using ArchiX.Library.Diagnostics;
+
 using Xunit;
 
 namespace ArchiXTest.ApiWeb.Test.DiagnosticsTests

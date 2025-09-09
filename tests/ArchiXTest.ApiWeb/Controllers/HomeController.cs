@@ -1,6 +1,8 @@
-using ArchiXTest.ApiWeb.Models;
-using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+
+using ArchiXTest.ApiWeb.Models;
+
+using Microsoft.AspNetCore.Mvc;
 
 namespace ArchiXTest.ApiWeb.Controllers
 {

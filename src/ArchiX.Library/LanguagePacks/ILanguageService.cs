@@ -1,6 +1,4 @@
-﻿using System.Threading;
-
-namespace ArchiX.Library.LanguagePacks
+﻿namespace ArchiX.Library.LanguagePacks
 {
     /// <summary>
     /// Çok dilli destek için display name ve listeleme hizmetlerini tanımlar.

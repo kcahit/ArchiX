@@ -1,6 +1,4 @@
-﻿using System.Threading;
-
-namespace ArchiX.Library.Diagnostics
+﻿namespace ArchiX.Library.Diagnostics
 {
     /// <summary>
     /// İstek zinciri korelasyon bilgisini temsil eden arayüz.

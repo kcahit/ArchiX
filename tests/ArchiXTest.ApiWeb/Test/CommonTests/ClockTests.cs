@@ -1,5 +1,5 @@
-﻿using System;
-using ArchiX.Library.Time;
+﻿using ArchiX.Library.Time;
+
 using Xunit;
 
 namespace ArchiXTest.ApiWeb.Tests.CommonTests

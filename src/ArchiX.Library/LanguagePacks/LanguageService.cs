@@ -1,5 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ArchiX.Library.Context;
+﻿using ArchiX.Library.Context;
+
+using Microsoft.EntityFrameworkCore;
 
 namespace ArchiX.Library.LanguagePacks
 {

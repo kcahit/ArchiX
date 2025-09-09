@@ -1,10 +1,13 @@
-﻿using ArchiX.Library.Filtering;
-using ArchiX.Library.LanguagePacks;
+﻿using System.Reflection;
+
 using ArchiX.Library.Entities;
+using ArchiX.Library.Filtering;
 using ArchiX.Library.Interfaces;
+using ArchiX.Library.LanguagePacks;
+
 using Humanizer;
+
 using Microsoft.EntityFrameworkCore;
-using System.Reflection;
 
 namespace ArchiX.Library.Context
 {

@@ -1,5 +1,6 @@
-﻿using Xunit;
-using ArchiX.Library.Result;
+﻿using ArchiX.Library.Result;
+
+using Xunit;
 
 namespace ArchiXTest.ApiWeb.Tests.CommonTests
 {

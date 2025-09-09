@@ -1,9 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
-using ArchiX.Library.Context;
+﻿using ArchiX.Library.Context;
 using ArchiX.Library.Entities;
 using ArchiX.Library.Infrastructure;
+
 using Microsoft.EntityFrameworkCore;
+
 using Xunit;
 
 namespace ArchiXTest.ApiWeb.Tests.InfrastructureTests

@@ -1,10 +1,10 @@
-﻿using System;
-using System.Linq;
-using ArchiX.Library.Context;
+﻿using ArchiX.Library.Context;
 using ArchiX.Library.Entities;
 using ArchiX.Library.Filtering;
 using ArchiX.Library.LanguagePacks;
+
 using Microsoft.EntityFrameworkCore;
+
 using Xunit;
 
 namespace ArchiXTest.ApiWeb.Tests.InfrastructureTests

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserSettings>
+  <ApplicationIdentity version="17.0"/>
+  <ToolsOptions>
+    <ToolsOptionsCategory name="Environment" RegisteredName="Environment">
+      <ToolsOptionsSubCategory name="FontsAndColors" RegisteredName="FontsAndColors">
+        <PropertyValue name="Version">2</PropertyValue>
+        <PropertyValue name="FontName">Consolas</PropertyValue>
+        <PropertyValue name="FontSize">11</PropertyValue>
+        <PropertyValue name="FontIsDefault">Yes</PropertyValue>
+        <FontsAndColorsCategories>
+          <Category GUID="{58E96763-1D3B-4E05-B6BA-FF7115FD0B7B}" FontName="Consolas" FontSize="11">
+            <!-- Keywords -->
+            <Item Name="Keyword" Foreground="0,0,255" Background="255,255,255" BoldFont="Yes"/>
+            <!-- Class/Struct/Interface -->
+            <Item Name="User Types" Foreground="0,128,0" Background="255,255,255" BoldFont="Yes"/>
+            <!-- Enum -->
+            <Item Name="User Types - Enums" Foreground="0,128,64" Background="255,255,255" BoldFont="Yes"/>
+            <!-- Strings -->
+            <Item Name="String" Foreground="163,21,21" Background="255,255,255"/>
+            <!-- Numbers -->
+            <Item Name="Number" Foreground="255,128,0" Background="255,255,255"/>
+            <!-- Comments -->
+            <Item Name="Comment" Foreground="128,128,128" Background="255,255,255" ItalicFont="Yes"/>
+            <!-- XML Doc Comments -->
+            <Item Name="XML Doc Comment" Foreground="150,150,150" Background="255,255,255"/>
+          </Category>
+        </FontsAndColorsCategories>
+      </ToolsOptionsSubCategory>
+    </ToolsOptionsCategory>
+  </ToolsOptions>
+</UserSettings>

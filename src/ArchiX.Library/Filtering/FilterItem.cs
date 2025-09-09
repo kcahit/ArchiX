@@ -1,5 +1,6 @@
-﻿using ArchiX.Library.Entities;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+
+using ArchiX.Library.Entities;
 
 
 namespace ArchiX.Library.Filtering

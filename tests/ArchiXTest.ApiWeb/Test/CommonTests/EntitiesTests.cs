@@ -1,5 +1,5 @@
-﻿using System;
-using ArchiX.Library.Entities;
+﻿using ArchiX.Library.Entities;
+
 using Xunit;
 
 namespace ArchiXTest.ApiWeb.Tests.DomainTests

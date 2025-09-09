@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ArchiX.Library.Logging;
+﻿namespace ArchiX.Library.Logging;
 
 /// <summary>
 /// Loglama konfigürasyon seçeneklerini temsil eder.

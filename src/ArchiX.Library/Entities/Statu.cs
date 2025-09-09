@@ -1,6 +1,4 @@
-﻿using ArchiX.Library.Entities;
-
-namespace ArchiX.Library.Entities
+﻿namespace ArchiX.Library.Entities
 {
     /// <summary>
     /// Sistemdeki kayıtların durumlarını temsil eden entity.
