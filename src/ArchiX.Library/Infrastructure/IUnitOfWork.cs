@@ -1,4 +1,4 @@
-﻿namespace ArchiX.Library.Interfaces
+﻿namespace ArchiX.Library.Infrastructure
 {
     /// <summary>
     /// Unit of Work desenini temsil eden arayüz.

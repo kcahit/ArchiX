@@ -1,6 +1,4 @@
-﻿using ArchiX.Library.Interfaces;
-
-namespace ArchiX.Library.Entities
+﻿namespace ArchiX.Library.Entities
 {
     /// <summary>
     /// Tüm entity sınıfları için ortak alanları içeren abstract base sınıf.

@@ -1,4 +1,6 @@
-﻿namespace ArchiX.Library.Interfaces
+﻿using ArchiX.Library.Entities;
+
+namespace ArchiX.Library.Infrastructure
 {
     /// <summary>
     /// Generic repository arayüzü. Tüm entity’ler için temel CRUD işlemlerini tanımlar.

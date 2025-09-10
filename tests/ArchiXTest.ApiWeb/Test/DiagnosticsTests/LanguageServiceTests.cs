@@ -1,4 +1,6 @@
-﻿using ArchiX.Library.Context;
+﻿using System.Globalization;
+
+using ArchiX.Library.Context;
 using ArchiX.Library.LanguagePacks;
 
 using Microsoft.EntityFrameworkCore;
@@ -20,59 +22,19 @@ namespace ArchiXTest.ApiWeb.Test.DiagnosticsTests
 
             var db = new AppDbContext(opts);
 
-            // Seed: Operator / FilterItem / Code alanı için tr-TR ve en-US
-            // Not: Service, StatusId == 3 olanları görüyor; bunu özellikle ekliyoruz.
-            db.Set<LanguagePack>().AddRange(new[]
-            {
-                new LanguagePack
-                {
-                    Id = -1001, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code",
-                    Code = "Equals", Culture = "tr-TR", DisplayName = "Eşittir",
-                    Description = "Değer eşit olmalı", StatusId = 3
-                },
-                new LanguagePack
-                {
-                    Id = -1002, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code",
-                    Code = "Equals", Culture = "en-US", DisplayName = "Equals",
-                    Description = "Value must be equal", StatusId = 3
-                },
-                new LanguagePack
-                {
-                    Id = -1003, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code",
-                    Code = "NotEquals", Culture = "tr-TR", DisplayName = "Eşit Değil",
-                    Description = "Değer eşit olmamalı", StatusId = 3
-                },
-                new LanguagePack
-                {
-                    Id = -1004, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code",
-                    Code = "NotEquals", Culture = "en-US", DisplayName = "Not Equal",
-                    Description = "Value must not be equal", StatusId = 3
-                },
-                new LanguagePack
-                {
-                    Id = -1005, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code",
-                    Code = "StartsWith", Culture = "tr-TR", DisplayName = "Başlar",
-                    Description = "Başlangıç eşleşmesi", StatusId = 3
-                },
-                new LanguagePack
-                {
-                    Id = -1006, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code",
-                    Code = "StartsWith", Culture = "en-US", DisplayName = "Starts With",
-                    Description = "Value starts with given text", StatusId = 3
-                },
-
-                // Pasif kayıt: StatusId != 3 olduğunda görünmemeli
-                new LanguagePack
-                {
-                    Id = -1999, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code",
-                    Code = "Hidden", Culture = "tr-TR", DisplayName = "Gizli",
-                    Description = "Pasif kayıt", StatusId = 2
-                }
-            });
+            db.Set<LanguagePack>().AddRange(
+            [
+                new LanguagePack { Id = -1001, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "Equals", Culture = "tr-TR", DisplayName = "Eşittir", Description = "Değer eşit olmalı", StatusId = 3 },
+                new LanguagePack { Id = -1002, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "Equals", Culture = "en-US", DisplayName = "Equals", Description = "Value must be equal", StatusId = 3 },
+                new LanguagePack { Id = -1003, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotEquals", Culture = "tr-TR", DisplayName = "Eşit Değil", Description = "Değer eşit olmamalı", StatusId = 3 },
+                new LanguagePack { Id = -1004, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotEquals", Culture = "en-US", DisplayName = "Not Equal", Description = "Value must not be equal", StatusId = 3 },
+                new LanguagePack { Id = -1005, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "StartsWith", Culture = "tr-TR", DisplayName = "Başlar", Description = "Başlangıç eşleşmesi", StatusId = 3 },
+                new LanguagePack { Id = -1006, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "StartsWith", Culture = "en-US", DisplayName = "Starts With", Description = "Value starts with given text", StatusId = 3 },
+                new LanguagePack { Id = -1999, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "Hidden", Culture = "tr-TR", DisplayName = "Gizli", Description = "Pasif kayıt", StatusId = 2 }
+            ]);
 
             db.SaveChanges();
-
-            svc = new LanguageService(db);
+            svc = new LanguageService(db: db);
             return db;
         }
 
@@ -92,8 +54,7 @@ namespace ArchiXTest.ApiWeb.Test.DiagnosticsTests
                 entityName: "FilterItem",
                 fieldName: "Code",
                 code: code,
-                culture: culture,
-                cancellationToken: CancellationToken.None);
+                culture: culture);
 
             Assert.Equal(expected, text);
         }
@@ -103,14 +64,10 @@ namespace ArchiXTest.ApiWeb.Test.DiagnosticsTests
         {
             using var db = CreateDb(out var svc);
 
-            // Mevcut olmayan kod
-            var notFound = await svc.GetDisplayNameAsync(
-                "Operator", "FilterItem", "Code", "DoesNotExist", "tr-TR");
+            var notFound = await svc.GetDisplayNameAsync("Operator", "FilterItem", "Code", "DoesNotExist", "tr-TR");
             Assert.Null(notFound);
 
-            // Pasif kayıt: StatusId != 3 => görünmemeli
-            var hidden = await svc.GetDisplayNameAsync(
-                "Operator", "FilterItem", "Code", "Hidden", "tr-TR");
+            var hidden = await svc.GetDisplayNameAsync("Operator", "FilterItem", "Code", "Hidden", "tr-TR");
             Assert.Null(hidden);
         }
 
@@ -119,14 +76,8 @@ namespace ArchiXTest.ApiWeb.Test.DiagnosticsTests
         {
             using var db = CreateDb(out var svc);
 
-            var listTr = await svc.GetListAsync(
-                itemType: "Operator",
-                entityName: "FilterItem",
-                fieldName: "Code",
-                culture: "tr-TR",
-                cancellationToken: CancellationToken.None);
+            var listTr = await svc.GetListAsync("Operator", "FilterItem", "Code", "tr-TR");
 
-            // Beklenenler: Eşittir, Eşit Değil, Başlar (3 kayıt); Hidden pasif olduğu için gelmemeli
             Assert.NotNull(listTr);
             Assert.Equal(3, listTr.Count);
 
@@ -142,6 +93,32 @@ namespace ArchiXTest.ApiWeb.Test.DiagnosticsTests
             Assert.Contains("Equals", namesEn);
             Assert.Contains("Not Equal", namesEn);
             Assert.Contains("Starts With", namesEn);
+        }
+
+        [Fact]
+        public void Returns_Key_When_Not_Found()
+        {
+            var service = new LanguageService(new CultureInfo("tr-TR"));
+            var result = service.T("olmayan_anahtar");
+            Assert.Equal("olmayan_anahtar", result);
+        }
+
+        [Fact]
+        public void Returns_Seeded_Value()
+        {
+            var seed = new Dictionary<string, string> { { "hello", "merhaba" } };
+            var service = new LanguageService(seed, new CultureInfo("tr-TR"));
+            var result = service.T("hello");
+            Assert.Equal("merhaba", result);
+        }
+
+        [Fact]
+        public void Returns_Formatted_Value()
+        {
+            var seed = new Dictionary<string, string> { { "welcome", "hoşgeldin {0}" } };
+            var service = new LanguageService(seed, new CultureInfo("tr-TR"));
+            var result = service.T("welcome", "Cahit");
+            Assert.Equal("hoşgeldin Cahit", result);
         }
     }
 }

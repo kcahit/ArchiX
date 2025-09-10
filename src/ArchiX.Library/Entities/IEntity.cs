@@ -1,4 +1,4 @@
-﻿namespace ArchiX.Library.Interfaces
+﻿namespace ArchiX.Library.Entities
 {
     /// <summary>
     /// Tüm entity sınıfları için işaret (marker) arayüz.
