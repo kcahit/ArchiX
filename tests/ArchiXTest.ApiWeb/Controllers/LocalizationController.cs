@@ -6,11 +6,9 @@ namespace ArchiXTest.ApiWeb.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public sealed class LocalizationController : ControllerBase
+public sealed class LocalizationController(ILanguageService lang) : ControllerBase
 {
-    private readonly ILanguageService _lang;
-
-    public LocalizationController(ILanguageService lang) => _lang = lang;
+    private readonly ILanguageService _lang = lang;
 
     // GET /api/localization/display-name?itemType=...&entityName=...&fieldName=...&code=...&culture=tr-TR
     [HttpGet("display-name")]
