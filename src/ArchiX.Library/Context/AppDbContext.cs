@@ -2,7 +2,10 @@
 
 using ArchiX.Library.Entities;
 using ArchiX.Library.Filtering;
+using ArchiX.Library.Infrastructure.EFCore;
 using ArchiX.Library.LanguagePacks;
+
+
 
 using Humanizer;
 
@@ -14,21 +17,13 @@ namespace ArchiX.Library.Context
     /// ArchiX uygulamasının veritabanı işlemlerini yöneten DbContext sınıfı.
     /// Entity tanımları, konfigürasyonlar ve seed verileri burada yapılır.
     /// </summary>
-    public class AppDbContext : DbContext
+    public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
     {
         /// <summary>
         /// Çalışma zamanında yüklü tüm assembly’leri tutan cache.
         /// IEntity implementasyonu aramada kullanılır.
         /// </summary>
         private static readonly Assembly[] _cachedAssemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-        /// <summary>
-        /// AppDbContext kurucu metodu.
-        /// </summary>
-        /// <param name="options">DbContext konfigürasyon seçenekleri.</param>
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-        {
-        }
 
         /// <summary>
         /// Model yapılandırmasını özelleştirmek için kullanılır.
@@ -101,12 +96,16 @@ namespace ArchiX.Library.Context
             ConfigureStatuSeeds(modelBuilder);
             ConfigureFilterItemSeeds(modelBuilder);
             ConfigureLanguagePackSeeds(modelBuilder);
+
+            // --- Soft-delete global filtre: DEL kodluları otomatik dışla
+            ModelBuilderExtensionsSoftDelete.ApplySoftDeleteFilter(modelBuilder);
+
         }
 
         /// <summary>
         /// Statu entity için başlangıç (seed) verilerini ekler.
         /// </summary>
-        private void ConfigureStatuSeeds(ModelBuilder modelBuilder)
+        private static void ConfigureStatuSeeds(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Statu>().HasData(
                 new Statu { Id = -1, Code = "DFT", Name = "Draft", Description = "Record is in draft state" },
@@ -121,7 +120,7 @@ namespace ArchiX.Library.Context
         /// <summary>
         /// FilterItem entity için başlangıç (seed) verilerini ekler.
         /// </summary>
-        private void ConfigureFilterItemSeeds(ModelBuilder modelBuilder)
+        private static void ConfigureFilterItemSeeds(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<FilterItem>().HasData(
                 new FilterItem { Id = -10, ItemType = "Operator", Code = "Equals" },
@@ -148,7 +147,7 @@ namespace ArchiX.Library.Context
         /// <summary>
         /// LanguagePack entity için başlangıç (seed) verilerini ekler.
         /// </summary>
-        private void ConfigureLanguagePackSeeds(ModelBuilder modelBuilder)
+        private static void ConfigureLanguagePackSeeds(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<LanguagePack>().HasData(
                 new LanguagePack { Id = -1001, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "Equals", Culture = "tr-TR", DisplayName = "Eşittir", Description = "Değer eşit olmalı" },
@@ -159,7 +158,7 @@ namespace ArchiX.Library.Context
                 new LanguagePack { Id = -1006, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "StartsWith", Culture = "en-US", DisplayName = "Starts With", Description = "Value starts with given text" },
                 new LanguagePack { Id = -1035, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "IsNotNull", Culture = "tr-TR", DisplayName = "Boş Değil", Description = "Değer null değil ve empty değil ise" },
                 new LanguagePack { Id = -1036, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "IsNotNull", Culture = "en-US", DisplayName = "Is Not Null/Empty", Description = "Value is not null and not empty" }
-             );
+            );
         }
     }
 }
