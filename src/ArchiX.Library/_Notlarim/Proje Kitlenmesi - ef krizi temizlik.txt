@@ -1,0 +1,77 @@
+﻿# ******************** BURAYI DİKKATLE OKUYUN VE ANLAYIN, SONRA ÇALIŞTIRIN!************************
+# aşağıdaki PowerShell betiği, ArchiX projesinde Entity Framework ile ilgili yaygın sorunları çözmek için tasarlanmıştır.
+# Özellikle, proje kitlenmelerini ve veritabanı bağlantı sorunlarını gidermeye yardımcı olur.
+# Betik, dotnet-ef aracını kurar, projeyi temizler ve yeniden derler, eksik migration'ları oluşturur ve veritabanını günceller.
+# Betik, Windows PowerShell ortamında çalıştırılmak üzere tasarlanmıştır.
+# 
+
+# --- ArchiX: Temiz Başlangıç + EF Mig. & DB Update (tek komut) ---
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+# Repo kökü ve projeler
+$repo        = 'C:\_git\ArchiX\Dev\ArchiX'
+$libraryProj = Join-Path $repo 'src\ArchiX.Library\ArchiX.Library.csproj'
+$startupProj = Join-Path $repo 'tests\ArchiXTest.ApiWeb\ArchiXTest.ApiWeb.csproj'
+
+# Ortam
+$env:ASPNETCORE_ENVIRONMENT = 'Development'
+$env:DOTNET_ENVIRONMENT     = 'Development'
+
+# dotnet-ef varsa/yoksa ayarla
+$hasEf = (& dotnet tool list -g | Select-String -SimpleMatch 'dotnet-ef')
+if (-not $hasEf) {
+  Write-Host '[ArchiX] dotnet-ef kuruluyor...' -ForegroundColor Yellow
+  dotnet tool install -g dotnet-ef | Out-Null
+  $env:PATH = "$($env:USERPROFILE)\.dotnet\tools;$env:PATH"
+}
+
+# VS/vstest kalıntılarını nazikçe temizle (opsiyonel, kilit ihtimaline karşı)
+Get-Process vstest* , dotnet -ErrorAction SilentlyContinue | ForEach-Object {
+  try { $_ | Stop-Process -Force -ErrorAction Stop } catch {}
+}
+
+# Restore + Clean + Build
+Set-Location $repo
+dotnet restore $repo
+dotnet clean   $repo -c Debug --nologo
+dotnet build   $repo -c Debug --nologo
+
+# DB bağlantısını hızlı test et (SELECT 1)
+Write-Host '[ArchiX] DB ping (SELECT 1) için uygulama başlatılıyor...' -ForegroundColor DarkCyan
+dotnet ef database update `
+  --project $libraryProj `
+  --startup-project $startupProj `
+  --context AppDbContext `
+  --no-build `
+  -v
+
+# İsteğe bağlı: veritabanını sıfırlamak gerekirse bir sonraki satırın başındaki # işaretini kaldır
+# dotnet ef database drop -f --project $libraryProj --startup-project $startupProj --context AppDbContext
+
+# Migration eksikse üret, varsa atla
+$migrationsDir = Join-Path (Split-Path $libraryProj -Parent) 'Migrations'
+$initCoreExists = Test-Path (Join-Path $migrationsDir '*InitCore*.cs')
+if (-not $initCoreExists) {
+  Write-Host '[ArchiX] InitCore migration oluşturuluyor...' -ForegroundColor Cyan
+  dotnet ef migrations add InitCore `
+    --project $libraryProj `
+    --startup-project $startupProj `
+    --context AppDbContext `
+    --output-dir Migrations `
+    -v
+} else {
+  Write-Host '[ArchiX] InitCore zaten var, oluşturma adımı atlandı.' -ForegroundColor DarkYellow
+}
+
+# DB’yi son sürüme getir
+Write-Host '[ArchiX] Database update başlıyor...' -ForegroundColor Cyan
+dotnet ef database update `
+  --project $libraryProj `
+  --startup-project $startupProj `
+  --context AppDbContext `
+  -v
+
+Write-Host "`n[ArchiX] Hazır. İstersen testleri de çalıştırıyorum..." -ForegroundColor Green
+dotnet test $repo --no-build --logger "trx;LogFileName=TestResults.trx"
