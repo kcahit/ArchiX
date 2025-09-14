@@ -8,6 +8,7 @@ namespace ArchiXTest.ApiWeb.Tests.DomainTests
     {
         private sealed class TestEntity : BaseEntity
         {
+            public new static bool MapToDb = false;   // <-- tabloya çevrilmeyecek
         }
 
         [Fact]

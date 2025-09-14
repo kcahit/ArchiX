@@ -1,0 +1,18 @@
+﻿PMC (Package Manager Console) — tek satır komutlar
+
+
+Add-Migration InitCore -Project ArchiX.Library -StartupProject ArchiXTest.ApiWeb -Context AppDbContext -OutputDir Migrations
+
+Update-Database -Project ArchiX.Library -StartupProject ArchiXTest.ApiWeb -Context AppDbContext
+
+
+
+***********************************************************************
+
+İstersen aynı işi terminalde (dotnet CLI) de yapabilirsin: POWER SHELL veya CMD
+
+Set-Location 'C:\_git\ArchiX\Dev\ArchiX'
+dotnet run --project .\tests\ArchiXTest.ApiWeb\ArchiXTest.ApiWeb.csproj
+
+
+

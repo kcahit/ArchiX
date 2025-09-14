@@ -1,22 +1,31 @@
-// tests/ArchiXTest.ApiWeb/Program.cs
-using ArchiX.Library.Context;
-using ArchiX.Library.LanguagePacks;
+﻿// File: tests/ArchiXTest.ApiWeb/Program.cs
+using ArchiX.Library.Context;        // AppDbContext
+using ArchiX.Library.Entities;       // Statu
+using ArchiX.Library.Filtering;      // FilterItem
+using ArchiX.Library.LanguagePacks;  // LanguagePack
 
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Controllers
-builder.Services.AddControllers();
+// === DIAGNOSTIC LOGGING ===
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 
-// EF Core (test ortam�: InMemory)
+// DbContext + detaylı EF SQL logları
 builder.Services.AddDbContext<AppDbContext>(opt =>
-    opt.UseInMemoryDatabase("ArchiXDb"));
+{
+    var cs = builder.Configuration.GetConnectionString("ArchiXDb")
+             ?? throw new InvalidOperationException("ConnectionStrings:ArchiXDb bulunamadı.");
+    opt.UseSqlServer(cs)
+       .EnableDetailedErrors()
+       .EnableSensitiveDataLogging()
+       .LogTo(Console.WriteLine, LogLevel.Information);
+});
 
-// Language DI (tek kay�t noktas�)
-builder.Services.AddLanguagePacks(); // ILanguageService -> LanguageService
-
-// Swagger
+// MVC + Swagger
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -28,19 +37,60 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// (Opsiyonel) HTTPS, statik dosya yoksa gerekmez.
-// app.UseHttpsRedirection();
-
 app.UseRouting();
-app.UseAuthorization();
-
 app.MapControllers();
 
-// DB'yi aya�a kald�r
+// ---- ŞEMA + SEED + TEŞHİS ----
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureCreated();
+    var cnn = (SqlConnection)db.Database.GetDbConnection();
+
+    Console.WriteLine($"[ArchiX] Using SQL Server = {cnn.DataSource} | DB = {cnn.Database}");
+
+    // 1) Şemayı uygula
+    var hasAnyMigrations = db.Database.GetMigrations().Any();
+    Console.WriteLine($"[ArchiX] HasAnyMigrations: {hasAnyMigrations}");
+    if (hasAnyMigrations)
+        await db.Database.MigrateAsync();
+    else
+        await db.Database.EnsureCreatedAsync();
+
+    try
+    {
+        // 2) Seed öncesi sayımlar
+        var preS = await db.Set<Statu>().CountAsync();
+        var preF = await db.Set<FilterItem>().IgnoreQueryFilters().CountAsync();
+        var preL = await db.Set<LanguagePack>().IgnoreQueryFilters().CountAsync();
+        Console.WriteLine($"[ArchiX] BEFORE Seed -> Status={preS}, FilterItems={preF}, LanguagePacks={preL}");
+
+        // 3) Seed çağrısı
+        await db.EnsureCoreSeedsAndBindAsync();
+
+        // 4) Seed sonrası sayımlar
+        var postS = await db.Set<Statu>().CountAsync(); // Statu'da global filtre yok
+        var postF = await db.Set<FilterItem>().IgnoreQueryFilters().CountAsync();
+        var postL = await db.Set<LanguagePack>().IgnoreQueryFilters().CountAsync();
+        Console.WriteLine($"[ArchiX] AFTER Seed  -> Status={postS}, FilterItems={postF}, LanguagePacks={postL}");
+
+        // 5) Zorlayıcı test insert (pipeline kontrolü): 1 satır ekle → SaveChanges → sil → SaveChanges
+        var testEntity = new Statu { Code = "___TEST___", Name = "___TEST___", Description = "diag" };
+        db.Add(testEntity);
+        var ins = await db.SaveChangesAsync();
+        Console.WriteLine($"[ArchiX] TEST INSERT SaveChanges affected: {ins}");
+
+        db.Remove(testEntity);
+        var del = await db.SaveChangesAsync();
+        Console.WriteLine($"[ArchiX] TEST DELETE SaveChanges affected: {del}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("[ArchiX Seed/Diag ERROR] " + ex);
+        throw;
+    }
 }
 
-app.Run();
+// Basit health
+app.MapGet("/health", () => Results.Ok("OK"));
+
+await app.RunAsync();
