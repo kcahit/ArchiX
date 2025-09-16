@@ -1,4 +1,5 @@
 ﻿using ArchiX.Library.Context;
+using ArchiX.Library.Entities;
 using ArchiX.Library.LanguagePacks;
 
 using ArchiXTest.ApiWeb.Controllers;

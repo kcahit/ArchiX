@@ -92,7 +92,7 @@ namespace ArchiX.Library.Infrastructure
             {
                 baseEntity.LastStatusAt = DateTimeOffset.UtcNow;
                 baseEntity.LastStatusBy = userId;
-                baseEntity.StatusId = -14; // Deleted
+                baseEntity.StatusId = 6; // Deleted
             }
 
             _dbSet.Remove(entity);

@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Linq.Expressions;
 
-using ArchiX.Library.Filtering;
+using ArchiX.Library.Entities;
 
 using Xunit;
 

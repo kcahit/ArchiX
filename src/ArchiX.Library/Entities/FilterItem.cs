@@ -1,9 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-using ArchiX.Library.Entities;
 
-
-namespace ArchiX.Library.Filtering
+namespace ArchiX.Library.Entities
 {
     /// <summary>
     /// Enum yerine DB tabanlı filtre tanımları.

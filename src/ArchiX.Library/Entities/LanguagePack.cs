@@ -1,6 +1,4 @@
-﻿using ArchiX.Library.Entities;
-
-namespace ArchiX.Library.LanguagePacks
+﻿namespace ArchiX.Library.Entities
 {
     /// <summary>
     /// Çok dillilik için tanımlar.

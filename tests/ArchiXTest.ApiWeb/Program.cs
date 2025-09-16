@@ -1,8 +1,6 @@
 ﻿// File: tests/ArchiXTest.ApiWeb/Program.cs
 using ArchiX.Library.Context;        // AppDbContext
 using ArchiX.Library.Entities;       // Statu
-using ArchiX.Library.Filtering;      // FilterItem
-using ArchiX.Library.LanguagePacks;  // LanguagePack
 
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;

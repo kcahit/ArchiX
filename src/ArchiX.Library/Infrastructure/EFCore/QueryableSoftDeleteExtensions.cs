@@ -10,7 +10,7 @@ namespace ArchiX.Library.Infrastructure.EFCore
     /// <para>
     /// Bu yardımcılar, <c>ModelBuilderExtensionsSoftDelete.ApplySoftDeleteFilter(...)</c> ile konulan
     /// global <c>HasQueryFilter</c> ifadesini EF Core’un <c>IgnoreQueryFilters()</c> API’ı üzerinden bypass eder.
-    /// Herhangi bir sabit durum ID’si (örn. <c>DEL = -14</c>) KULLANMAZ; bu nedenle ileride durum ID’leri
+    /// Herhangi bir sabit durum ID’si (örn. <c>DEL = 6</c>) KULLANMAZ; bu nedenle ileride durum ID’leri
     /// değişse bile davranış aynı kalır.
     /// </para>
     /// <para>Kullanım örnekleri:</para>

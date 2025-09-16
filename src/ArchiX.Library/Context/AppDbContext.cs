@@ -3,8 +3,6 @@
 using System.Reflection;
 
 using ArchiX.Library.Entities;       // BaseEntity, Statu, IEntity
-using ArchiX.Library.Filtering;      // FilterItem
-using ArchiX.Library.LanguagePacks;  // LanguagePack
 
 using Humanizer;
 

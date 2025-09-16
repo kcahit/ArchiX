@@ -11,46 +11,39 @@ using Xunit;
 namespace ArchiXTest.ApiWeb.Test.InfrastructureTests
 {
     // === Test için minimal entity (BaseEntity + Name alanı) ===
-    internal class SoftDelEntity : BaseEntity
+    internal class SoftDelEntity() : BaseEntity
     {
         public new static bool MapToDb = false;   // <-- tabloya çevrilmeyecek
-        public string Name { get; set; } = "";
+        public string Name { get; set; } = string.Empty;
     }
 
-    // === Varsayılan (-14 / DEL) ile global filtre uygulayan DbContext ===
-    internal class SoftDelDbDefault : DbContext
+    // === Varsayılan (6 / DEL) ile global filtre uygulayan DbContext ===
+    internal class SoftDelDbDefault(DbContextOptions<SoftDelDbDefault> options) : DbContext(options)
     {
-        public SoftDelDbDefault(DbContextOptions<SoftDelDbDefault> options) : base(options) { }
         public DbSet<SoftDelEntity> Items => Set<SoftDelEntity>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplySoftDeleteFilter(); // default: -14 (DEL)
+            modelBuilder.ApplySoftDeleteFilter(); // default: 6 (DEL)
             base.OnModelCreating(modelBuilder);
         }
     }
 
     // === Özel deletedStatusId ile filtre uygulayan DbContext ===
-    internal class SoftDelDbCustom : DbContext
+    internal class SoftDelDbCustom(DbContextOptions<SoftDelDbCustom> options, int deleted) : DbContext(options)
     {
-        private readonly int _deleted;
-        public SoftDelDbCustom(DbContextOptions<SoftDelDbCustom> options, int deleted) : base(options)
-        {
-            _deleted = deleted;
-        }
-
         public DbSet<SoftDelEntity> Items => Set<SoftDelEntity>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplySoftDeleteFilter(_deleted);
+            modelBuilder.ApplySoftDeleteFilter(deleted); // primary ctor paramı doğrudan kullanılıyor
             base.OnModelCreating(modelBuilder);
         }
     }
 
     public class ModelBuilderExtensionsSoftDeleteTest
     {
-        private const int DEL = -14; // Statu seed: Code="DEL"
+        private const int DEL = 6; // Statu seed: Code="DEL"
 
         private static DbContextOptions<T> InMemory<T>() where T : DbContext =>
             new DbContextOptionsBuilder<T>()

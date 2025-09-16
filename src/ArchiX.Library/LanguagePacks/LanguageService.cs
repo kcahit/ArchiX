@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 
 using ArchiX.Library.Context;
+using ArchiX.Library.Entities;
 
 namespace ArchiX.Library.LanguagePacks
 {
