@@ -1,6 +1,7 @@
 ﻿// File: tests/ArchiXTest.ApiWeb/Program.cs
 using ArchiX.Library.Context;        // AppDbContext
 using ArchiX.Library.Entities;       // Statu
+using ArchiX.Library.Infrastructure; // AddArchiXDomainEvents()
 
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +27,9 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// === Domain Events DI ===
+builder.Services.AddArchiXDomainEvents(); // <— eklendi
 
 var app = builder.Build();
 
