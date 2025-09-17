@@ -6,16 +6,14 @@ namespace ArchiX.Library.Infrastructure
     /// <summary>
     /// <see cref="IMemoryCache"/> tabanlı, proses-içi (in-memory) önbellek implementasyonu.
     /// </summary>
-    public sealed class MemoryCacheService(IMemoryCache cache) : IMemoryCacheService
+    public sealed class MemoryCacheService(IMemoryCache cache) : ICacheService
     {
+        // Primary constructor parametresi alan doğrulaması ile alttaki alana atanır.
         private readonly IMemoryCache _cache = cache ?? throw new ArgumentNullException(nameof(cache));
 
         /// <summary>
         /// Anahtara karşılık gelen değeri döner; yoksa <c>null</c>.
         /// </summary>
-        /// <typeparam name="T">Değer türü.</typeparam>
-        /// <param name="key">Önbellek anahtarı.</param>
-        /// <param name="cancellationToken">İptal belirteci.</param>
         public Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(key);
@@ -26,12 +24,6 @@ namespace ArchiX.Library.Infrastructure
         /// <summary>
         /// Verilen anahtar ile değeri önbelleğe yazar.
         /// </summary>
-        /// <typeparam name="T">Değer türü.</typeparam>
-        /// <param name="key">Önbellek anahtarı.</param>
-        /// <param name="value">Yazılacak değer.</param>
-        /// <param name="absoluteExpiration">Mutlak zaman aşımı (varsa).</param>
-        /// <param name="slidingExpiration">Kayan zaman aşımı (varsa).</param>
-        /// <param name="cancellationToken">İptal belirteci.</param>
         public Task SetAsync<T>(
             string key,
             T value,
@@ -49,8 +41,6 @@ namespace ArchiX.Library.Infrastructure
         /// <summary>
         /// Anahtarın önbellekte mevcut olup olmadığını belirtir.
         /// </summary>
-        /// <param name="key">Önbellek anahtarı.</param>
-        /// <param name="cancellationToken">İptal belirteci.</param>
         public Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(key);
@@ -61,8 +51,6 @@ namespace ArchiX.Library.Infrastructure
         /// <summary>
         /// Verilen anahtarı önbellekten siler (yoksa no-op).
         /// </summary>
-        /// <param name="key">Önbellek anahtarı.</param>
-        /// <param name="cancellationToken">İptal belirteci.</param>
         public Task RemoveAsync(string key, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(key);
@@ -73,13 +61,6 @@ namespace ArchiX.Library.Infrastructure
         /// <summary>
         /// Anahtar yoksa <paramref name="factory"/> ile değeri üretir, önbelleğe yazar ve döner.
         /// </summary>
-        /// <typeparam name="T">Değer türü.</typeparam>
-        /// <param name="key">Önbellek anahtarı.</param>
-        /// <param name="factory">Değer üretici fonksiyon.</param>
-        /// <param name="absoluteExpiration">Mutlak zaman aşımı (varsa).</param>
-        /// <param name="slidingExpiration">Kayan zaman aşımı (varsa).</param>
-        /// <param name="cacheNull"><c>true</c> ise <c>null</c> sonuçlar da cache'lenir.</param>
-        /// <param name="cancellationToken">İptal belirteci.</param>
         public async Task<T> GetOrSetAsync<T>(
             string key,
             Func<CancellationToken, Task<T>> factory,

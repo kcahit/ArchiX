@@ -7,12 +7,12 @@ namespace ArchiXTest.ApiWeb.Test.InfrastructureTests
 {
     public class CacheTests
     {
-        private static IMemoryCacheService CreateMemoryCacheService()
+        private static ICacheService CreateMemoryCacheService()
         {
             var services = new ServiceCollection();
             services.AddArchiXMemoryCaching();
             var sp = services.BuildServiceProvider();
-            return sp.GetRequiredService<IMemoryCacheService>();
+            return sp.GetRequiredService<ICacheService>();
         }
 
         [Fact]
