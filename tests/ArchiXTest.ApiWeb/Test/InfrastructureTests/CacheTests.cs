@@ -13,6 +13,7 @@ namespace ArchiXTest.ApiWeb.Test.InfrastructureTests
             services.AddArchiXMemoryCaching();
             var sp = services.BuildServiceProvider();
             return sp.GetRequiredService<ICacheService>();
+
         }
 
         [Fact]
