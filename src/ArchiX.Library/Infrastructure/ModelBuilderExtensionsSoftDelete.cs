@@ -6,7 +6,7 @@ using ArchiX.Library.Entities; // BaseEntity için
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace ArchiX.Library.Infrastructure.EFCore
+namespace ArchiX.Library.Infrastructure
 {
     /// <summary>
     /// StatusId'si "DEL" olan (örn: 6) kayıtları globalde dışlamak için ModelBuilder uzantıları.

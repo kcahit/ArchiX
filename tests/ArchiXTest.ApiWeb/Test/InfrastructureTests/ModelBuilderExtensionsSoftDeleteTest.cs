@@ -2,7 +2,7 @@
 // Proje referansı: ArchiX.Library (BaseEntity + ModelBuilderExtensionsSoftDelete)
 
 using ArchiX.Library.Entities;                 // BaseEntity
-using ArchiX.Library.Infrastructure.EFCore;    // ApplySoftDeleteFilter
+using ArchiX.Library.Infrastructure;
 
 using Microsoft.EntityFrameworkCore;
 

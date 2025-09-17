@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiX.Library", "ArchiX.Library.csproj", "{CE407558-2D13-C46A-7A6F-D677DB52BC03}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CE407558-2D13-C46A-7A6F-D677DB52BC03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE407558-2D13-C46A-7A6F-D677DB52BC03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE407558-2D13-C46A-7A6F-D677DB52BC03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE407558-2D13-C46A-7A6F-D677DB52BC03}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C86ED6EA-E50A-404B-8482-2A8164EE2008}
+	EndGlobalSection
+EndGlobal
