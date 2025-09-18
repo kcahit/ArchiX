@@ -3,7 +3,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace ArchiX.Library.Infrastructure
+namespace ArchiX.Library.Infrastructure.Caching
 {
     /// <summary>
     /// Redis'e yazılan/okunan JSON verisi için serileştirme seçenekleri.

@@ -4,7 +4,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 
-namespace ArchiX.Library.Infrastructure
+namespace ArchiX.Library.Infrastructure.Caching
 {
     /// <summary>
     /// <see cref="IDistributedCache"/> üzerinde JSON serileştirme ile çalışan önbellek servisi.

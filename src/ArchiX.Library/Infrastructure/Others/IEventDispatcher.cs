@@ -1,6 +1,6 @@
 ﻿using ArchiX.Library.DomainEvents.Contracts;
 
-namespace ArchiX.Library.Infrastructure
+namespace ArchiX.Library.Infrastructure.Others
 {
     /// <summary>
     /// Toplanan domain event'leri ilgili <see cref="IEventHandler{TEvent}"/> uygulamalarına

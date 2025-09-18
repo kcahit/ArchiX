@@ -1,7 +1,7 @@
 ﻿// File: src/ArchiX.Library/Infrastructure/MemoryCacheService.cs
 using Microsoft.Extensions.Caching.Memory;
 
-namespace ArchiX.Library.Infrastructure
+namespace ArchiX.Library.Infrastructure.Caching
 {
     /// <summary>
     /// <see cref="IMemoryCache"/> tabanlı, proses-içi (in-memory) önbellek implementasyonu.

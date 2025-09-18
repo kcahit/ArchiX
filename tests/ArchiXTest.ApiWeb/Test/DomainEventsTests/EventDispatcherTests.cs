@@ -1,5 +1,5 @@
 ﻿using ArchiX.Library.DomainEvents.Contracts;
-using ArchiX.Library.Infrastructure;
+using ArchiX.Library.Infrastructure.Others;
 
 using Xunit;
 

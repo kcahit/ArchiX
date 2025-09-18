@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace ArchiX.Library.Infrastructure
+namespace ArchiX.Library.Infrastructure.Caching
 {
     /// <summary>
     /// Cache anahtarları için tutarlı ve çakışmasız üretim yardımcıları.

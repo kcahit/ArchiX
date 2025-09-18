@@ -1,5 +1,5 @@
 ﻿// File: src/ArchiX.Library/Infrastructure/ICacheKeyPolicy.cs
-namespace ArchiX.Library.Infrastructure
+namespace ArchiX.Library.Infrastructure.Caching
 {
     /// <summary>
     /// Cache anahtarları için politika sözleşmesi.

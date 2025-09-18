@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace ArchiX.Library.Infrastructure
+namespace ArchiX.Library.Infrastructure.Others
 {
     /// <summary>
     /// Domain Events bileşenleri için Dependency Injection (DI) kayıt uzantıları.

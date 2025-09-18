@@ -1,5 +1,5 @@
 ﻿// File: tests/ArchiXTest.ApiWeb/Test/InfrastructureTests/CacheTests.cs
-using ArchiX.Library.Infrastructure;
+using ArchiX.Library.Infrastructure.Caching;
 
 using Xunit;
 

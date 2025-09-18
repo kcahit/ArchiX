@@ -1,7 +1,8 @@
 ﻿// File: tests/ArchiXTest.ApiWeb/Program.cs
 using ArchiX.Library.Context;        // AppDbContext
 using ArchiX.Library.Entities;       // Statu, FilterItem, LanguagePack
-using ArchiX.Library.Infrastructure; // AddArchiXDomainEvents(), AddArchiXCacheKeyPolicy()
+using ArchiX.Library.Infrastructure.Caching;
+using ArchiX.Library.Infrastructure.Others;
 
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;

@@ -1,5 +1,5 @@
 ﻿// File: src/ArchiX.Library/Infrastructure/ICacheService.cs
-namespace ArchiX.Library.Infrastructure
+namespace ArchiX.Library.Infrastructure.Caching
 {
     /// <summary>
     /// Sağlayıcı bağımsız önbellek sözleşmesi.

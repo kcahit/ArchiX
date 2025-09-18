@@ -1,7 +1,7 @@
 ﻿// File: src/ArchiX.Library/Infrastructure/DefaultCacheKeyPolicy.cs
 using System.Globalization;
 
-namespace ArchiX.Library.Infrastructure
+namespace ArchiX.Library.Infrastructure.Caching
 {
     /// <summary>
     /// Varsayılan politika uygulaması. İçeride <see cref="CacheKeyBuilder"/> kullanır.
@@ -10,7 +10,7 @@ namespace ArchiX.Library.Infrastructure
     public sealed class DefaultCacheKeyPolicy(CacheKeyPolicyOptions options) : ICacheKeyPolicy
     {
         private readonly CacheKeyPolicyOptions _opt =
-            options ?? throw new System.ArgumentNullException(nameof(options));
+            options ?? throw new ArgumentNullException(nameof(options));
 
         /// <summary>Sadece parçalarla kısayol.</summary>
         public string Build(params string?[] parts)
@@ -29,12 +29,12 @@ namespace ArchiX.Library.Infrastructure
 
             // tenant
             var tenant = _opt.IncludeTenant
-                ? (tenantId ?? _opt.TenantAccessor?.Invoke())
+                ? tenantId ?? _opt.TenantAccessor?.Invoke()
                 : null;
 
             // culture (verilmediyse CurrentUICulture.Name)
             var cultureName = _opt.IncludeCulture
-                ? (culture ?? _opt.CultureAccessor?.Invoke() ?? CultureInfo.CurrentUICulture.Name)
+                ? culture ?? _opt.CultureAccessor?.Invoke() ?? CultureInfo.CurrentUICulture.Name
                 : null;
 
             // anahtar parçalarını topla
