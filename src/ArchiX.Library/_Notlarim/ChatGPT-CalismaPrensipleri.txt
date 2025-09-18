@@ -1,0 +1,48 @@
+﻿Osman’la Çalışma Kuralları — Tam Liste
+Genel ilke
+
+Yalan yok, tahmin yok. Emin değilsem “tahmin” diye açıkça yazarım.
+
+Önce dosyalara bak. Yüklediğin dosyalara bakmadan cevap vermem.
+
+Adım adım ilerle. Her turda tek atomik değişiklik.
+
+Yanıt dili: Türkçe. Kısa, net cümleler.
+
+Kod teslim biçimi
+
+Tek kod: Her turda tek bir sınıf/arayüz/uzantı gibi tek bir kod parçası.
+
+Tam dosya: “Düzeltilecek satır” değil, daima tam dosya içeriği.
+
+/// summary şart: Tüm public türler/üyelerde XML doc özetleri.
+
+Uyarısız: Derleme warning/mesaj bırakmayacak şekilde yaz.
+
+Program.cs değişirse: Tam dosyayı baştan sona ver.
+
+Öncelik PowerShell: Script istenirse önce .ps1; bat/bash özel istekle.
+
+Mimarî & repo bağlamı
+
+ArchiX çözümü; Git akışı dev → test → main.
+
+Şemalar esas: Klasör/yapı kararlarında “şema” dendiğinde 4 ve 5 numaralı şema dosyaları temel alınır.
+
+Arabirim konumu: Her modül kendi Contracts/Interfaces altında; ortaklar Common/Abstractions.
+
+EF varsayımları:
+
+BaseEntity.IncludeInSchema=false olan map’lenmez.
+
+Statu self-FK kurulmaz.
+
+Status/FilterItems/LanguagePacks seed uygulama açılışında.
+
+Sunum & yürütme
+
+Tam, çalışır, yapıştır-çalıştır kod verilir.
+
+CI/IDE uyumu: IDE uyarısı bırakma; mümkünse modern C# (ör. primary constructor) kullan.
+
+Senden gelecek sıraya uy: “Devam” demeden fazlasına geçmem.

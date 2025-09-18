@@ -6,47 +6,43 @@ using System.Text.Json.Serialization;
 namespace ArchiX.Library.Infrastructure
 {
     /// <summary>
-    /// Redis'e yazılan/Redis'ten okunan JSON verisinin serileştirme seçenekleri.
-    /// Varsayılanlar: camelCase, null alanları yazma, kompakt çıktı.
+    /// Redis'e yazılan/okunan JSON verisi için serileştirme seçenekleri.
+    /// Options pattern ile kullanılmak üzere parametresiz kurucu içerir.
     /// </summary>
     public sealed class RedisSerializationOptions
     {
         /// <summary>
-        /// System.Text.Json serileştirme seçenekleri.
+        /// System.Text.Json serileştirme seçenekleri. Varsayılanı <see cref="CreateDefault"/> değeridir.
         /// </summary>
-        public JsonSerializerOptions Json { get; }
+        public JsonSerializerOptions Json { get; set; } = CreateDefault();
 
         /// <summary>
-        /// Özelleştirilmiş <see cref="JsonSerializerOptions"/> vermezsen,
-        /// proje için uygun varsayılanlarla oluşturur.
+        /// Options pattern'in örnek oluşturabilmesi için zorunlu parametresiz kurucu.
         /// </summary>
-        public RedisSerializationOptions(JsonSerializerOptions? json = null)
+        public RedisSerializationOptions() { }
+
+        /// <summary>
+        /// İsteğe bağlı kolay kurucu: özel <paramref name="json"/> ayarını doğrudan atar.
+        /// </summary>
+        public RedisSerializationOptions(JsonSerializerOptions json)
         {
-            Json = json ?? CreateDefault();
+            Json = json ?? throw new ArgumentNullException(nameof(json));
         }
 
         /// <summary>
         /// ArchiX için varsayılan JSON serileştirme seçenekleri.
-        /// - camelCase alan adları
-        /// - null alanları yazma (WhenWritingNull)
-        /// - kompakt çıktı (WriteIndented=false)
-        /// - toleranslı okuma için AllowTrailingCommas=true
         /// </summary>
         public static JsonSerializerOptions CreateDefault()
         {
-            var opts = new JsonSerializerOptions
+            return new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
                 WriteIndented = false,
                 AllowTrailingCommas = true,
-                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping // id/anahtar vb. için geniş karakter desteği
+                // id/anahtar gibi değerlerde geniş karakter desteği
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
             };
-
-            // Gelecekte gerekirse açarız:
-            // opts.NumberHandling = JsonNumberHandling.AllowReadingFromString;
-
-            return opts;
         }
     }
 }

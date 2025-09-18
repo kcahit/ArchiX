@@ -1,17 +1,20 @@
 ﻿// File: src/ArchiX.Library/Infrastructure/CachingServiceCollectionExtensions.cs
+using System.Text.Json;
+
 using Microsoft.Extensions.Caching.StackExchangeRedis;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace ArchiX.Library.Infrastructure
 {
     /// <summary>
-    /// Önbellek (caching) servisleri ve ilgili yapılandırmalar için DI kayıt uzantıları.
+    /// Önbellek (caching) servisleri, serileştirme seçenekleri ve cache key politikası için DI kayıt uzantıları.
     /// </summary>
     public static class CachingServiceCollectionExtensions
     {
         /// <summary>
-        /// In-memory caching’i (<see cref="ICacheService"/>) ve
-        /// <see cref="ICacheService"/> implementasyonunu DI konteynerine ekler.
+        /// In-memory caching’i (<see cref="ICacheService"/>) ve implementasyonunu DI’a ekler.
         /// </summary>
         public static IServiceCollection AddArchiXMemoryCaching(this IServiceCollection services)
         {
@@ -24,7 +27,7 @@ namespace ArchiX.Library.Infrastructure
 
         /// <summary>
         /// Redis (StackExchange.Redis tabanlı <see cref="Microsoft.Extensions.Caching.Distributed.IDistributedCache"/>) için
-        /// <see cref="IRedisCacheService"/> implementasyonunu DI konteynerine ekler.
+        /// <see cref="ICacheService"/> implementasyonunu DI’a ekler.
         /// </summary>
         /// <param name="services">DI konteyneri.</param>
         /// <param name="configuration">Örn: "localhost:6379,abortConnect=false".</param>
@@ -44,7 +47,7 @@ namespace ArchiX.Library.Infrastructure
                     opts.InstanceName = instanceName;
             });
 
-            services.AddSingleton<IRedisCacheService, RedisCacheService>();
+            services.AddSingleton<ICacheService, RedisCacheService>();
             return services;
         }
 
@@ -59,7 +62,7 @@ namespace ArchiX.Library.Infrastructure
             ArgumentNullException.ThrowIfNull(configure);
 
             services.AddStackExchangeRedisCache(configure);
-            services.AddSingleton<IRedisCacheService, RedisCacheService>();
+            services.AddSingleton<ICacheService, RedisCacheService>();
             return services;
         }
 
@@ -68,16 +71,6 @@ namespace ArchiX.Library.Infrastructure
         /// <summary>
         /// Redis serileştirme davranışını (System.Text.Json) <see cref="RedisSerializationOptions"/> üzerinden yapılandırır.
         /// </summary>
-        /// <remarks>
-        /// <para>Örnek:</para>
-        /// <code>
-        /// services.AddArchiXRedisSerialization(options =>
-        /// {
-        ///     options.Json.PropertyNamingPolicy = null; // PascalCase
-        ///     options.Json.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
-        /// });
-        /// </code>
-        /// </remarks>
         public static IServiceCollection AddArchiXRedisSerialization(
             this IServiceCollection services,
             Action<RedisSerializationOptions> configure)
@@ -90,26 +83,84 @@ namespace ArchiX.Library.Infrastructure
         }
 
         /// <summary>
-        /// Yalnızca <see cref="System.Text.Json.JsonSerializerOptions"/> özelleştirmek için kısayol.
+        /// Yalnızca <see cref="JsonSerializerOptions"/> özelleştirmek için kısayol.
         /// </summary>
-        /// <remarks>
-        /// <para>Örnek:</para>
-        /// <code>
-        /// services.AddArchiXRedisSerialization(json =>
-        /// {
-        ///     json.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-        ///     json.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-        /// });
-        /// </code>
-        /// </remarks>
         public static IServiceCollection AddArchiXRedisSerialization(
             this IServiceCollection services,
-            Action<System.Text.Json.JsonSerializerOptions> configureJson)
+            Action<JsonSerializerOptions> configureJson)
         {
             ArgumentNullException.ThrowIfNull(services);
             ArgumentNullException.ThrowIfNull(configureJson);
 
             services.Configure<RedisSerializationOptions>(opts => configureJson(opts.Json));
+            return services;
+        }
+
+        // ===================== 4,022 — Cache Key Policy =====================
+
+        /// <summary>
+        /// Cache key politikası için varsayılan ayarlarla <see cref="ICacheKeyPolicy"/> kaydeder.
+        /// </summary>
+        public static IServiceCollection AddArchiXCacheKeyPolicy(this IServiceCollection services)
+        {
+            ArgumentNullException.ThrowIfNull(services);
+
+            services.AddOptions<CacheKeyPolicyOptions>();
+
+            services.AddSingleton<ICacheKeyPolicy>(sp =>
+            {
+                var opt = sp.GetRequiredService<IOptions<CacheKeyPolicyOptions>>().Value;
+                return new DefaultCacheKeyPolicy(opt);
+            });
+
+            return services;
+        }
+
+        /// <summary>
+        /// Cache key politikasını verilen yapılandırmayla kaydeder (prefix/tenant/culture/version).
+        /// </summary>
+        public static IServiceCollection AddArchiXCacheKeyPolicy(
+            this IServiceCollection services,
+            Action<CacheKeyPolicyOptions> configure)
+        {
+            ArgumentNullException.ThrowIfNull(services);
+            ArgumentNullException.ThrowIfNull(configure);
+
+            services.AddOptions<CacheKeyPolicyOptions>()
+                    .Configure(configure);
+
+            services.AddSingleton<ICacheKeyPolicy>(sp =>
+            {
+                var opt = sp.GetRequiredService<IOptions<CacheKeyPolicyOptions>>().Value;
+                return new DefaultCacheKeyPolicy(opt);
+            });
+
+            return services;
+        }
+
+        /// <summary>
+        /// Cache key politikasını <see cref="IConfiguration"/> üzerinden bağlar ve kaydeder.
+        /// Varsayılan bölüm adı: <c>"ArchiX:CacheKeyPolicy"</c>.
+        /// </summary>
+        public static IServiceCollection AddArchiXCacheKeyPolicy(
+            this IServiceCollection services,
+            IConfiguration configuration,
+            string sectionName = "ArchiX:CacheKeyPolicy")
+        {
+            ArgumentNullException.ThrowIfNull(services);
+            ArgumentNullException.ThrowIfNull(configuration);
+
+            var section = configuration.GetSection(sectionName);
+
+            services.AddOptions<CacheKeyPolicyOptions>()
+                    .Bind(section);
+
+            services.AddSingleton<ICacheKeyPolicy>(sp =>
+            {
+                var opt = sp.GetRequiredService<IOptions<CacheKeyPolicyOptions>>().Value;
+                return new DefaultCacheKeyPolicy(opt);
+            });
+
             return services;
         }
     }

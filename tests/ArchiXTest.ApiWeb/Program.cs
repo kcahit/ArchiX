@@ -1,7 +1,7 @@
 ﻿// File: tests/ArchiXTest.ApiWeb/Program.cs
 using ArchiX.Library.Context;        // AppDbContext
-using ArchiX.Library.Entities;       // Statu
-using ArchiX.Library.Infrastructure; // AddArchiXDomainEvents()
+using ArchiX.Library.Entities;       // Statu, FilterItem, LanguagePack
+using ArchiX.Library.Infrastructure; // AddArchiXDomainEvents(), AddArchiXCacheKeyPolicy()
 
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +12,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
-// DbContext + detaylı EF SQL logları
+/// <summary>
+/// DbContext kaydı ve detaylı EF SQL log konfigürasyonu.
+/// </summary>
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
     var cs = builder.Configuration.GetConnectionString("ArchiXDb")
@@ -23,13 +25,18 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
        .LogTo(Console.WriteLine, LogLevel.Information);
 });
 
-// MVC + Swagger
+/// <summary>
+/// MVC + Swagger servisleri.
+/// </summary>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// === Domain Events DI ===
-builder.Services.AddArchiXDomainEvents(); // <— eklendi
+/// <summary>
+/// ArchiX DI kayıtları.
+/// </summary>
+builder.Services.AddArchiXDomainEvents();   // mevcut
+builder.Services.AddArchiXCacheKeyPolicy(); // 4,022 — Cache Key Policy (varsayılan ayarlar)
 
 var app = builder.Build();
 
@@ -42,7 +49,9 @@ if (app.Environment.IsDevelopment())
 app.UseRouting();
 app.MapControllers();
 
-// ---- ŞEMA + SEED + TEŞHİS ----
+/// <summary>
+/// Şema/Seed ve teşhis akışı.
+/// </summary>
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -75,7 +84,7 @@ using (var scope = app.Services.CreateScope())
         var postL = await db.Set<LanguagePack>().IgnoreQueryFilters().CountAsync();
         Console.WriteLine($"[ArchiX] AFTER Seed  -> Status={postS}, FilterItems={postF}, LanguagePacks={postL}");
 
-        // 5) Zorlayıcı test insert (pipeline kontrolü): 1 satır ekle → SaveChanges → sil → SaveChanges
+        // 5) Zorlayıcı test insert (pipeline kontrolü)
         var testEntity = new Statu { Code = "___TEST___", Name = "___TEST___", Description = "diag" };
         db.Add(testEntity);
         var ins = await db.SaveChangesAsync();
@@ -92,7 +101,9 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Basit health
+/// <summary>
+/// Basit health endpoint.
+/// </summary>
 app.MapGet("/health", () => Results.Ok("OK"));
 
 await app.RunAsync();
