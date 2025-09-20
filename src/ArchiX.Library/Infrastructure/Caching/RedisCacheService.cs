@@ -1,4 +1,4 @@
-﻿// File: src/ArchiX.Library/Infrastructure/RedisCacheService.cs
+﻿// File: src/ArchiX.Library/Infrastructure/Caching/RedisCacheService.cs
 using System.Text.Json;
 
 using Microsoft.Extensions.Caching.Distributed;

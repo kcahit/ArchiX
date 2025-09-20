@@ -1,4 +1,4 @@
-﻿// File: src/ArchiX.Library/Infrastructure/ICacheService.cs
+﻿// File: src/ArchiX.Library/Infrastructure/Caching/ICacheService.cs
 namespace ArchiX.Library.Infrastructure.Caching
 {
     /// <summary>

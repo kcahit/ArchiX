@@ -1,4 +1,4 @@
-﻿// File: src/ArchiX.Library/Infrastructure/DefaultCacheKeyPolicy.cs
+﻿// File: src/ArchiX.Library/Infrastructure/Caching/DefaultCacheKeyPolicy.cs
 using System.Globalization;
 
 namespace ArchiX.Library.Infrastructure.Caching

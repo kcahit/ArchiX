@@ -1,6 +1,6 @@
 ﻿using ArchiX.Library.Context;
 using ArchiX.Library.Entities;
-using ArchiX.Library.Infrastructure;
+using ArchiX.Library.Infrastructure.EfCore;
 
 using Microsoft.EntityFrameworkCore;
 

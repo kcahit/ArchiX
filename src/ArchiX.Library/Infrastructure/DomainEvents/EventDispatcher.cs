@@ -2,7 +2,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ArchiX.Library.Infrastructure.Others
+namespace ArchiX.Library.Infrastructure.DomainEvents
 {
     /// <summary>
     /// DI içindeki <see cref="IEventHandler{TEvent}"/> uygulamalarını bularak

@@ -1,4 +1,4 @@
-﻿// File: src/ArchiX.Library/Infrastructure/CacheKeyBuilder.cs
+﻿// File: src/ArchiX.Library/Infrastructure/Caching/CacheKeyBuilder.cs
 #pragma warning disable CS1591
 using System.Globalization;
 using System.Security.Cryptography;

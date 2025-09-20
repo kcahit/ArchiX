@@ -1,8 +1,9 @@
 ﻿// File: tests/ArchiXTest.ApiWeb/Program.cs
-using ArchiX.Library.Context;        // AppDbContext
-using ArchiX.Library.Entities;       // Statu, FilterItem, LanguagePack
+using ArchiX.Library.Context;                   // AppDbContext
+using ArchiX.Library.Entities;                  // Statu, FilterItem, LanguagePack
 using ArchiX.Library.Infrastructure.Caching;
-using ArchiX.Library.Infrastructure.Others;
+using ArchiX.Library.Infrastructure.DomainEvents;
+using ArchiX.Library.Infrastructure.Http;       // IHttpClientWrapper & AddHttpClientWrapperWithPolicies<>
 
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -38,6 +39,30 @@ builder.Services.AddSwaggerGen();
 /// </summary>
 builder.Services.AddArchiXDomainEvents();   // mevcut
 builder.Services.AddArchiXCacheKeyPolicy(); // 4,022 — Cache Key Policy (varsayılan ayarlar)
+
+/// <summary>
+/// Dış servis HttpClient wrapper kaydı.
+/// Correlation → Retry → Timeout handler zinciri ile typed client; konfigürasyon appsettings'ten okunur.
+/// </summary>
+{
+    var apiBase = builder.Configuration["ExternalServices:DemoApi:BaseAddress"] ?? "https://example.invalid/";
+    var timeoutSec = builder.Configuration.GetValue<int?>("ExternalServices:DemoApi:TimeoutSeconds") ?? 30;
+    var retryCount = builder.Configuration.GetValue<int?>("ExternalServices:DemoApi:RetryCount") ?? 3;
+    var baseDelayMs = builder.Configuration.GetValue<int?>("ExternalServices:DemoApi:BaseDelayMs") ?? 200;
+
+    // IHttpClientWrapper => DefaultHttpClientWrapper
+    builder.Services.AddHttpClientWrapperWithPolicies<DefaultHttpClientWrapper>(
+        configureClient: c =>
+        {
+            c.BaseAddress = new Uri(apiBase);
+            c.Timeout = TimeSpan.FromSeconds(timeoutSec);
+        },
+        maxRetries: retryCount,
+        baseDelay: TimeSpan.FromMilliseconds(baseDelayMs),
+        timeout: TimeSpan.FromSeconds(timeoutSec)
+    // configureJson: opsiyonel
+    );
+}
 
 var app = builder.Build();
 

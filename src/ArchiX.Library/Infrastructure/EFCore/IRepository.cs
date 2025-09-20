@@ -1,6 +1,6 @@
 ﻿using ArchiX.Library.Entities;
 
-namespace ArchiX.Library.Infrastructure
+namespace ArchiX.Library.Infrastructure.EfCore
 {
     /// <summary>
     /// Generic repository arayüzü. Tüm entity’ler için temel CRUD işlemlerini tanımlar.

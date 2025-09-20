@@ -1,6 +1,8 @@
 ﻿using ArchiX.Library.Context;
 
-namespace ArchiX.Library.Infrastructure
+
+
+namespace ArchiX.Library.Infrastructure.EfCore
 {
     /// <summary>
     /// Unit of Work implementasyonu.
@@ -15,10 +17,7 @@ namespace ArchiX.Library.Infrastructure
         /// UnitOfWork kurucu metodu.
         /// </summary>
         /// <param name="context">EF Core AppDbContext örneği.</param>
-        public UnitOfWork(AppDbContext context)
-        {
-            _context = context;
-        }
+        public UnitOfWork(AppDbContext context) => _context = context;
 
         /// <summary>
         /// Yapılan tüm değişiklikleri veritabanına asenkron olarak kaydeder.

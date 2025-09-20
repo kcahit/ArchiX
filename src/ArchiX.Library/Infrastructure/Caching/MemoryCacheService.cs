@@ -1,4 +1,4 @@
-﻿// File: src/ArchiX.Library/Infrastructure/MemoryCacheService.cs
+﻿// File: src/ArchiX.Library/Infrastructure/Caching/MemoryCacheService.cs
 using Microsoft.Extensions.Caching.Memory;
 
 namespace ArchiX.Library.Infrastructure.Caching

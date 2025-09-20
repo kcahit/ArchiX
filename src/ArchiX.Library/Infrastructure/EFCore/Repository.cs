@@ -3,7 +3,7 @@ using ArchiX.Library.Entities;
 
 using Microsoft.EntityFrameworkCore;
 
-namespace ArchiX.Library.Infrastructure
+namespace ArchiX.Library.Infrastructure.EfCore
 {
     /// <summary>
     /// Generic repository implementasyonu.

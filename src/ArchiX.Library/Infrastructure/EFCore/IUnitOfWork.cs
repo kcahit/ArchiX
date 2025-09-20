@@ -1,4 +1,4 @@
-﻿namespace ArchiX.Library.Infrastructure
+﻿namespace ArchiX.Library.Infrastructure.EfCore
 {
     /// <summary>
     /// Unit of Work desenini temsil eden arayüz.

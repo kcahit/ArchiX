@@ -1,4 +1,4 @@
-﻿// File: src/ArchiX.Library/Infrastructure/CacheKeyPolicyOptions.cs
+﻿// File: src/ArchiX.Library/Infrastructure/Caching//CacheKeyPolicyOptions.cs
 namespace ArchiX.Library.Infrastructure.Caching
 {
     /// <summary>

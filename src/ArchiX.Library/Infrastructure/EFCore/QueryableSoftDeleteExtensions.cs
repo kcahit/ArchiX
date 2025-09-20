@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace ArchiX.Library.Infrastructure
+namespace ArchiX.Library.Infrastructure.EfCore
 {
     /// <summary>
     /// EF Core’da soft-delete için tanımlanan global sorgu filtresini (HasQueryFilter) geçici olarak
