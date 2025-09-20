@@ -1,0 +1,19 @@
+<Project>
+  <PropertyGroup>
+    <!-- .NET analizörleri -->
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- CPM kullanıldığı için versiyon belirtme: Directory.Packages.props belirliyor -->
+    <PackageReference Include="StyleCop.Analyzers" PrivateAssets="all" />
+    <!-- StyleCop yapılandırmasını tüm projelere tanıt -->
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(CI)' == 'true'">
+  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+</PropertyGroup>
+
+</Project>

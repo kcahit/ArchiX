@@ -1,23 +1,56 @@
 <Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+
+    <!-- Versiyon grupları -->
+    <EfCoreVersion>9.0.8</EfCoreVersion>
+    <MsExtVersion>9.0.8</MsExtVersion>
+    <SwashbuckleVersion>6.6.2</SwashbuckleVersion>
+    <StyleCopVersion>1.2.0-beta.507</StyleCopVersion>
+    <HumanizerVersion>2.14.1</HumanizerVersion>
+    <TestSdkVersion>17.11.1</TestSdkVersion>
+    <XunitVersion>2.9.2</XunitVersion>
+    <XunitRunnerVersion>2.8.2</XunitRunnerVersion>
+    <CoverletCollectorVersion>6.0.2</CoverletCollectorVersion>
+  </PropertyGroup>
+
   <ItemGroup>
+    <!-- Style / Analyzers -->
+    <PackageVersion Include="StyleCop.Analyzers" Version="$(StyleCopVersion)" />
+
     <!-- EF Core -->
-    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.8" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.8" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.8" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="$(EfCoreVersion)" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="$(EfCoreVersion)" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(EfCoreVersion)" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="$(EfCoreVersion)" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="$(EfCoreVersion)" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="$(EfCoreVersion)" />
 
-    <!-- Extensions -->
-    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="9.0.8" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.8" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
-    <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.8" />
-    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.8" />
+    <!-- Microsoft.Extensions* ailesi -->
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="$(MsExtVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="$(MsExtVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="$(MsExtVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.FileExtensions" Version="$(MsExtVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="$(MsExtVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="$(MsExtVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.FileProviders.Abstractions" Version="$(MsExtVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.FileProviders.Physical" Version="$(MsExtVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.FileSystemGlobbing" Version="$(MsExtVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="$(MsExtVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="$(MsExtVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MsExtVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="$(MsExtVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="$(MsExtVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="$(MsExtVersion)" />
 
-    <!-- Swagger -->
-    <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <!-- Üçüncü taraf -->
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="$(SwashbuckleVersion)" />
+    <PackageVersion Include="Humanizer.Core" Version="$(HumanizerVersion)" />
 
-    <!-- xUnit (testler için) -->
-    <PackageVersion Include="xunit" Version="2.9.2" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
+    <!-- Test -->
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="$(TestSdkVersion)" />
+    <PackageVersion Include="xunit" Version="$(XunitVersion)" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="$(XunitRunnerVersion)" />
+    <PackageVersion Include="coverlet.collector" Version="$(CoverletCollectorVersion)" />
   </ItemGroup>
 </Project>

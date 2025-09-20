@@ -1,0 +1,22 @@
+{
+  "settings": {
+    "documentationRules": {
+      // Dosya başlığı zorunlu değil
+      "xmlHeader": false,
+      // Yalnızca dışa açık API için dokümantasyon öner (uyarı seviyesinde kalacak)
+      "documentExposedElements": true,
+      "documentInternalElements": false,
+      "documentPrivateElements": false,
+      "companyName": "ArchiX"
+    },
+    "orderingRules": {
+      // Mevcut kodla uyum: using'ler namespace DIŞINDA
+      "usingDirectivesPlacement": "outsideNamespace",
+      "systemUsingDirectivesFirst": true,
+      "blankLinesBetweenUsingGroups": "require"
+    },
+    "layoutRules": {
+      "newlineAtEndOfFile": "require"
+    }
+  }
+}
