@@ -2,8 +2,14 @@
   <PropertyGroup>
     <!-- .NET analizörleri -->
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
-    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <!-- En yeni kurallar: "latest-recommended" yerine tüm son kuralları aç -->
+    <AnalysisLevel>latest</AnalysisLevel>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+    <!-- IDE0005'in build'de çalışması ve SA0001'in görülmemesi için -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Eksik XML dokümantasyon uyarılarını bastır -->
+    <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,8 +18,9 @@
     <!-- StyleCop yapılandırmasını tüm projelere tanıt -->
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" />
   </ItemGroup>
-  <PropertyGroup Condition="'$(CI)' == 'true'">
-  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-</PropertyGroup>
 
+  <!-- CI'da uyarıları hata yap -->
+  <PropertyGroup Condition="'$(CI)' == 'true'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
 </Project>
