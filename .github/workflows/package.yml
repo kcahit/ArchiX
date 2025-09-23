@@ -32,7 +32,7 @@ jobs:
           restore-keys: ${{ runner.os }}-nuget-
       - name: GitHub Packages kaynağını ekle
         shell: pwsh
-        run: dotnet nuget add source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -n github -u "${{ github.repository_owner }}" -p "${{ secrets.GITHUB_TOKEN }}" --store-password-in-clear-text
+        run: dotnet nuget add source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -n github -u "${{ github.repository_owner }}" -p "${{ secrets.NUGET_API_KEY }}" --store-password-in-clear-text
       - name: Restore
         run: dotnet restore
       - name: Build
@@ -59,7 +59,7 @@ jobs:
           restore-keys: ${{ runner.os }}-nuget-
       - name: GitHub Packages kaynağını ekle
         shell: pwsh
-        run: dotnet nuget add source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -n github -u "${{ github.repository_owner }}" -p "${{ secrets.GITHUB_TOKEN }}" --store-password-in-clear-text
+        run: dotnet nuget add source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -n github -u "${{ github.repository_owner }}" -p "${{ secrets.NUGET_API_KEY }}" --store-password-in-clear-text
       - name: Restore
         run: dotnet restore
       - name: Compute version (-dev.*)
@@ -72,7 +72,7 @@ jobs:
       - name: Pack
         run: dotnet pack .\src\ArchiX.Library\ArchiX.Library.csproj -c Release -o artifacts\packages /p:Version=${{ steps.ver.outputs.version }} /p:ContinuousIntegrationBuild=true
       - name: Push to GitHub Packages
-        run: dotnet nuget push .\artifacts\packages\*.nupkg --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+        run: dotnet nuget push .\artifacts\packages\*.nupkg --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate
 
   # tag v* -> stabil paket (X.Y.Z)
   prod-release:
@@ -95,7 +95,7 @@ jobs:
           restore-keys: ${{ runner.os }}-nuget-
       - name: GitHub Packages kaynağını ekle
         shell: pwsh
-        run: dotnet nuget add source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -n github -u "${{ github.repository_owner }}" -p "${{ secrets.GITHUB_TOKEN }}" --store-password-in-clear-text
+        run: dotnet nuget add source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -n github -u "${{ github.repository_owner }}" -p "${{ secrets.NUGET_API_KEY }}" --store-password-in-clear-text
       - name: Get tag version
         id: ver
         shell: pwsh
@@ -105,4 +105,4 @@ jobs:
       - name: Pack
         run: dotnet pack .\src\ArchiX.Library\ArchiX.Library.csproj -c Release -o artifacts\packages /p:Version=${{ steps.ver.outputs.version }} /p:ContinuousIntegrationBuild=true
       - name: Push to GitHub Packages
-        run: dotnet nuget push .\artifacts\packages\*.nupkg --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+        run: dotnet nuget push .\artifacts\packages\*.nupkg --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate
