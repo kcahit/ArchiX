@@ -96,12 +96,14 @@ jobs:
       - name: GitHub Packages kaynağını ekle
         shell: pwsh
         run: dotnet nuget add source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -n github -u "${{ github.repository_owner }}" -p "${{ secrets.NUGET_API_KEY }}" --store-password-in-clear-text
-      - name: Get tag version
+      - name: Get tag version (strip leading 'v')
         id: ver
         shell: pwsh
         run: |
           $tag = "${{ github.ref }}".Replace("refs/tags/","")
-          "version=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          $ver = $tag.TrimStart('v','V')   # <-- asıl düzeltme
+          "tag=$tag"     | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "version=$ver" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
       - name: Pack
         run: dotnet pack .\src\ArchiX.Library\ArchiX.Library.csproj -c Release -o artifacts\packages /p:Version=${{ steps.ver.outputs.version }} /p:ContinuousIntegrationBuild=true
       - name: Push to GitHub Packages
