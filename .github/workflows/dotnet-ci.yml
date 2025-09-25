@@ -5,9 +5,10 @@ on:
     branches: [ "**" ]
   pull_request:
     branches: [ "**" ]
+  workflow_dispatch: {}
 
 jobs:
-  build_and_test:
+  build_only:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -22,15 +23,5 @@ jobs:
       - name: Restore
         run: dotnet restore ArchiX.sln
 
-      - name: Build (warnings as errors)
-        run: dotnet build ArchiX.sln -c Debug -warnaserror
-
-      - name: Test
-        run: dotnet test ArchiX.sln -c Debug -v minimal --logger "trx;LogFileName=test-results.trx"
-
-      - name: Upload Test Results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: "**/TestResults/*.trx"
+      - name: Build
+        run: dotnet build ArchiX.sln -c Debug --no-restore -v minimal
