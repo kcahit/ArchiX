@@ -23,7 +23,7 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseSqlServer(cs)
        .EnableDetailedErrors()
        .EnableSensitiveDataLogging()
-       .LogTo(Console.WriteLine, LogLevel.Information); // EF kendi logunu konsola yazabilir, kalsın
+       .LogTo(Console.WriteLine, LogLevel.Information);
 });
 
 builder.Services.AddControllers();
@@ -35,10 +35,10 @@ builder.Services.AddArchiXCacheKeyPolicy();
 
 // HTTP client politikaları
 {
-    var apiBase = builder.Configuration["ExternalServices:DemoApi:BaseAddress"] ?? "https://example.invalid/";
-    var timeoutSec = builder.Configuration.GetValue<int?>("ExternalServices:DemoApi:TimeoutSeconds") ?? 30;
-    var retryCount = builder.Configuration.GetValue<int?>("ExternalServices:DemoApi:RetryCount") ?? 3;
-    var baseDelayMs = builder.Configuration.GetValue<int?>("ExternalServices:DemoApi:BaseDelayMs") ?? 200;
+    var apiBase = builder.Configuration["ExternalServices:Ping:BaseAddress"] ?? "https://example.invalid/";
+    var timeoutSec = builder.Configuration.GetValue<int?>("ExternalServices:Ping:TimeoutSeconds") ?? 30;
+    var retryCount = builder.Configuration.GetValue<int?>("ExternalServices:Ping:RetryCount") ?? 3;
+    var baseDelayMs = builder.Configuration.GetValue<int?>("ExternalServices:Ping:BaseDelayMs") ?? 200;
 
     builder.Services.AddHttpClientWrapperWithPolicies<DefaultHttpClientWrapper>(
         c => { c.BaseAddress = new Uri(apiBase); c.Timeout = TimeSpan.FromSeconds(timeoutSec); },
@@ -54,7 +54,7 @@ var hc = builder.Services.AddHealthChecks();
 // Testing dışı ortamda gerçek adapter ve health check
 if (!builder.Environment.IsEnvironment("Testing"))
 {
-    builder.Services.AddPingAdapterWithHealthCheck(builder.Configuration, "ExternalServices:DemoApi", "external_ping");
+    builder.Services.AddPingAdapterWithHealthCheck(builder.Configuration, "ExternalServices:Ping", "external_ping");
 }
 else
 {

@@ -13,12 +13,9 @@ namespace ArchiX.Library.External
     public static class PingAdapterServiceCollectionExtensions
     {
         /// <summary>
-        /// IPingAdapter’ı tipli HttpClient ile kaydeder.
+        /// <see cref="IPingAdapter"/>’ı tipli HttpClient ile kaydeder.
         /// Correlation → OutboundLogging → Retry → Timeout → ProblemDetails zinciri bağlanır.
         /// </summary>
-        /// <param name="services">DI koleksiyonu.</param>
-        /// <param name="baseAddress">Dış servisin kök adresi.</param>
-        /// <param name="timeout">İsteğe bağlı zaman aşımı.</param>
         public static IServiceCollection AddPingAdapter(
             this IServiceCollection services,
             Uri baseAddress,
@@ -50,20 +47,17 @@ namespace ArchiX.Library.External
         }
 
         /// <summary>
-        /// Konfigürasyondan IPingAdapter kaydı yapar.
-        /// Varsayılan bölüm: <c>ExternalServices:DemoApi</c>.
+        /// Konfigürasyondan <see cref="IPingAdapter"/> kaydı yapar.
+        /// Varsayılan bölüm: <c>ExternalServices:Ping</c>.
         /// <list type="bullet">
         /// <item><description><c>BaseAddress</c> (zorunlu, URL)</description></item>
         /// <item><description><c>TimeoutSeconds</c> (opsiyonel, 1–300)</description></item>
         /// </list>
         /// </summary>
-        /// <param name="services">DI koleksiyonu.</param>
-        /// <param name="config">Uygulama konfigürasyonu.</param>
-        /// <param name="sectionPath">Konfigürasyon bölüm yolu.</param>
         public static IServiceCollection AddPingAdapter(
             this IServiceCollection services,
             IConfiguration config,
-            string sectionPath = "ExternalServices:DemoApi")
+            string sectionPath = "ExternalServices:Ping")
         {
             ArgumentNullException.ThrowIfNull(services);
             ArgumentNullException.ThrowIfNull(config);
@@ -71,12 +65,10 @@ namespace ArchiX.Library.External
             var section = config.GetSection(sectionPath);
             var opts = section.Get<PingAdapterOptions>()
                        ?? throw new InvalidOperationException($"{sectionPath} bölümü okunamadı.");
-
             ValidateOptions(opts, sectionPath);
 
             var baseUri = opts.GetBaseUri();
             var timeout = opts.GetTimeout();
-
             return services.AddPingAdapter(baseUri, timeout);
         }
 

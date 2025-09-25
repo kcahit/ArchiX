@@ -17,14 +17,11 @@ namespace ArchiX.Library.External
         /// /status yanıtını tipli modele döndürür.
         /// JSON parse başarısız olursa metni <see cref="PingStatus.Text"/> alanına koyar.
         /// </summary>
-        /// <param name="adapter">IPingAdapter bağımlılığı.</param>
-        /// <param name="ct">İptal belirteci.</param>
         public static async Task<PingStatus> GetStatusAsync(this IPingAdapter adapter, CancellationToken ct = default)
         {
             ArgumentNullException.ThrowIfNull(adapter);
             var text = await adapter.GetStatusTextAsync(ct).ConfigureAwait(false);
 
-            // JSON parse denemesi
             try
             {
                 var model = JsonSerializer.Deserialize<PingStatus>(text, JsonOpts);
@@ -32,19 +29,14 @@ namespace ArchiX.Library.External
             }
             catch
             {
-                // yoksay
+                // yok say
             }
 
-            // Düz metin
             return new PingStatus(Text: text, Service: null, Version: null, Uptime: null);
         }
     }
 
     /// <summary>Ping /status çıktısı için sade model.</summary>
-    /// <param name="Text">Ham yanıt metni.</param>
-    /// <param name="Service">Servis adı (varsa JSON’dan).</param>
-    /// <param name="Version">Sürüm (varsa JSON’dan).</param>
-    /// <param name="Uptime">Çalışma süresi (varsa JSON’dan).</param>
     public sealed record PingStatus(
         string Text,
         [property: JsonPropertyName("service")] string? Service,

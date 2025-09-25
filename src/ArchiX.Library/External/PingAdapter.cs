@@ -16,9 +16,6 @@ namespace ArchiX.Library.External
         private readonly ILogger<PingAdapter> _log = log ?? throw new ArgumentNullException(nameof(log));
 
         /// <summary>/status çağrısı. 2KB üstü gövde kesilir.</summary>
-        /// <param name="ct">İptal belirteci.</param>
-        /// <returns>Yanıt gövdesi (text).</returns>
-        /// <exception cref="HttpRequestException">Başarısız HTTP durumlarında fırlatılır.</exception>
         public async Task<string> GetStatusTextAsync(CancellationToken ct = default)
         {
             using var req = new HttpRequestMessage(HttpMethod.Get, "status");

@@ -1,5 +1,6 @@
 ﻿// File: src/ArchiX.Library/External/IPingAdapter.cs
 #nullable enable
+
 namespace ArchiX.Library.External
 {
     /// <summary>Dış servis ping işlemleri için sözleşme.</summary>
