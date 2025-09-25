@@ -2,10 +2,11 @@
 #nullable enable
 using System.ComponentModel.DataAnnotations;
 
-using ArchiX.Library.Infrastructure.Http; // CorrelationHandler, OutboundLoggingHandler, RetryHandler, TimeoutHandler, ProblemDetailsHandler
+using ArchiX.Library.Infrastructure.Http; // CorrelationHandler, OutboundLoggingHandler, RetryHandler, TimeoutHandler, ProblemDetailsHandler, HttpPoliciesOptions
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace ArchiX.Library.External
 {
@@ -15,6 +16,7 @@ namespace ArchiX.Library.External
         /// <summary>
         /// <see cref="IPingAdapter"/>’ı tipli HttpClient ile kaydeder.
         /// Correlation → OutboundLogging → Retry → Timeout → ProblemDetails zinciri bağlanır.
+        /// Retry/Timeout değerleri varsa parametrelerden, yoksa <see cref="HttpPoliciesOptions"/>’tan alınır.
         /// </summary>
         public static IServiceCollection AddPingAdapter(
             this IServiceCollection services,
@@ -27,10 +29,9 @@ namespace ArchiX.Library.External
             // Handler bağımlılıklarını kaydet (idempotent)
             services.AddTransient<CorrelationHandler>();
             services.AddTransient<OutboundLoggingHandler>();
-            services.AddTransient<RetryHandler>();
-            services.AddTransient<TimeoutHandler>();
             services.AddTransient<ProblemDetailsHandler>();
 
+            // Retry/Timeout handler'larını options'a göre kur
             services.AddHttpClient<IPingAdapter, PingAdapter>(client =>
             {
                 client.BaseAddress = baseAddress;
@@ -39,8 +40,19 @@ namespace ArchiX.Library.External
             })
                 .AddHttpMessageHandler<CorrelationHandler>()
                 .AddHttpMessageHandler<OutboundLoggingHandler>()
-                .AddHttpMessageHandler<RetryHandler>()
-                .AddHttpMessageHandler<TimeoutHandler>()
+                .AddHttpMessageHandler(sp =>
+                {
+                    var opts = sp.GetService<IOptions<HttpPoliciesOptions>>()?.Value;
+                    return new RetryHandler(
+                        maxRetries: opts?.RetryCount ?? 3,
+                        baseDelay: opts?.GetBaseDelay() ?? TimeSpan.FromMilliseconds(200));
+                })
+                .AddHttpMessageHandler(sp =>
+                {
+                    var opts = sp.GetService<IOptions<HttpPoliciesOptions>>()?.Value;
+                    var effectiveTimeout = timeout ?? opts?.GetTimeout() ?? TimeSpan.FromSeconds(100);
+                    return new TimeoutHandler(effectiveTimeout);
+                })
                 .AddHttpMessageHandler<ProblemDetailsHandler>();
 
             return services;
@@ -72,7 +84,6 @@ namespace ArchiX.Library.External
             return services.AddPingAdapter(baseUri, timeout);
         }
 
-        /// <summary>DataAnnotations ile seçenekleri doğrular.</summary>
         private static void ValidateOptions(PingAdapterOptions opts, string sectionPath)
         {
             var ctx = new ValidationContext(opts);

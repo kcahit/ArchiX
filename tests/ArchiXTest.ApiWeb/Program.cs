@@ -33,20 +33,11 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddArchiXDomainEvents();
 builder.Services.AddArchiXCacheKeyPolicy();
 
-// HTTP client politikaları
-{
-    var apiBase = builder.Configuration["ExternalServices:Ping:BaseAddress"] ?? "https://example.invalid/";
-    var timeoutSec = builder.Configuration.GetValue<int?>("ExternalServices:Ping:TimeoutSeconds") ?? 30;
-    var retryCount = builder.Configuration.GetValue<int?>("ExternalServices:Ping:RetryCount") ?? 3;
-    var baseDelayMs = builder.Configuration.GetValue<int?>("ExternalServices:Ping:BaseDelayMs") ?? 200;
+// HTTP politikalarını tek yerden bağla (Retry/Timeout)
+builder.Services.AddHttpPolicies(builder.Configuration);
 
-    builder.Services.AddHttpClientWrapperWithPolicies<DefaultHttpClientWrapper>(
-        c => { c.BaseAddress = new Uri(apiBase); c.Timeout = TimeSpan.FromSeconds(timeoutSec); },
-        maxRetries: retryCount,
-        baseDelay: TimeSpan.FromMilliseconds(baseDelayMs),
-        timeout: TimeSpan.FromSeconds(timeoutSec)
-    );
-}
+// NOT: DefaultHttpClientWrapper + politikalar kaldırıldı.
+// Ping adapter kendi HttpClient ve handler zincirini HttpPoliciesOptions ile kuruyor.
 
 // HealthChecks servisini ekle
 var hc = builder.Services.AddHealthChecks();
