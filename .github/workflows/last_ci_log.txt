@@ -1,0 +1,332 @@
+﻿quick	Set up job	´╗┐2025-09-23T08:52:35.8983619Z Current runner version: '2.328.0'
+quick	Set up job	2025-09-23T08:52:35.9036007Z ##[group]Runner Image Provisioner
+quick	Set up job	2025-09-23T08:52:35.9036779Z Hosted Compute Agent
+quick	Set up job	2025-09-23T08:52:35.9037329Z Version: 20250829.383
+quick	Set up job	2025-09-23T08:52:35.9037841Z Commit: 27cb235aab5b0e52e153a26cd86b4742e89dac5d
+quick	Set up job	2025-09-23T08:52:35.9038498Z Build Date: 2025-08-29T13:48:48Z
+quick	Set up job	2025-09-23T08:52:35.9039059Z ##[endgroup]
+quick	Set up job	2025-09-23T08:52:35.9039501Z ##[group]Operating System
+quick	Set up job	2025-09-23T08:52:35.9040048Z Microsoft Windows Server 2025
+quick	Set up job	2025-09-23T08:52:35.9040589Z 10.0.26100
+quick	Set up job	2025-09-23T08:52:35.9041048Z Datacenter
+quick	Set up job	2025-09-23T08:52:35.9041450Z ##[endgroup]
+quick	Set up job	2025-09-23T08:52:35.9041865Z ##[group]Runner Image
+quick	Set up job	2025-09-23T08:52:35.9042361Z Image: windows-2025
+quick	Set up job	2025-09-23T08:52:35.9042805Z Version: 20250907.19.1
+quick	Set up job	2025-09-23T08:52:35.9044331Z Included Software: https://github.com/actions/runner-images/blob/win25/20250907.19/images/windows/Windows2025-Readme.md
+quick	Set up job	2025-09-23T08:52:35.9046028Z Image Release: https://github.com/actions/runner-images/releases/tag/win25%2F20250907.19
+quick	Set up job	2025-09-23T08:52:35.9047466Z ##[endgroup]
+quick	Set up job	2025-09-23T08:52:35.9048497Z ##[group]GITHUB_TOKEN Permissions
+quick	Set up job	2025-09-23T08:52:35.9050326Z Contents: read
+quick	Set up job	2025-09-23T08:52:35.9050839Z Metadata: read
+quick	Set up job	2025-09-23T08:52:35.9051281Z Packages: write
+quick	Set up job	2025-09-23T08:52:35.9051754Z ##[endgroup]
+quick	Set up job	2025-09-23T08:52:35.9053787Z Secret source: Actions
+quick	Set up job	2025-09-23T08:52:35.9054436Z Prepare workflow directory
+quick	Set up job	2025-09-23T08:52:35.9481555Z Prepare all required actions
+quick	Set up job	2025-09-23T08:52:35.9521638Z Getting action download info
+quick	Set up job	2025-09-23T08:52:36.3527386Z Download action repository 'actions/checkout@v4' (SHA:08eba0b27e820071cde6df949e0beb9ba4906955)
+quick	Set up job	2025-09-23T08:52:36.5003245Z Download action repository 'actions/setup-dotnet@v4' (SHA:67a3573c9a986a3f9c594539f4ab511d57bb3ce9)
+quick	Set up job	2025-09-23T08:52:37.1931967Z Download action repository 'actions/cache@v4' (SHA:0400d5f644dc74513175e3cd8d07132dd4860809)
+quick	Set up job	2025-09-23T08:52:37.5086513Z Complete job name: quick
+quick	Run actions/checkout@v4	´╗┐2025-09-23T08:52:37.7673218Z ##[group]Run actions/checkout@v4
+quick	Run actions/checkout@v4	2025-09-23T08:52:37.7675532Z with:
+quick	Run actions/checkout@v4	2025-09-23T08:52:37.7676228Z   repository: kcahit/ArchiX
+quick	Run actions/checkout@v4	2025-09-23T08:52:37.7677458Z   token: ***
+quick	Run actions/checkout@v4	2025-09-23T08:52:37.7678141Z   ssh-strict: true
+quick	Run actions/checkout@v4	2025-09-23T08:52:37.7678841Z   ssh-user: git
+quick	Run actions/checkout@v4	2025-09-23T08:52:37.7679564Z   persist-credentials: true
+quick	Run actions/checkout@v4	2025-09-23T08:52:37.7680391Z   clean: true
+quick	Run actions/checkout@v4	2025-09-23T08:52:37.7681112Z   sparse-checkout-cone-mode: true
+quick	Run actions/checkout@v4	2025-09-23T08:52:37.7682406Z   fetch-depth: 1
+quick	Run actions/checkout@v4	2025-09-23T08:52:37.7683122Z   fetch-tags: false
+quick	Run actions/checkout@v4	2025-09-23T08:52:37.7683869Z   show-progress: true
+quick	Run actions/checkout@v4	2025-09-23T08:52:37.7684600Z   lfs: false
+quick	Run actions/checkout@v4	2025-09-23T08:52:37.7685308Z   submodules: false
+quick	Run actions/checkout@v4	2025-09-23T08:52:37.7686048Z   set-safe-directory: true
+quick	Run actions/checkout@v4	2025-09-23T08:52:37.7687182Z ##[endgroup]
+quick	Run actions/checkout@v4	2025-09-23T08:52:37.9634723Z Syncing repository: kcahit/ArchiX
+quick	Run actions/checkout@v4	2025-09-23T08:52:37.9639117Z ##[group]Getting Git version info
+quick	Run actions/checkout@v4	2025-09-23T08:52:37.9641209Z Working directory is 'D:\a\ArchiX\ArchiX'
+quick	Run actions/checkout@v4	2025-09-23T08:52:38.0826514Z [command]"C:\Program Files\Git\bin\git.exe" version
+quick	Run actions/checkout@v4	2025-09-23T08:52:38.8919843Z git version 2.51.0.windows.1
+quick	Run actions/checkout@v4	2025-09-23T08:52:38.8998125Z ##[endgroup]
+quick	Run actions/checkout@v4	2025-09-23T08:52:38.9079594Z Temporarily overriding HOME='D:\a\_temp\df8047ad-6b44-419c-885f-525fc4f2eae8' before making global git config changes
+quick	Run actions/checkout@v4	2025-09-23T08:52:38.9131564Z Adding repository directory to the temporary git global config as a safe directory
+quick	Run actions/checkout@v4	2025-09-23T08:52:38.9151046Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\ArchiX\ArchiX
+quick	Run actions/checkout@v4	2025-09-23T08:52:39.0232627Z Deleting the contents of 'D:\a\ArchiX\ArchiX'
+quick	Run actions/checkout@v4	2025-09-23T08:52:39.0240192Z ##[group]Initializing the repository
+quick	Run actions/checkout@v4	2025-09-23T08:52:39.0250931Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\ArchiX\ArchiX
+quick	Run actions/checkout@v4	2025-09-23T08:52:39.2097844Z Initialized empty Git repository in D:/a/ArchiX/ArchiX/.git/
+quick	Run actions/checkout@v4	2025-09-23T08:52:39.2168856Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/kcahit/ArchiX
+quick	Run actions/checkout@v4	2025-09-23T08:52:39.2961390Z ##[endgroup]
+quick	Run actions/checkout@v4	2025-09-23T08:52:39.2964682Z ##[group]Disabling automatic garbage collection
+quick	Run actions/checkout@v4	2025-09-23T08:52:39.2971925Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+quick	Run actions/checkout@v4	2025-09-23T08:52:39.3298980Z ##[endgroup]
+quick	Run actions/checkout@v4	2025-09-23T08:52:39.3299567Z ##[group]Setting up auth
+quick	Run actions/checkout@v4	2025-09-23T08:52:39.3314725Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+quick	Run actions/checkout@v4	2025-09-23T08:52:39.3663303Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+quick	Run actions/checkout@v4	2025-09-23T08:52:42.0596547Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+quick	Run actions/checkout@v4	2025-09-23T08:52:42.0932773Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+quick	Run actions/checkout@v4	2025-09-23T08:52:42.6388340Z [command]"C:\Program Files\Git\bin\git.exe" config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+quick	Run actions/checkout@v4	2025-09-23T08:52:42.6714898Z ##[endgroup]
+quick	Run actions/checkout@v4	2025-09-23T08:52:42.6715946Z ##[group]Fetching the repository
+quick	Run actions/checkout@v4	2025-09-23T08:52:42.6730524Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +a8c9d7bd25d54988ab8f72783be6a935bfc5eaa8:refs/remotes/pull/7/merge
+quick	Run actions/checkout@v4	2025-09-23T08:52:44.8732293Z From https://github.com/kcahit/ArchiX
+quick	Run actions/checkout@v4	2025-09-23T08:52:44.8733143Z  * [new ref]         a8c9d7bd25d54988ab8f72783be6a935bfc5eaa8 -> pull/7/merge
+quick	Run actions/checkout@v4	2025-09-23T08:52:44.9244525Z ##[endgroup]
+quick	Run actions/checkout@v4	2025-09-23T08:52:44.9245163Z ##[group]Determining the checkout info
+quick	Run actions/checkout@v4	2025-09-23T08:52:44.9247343Z ##[endgroup]
+quick	Run actions/checkout@v4	2025-09-23T08:52:44.9259714Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+quick	Run actions/checkout@v4	2025-09-23T08:52:45.0152135Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+quick	Run actions/checkout@v4	2025-09-23T08:52:45.0461731Z ##[group]Checking out the ref
+quick	Run actions/checkout@v4	2025-09-23T08:52:45.0473741Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force refs/remotes/pull/7/merge
+quick	Run actions/checkout@v4	2025-09-23T08:52:45.3201851Z Note: switching to 'refs/remotes/pull/7/merge'.
+quick	Run actions/checkout@v4	2025-09-23T08:52:45.3202525Z 
+quick	Run actions/checkout@v4	2025-09-23T08:52:45.3203399Z You are in 'detached HEAD' state. You can look around, make experimental
+quick	Run actions/checkout@v4	2025-09-23T08:52:45.3204007Z changes and commit them, and you can discard any commits you make in this
+quick	Run actions/checkout@v4	2025-09-23T08:52:45.3204439Z state without impacting any branches by switching back to a branch.
+quick	Run actions/checkout@v4	2025-09-23T08:52:45.3204687Z 
+quick	Run actions/checkout@v4	2025-09-23T08:52:45.3204846Z If you want to create a new branch to retain commits you create, you may
+quick	Run actions/checkout@v4	2025-09-23T08:52:45.3205223Z do so (now or later) by using -c with the switch command. Example:
+quick	Run actions/checkout@v4	2025-09-23T08:52:45.3205453Z 
+quick	Run actions/checkout@v4	2025-09-23T08:52:45.3205594Z   git switch -c <new-branch-name>
+quick	Run actions/checkout@v4	2025-09-23T08:52:45.3205857Z 
+quick	Run actions/checkout@v4	2025-09-23T08:52:45.3205964Z Or undo this operation with:
+quick	Run actions/checkout@v4	2025-09-23T08:52:45.3206218Z 
+quick	Run actions/checkout@v4	2025-09-23T08:52:45.3206346Z   git switch -
+quick	Run actions/checkout@v4	2025-09-23T08:52:45.3206501Z 
+quick	Run actions/checkout@v4	2025-09-23T08:52:45.3206710Z Turn off this advice by setting config variable advice.detachedHead to false
+quick	Run actions/checkout@v4	2025-09-23T08:52:45.3206981Z 
+quick	Run actions/checkout@v4	2025-09-23T08:52:45.3207286Z HEAD is now at a8c9d7b Merge 330873c5aeb74bd9faca10380d0445db11f94f84 into c9f73b8cf85570f28ff94263de41d35dbdeb0d80
+quick	Run actions/checkout@v4	2025-09-23T08:52:45.3249713Z ##[endgroup]
+quick	Run actions/checkout@v4	2025-09-23T08:52:45.3924713Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+quick	Run actions/checkout@v4	2025-09-23T08:52:45.4321338Z a8c9d7bd25d54988ab8f72783be6a935bfc5eaa8
+quick	Run actions/setup-dotnet@v4	´╗┐2025-09-23T08:52:45.4743980Z ##[group]Run actions/setup-dotnet@v4
+quick	Run actions/setup-dotnet@v4	2025-09-23T08:52:45.4744520Z with:
+quick	Run actions/setup-dotnet@v4	2025-09-23T08:52:45.4744782Z   dotnet-version: 9.0.x
+quick	Run actions/setup-dotnet@v4	2025-09-23T08:52:45.4745324Z   cache: false
+quick	Run actions/setup-dotnet@v4	2025-09-23T08:52:45.4745501Z ##[endgroup]
+quick	Run actions/setup-dotnet@v4	2025-09-23T08:52:46.0849280Z [command]"C:\Program Files\PowerShell\7\pwsh.exe" -NoLogo -Sta -NoProfile -NonInteractive -ExecutionPolicy Unrestricted -Command & 'D:\a\_actions\actions\setup-dotnet\v4\externals\install-dotnet.ps1' -SkipNonVersionedFiles -Runtime dotnet -Channel LTS
+quick	Run actions/setup-dotnet@v4	2025-09-23T08:53:05.7065438Z dotnet-install: Downloaded file https://builds.dotnet.microsoft.com/dotnet/Runtime/8.0.20/dotnet-runtime-8.0.20-win-x64.zip size is 33304082 bytes.
+quick	Run actions/setup-dotnet@v4	2025-09-23T08:53:05.7086974Z dotnet-install: Either downloaded or local package size can not be measured. One of them may be corrupted.
+quick	Run actions/setup-dotnet@v4	2025-09-23T08:53:05.7115998Z dotnet-install: Extracting the archive.
+quick	Run actions/setup-dotnet@v4	2025-09-23T08:53:06.7852946Z dotnet-install: Note that the script does not ensure your Windows version is supported during the installation.
+quick	Run actions/setup-dotnet@v4	2025-09-23T08:53:06.7858421Z dotnet-install: To check the list of supported versions, go to https://learn.microsoft.com/dotnet/core/install/windows#supported-versions
+quick	Run actions/setup-dotnet@v4	2025-09-23T08:53:06.7865140Z dotnet-install: Installed version is 8.0.20
+quick	Run actions/setup-dotnet@v4	2025-09-23T08:53:06.7871379Z dotnet-install: Installation finished
+quick	Run actions/setup-dotnet@v4	2025-09-23T08:53:07.7664250Z [command]"C:\Program Files\PowerShell\7\pwsh.exe" -NoLogo -Sta -NoProfile -NonInteractive -ExecutionPolicy Unrestricted -Command & 'D:\a\_actions\actions\setup-dotnet\v4\externals\install-dotnet.ps1' -SkipNonVersionedFiles -Channel 9.0
+quick	Run actions/setup-dotnet@v4	2025-09-23T08:53:59.4659397Z dotnet-install: Downloaded file https://builds.dotnet.microsoft.com/dotnet/Sdk/9.0.305/dotnet-sdk-9.0.305-win-x64.zip size is 298449616 bytes.
+quick	Run actions/setup-dotnet@v4	2025-09-23T08:53:59.4681061Z dotnet-install: Either downloaded or local package size can not be measured. One of them may be corrupted.
+quick	Run actions/setup-dotnet@v4	2025-09-23T08:53:59.5019457Z dotnet-install: Extracting the archive.
+quick	Run actions/setup-dotnet@v4	2025-09-23T08:54:22.9542897Z dotnet-install: Note that the script does not ensure your Windows version is supported during the installation.
+quick	Run actions/setup-dotnet@v4	2025-09-23T08:54:22.9547525Z dotnet-install: To check the list of supported versions, go to https://learn.microsoft.com/dotnet/core/install/windows#supported-versions
+quick	Run actions/setup-dotnet@v4	2025-09-23T08:54:22.9553248Z dotnet-install: Installed version is 9.0.305
+quick	Run actions/setup-dotnet@v4	2025-09-23T08:54:22.9558659Z dotnet-install: Installation finished
+quick	NuGet cache	´╗┐2025-09-23T08:54:23.2132957Z ##[group]Run actions/cache@v4
+quick	NuGet cache	2025-09-23T08:54:23.2133260Z with:
+quick	NuGet cache	2025-09-23T08:54:23.2133447Z   path: ~/.nuget/packages
+quick	NuGet cache	**/obj
+quick	NuGet cache	
+quick	NuGet cache	2025-09-23T08:54:23.2133855Z   key: Windows-nuget-9ab629efa0cd562e103c2b77e4bc3e1a228319f24eaf6885571e141b2da616f7
+quick	NuGet cache	2025-09-23T08:54:23.2134271Z   restore-keys: Windows-nuget-
+quick	NuGet cache	2025-09-23T08:54:23.2134496Z   enableCrossOsArchive: false
+quick	NuGet cache	2025-09-23T08:54:23.2134714Z   fail-on-cache-miss: false
+quick	NuGet cache	2025-09-23T08:54:23.2134907Z   lookup-only: false
+quick	NuGet cache	2025-09-23T08:54:23.2135086Z   save-always: false
+quick	NuGet cache	2025-09-23T08:54:23.2135246Z env:
+quick	NuGet cache	2025-09-23T08:54:23.2135415Z   DOTNET_ROOT: C:\Program Files\dotnet
+quick	NuGet cache	2025-09-23T08:54:23.2135643Z ##[endgroup]
+quick	NuGet cache	2025-09-23T08:54:23.9332712Z Cache hit for: Windows-nuget-9ab629efa0cd562e103c2b77e4bc3e1a228319f24eaf6885571e141b2da616f7
+quick	NuGet cache	2025-09-23T08:54:25.1796050Z Received 46137344 of 206514259 (22.3%), 43.6 MBs/sec
+quick	NuGet cache	2025-09-23T08:54:26.1830599Z Received 167772160 of 206514259 (81.2%), 79.5 MBs/sec
+quick	NuGet cache	2025-09-23T08:54:27.1844689Z Received 202319955 of 206514259 (98.0%), 64.0 MBs/sec
+quick	NuGet cache	2025-09-23T08:54:27.4143554Z Received 206514259 of 206514259 (100.0%), 60.7 MBs/sec
+quick	NuGet cache	2025-09-23T08:54:27.4151601Z Cache Size: ~197 MB (206514259 B)
+quick	NuGet cache	2025-09-23T08:54:27.4199179Z [command]"C:\Program Files\Git\usr\bin\tar.exe" -xf D:/a/_temp/ca24ec4e-7280-4162-ab78-2439609f26d9/cache.tzst -P -C D:/a/ArchiX/ArchiX --force-local --use-compress-program "zstd -d"
+quick	NuGet cache	2025-09-23T08:54:36.1701206Z Cache restored successfully
+quick	NuGet cache	2025-09-23T08:54:36.1974910Z Cache restored from key: Windows-nuget-9ab629efa0cd562e103c2b77e4bc3e1a228319f24eaf6885571e141b2da616f7
+quick	GitHub Packages kayna─ş─▒n─▒ ekle	´╗┐2025-09-23T08:54:36.2238276Z ##[group]Run dotnet nuget add source "https://nuget.pkg.github.com/kcahit/index.json" -n github -u "kcahit" -p "***" --store-password-in-clear-text
+quick	GitHub Packages kayna─ş─▒n─▒ ekle	2025-09-23T08:54:36.2239954Z [36;1mdotnet nuget add source "https://nuget.pkg.github.com/kcahit/index.json" -n github -u "kcahit" -p "***" --store-password-in-clear-text[0m
+quick	GitHub Packages kayna─ş─▒n─▒ ekle	2025-09-23T08:54:36.2311550Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+quick	GitHub Packages kayna─ş─▒n─▒ ekle	2025-09-23T08:54:36.2311889Z env:
+quick	GitHub Packages kayna─ş─▒n─▒ ekle	2025-09-23T08:54:36.2312071Z   DOTNET_ROOT: C:\Program Files\dotnet
+quick	GitHub Packages kayna─ş─▒n─▒ ekle	2025-09-23T08:54:36.2312310Z ##[endgroup]
+quick	GitHub Packages kayna─ş─▒n─▒ ekle	2025-09-23T08:54:37.0713551Z Package source with Name: github added successfully.
+quick	Restore	´╗┐2025-09-23T08:54:37.5589645Z ##[group]Run dotnet restore
+quick	Restore	2025-09-23T08:54:37.5590005Z [36;1mdotnet restore[0m
+quick	Restore	2025-09-23T08:54:37.5651891Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+quick	Restore	2025-09-23T08:54:37.5652227Z env:
+quick	Restore	2025-09-23T08:54:37.5652413Z   DOTNET_ROOT: C:\Program Files\dotnet
+quick	Restore	2025-09-23T08:54:37.5652643Z ##[endgroup]
+quick	Restore	2025-09-23T08:54:39.1928736Z   Determining projects to restore...
+quick	Restore	2025-09-23T08:54:40.1899676Z   Restored D:\a\ArchiX\ArchiX\src\ArchiX.Library\ArchiX.Library.csproj (in 725 ms).
+quick	Restore	2025-09-23T08:54:40.1923840Z   1 of 2 projects are up-to-date for restore.
+quick	Build	´╗┐2025-09-23T08:54:40.7656330Z ##[group]Run dotnet build -c Release --no-restore
+quick	Build	2025-09-23T08:54:40.7656791Z [36;1mdotnet build -c Release --no-restore[0m
+quick	Build	2025-09-23T08:54:40.7719789Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+quick	Build	2025-09-23T08:54:40.7720115Z env:
+quick	Build	2025-09-23T08:54:40.7720299Z   DOTNET_ROOT: C:\Program Files\dotnet
+quick	Build	2025-09-23T08:54:40.7720565Z ##[endgroup]
+quick	Build	2025-09-23T08:54:48.3997767Z   ArchiX.Library -> D:\a\ArchiX\ArchiX\src\ArchiX.Library\bin\Release\net9.0\ArchiX.Library.dll
+quick	Build	2025-09-23T08:54:54.6609266Z   ArchiXTest.ApiWeb -> D:\a\ArchiX\ArchiX\tests\ArchiXTest.ApiWeb\bin\Release\net9.0\ArchiXTest.ApiWeb.dll
+quick	Build	2025-09-23T08:54:54.6847594Z 
+quick	Build	2025-09-23T08:54:54.6856447Z Build succeeded.
+quick	Build	2025-09-23T08:54:54.6856898Z     0 Warning(s)
+quick	Build	2025-09-23T08:54:54.6857330Z     0 Error(s)
+quick	Build	2025-09-23T08:54:54.6861468Z 
+quick	Build	2025-09-23T08:54:54.6861811Z Time Elapsed 00:00:13.41
+quick	Build	2025-09-23T08:54:54.6901741Z 
+quick	Build	2025-09-23T08:54:54.6902465Z Workload updates are available. Run `dotnet workload list` for more information.
+quick	Test	´╗┐2025-09-23T08:54:54.8526283Z ##[group]Run dotnet test -c Release --no-build --verbosity normal
+quick	Test	2025-09-23T08:54:54.8527117Z [36;1mdotnet test -c Release --no-build --verbosity normal[0m
+quick	Test	2025-09-23T08:54:54.8629559Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+quick	Test	2025-09-23T08:54:54.8630109Z env:
+quick	Test	2025-09-23T08:54:54.8630404Z   DOTNET_ROOT: C:\Program Files\dotnet
+quick	Test	2025-09-23T08:54:54.8630805Z ##[endgroup]
+quick	Test	2025-09-23T08:54:55.6227320Z Build started 9/23/2025 8:54:55 AM.
+quick	Test	2025-09-23T08:54:55.7717473Z      1>Project "D:\a\ArchiX\ArchiX\ArchiX.sln" on node 1 (VSTest target(s)).
+quick	Test	2025-09-23T08:54:55.7718535Z      1>ValidateSolutionConfiguration:
+quick	Test	2025-09-23T08:54:55.7719207Z          Building solution configuration "Release|Any CPU".
+quick	Test	2025-09-23T08:54:56.4451385Z Test run for D:\a\ArchiX\ArchiX\tests\ArchiXTest.ApiWeb\bin\Release\net9.0\ArchiXTest.ApiWeb.dll (.NETCoreApp,Version=v9.0)
+quick	Test	2025-09-23T08:54:56.5192064Z VSTest version 17.14.1 (x64)
+quick	Test	2025-09-23T08:54:56.5224271Z 
+quick	Test	2025-09-23T08:54:56.6188624Z Starting test execution, please wait...
+quick	Test	2025-09-23T08:54:56.6491701Z A total of 1 test files matched the specified pattern.
+quick	Test	2025-09-23T08:54:57.0932781Z [xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.8.2+699d445a1a (64-bit .NET 9.0.9)
+quick	Test	2025-09-23T08:54:57.1637677Z [xUnit.net 00:00:00.08]   Discovering: ArchiXTest.ApiWeb
+quick	Test	2025-09-23T08:54:57.2288796Z [xUnit.net 00:00:00.15]   Discovered:  ArchiXTest.ApiWeb
+quick	Test	2025-09-23T08:54:57.2315612Z [xUnit.net 00:00:00.15]   Starting:    ArchiXTest.ApiWeb
+quick	Test	2025-09-23T08:54:57.3690610Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.ExceptionLoggerTests.HandleException_ShouldReturnExpectedMessage(exceptionType: typeof(System.NullReferenceException), expected: "Null bir nesneye eri┼şilmeye ├ğal─▒┼ş─▒l─▒yor.") [6 ms]
+quick	Test	2025-09-23T08:54:57.3708915Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.ExceptionLoggerTests.HandleException_ShouldReturnExpectedMessage(exceptionType: typeof(System.ArgumentException), expected: "Ge├ğersiz veya eksik arg├╝man.") [< 1 ms]
+quick	Test	2025-09-23T08:54:57.3715080Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.ExceptionLoggerTests.HandleException_ShouldReturnExpectedMessage(exceptionType: typeof(System.ArgumentNullException), expected: "Null de─şer i├ğeriyor.") [< 1 ms]
+quick	Test	2025-09-23T08:54:57.3722161Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.ExceptionLoggerTests.HandleException_ShouldReturnExpectedMessage(exceptionType: typeof(System.ArgumentOutOfRangeException), expected: "Arg├╝man belirtilen aral─▒─ş─▒n d─▒┼ş─▒ndad─▒r.") [< 1 ms]
+quick	Test	2025-09-23T08:54:57.3728647Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.ExceptionLoggerTests.HandleException_ShouldReturnExpectedMessage(exceptionType: typeof(System.DivideByZeroException), expected: "S─▒f─▒ra b├Âlme hatas─▒.") [< 1 ms]
+quick	Test	2025-09-23T08:54:57.3732174Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.ExceptionLoggerTests.HandleException_ShouldReturnExpectedMessage(exceptionType: typeof(System.FormatException), expected: "Yanl─▒┼ş formatta veri. ├ûrn: string'i say─▒ya ├ğevirme"┬À┬À┬À) [< 1 ms]
+quick	Test	2025-09-23T08:54:57.3735875Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.ExceptionLoggerTests.HandleException_ShouldReturnExpectedMessage(exceptionType: typeof(System.InvalidOperationException), expected: "Nesne ge├ğersiz bir durumda. ├ûrn: kapal─▒ bir kayna─ş"┬À┬À┬À) [< 1 ms]
+quick	Test	2025-09-23T08:54:57.3743709Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.ExceptionLoggerTests.HandleException_ShouldReturnExpectedMessage(exceptionType: typeof(System.IndexOutOfRangeException), expected: "Dizi s─▒n─▒r─▒ a┼ş─▒ld─▒! Veriyi kontrol et.") [< 1 ms]
+quick	Test	2025-09-23T08:54:57.3749363Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.ExceptionLoggerTests.HandleException_ShouldReturnBilinmeyenHata_ForUnknownException [< 1 ms]
+quick	Test	2025-09-23T08:54:57.3751619Z   Passed In: Age Ôêê {19, 28, 31} [26 ms]
+quick	Test	2025-09-23T08:54:57.3755908Z   Passed Between: Age 20..30 (dahil) [1 ms]
+quick	Test	2025-09-23T08:54:57.3756877Z   Passed StartsWith: Name 'A' ile ba┼şlayanlar [1 ms]
+quick	Test	2025-09-23T08:54:57.3757771Z   Passed IsNull: Note == null [1 ms]
+quick	Test	2025-09-23T08:54:57.3758271Z   Passed Between: Joined 2023-01-01..2024-12-31 [1 ms]
+quick	Test	2025-09-23T08:54:57.3764779Z   Passed NotBetween: Age 20..30 d─▒┼ş─▒nda kalanlar [< 1 ms]
+quick	Test	2025-09-23T08:54:57.3765662Z   Passed EndsWith: Name 'n' ile bitenler [< 1 ms]
+quick	Test	2025-09-23T08:54:57.3767335Z   Passed ArchiXTest.ApiWeb.Test.DomainEventsTests.EventDispatcherTests.DispatchAsync_calls_registered_handlers [25 ms]
+quick	Test	2025-09-23T08:54:57.3769749Z   Passed ArchiXTest.ApiWeb.Tests.DomainTests.EntitiesTests.NewEntity_ShouldHaveValidDefaults [3 ms]
+quick	Test	2025-09-23T08:54:57.3772054Z   Passed ArchiXTest.ApiWeb.Tests.CommonTests.ResultGenericTests.Failure_Should_Return_Failure_Result_With_Error [1 ms]
+quick	Test	2025-09-23T08:54:57.3774196Z   Passed ArchiXTest.ApiWeb.Tests.CommonTests.ResultGenericTests.Success_Should_Return_Success_Result_With_Value [< 1 ms]
+quick	Test	2025-09-23T08:54:57.3776187Z   Passed ArchiXTest.ApiWeb.Tests.CommonTests.ClockTests.UtcNow_ShouldReturnCloseToSystemUtcNow [1 ms]
+quick	Test	2025-09-23T08:54:57.3778300Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.CorrelationTests.BeginScope_ShouldRestorePreviousContext_OnDispose [< 1 ms]
+quick	Test	2025-09-23T08:54:57.3780095Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.CorrelationTests.BeginScope_ShouldGenerateCorrelationId_WhenNotProvided [3 ms]
+quick	Test	2025-09-23T08:54:57.3781360Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.CorrelationTests.BeginScope_ShouldUseProvidedCorrelationId_AndTraceId [< 1 ms]
+quick	Test	2025-09-23T08:54:58.0512641Z   Passed ArchiXTest.ApiWeb.Test.InfrastructureTests.CacheTests.Exists_Then_Remove_Works [7 ms]
+quick	Test	2025-09-23T08:54:58.0723126Z   Passed ArchiXTest.ApiWeb.Test.InfrastructureTests.CacheTests.GetOrSet_Null_Not_Cached_When_Flag_False [3 ms]
+quick	Test	2025-09-23T08:54:58.0725189Z   Passed ArchiXTest.ApiWeb.Test.InfrastructureTests.CacheTests.GetOrSet_Computes_Once_Then_Returns_Cached [4 ms]
+quick	Test	2025-09-23T08:54:58.0727024Z   Passed ArchiXTest.ApiWeb.Test.InfrastructureTests.CacheTests.GetOrSet_Null_Cached_When_Flag_True [< 1 ms]
+quick	Test	2025-09-23T08:54:58.0728587Z   Passed ArchiXTest.ApiWeb.Test.InfrastructureTests.CacheTests.Set_Then_Get_Returns_Value [1 ms]
+quick	Test	2025-09-23T08:54:58.0730385Z   Passed ArchiXTest.ApiWeb.Tests.InfrastructureTests.RepositoryUowTests.Update_ShouldChangeEntityValues [737 ms]
+quick	Test	2025-09-23T08:54:58.0776677Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.LanguageServiceTests.GetDisplayNameAsync_should_return_correct_translation(culture: "tr-TR", code: "Equals", expected: "E┼şittir") [664 ms]
+quick	Test	2025-09-23T08:54:58.0779712Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.LanguageServiceTests.GetDisplayNameAsync_should_return_correct_translation(culture: "tr-TR", code: "NotEquals", expected: "E┼şit De─şil") [4 ms]
+quick	Test	2025-09-23T08:54:58.0782849Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.LanguageServiceTests.GetDisplayNameAsync_should_return_correct_translation(culture: "en-US", code: "NotEquals", expected: "Not Equal") [1 ms]
+quick	Test	2025-09-23T08:54:58.0786168Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.LanguageServiceTests.GetDisplayNameAsync_should_return_correct_translation(culture: "tr-TR", code: "StartsWith", expected: "Ba┼şlar") [1 ms]
+quick	Test	2025-09-23T08:54:58.0788836Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.LanguageServiceTests.GetDisplayNameAsync_should_return_correct_translation(culture: "en-US", code: "StartsWith", expected: "Starts With") [< 1 ms]
+quick	Test	2025-09-23T08:54:58.0800348Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.LanguageServiceTests.GetDisplayNameAsync_should_return_correct_translation(culture: "en-US", code: "Equals", expected: "Equals") [< 1 ms]
+quick	Test	2025-09-23T08:54:58.0802565Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.LanguageServiceTests.GetListAsync_should_return_active_culture_specific_list [8 ms]
+quick	Test	2025-09-23T08:54:58.0804501Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.LanguageServiceTests.Returns_Seeded_Value [< 1 ms]
+quick	Test	2025-09-23T08:54:58.0806024Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.LanguageServiceTests.Returns_Formatted_Value [< 1 ms]
+quick	Test	2025-09-23T08:54:58.0807449Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.LanguageServiceTests.Returns_Key_When_Not_Found [< 1 ms]
+quick	Test	2025-09-23T08:54:58.0810452Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.LanguageServiceTests.GetDisplayNameAsync_should_return_null_when_not_found_or_not_active [1 ms]
+quick	Test	2025-09-23T08:54:58.0812277Z   Passed ArchiXTest.ApiWeb.Tests.InfrastructureTests.RepositoryUowTests.Delete_ShouldRemoveEntity [39 ms]
+quick	Test	2025-09-23T08:54:58.0813840Z   Passed ArchiXTest.ApiWeb.Tests.InfrastructureTests.RepositoryUowTests.Add_Then_GetById_ShouldReturnEntity [1 ms]
+quick	Test	2025-09-23T08:54:58.0816670Z   Passed ArchiXTest.ApiWeb.Tests.InfrastructureTests.Http.RetryHandlerTests.Does_Not_Retry_On_404 [8 ms]
+quick	Test	2025-09-23T08:54:58.0818553Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.LocalizationControllerTests.List_unknown_culture_returns_200_and_empty_list [4 ms]
+quick	Test	2025-09-23T08:54:58.0820432Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.LocalizationControllerTests.DisplayName_trTR_Equals_returns_200_and_value [2 ms]
+quick	Test	2025-09-23T08:54:58.0823916Z   Passed ArchiXTest.ApiWeb.Test.CommonTests.ContextTests.ShouldSeedFilterItems [775 ms]
+quick	Test	2025-09-23T08:54:58.0828662Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.LocalizationControllerTests.List_trTR_returns_200_and_three_items [2 ms]
+quick	Test	2025-09-23T08:54:58.0830546Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.LocalizationControllerTests.DisplayName_returns_404_when_missing_or_inactive [1 ms]
+quick	Test	2025-09-23T08:54:58.0832179Z   Passed ArchiXTest.ApiWeb.Tests.CommonTests.ErrorTests.Error_Should_SetPropertiesCorrectly [< 1 ms]
+quick	Test	2025-09-23T08:54:58.0834885Z   Passed ArchiXTest.ApiWeb.Tests.CommonTests.ErrorTests.Error_Should_HaveDefaultValues_WhenNotSet [< 1 ms]
+quick	Test	2025-09-23T08:54:58.0836839Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.LanguageServiceFallbackTests.Fallback_To_DefaultCulture_When_Key_Missing_In_Target [1 ms]
+quick	Test	2025-09-23T08:54:58.0838882Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.LanguageServiceFallbackTests.Async_APIs_Respect_Fallback_Rules [< 1 ms]
+quick	Test	2025-09-23T08:54:58.0840975Z   Passed ArchiXTest.ApiWeb.Tests.InfrastructureTests.Http.RetryHandlerTests.PostBody_Is_Preserved_On_Retry_And_ContentType_Remains [10 ms]
+quick	Test	2025-09-23T08:54:58.0843456Z   Passed ArchiXTest.ApiWeb.Tests.InfrastructureTests.Http.RetryHandlerTests.Retries_On_429 [< 1 ms]
+quick	Test	2025-09-23T08:54:58.0845130Z   Passed ArchiXTest.ApiWeb.Tests.InfrastructureTests.Http.RetryHandlerTests.Retries_On_5xx_Until_Success [< 1 ms]
+quick	Test	2025-09-23T08:54:58.1060984Z   Passed ArchiXTest.ApiWeb.Tests.CommonTests.ResultTests.Failure_Should_Return_Failure_Result_With_Error [< 1 ms]
+quick	Test	2025-09-23T08:54:58.1063421Z   Passed ArchiXTest.ApiWeb.Tests.CommonTests.ResultTests.Success_Should_Return_Success_Result [< 1 ms]
+quick	Test	2025-09-23T08:54:58.1065058Z   Passed ArchiXTest.ApiWeb.Test.CommonTests.ContextTests.CanInsertAndRetrieveEntity [12 ms]
+quick	Test	2025-09-23T08:54:58.1066821Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.FileExportImportTests.ExportToCsv_Should_Create_Valid_Csv_String [7 ms]
+quick	Test	2025-09-23T08:54:58.1068536Z   Passed ArchiXTest.ApiWeb.Test.CommonTests.ContextTests.ShouldSeedLanguagePacks [9 ms]
+quick	Test	2025-09-23T08:54:58.1070266Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.FileExportImportTests.ImportFromCsv_Should_Parse_Valid_Records [5 ms]
+quick	Test	2025-09-23T08:54:58.1072086Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.GridFiltering_SeedAndBehavior_Tests.In_and_NotIn [10 ms]
+quick	Test	2025-09-23T08:54:58.1073743Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.GridFiltering_SeedAndBehavior_Tests.Contains_and_NotContains [3 ms]
+quick	Test	2025-09-23T08:54:58.1164891Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.GridFiltering_SeedAndBehavior_Tests.Greater_Less_Between_NotBetween [6 ms]
+quick	Test	2025-09-23T08:54:58.1167171Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.GridFiltering_SeedAndBehavior_Tests.Seed_code_should_map_to_enum(code: "LessThanOrEqual", expectedEnumName: "LessThanOrEqual") [1 ms]
+quick	Test	2025-09-23T08:54:58.1200846Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.GridFiltering_SeedAndBehavior_Tests.Seed_code_should_map_to_enum(code: "NotIn", expectedEnumName: "NotIn") [< 1 ms]
+quick	Test	2025-09-23T08:54:58.1441279Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.GridFiltering_SeedAndBehavior_Tests.Seed_code_should_map_to_enum(code: "Contains", expectedEnumName: "Contains") [< 1 ms]
+quick	Test	2025-09-23T08:54:58.1444727Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.GridFiltering_SeedAndBehavior_Tests.Seed_code_should_map_to_enum(code: "Equals", expectedEnumName: "Equals") [< 1 ms]
+quick	Test	2025-09-23T08:54:58.1447126Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.GridFiltering_SeedAndBehavior_Tests.Seed_code_should_map_to_enum(code: "NotEquals", expectedEnumName: "NotEquals") [< 1 ms]
+quick	Test	2025-09-23T08:54:58.1449354Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.GridFiltering_SeedAndBehavior_Tests.Seed_code_should_map_to_enum(code: "NotEndsWith", expectedEnumName: "NotEndsWith") [< 1 ms]
+quick	Test	2025-09-23T08:54:58.1451588Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.GridFiltering_SeedAndBehavior_Tests.Seed_code_should_map_to_enum(code: "In", expectedEnumName: "In") [< 1 ms]
+quick	Test	2025-09-23T08:54:58.1453758Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.GridFiltering_SeedAndBehavior_Tests.Seed_code_should_map_to_enum(code: "Between", expectedEnumName: "Between") [< 1 ms]
+quick	Test	2025-09-23T08:54:58.1456471Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.GridFiltering_SeedAndBehavior_Tests.Seed_code_should_map_to_enum(code: "NotStartsWith", expectedEnumName: "NotStartsWith") [< 1 ms]
+quick	Test	2025-09-23T08:54:58.1458825Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.GridFiltering_SeedAndBehavior_Tests.Seed_code_should_map_to_enum(code: "NotBetween", expectedEnumName: "NotBetween") [< 1 ms]
+quick	Test	2025-09-23T08:54:58.1462201Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.GridFiltering_SeedAndBehavior_Tests.Seed_code_should_map_to_enum(code: "LessThan", expectedEnumName: "LessThan") [< 1 ms]
+quick	Test	2025-09-23T08:54:58.1464844Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.GridFiltering_SeedAndBehavior_Tests.Seed_code_should_map_to_enum(code: "IsNotNull", expectedEnumName: "IsNotNull") [< 1 ms]
+quick	Test	2025-09-23T08:54:58.1467250Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.GridFiltering_SeedAndBehavior_Tests.Seed_code_should_map_to_enum(code: "StartsWith", expectedEnumName: "StartsWith") [< 1 ms]
+quick	Test	2025-09-23T08:54:58.1469985Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.GridFiltering_SeedAndBehavior_Tests.Seed_code_should_map_to_enum(code: "NotContains", expectedEnumName: "NotContains") [< 1 ms]
+quick	Test	2025-09-23T08:54:58.1472213Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.GridFiltering_SeedAndBehavior_Tests.Seed_code_should_map_to_enum(code: "EndsWith", expectedEnumName: "EndsWith") [< 1 ms]
+quick	Test	2025-09-23T08:54:58.1474889Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.GridFiltering_SeedAndBehavior_Tests.Seed_code_should_map_to_enum(code: "GreaterThan", expectedEnumName: "GreaterThan") [< 1 ms]
+quick	Test	2025-09-23T08:54:58.1477066Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.GridFiltering_SeedAndBehavior_Tests.Seed_code_should_map_to_enum(code: "IsNull", expectedEnumName: "IsNull") [< 1 ms]
+quick	Test	2025-09-23T08:54:58.1508990Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.GridFiltering_SeedAndBehavior_Tests.Seed_code_should_map_to_enum(code: "GreaterThanOrEqual", expectedEnumName: "GreaterThanOrEqual") [< 1 ms]
+quick	Test	2025-09-23T08:54:58.1511256Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.GridFiltering_SeedAndBehavior_Tests.EndsWith_and_NotEndsWith [4 ms]
+quick	Test	2025-09-23T08:54:58.1512760Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.GridFiltering_SeedAndBehavior_Tests.Null_checks [2 ms]
+quick	Test	2025-09-23T08:54:58.1514491Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.LanguageServiceFallbackTests.Format_Uses_CurrentCulture [49 ms]
+quick	Test	2025-09-23T08:54:58.1516253Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.GridFiltering_SeedAndBehavior_Tests.Equals_and_NotEquals [3 ms]
+quick	Test	2025-09-23T08:54:58.1518074Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.LanguageServiceFallbackTests.Context_Scope_Treats_SameKey_AsDistinct [2 ms]
+quick	Test	2025-09-23T08:54:58.1519944Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.GridFiltering_SeedAndBehavior_Tests.StartsWith_and_NotStartsWith [3 ms]
+quick	Test	2025-09-23T08:54:58.1522380Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.LanguageServiceFallbackTests.ConcurrentReads_DoNotCorruptCache [6 ms]
+quick	Test	2025-09-23T08:54:58.2649170Z [xUnit.net 00:00:01.18]   Finished:    ArchiXTest.ApiWeb
+quick	Test	2025-09-23T08:54:58.3210465Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.LanguageServiceFallbackTests.Graceful_Return_Key_When_NotThrowing [< 1 ms]
+quick	Test	2025-09-23T08:54:58.3212557Z   Passed ArchiXTest.ApiWeb.Test.InfrastructureTests.CacheServicePolicyIntegrationTests.GetOrSet_Computes_Once_Then_Uses_Cache [44 ms]
+quick	Test	2025-09-23T08:54:58.3214834Z   Passed ArchiXTest.ApiWeb.Test.DiagnosticsTests.LanguageServiceFallbackTests.Throw_If_Missing_In_All_Cultures_When_Requested [< 1 ms]
+quick	Test	2025-09-23T08:54:58.3217046Z   Passed ArchiXTest.ApiWeb.Test.InfrastructureTests.CacheServicePolicyIntegrationTests.Serialization_Respects_Custom_Options [17 ms]
+quick	Test	2025-09-23T08:54:58.3222996Z   Passed ArchiXTest.ApiWeb.Test.InfrastructureTests.CacheServicePolicyIntegrationTests.Set_Then_Get_Roundtrips_With_PolicyKey [1 ms]
+quick	Test	2025-09-23T08:54:58.3225189Z   Passed ArchiXTest.ApiWeb.Test.InfrastructureTests.CacheServicePolicyIntegrationTests.Exists_And_Remove_Work_As_Expected_With_PolicyKey [1 ms]
+quick	Test	2025-09-23T08:54:58.3227359Z   Passed ArchiXTest.ApiWeb.Test.InfrastructureTests.ModelBuilderExtensionsSoftDeleteTest.DefaultFilter_Excludes_Status_DEL [73 ms]
+quick	Test	2025-09-23T08:54:58.3229629Z   Passed ArchiXTest.ApiWeb.Test.InfrastructureTests.ModelBuilderExtensionsSoftDeleteTest.CustomDeletedStatus_IsHonored_ByFilter [58 ms]
+quick	Test	2025-09-23T08:54:58.3246665Z 
+quick	Test	2025-09-23T08:54:58.3283070Z Test Run Successful.
+quick	Test	2025-09-23T08:54:58.3283630Z Total tests: 98
+quick	Test	2025-09-23T08:54:58.3284109Z      Passed: 98
+quick	Test	2025-09-23T08:54:58.3339582Z  Total time: 1.6758 Seconds
+quick	Test	2025-09-23T08:54:58.3672231Z      1>Done Building Project "D:\a\ArchiX\ArchiX\ArchiX.sln" (VSTest target(s)).
+quick	Test	2025-09-23T08:54:58.3736252Z 
+quick	Test	2025-09-23T08:54:58.3736902Z Build succeeded.
+quick	Test	2025-09-23T08:54:58.3737483Z     0 Warning(s)
+quick	Test	2025-09-23T08:54:58.3737922Z     0 Error(s)
+quick	Test	2025-09-23T08:54:58.3744384Z 
+quick	Test	2025-09-23T08:54:58.3744789Z Time Elapsed 00:00:02.75
+quick	Test	2025-09-23T08:54:58.3973303Z 
+quick	Test	2025-09-23T08:54:58.3974480Z Workload updates are available. Run `dotnet workload list` for more information.
+quick	Post NuGet cache	´╗┐2025-09-23T08:54:58.8832150Z Post job cleanup.
+quick	Post NuGet cache	2025-09-23T08:54:59.0880916Z Cache hit occurred on the primary key Windows-nuget-9ab629efa0cd562e103c2b77e4bc3e1a228319f24eaf6885571e141b2da616f7, not saving cache.
+quick	Post Run actions/setup-dotnet@v4	´╗┐2025-09-23T08:54:59.1207204Z Post job cleanup.
+quick	Post Run actions/checkout@v4	´╗┐2025-09-23T08:54:59.3792130Z Post job cleanup.
+quick	Post Run actions/checkout@v4	2025-09-23T08:54:59.6551711Z [command]"C:\Program Files\Git\bin\git.exe" version
+quick	Post Run actions/checkout@v4	2025-09-23T08:54:59.6893491Z git version 2.51.0.windows.1
+quick	Post Run actions/checkout@v4	2025-09-23T08:54:59.7005001Z Temporarily overriding HOME='D:\a\_temp\7cabb7df-5d28-4b57-a70b-8193e9004c1e' before making global git config changes
+quick	Post Run actions/checkout@v4	2025-09-23T08:54:59.7006466Z Adding repository directory to the temporary git global config as a safe directory
+quick	Post Run actions/checkout@v4	2025-09-23T08:54:59.7017709Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\ArchiX\ArchiX
+quick	Post Run actions/checkout@v4	2025-09-23T08:54:59.7537561Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+quick	Post Run actions/checkout@v4	2025-09-23T08:54:59.8020320Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+quick	Post Run actions/checkout@v4	2025-09-23T08:55:00.4542592Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+quick	Post Run actions/checkout@v4	2025-09-23T08:55:00.4836149Z http.https://github.com/.extraheader
+quick	Post Run actions/checkout@v4	2025-09-23T08:55:00.4898349Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+quick	Post Run actions/checkout@v4	2025-09-23T08:55:00.5260175Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+quick	Complete job	´╗┐2025-09-23T08:55:01.1945499Z Cleaning up orphan processes
+quick	Complete job	2025-09-23T08:55:01.2621171Z Terminate orphan process: pid (7784) (dotnet)
+quick	Complete job	2025-09-23T08:55:01.2713690Z Terminate orphan process: pid (7816) (conhost)
+quick	Complete job	2025-09-23T08:55:01.2825096Z Terminate orphan process: pid (7208) (dotnet)
+quick	Complete job	2025-09-23T08:55:01.3048465Z Terminate orphan process: pid (5244) (conhost)
