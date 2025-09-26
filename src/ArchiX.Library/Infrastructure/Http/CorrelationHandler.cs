@@ -1,29 +1,21 @@
 ﻿// File: src/ArchiX.Library/Infrastructure/Http/CorrelationHandler.cs
+#nullable enable
 namespace ArchiX.Library.Infrastructure.Http
 {
-    /// <summary>
-    /// Her HTTP isteğine X-Correlation-ID ekleyen <see cref="DelegatingHandler"/>.
-    /// Kimlik zaten varsa dokunmaz; yoksa yeni bir GUID üretir.
-    /// </summary>
-    public sealed class CorrelationHandler : DelegatingHandler
+    /// <summary>Giden isteklere standart korelasyon başlığını ekler, yanıta geri yazar.</summary>
+    /// <remarks>
+    /// Başlık adı <see cref="HttpCorrelation.HeaderName"/>. İstek üzerinde yoksa yeni kimlik üretir.
+    /// Yanıt üstbilgisine aynı kimliği yazar.
+    /// </remarks>
+    public sealed class CorrelationHandler() : DelegatingHandler
     {
-        private const string HeaderName = "X-Correlation-ID";
-
-        /// <summary>İsteğe korelasyon kimliği ekler ve zinciri devam ettirir.</summary>
-        /// <param name="request">HTTP isteği.</param>
-        /// <param name="cancellationToken">İptal belirteci.</param>
-        /// <returns>HTTP yanıtı.</returns>
-        protected override async Task<HttpResponseMessage> SendAsync(
-            HttpRequestMessage request,
-            CancellationToken cancellationToken)
+        /// <summary>İstek/yanıt akışında korelasyon başlığını garanti eder.</summary>
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            if (!request.Headers.Contains(HeaderName))
-            {
-                var corrId = Guid.NewGuid().ToString("D");
-                request.Headers.Add(HeaderName, corrId);
-            }
-
-            return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            var id = HttpCorrelation.EnsureOnRequest(request);
+            var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            HttpCorrelation.SetOnResponse(response, id);
+            return response;
         }
     }
 }
