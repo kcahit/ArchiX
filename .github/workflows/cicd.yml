@@ -1,23 +1,18 @@
 ﻿name: ArchiX CI/CD
-
 on:
-  push:
-    branches: [ main, prod ]
+  push: { branches: [ main, prod ] }
 
 concurrency:
   group: cicd-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
+permissions: { contents: read }
 
 env:
-  DOTNET_VERSION: '8.0.x'
-  EF_PROJECT: 'src/ArchiX.Library/ArchiX.Library.csproj'
-  STARTUP_PROJECT: 'src/ArchiX.Library/ArchiX.Library.csproj'
-  DB_CONTEXT: 'AppDbContext'
-  SEED_PROJECT_RUN: '0'
-  SEED_PROJECT: ''
+  DOTNET_VERSION: "8.0.x"
+  EF_PROJECT: "src/ArchiX.Library/ArchiX.Library.csproj"
+  STARTUP_PROJECT: "src/ArchiX.Library/ArchiX.Library.csproj"
+  DB_CONTEXT: "AppDbContext"
 
 jobs:
   ci_main:
@@ -26,44 +21,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+        with: { dotnet-version: ${{ env.DOTNET_VERSION }} }
       - run: dotnet restore
-      - run: dotnet build --configuration Release --no-restore
-      - run: dotnet test --configuration Release --no-build --verbosity normal
+      - run: dotnet build -c Release --no-restore
+      - run: dotnet test -c Release --no-build --verbosity normal
 
   deploy_prod:
     if: github.ref == 'refs/heads/prod'
     runs-on: ubuntu-latest
-    environment: production
     steps:
-      - name: Fail if secret missing
-        run: |
-          if [ -z "${{ secrets.PROD_SQL_CONNECTION }}" ]; then
-            echo "Missing secret: PROD_SQL_CONNECTION"; exit 1;
-          fi
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+        with: { dotnet-version: ${{ env.DOTNET_VERSION }} }
       - run: dotnet restore
-      - name: Install dotnet-ef
-        run: |
-          dotnet tool install --global dotnet-ef
-          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
-      - name: Apply EF Migrations
-        env:
-          PROD_SQL_CONNECTION: ${{ secrets.PROD_SQL_CONNECTION }}
-        run: |
-          dotnet ef database update \
-            --project "${{ env.EF_PROJECT }}" \
-            --startup-project "${{ env.STARTUP_PROJECT }}" \
-            --context "${{ env.DB_CONTEXT }}" \
-            --connection "$PROD_SQL_CONNECTION"
-      - name: Seed (optional)
-        if: ${{ env.SEED_PROJECT_RUN == '1' }}
-        env:
-          ASPNETCORE_ENVIRONMENT: Production
-          ConnectionStrings__Default: ${{ secrets.PROD_SQL_CONNECTION }}
-        run: |
-          dotnet run --project "${{ env.SEED_PROJECT }}" --no-build -- --seed true
+      - name: No DB migration (6.03 removed)
+        run: echo "6.03 migration/seed CI adımları kaldırıldı. Migrasyonlar runtime uygulanacak."
