@@ -1,7 +1,4 @@
-cd C:\_git\ArchiX\Dev\ArchiX
-New-Item -ItemType Directory -Force .github\workflows | Out-Null
-Set-Content -Path .github\workflows\cicd.yml -Encoding UTF8 -Value @'
-name: ArchiX CI/CD
+﻿name: ArchiX CI/CD
 
 on:
   push:
@@ -15,12 +12,12 @@ permissions:
   contents: read
 
 env:
-  DOTNET_VERSION: "8.0.x"
-  EF_PROJECT: "src/ArchiX.Library/ArchiX.Library.csproj"
-  STARTUP_PROJECT: "src/ArchiX.Library/ArchiX.Library.csproj"
-  DB_CONTEXT: "AppDbContext"
-  SEED_PROJECT_RUN: "0"
-  SEED_PROJECT: ""
+  DOTNET_VERSION: '8.0.x'
+  EF_PROJECT: 'src/ArchiX.Library/ArchiX.Library.csproj'
+  STARTUP_PROJECT: 'src/ArchiX.Library/ArchiX.Library.csproj'
+  DB_CONTEXT: 'AppDbContext'
+  SEED_PROJECT_RUN: '0'
+  SEED_PROJECT: ''
 
 jobs:
   ci_main:
@@ -29,7 +26,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
-        with: { dotnet-version: ${{ env.DOTNET_VERSION }} }
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
       - run: dotnet restore
       - run: dotnet build --configuration Release --no-restore
       - run: dotnet test --configuration Release --no-build --verbosity normal
@@ -41,19 +39,18 @@ jobs:
     steps:
       - name: Fail if secret missing
         run: |
-          test -n "${{ secrets.PROD_SQL_CONNECTION }}" || { echo "Missing secret: PROD_SQL_CONNECTION"; exit 1; }
-
+          if [ -z "${{ secrets.PROD_SQL_CONNECTION }}" ]; then
+            echo "Missing secret: PROD_SQL_CONNECTION"; exit 1;
+          fi
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
-        with: { dotnet-version: ${{ env.DOTNET_VERSION }} }
-
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
       - run: dotnet restore
-
       - name: Install dotnet-ef
         run: |
           dotnet tool install --global dotnet-ef
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
-
       - name: Apply EF Migrations
         env:
           PROD_SQL_CONNECTION: ${{ secrets.PROD_SQL_CONNECTION }}
@@ -63,15 +60,10 @@ jobs:
             --startup-project "${{ env.STARTUP_PROJECT }}" \
             --context "${{ env.DB_CONTEXT }}" \
             --connection "$PROD_SQL_CONNECTION"
-
       - name: Seed (optional)
-        if: env.SEED_PROJECT_RUN == '1'
+        if: ${{ env.SEED_PROJECT_RUN == '1' }}
         env:
-          ASPNETCORE_ENVIRONMENT: "Production"
+          ASPNETCORE_ENVIRONMENT: Production
           ConnectionStrings__Default: ${{ secrets.PROD_SQL_CONNECTION }}
         run: |
           dotnet run --project "${{ env.SEED_PROJECT }}" --no-build -- --seed true
-'@
-git add .github/workflows/cicd.yml
-git commit -m "CI/CD: main=build+test, prod=deploy+migration"
-git push origin main
