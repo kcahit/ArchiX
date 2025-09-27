@@ -1,18 +1,19 @@
 ﻿name: ArchiX CI/CD
 on:
-  push: { branches: [ main, prod ] }
+  push:
+    branches:
+      - main
+      - prod
 
 concurrency:
   group: cicd-${{ github.ref }}
   cancel-in-progress: true
 
-permissions: { contents: read }
+permissions:
+  contents: read
 
 env:
-  DOTNET_VERSION: "8.0.x"
-  EF_PROJECT: "src/ArchiX.Library/ArchiX.Library.csproj"
-  STARTUP_PROJECT: "src/ArchiX.Library/ArchiX.Library.csproj"
-  DB_CONTEXT: "AppDbContext"
+  DOTNET_VERSION: 8.0.x
 
 jobs:
   ci_main:
@@ -21,7 +22,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
-        with: { dotnet-version: ${{ env.DOTNET_VERSION }} }
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - run: dotnet --info
       - run: dotnet restore
       - run: dotnet build -c Release --no-restore
       - run: dotnet test -c Release --no-build --verbosity normal
@@ -32,7 +35,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
-        with: { dotnet-version: ${{ env.DOTNET_VERSION }} }
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - run: dotnet --info
       - run: dotnet restore
-      - name: No DB migration (6.03 removed)
-        run: echo "6.03 migration/seed CI adımları kaldırıldı. Migrasyonlar runtime uygulanacak."
+      - run: echo "6.03 migration/seed CI adımları kaldırıldı. Migrasyonlar runtime uygulanacak."
