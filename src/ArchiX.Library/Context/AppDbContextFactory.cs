@@ -15,7 +15,7 @@ namespace ArchiX.Library.Context
 
             if (string.IsNullOrWhiteSpace(connection))
                 throw new InvalidOperationException(
-                    "Bağlantı dizesi bulunamadı. '--connection' argümanı verin ya da 'ConnectionStrings__ArchiXDb' / 'ConnectionStrings__Default' ortam değişkenini veya appsettings*.json içinde aynı anahtarı sağlayın.");
+                    "Bağlantı dizesi yok. '--connection' verin veya ConnectionStrings:ArchiXDb/Default sağlayın.");
 
             var options = new DbContextOptionsBuilder<AppDbContext>()
                 .UseSqlServer(connection, o => o.EnableRetryOnFailure())

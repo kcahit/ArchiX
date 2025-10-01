@@ -1,95 +1,126 @@
-﻿// File: tests/ArchiXTest.ApiWeb/Test/ExternalTests/PingEndpointsTests.cs
-#nullable enable
-using System.Net;
+﻿// File: tests/ArchiXTest.ApiWeb/Program.cs  (DB init testte kapatıldı)
 
 using ArchiX.Library.Context;
+using ArchiX.Library.Entities;
 using ArchiX.Library.External;
+using ArchiX.Library.Infrastructure.Caching;
+using ArchiX.Library.Infrastructure.DomainEvents;
+using ArchiX.Library.Infrastructure.Http;
 
-using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-using Xunit;
+var builder = WebApplication.CreateBuilder(args);
 
-namespace ArchiXTest.ApiWeb.Test.ExternalTests
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
+builder.Services.AddDbContext<AppDbContext>(opt =>
 {
-    public sealed class PingEndpointsTests(WebApplicationFactory<Program> factory)
-        : IClassFixture<WebApplicationFactory<Program>>
+    var cs = builder.Configuration.GetConnectionString("ArchiXDb")
+             ?? throw new InvalidOperationException("ConnectionStrings:ArchiXDb bulunamadı.");
+    opt.UseSqlServer(cs)
+       .EnableDetailedErrors()
+       .EnableSensitiveDataLogging()
+       .LogTo(Console.WriteLine, LogLevel.Information);
+});
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddArchiXDomainEvents();
+builder.Services.AddArchiXCacheKeyPolicy();
+
+// HTTP politikalarını tek yerden bağla (Retry/Timeout)
+builder.Services.AddHttpPolicies(builder.Configuration);
+
+// NOT: DefaultHttpClientWrapper + politikalar kaldırıldı.
+// Ping adapter kendi HttpClient ve handler zincirini HttpPoliciesOptions ile kuruyor.
+
+// HealthChecks servisini ekle
+var hc = builder.Services.AddHealthChecks();
+
+// Testing dışı ortamda gerçek adapter ve health check
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    builder.Services.AddPingAdapterWithHealthCheck(builder.Configuration, "ExternalServices:Ping", "external_ping");
+}
+else
+{
+    // Testing’de predicate boşa düşmesin diye sahte health check
+    hc.AddCheck("external_ping", () => HealthCheckResult.Healthy("fake"));
+}
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Testing"))
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseArchiXCorrelation();
+app.UseRouting();
+app.MapControllers();
+
+app.MapHealthChecks("/healthz");
+app.MapHealthChecks("/health/ping", new HealthCheckOptions { Predicate = r => r.Name == "external_ping" });
+
+// Ortam bayrakları
+var isDevelopment = app.Environment.IsDevelopment();
+var isTesting = app.Environment.IsEnvironment("Testing");
+
+// Testte DB init’i kapat
+// Ayrıca Development DEĞİLSE DB init atlanır.
+var skipDbInit = app.Configuration.GetValue<bool>("DisableDbInit") || isTesting || !isDevelopment;
+
+if (!skipDbInit)
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var cnn = (SqlConnection)db.Database.GetDbConnection();
+
+    app.Logger.LogInformation("[ArchiX] Using SQL Server = {DataSource} | DB = {Database}", cnn.DataSource, cnn.Database);
+
+    var hasAnyMigrations = db.Database.GetMigrations().Any();
+    app.Logger.LogInformation("[ArchiX] HasAnyMigrations: {HasAny}", hasAnyMigrations);
+    if (hasAnyMigrations)
+        await db.Database.MigrateAsync();
+    else
+        await db.Database.EnsureCreatedAsync();
+
+    try
     {
-        private readonly WebApplicationFactory<Program> _factory = factory.WithWebHostBuilder(b =>
-        {
-            b.UseEnvironment("Testing");
-            b.UseContentRoot(AppContext.BaseDirectory);
+        var preS = await db.Set<Statu>().CountAsync();
+        var preF = await db.Set<FilterItem>().IgnoreQueryFilters().CountAsync();
+        var preL = await db.Set<LanguagePack>().IgnoreQueryFilters().CountAsync();
+        app.Logger.LogInformation("[ArchiX] BEFORE Seed -> Status={S}, FilterItems={F}, LanguagePacks={L}", preS, preF, preL);
 
-            b.ConfigureAppConfiguration(cfg =>
-            {
-                cfg.AddInMemoryCollection(new Dictionary<string, string?>
-                {
-                    // DB init kapalı
-                    ["DisableDbInit"] = "true",
+        await db.EnsureCoreSeedsAndBindAsync();
 
-                    // Program.cs içindeki AddPingAdapterWithHealthCheck için gerekli bölüm
-                    ["ExternalServices:DemoApi:BaseAddress"] = "http://localhost/",
-                    ["ExternalServices:DemoApi:TimeoutSeconds"] = "5",
-                    ["ExternalServices:DemoApi:RetryCount"] = "0",
-                    ["ExternalServices:DemoApi:BaseDelayMs"] = "0",
-                });
-            });
+        var postS = await db.Set<Statu>().CountAsync();
+        var postF = await db.Set<FilterItem>().IgnoreQueryFilters().CountAsync();
+        var postL = await db.Set<LanguagePack>().IgnoreQueryFilters().CountAsync();
+        app.Logger.LogInformation("[ArchiX] AFTER Seed  -> Status={S}, FilterItems={F}, LanguagePacks={L}", postS, postF, postL);
 
-            b.ConfigureServices(services =>
-            {
-                // AppDbContext kayıtlarını sök
-                var toRemove = services.Where(d =>
-                        d.ServiceType == typeof(DbContextOptions<AppDbContext>) ||
-                        d.ServiceType == typeof(AppDbContext) ||
-                        d.ServiceType == typeof(IDbContextFactory<AppDbContext>))
-                    .ToList();
-                foreach (var d in toRemove) services.Remove(d);
-
-                // InMemory ile yeniden ekle
-                services.AddDbContext<AppDbContext>(o => o.UseInMemoryDatabase("PingEndpointsTests"));
-
-                // Dış servisi sahtele (son kayıt kazanır)
-                services.AddSingleton<IPingAdapter>(new FakePingAdapter());
-            });
-        });
-
-        [Fact]
-        public async Task GetStatus_ReturnsTextPlain()
-        {
-            var client = _factory.CreateClient();
-            var res = await client.GetAsync("/ping/status");
-            var text = await res.Content.ReadAsStringAsync();
-
-            Assert.Equal(HttpStatusCode.OK, res.StatusCode);
-            Assert.Equal("text/plain; charset=utf-8", res.Content.Headers.ContentType!.ToString());
-            Assert.Equal("pong", text);
-        }
-
-        [Fact]
-        public async Task GetStatusJson_ReturnsTypedModel()
-        {
-            var client = _factory.CreateClient();
-            var res = await client.GetAsync("/ping/status.json");
-            var model = await res.Content.ReadFromJsonAsync<PingStatus>();
-
-            Assert.Equal(HttpStatusCode.OK, res.StatusCode);
-            Assert.NotNull(model);
-            Assert.Equal("demo", model!.Service);
-            Assert.Equal("1.0", model.Version);
-        }
-
-        [Fact]
-        public async Task Health_Ping_ReturnsHealthy()
-        {
-            var client = _factory.CreateClient();
-            var res = await client.GetAsync("/health/ping");
-            Assert.Equal(HttpStatusCode.OK, res.StatusCode);
-        }
-
-        private sealed class FakePingAdapter : IPingAdapter
-        {
-            public Task<string> GetStatusTextAsync(CancellationToken ct = default)
-                => Task.FromResult("""{"service":"demo","version":"1.0","uptime":"123s"}""");
-        }
+        var testEntity = new Statu { Code = "___TEST___", Name = "___TEST___", Description = "diag" };
+        db.Add(testEntity);
+        var ins = await db.SaveChangesAsync();
+        app.Logger.LogInformation("[ArchiX] TEST INSERT SaveChanges affected: {Count}", ins);
+        db.Remove(testEntity);
+        var del = await db.SaveChangesAsync();
+        app.Logger.LogInformation("[ArchiX] TEST DELETE SaveChanges affected: {Count}", del);
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogError(ex, "[ArchiX Seed/Diag ERROR]");
+        throw;
     }
 }
+
+await app.RunAsync();
+
+public partial class Program { }

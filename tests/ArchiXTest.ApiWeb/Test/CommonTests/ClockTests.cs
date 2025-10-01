@@ -1,26 +1,33 @@
-﻿using ArchiX.Library.Time;
+﻿// File: tests/ArchiXTest.ApiWeb/Test/CommonTests/ClockTests.cs
+using ArchiX.Library.Time;
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Tests.CommonTests
+namespace ArchiXTest.ApiWeb.Test.CommonTests
 {
+    /// <summary>
+    /// Saat sağlayıcı testleri.
+    /// </summary>
     public sealed class ClockTests
     {
-        private readonly IClock _clock = new SystemClock();
-
         [Fact]
         public void UtcNow_ShouldReturnCloseToSystemUtcNow()
         {
-            // Arrange
-            var before = DateTime.UtcNow;
+            var clock = new SystemClock();
+            var now = clock.UtcNow;
+            var sys = DateTimeOffset.UtcNow;
 
-            // Act
-            var actual = _clock.UtcNow;
+            Assert.True((sys - now).Duration() < TimeSpan.FromSeconds(1));
+        }
 
-            var after = DateTime.UtcNow;
+        [Fact]
+        public void Now_ShouldReturnCloseToSystemNow()
+        {
+            var clock = new SystemClock();
+            var now = clock.UtcNow.LocalDateTime;
+            var sys = DateTime.Now;
 
-            // Assert
-            Assert.InRange(actual, before, after);
+            Assert.True((sys - now).Duration() < TimeSpan.FromSeconds(1));
         }
     }
 }

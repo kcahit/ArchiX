@@ -243,7 +243,23 @@ dotnet_naming_style.begins_with_i.required_suffix =
 dotnet_naming_style.begins_with_i.word_separator =
 dotnet_naming_style.begins_with_i.capitalization = pascal_case
 
-#### Analyzer severities (temizlik & format) ####
-dotnet_diagnostic.IDE0055.severity = none    # Format document
+# Kod stilleri ve uyarı ayarları
 dotnet_diagnostic.IDE0005.severity = warning   # Remove unnecessary usings
-dotnet_diagnostic.IDE0290.severity = none
+dotnet_diagnostic.IDE0028.severity = none      # Collection initialization simplification
+dotnet_diagnostic.IDE0055.severity = none      # Format document
+dotnet_diagnostic.IDE0063.severity = none      # Simple using statement
+dotnet_diagnostic.IDE0130.severity = error	   # Namespace klasör yapısına uymalı (zorunlu)
+dotnet_diagnostic.IDE0290.severity = none      # Primary constructor style
+
+# Varsayılan: CA1859 açık (uyarı)
+[*.cs]
+dotnet_diagnostic.CA1859.severity = warning
+# Sadece ArchiXDatabase.cs için kapat
+[src/ArchiX.Library/Runtime/Database/Core/ArchiXDatabase.cs]
+dotnet_diagnostic.CA1859.severity = none
+# Tüm test dosyaları için kapat
+[tests/**/*.cs]
+dotnet_diagnostic.CA1859.severity = none
+
+
+
