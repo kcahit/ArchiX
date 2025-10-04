@@ -71,8 +71,8 @@ public static class LogRecordFactory
             {
                 SeverityNumber = 2, // Error varsayılan (middleware 400 için Warning’e çeviriyor)
                 SeverityName = "Error",
-                Code = xlog.hResult,
-                Message = xlog.mesaj,
+                Code = xlog.HResult,
+                Message = xlog.Mesaj,
                 Details = detailsIfDev
             },
             Correlation = new LogCorrelation
@@ -153,6 +153,7 @@ public static class LogRecordFactory
     private static string? Truncate(string? s, int max)
     {
         if (string.IsNullOrEmpty(s)) return s;
-        return s.Length <= max ? s : s.Substring(0, max);
+        return s.Length <= max ? s : s[..max];
+
     }
 }

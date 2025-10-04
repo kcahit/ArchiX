@@ -10,21 +10,17 @@ public sealed class ArchiXDatabaseInvalidProviderTests
     [Fact]
     public void Configure_WithInvalidProvider_ShouldThrow()
     {
-        // Arrange
-        ArchiXDatabase.Configure("MongoDb");
+        var ex = Assert.Throws<NotSupportedException>(() => ArchiXDatabase.Configure("MongoDb"));
+        Assert.Contains("Unsupported DB provider", ex.Message);
 
-        try
-        {
-            // Act + Assert
-            var ex = Assert.Throws<NotSupportedException>(
-                () => ArchiXDatabase.CreateAsync().GetAwaiter().GetResult());
+        // Güvenli reset (başka testler etkilenmesin)
+        ArchiXDatabase.Configure("SqlServer");
+    }
 
-            Assert.Contains("Unsupported DB provider", ex.Message);
-        }
-        finally
-        {
-            // Leakage önleme
-            ArchiXDatabase.Configure("SqlServer");
-        }
+    [Fact]
+    public void TryConfigure_WithInvalidProvider_ShouldReturnFalse()
+    {
+        var ok = ArchiXDatabase.TryConfigure("MongoDb");
+        Assert.False(ok);
     }
 }

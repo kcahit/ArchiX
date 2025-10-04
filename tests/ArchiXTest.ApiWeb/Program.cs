@@ -1,10 +1,12 @@
-﻿// File: tests/ArchiXTest.ApiWeb/Program.cs  (DB init testte kapatıldı)
+﻿// File: tests/ArchiXTest.ApiWeb/Program.cs 
+using ArchiX.Library.Config;
 using ArchiX.Library.Context;
 using ArchiX.Library.Entities;
 using ArchiX.Library.External;
 using ArchiX.Library.Infrastructure.Caching;
 using ArchiX.Library.Infrastructure.DomainEvents;
 using ArchiX.Library.Infrastructure.Http;
+using ArchiX.Library.Runtime.Observability;
 
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Data.SqlClient;
@@ -32,26 +34,23 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddArchiXDomainEvents();
 builder.Services.AddArchiXCacheKeyPolicy();
-
-// HTTP politikalarını tek yerden bağla (Retry/Timeout)
 builder.Services.AddHttpPolicies(builder.Configuration);
-
-// NOT: DefaultHttpClientWrapper + politikalar kaldırıldı.
-// Ping adapter kendi HttpClient ve handler zincirini HttpPoliciesOptions ile kuruyor.
 
 // HealthChecks servisini ekle
 var hc = builder.Services.AddHealthChecks();
 
-// Testing dışı ortamda gerçek adapter ve health check
-if (!builder.Environment.IsEnvironment("Testing"))
+// Development / Testing ortamında sahte health check
+if (builder.Environment.IsDevelopment() || builder.Environment.IsEnvironment("Testing"))
 {
-    builder.Services.AddPingAdapterWithHealthCheck(builder.Configuration, "ExternalServices:Ping", "external_ping");
+    hc.AddCheck("external_ping", () => HealthCheckResult.Healthy("fake"));
 }
 else
 {
-    // Testing’de predicate boşa düşmesin diye sahte health check
-    hc.AddCheck("external_ping", () => HealthCheckResult.Healthy("fake"));
+    builder.Services.AddPingAdapterWithHealthCheck(builder.Configuration, "ExternalServices:Ping", "external_ping");
 }
+
+// 6,04: OpenTelemetry entegrasyonu
+builder.Services.AddArchiXObservability(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
 
@@ -61,26 +60,38 @@ if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Testing"))
     app.UseSwaggerUI();
 }
 
+// 6,04: Prometheus scraping vb.
+app.UseArchiXObservability(builder.Configuration);
+
 app.UseArchiXCorrelation();
 app.UseRouting();
-app.MapControllers();
+app.UseMiddleware<LoggingScopeMiddleware>();
+app.UseMiddleware<RequestMetricsMiddleware>();
 
+app.MapControllers();
 app.MapHealthChecks("/healthz");
 app.MapHealthChecks("/health/ping", new HealthCheckOptions { Predicate = r => r.Name == "external_ping" });
 
-// Testte DB init’i kapat
-var skipDbInit = app.Configuration.GetValue<bool>("DisableDbInit") || app.Environment.IsEnvironment("Testing");
+// ------------------------------------------------------------------------
+// DB işlemlerinin çalıştırılıp çalıştırılmayacağı kontrol ediliyor
+var allowDbOps = ShouldRunDbOps.Evaluate(app.Configuration, app.Environment);
 
-if (!skipDbInit)
+if (allowDbOps)
 {
+    using var __dbInitAct = ArchiXTelemetry.Activity.StartActivity("DbInit");
+
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var cnn = (SqlConnection)db.Database.GetDbConnection();
 
     app.Logger.LogInformation("[ArchiX] Using SQL Server = {DataSource} | DB = {Database}", cnn.DataSource, cnn.Database);
+    __dbInitAct?.SetTag("db.server", cnn.DataSource);
+    __dbInitAct?.SetTag("db.name", cnn.Database);
 
     var hasAnyMigrations = db.Database.GetMigrations().Any();
     app.Logger.LogInformation("[ArchiX] HasAnyMigrations: {HasAny}", hasAnyMigrations);
+    __dbInitAct?.SetTag("db.migrations.present", hasAnyMigrations);
+
     if (hasAnyMigrations)
         await db.Database.MigrateAsync();
     else
@@ -88,6 +99,8 @@ if (!skipDbInit)
 
     try
     {
+        using var __seedAct = ArchiXTelemetry.Activity.StartActivity("DbSeed");
+
         var preS = await db.Set<Statu>().CountAsync();
         var preF = await db.Set<FilterItem>().IgnoreQueryFilters().CountAsync();
         var preL = await db.Set<LanguagePack>().IgnoreQueryFilters().CountAsync();
@@ -100,20 +113,34 @@ if (!skipDbInit)
         var postL = await db.Set<LanguagePack>().IgnoreQueryFilters().CountAsync();
         app.Logger.LogInformation("[ArchiX] AFTER Seed  -> Status={S}, FilterItems={F}, LanguagePacks={L}", postS, postF, postL);
 
-        var testEntity = new Statu { Code = "___TEST___", Name = "___TEST___", Description = "diag" };
+        using var __testOpsAct = ArchiXTelemetry.Activity.StartActivity("DbTestOps");
+
+        // Duplicate key'i önlemek için benzersiz test kodu
+        var testCode = "___TEST___:" + Guid.NewGuid().ToString("N");
+        var testEntity = new Statu { Code = testCode, Name = testCode, Description = "diag" };
+
         db.Add(testEntity);
         var ins = await db.SaveChangesAsync();
         app.Logger.LogInformation("[ArchiX] TEST INSERT SaveChanges affected: {Count}", ins);
+        __testOpsAct?.SetTag("insert.affected", ins);
+
         db.Remove(testEntity);
         var del = await db.SaveChangesAsync();
         app.Logger.LogInformation("[ArchiX] TEST DELETE SaveChanges affected: {Count}", del);
+        __testOpsAct?.SetTag("delete.affected", del);
     }
     catch (Exception ex)
     {
         app.Logger.LogError(ex, "[ArchiX Seed/Diag ERROR]");
+        ErrorMetric.Record(area: "startup", exceptionName: ex.GetType().Name);
         throw;
     }
 }
+else
+{
+    app.Logger.LogInformation("[ArchiX] DB işlemleri bu ortamda devre dışı bırakıldı.");
+}
+// ------------------------------------------------------------------------
 
 await app.RunAsync();
 
