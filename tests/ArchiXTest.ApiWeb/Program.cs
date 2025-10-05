@@ -1,5 +1,4 @@
-﻿// File: tests/ArchiXTest.ApiWeb/Program.cs 
-using ArchiX.Library.Config;
+﻿using ArchiX.Library.Config;
 using ArchiX.Library.Context;
 using ArchiX.Library.Entities;
 using ArchiX.Library.External;
@@ -17,6 +16,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
+
+// ArchiX config köprüleme: library için IConfiguration ver
+ShouldRunDbOps.Initialize(builder.Configuration);
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
@@ -73,8 +75,8 @@ app.MapHealthChecks("/healthz");
 app.MapHealthChecks("/health/ping", new HealthCheckOptions { Predicate = r => r.Name == "external_ping" });
 
 // ------------------------------------------------------------------------
-// DB işlemlerinin çalıştırılıp çalıştırılmayacağı kontrol ediliyor
-var allowDbOps = ShouldRunDbOps.Evaluate(app.Configuration, app.Environment);
+// DB işlemleri ve loglama kontrolü (yalnızca ArchiX:AllowDbOps)
+var allowDbOps = ShouldRunDbOps.IsEnabled();
 
 if (allowDbOps)
 {
@@ -115,7 +117,6 @@ if (allowDbOps)
 
         using var __testOpsAct = ArchiXTelemetry.Activity.StartActivity("DbTestOps");
 
-        // Duplicate key'i önlemek için benzersiz test kodu
         var testCode = "___TEST___:" + Guid.NewGuid().ToString("N");
         var testEntity = new Statu { Code = testCode, Name = testCode, Description = "diag" };
 

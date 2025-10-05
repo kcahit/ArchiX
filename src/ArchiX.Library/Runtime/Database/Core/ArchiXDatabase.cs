@@ -1,4 +1,5 @@
-﻿// File: src/ArchiX.Library/Runtime/Database/Core/ArchiXDatabase.cs
+﻿using ArchiX.Library.Config;
+
 namespace ArchiX.Library.Runtime.Database.Core
 {
     /// <summary>
@@ -60,11 +61,23 @@ namespace ArchiX.Library.Runtime.Database.Core
             return false;
         }
 
-        /// <summary>Yeni veritabanı oluşturur ve seed uygular.</summary>
-        public static Task CreateAsync(CancellationToken ct = default) => GetProvisioner().CreateAsync(ct);
+        /// <summary>Yeni veritabanı oluşturur ve seed uygular. <c>ArchiX:AllowDbOps=false</c> ise çalıştırmaz.</summary>
+        public static Task CreateAsync(CancellationToken ct = default)
+        {
+            if (!ShouldRunDbOps.IsEnabled())
+                return Task.CompletedTask;
 
-        /// <summary>Mevcut veritabanını günceller, bekleyen migration ve seed işlemlerini uygular.</summary>
-        public static Task UpdateAsync(CancellationToken ct = default) => GetProvisioner().UpdateAsync(ct);
+            return GetProvisioner().CreateAsync(ct);
+        }
+
+        /// <summary>Mevcut veritabanını günceller; <c>ArchiX:AllowDbOps=false</c> ise çalıştırmaz.</summary>
+        public static Task UpdateAsync(CancellationToken ct = default)
+        {
+            if (!ShouldRunDbOps.IsEnabled())
+                return Task.CompletedTask;
+
+            return GetProvisioner().UpdateAsync(ct);
+        }
 
         private static ArchiXDbProvisionerBase GetProvisioner()
         {

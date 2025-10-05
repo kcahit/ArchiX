@@ -1,6 +1,4 @@
-﻿// File: tests/ArchiXTest.ApiWeb/Test/RuntimeTests/DatabaseTests/ArchiXDatabaseSnapshotTests.cs
-
-using System.Text.Json;
+﻿using System.Text.Json;
 
 using ArchiX.Library.Runtime.Database.Core;
 
@@ -9,30 +7,44 @@ using Xunit;
 namespace ArchiXTest.ApiWeb.Test.RuntimeTests.DatabaseTests
 {
     /// <summary>
-    /// Snapshot loglarının doğru yazıldığını test eder.
+    /// Create çağrısı sonrası snapshot loglarının yazıldığını doğrular.
+    /// <para><c>ArchiX:AllowDbOps=false</c> ise test çalıştırmadan çıkar.</para>
     /// </summary>
     public sealed class ArchiXDatabaseSnapshotTests
     {
+        /// <summary>
+        /// İzin varsa Create sonrası "Tables.Snapshot" kaydı bulunmalıdır.
+        /// </summary>
         [Fact]
         public async Task CreateAsync_ShouldWriteSnapshotEntry()
         {
-            // Arrange
+            if (!AllowDbOps())
+                return;
+
             ArchiXDatabase.Configure("SqlServer");
 
-            // Act
             await ArchiXDatabase.CreateAsync();
 
-            // Assert
-            var logDir = Path.Combine(System.AppContext.BaseDirectory, "logs");
+            var logDir = Path.Combine(AppContext.BaseDirectory, "logs");
             var file = Directory.GetFiles(logDir, "ArchiXDB_Log_Create_*.jsonl").Last();
 
             var lines = await File.ReadAllLinesAsync(file);
-            Assert.Contains(lines, l => l.Contains("Tables.Snapshot"));
+            Assert.Contains(lines, l => l.Contains("Tables.Snapshot", StringComparison.Ordinal));
 
-            // JSON parse kontrol
-            var snapshotLine = lines.First(l => l.Contains("Tables.Snapshot"));
-            var doc = JsonDocument.Parse(snapshotLine);
+            var snapshotLine = lines.First(l => l.Contains("Tables.Snapshot", StringComparison.Ordinal));
+            using var doc = JsonDocument.Parse(snapshotLine);
             Assert.Equal("Tables.Snapshot", doc.RootElement.GetProperty("Stage").GetString());
+        }
+
+        private static bool AllowDbOps()
+        {
+            var config = new ConfigurationBuilder()
+                .SetBasePath(AppContext.BaseDirectory)
+                .AddJsonFile("appsettings.json", optional: true)
+                .AddEnvironmentVariables()
+                .Build();
+
+            return config.GetValue("ArchiX:AllowDbOps", false);
         }
     }
 }

@@ -1,6 +1,6 @@
-﻿// File: src/ArchiX.Library/Runtime/Database/Core/ArchiXDbProvisionerBase.cs
+﻿using System.Text.Json;
 
-using System.Text.Json;
+using ArchiX.Library.Config;
 
 namespace ArchiX.Library.Runtime.Database.Core
 {
@@ -20,6 +20,9 @@ namespace ArchiX.Library.Runtime.Database.Core
 
         public async Task CreateAsync(CancellationToken ct = default)
         {
+            if (!ShouldRunDbOps.IsEnabled())
+                return;
+
             var logFile = GetLogFile("Create");
             await using var writer = CreateLogWriter(logFile);
             await WriteLogAsync(writer, "Start");
@@ -36,6 +39,9 @@ namespace ArchiX.Library.Runtime.Database.Core
 
         public async Task UpdateAsync(CancellationToken ct = default)
         {
+            if (!ShouldRunDbOps.IsEnabled())
+                return;
+
             var logFile = GetLogFile("Update");
             await using var writer = CreateLogWriter(logFile);
             await WriteLogAsync(writer, "Start");
