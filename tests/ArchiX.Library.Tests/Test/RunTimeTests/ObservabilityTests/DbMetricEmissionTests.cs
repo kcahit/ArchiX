@@ -5,8 +5,7 @@ using Microsoft.AspNetCore.TestHost;
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.RunTimeTests.ObservabilityTests;
-
+namespace ArchiX.Library.Tests.Test.RunTimeTests.ObservabilityTests;
 public sealed class DbMetricEmissionTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly WebApplicationFactory<Program> _factory;
@@ -15,7 +14,7 @@ public sealed class DbMetricEmissionTests : IClassFixture<WebApplicationFactory<
     {
         _factory = factory.WithWebHostBuilder(builder =>
         {
-            builder.UseSolutionRelativeContentRoot("tests/ArchiXTest.ApiWeb"); // FIX
+            builder.UseSolutionRelativeContentRoot("tests/ArchiX.Library.Tests"); // FIX
 
             builder.UseSetting("DOTNET_ENVIRONMENT", "Testing");
             builder.ConfigureAppConfiguration((_, cfg) =>
