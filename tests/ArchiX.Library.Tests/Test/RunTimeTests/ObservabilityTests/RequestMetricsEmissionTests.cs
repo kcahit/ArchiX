@@ -1,24 +1,19 @@
-﻿using System.Net;
-
-using Microsoft.AspNetCore.Mvc.Testing;
+﻿using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.RunTimeTests.ObservabilityTests;
+namespace ArchiX.Library.Tests.Test.RunTimeTests.ObservabilityTests;
 
-/// <summary>
-/// Prometheus scraping endpoint’in ayağa kalktığını doğrular.
-/// </summary>
-public sealed class MetricsEndpointTests : IClassFixture<WebApplicationFactory<Program>>
+public sealed class RequestMetricsEmissionTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly WebApplicationFactory<Program> _factory;
 
-    public MetricsEndpointTests(WebApplicationFactory<Program> factory)
+    public RequestMetricsEmissionTests(WebApplicationFactory<Program> factory)
     {
         _factory = factory.WithWebHostBuilder(builder =>
         {
-            builder.UseSolutionRelativeContentRoot("tests/ArchiXTest.ApiWeb"); // FIX
+            builder.UseSolutionRelativeContentRoot("tests/ArchiX.Library.Tests");
 
             builder.UseSetting("DOTNET_ENVIRONMENT", "Testing");
             builder.ConfigureAppConfiguration((_, cfg) =>
@@ -36,13 +31,13 @@ public sealed class MetricsEndpointTests : IClassFixture<WebApplicationFactory<P
     }
 
     [Fact]
-    public async Task Metrics_Endpoint_Should_Return_200_With_Content()
+    public async Task Metrics_Should_Contain_Http_Request_Metrics()
     {
         var client = _factory.CreateClient();
-        var resp = await client.GetAsync("/metrics");
-        Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+        _ = await client.GetAsync("/healthz");
 
-        var text = await resp.Content.ReadAsStringAsync();
-        Assert.False(string.IsNullOrWhiteSpace(text));
+        var metrics = await client.GetStringAsync("/metrics");
+        Assert.Contains("archix_http_request_duration_ms", metrics);
+        Assert.Contains("archix_http_requests_total", metrics);
     }
 }
