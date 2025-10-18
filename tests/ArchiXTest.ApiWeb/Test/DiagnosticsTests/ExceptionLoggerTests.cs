@@ -24,7 +24,7 @@ namespace ArchiXTest.ApiWeb.Test.DiagnosticsTests
             var logger = new ExceptionLogger(ex);
 
             // Assert
-            Assert.Equal(expected, logger.mesaj);
+            Assert.Equal(expected, logger.Mesaj);
         }
 
         [Fact]
@@ -37,8 +37,8 @@ namespace ArchiXTest.ApiWeb.Test.DiagnosticsTests
             var logger = new ExceptionLogger(ex);
 
             // Assert
-            Assert.Equal("Bilinmeyen hata", logger.mesaj);
-            Assert.Equal("Custom error", logger.detayMesaj);
+            Assert.Equal("Bilinmeyen hata", logger.Mesaj);
+            Assert.Equal("Custom error", logger.DetayMesaj);
             Assert.Equal(typeof(ApplicationException).FullName, ex.GetType().FullName);
         }
     }

@@ -1,0 +1,42 @@
+﻿name: ArchiX CI/CD
+on:
+  push:
+    branches:
+      - main
+      - prod
+
+concurrency:
+  group: cicd-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: 8.0.x
+
+jobs:
+  ci_main:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - run: dotnet --info
+      - run: dotnet restore
+      - run: dotnet build -c Release --no-restore
+      - run: dotnet test -c Release --no-build --verbosity normal
+
+  deploy_prod:
+    if: github.ref == 'refs/heads/prod'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - run: dotnet --info
+      - run: dotnet restore
+      - run: echo "6.03 migration/seed CI adımları kaldırıldı. Migrasyonlar runtime uygulanacak."

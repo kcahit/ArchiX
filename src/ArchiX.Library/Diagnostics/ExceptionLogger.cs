@@ -7,7 +7,7 @@ namespace ArchiX.Library.Diagnostics
     /// <summary>
     /// Exception nesnelerinden log ve kullanıcıya uygun mesaj üretmek için kullanılan yardımcı sınıf.
     /// </summary>
-    public class ExceptionLogger
+    public sealed class ExceptionLogger
     {
         /// <summary>
         /// Log dosyası yolu (opsiyonel).
@@ -17,47 +17,47 @@ namespace ArchiX.Library.Diagnostics
         /// <summary>
         /// Son üretilen mesaj.
         /// </summary>
-        public string mesaj { get; private set; } = "";
+        public string Mesaj { get; private set; } = string.Empty;
 
         /// <summary>
         /// Exception stack trace bilgisi.
         /// </summary>
-        public string? stackTrace { get; private set; }
+        public string? StackTrace { get; private set; }
 
         /// <summary>
         /// Exception yardım bağlantısı.
         /// </summary>
-        public string? helpLink { get; private set; }
+        public string? HelpLink { get; private set; }
 
         /// <summary>
         /// Exception kaynağı.
         /// </summary>
-        public string? source { get; private set; }
+        public string? Source { get; private set; }
 
         /// <summary>
         /// Exception’un gerçekleştiği metot.
         /// </summary>
-        public string? targetSite { get; private set; }
+        public string? TargetSite { get; private set; }
 
         /// <summary>
         /// İç exception bilgisi.
         /// </summary>
-        public string? innerException { get; private set; }
+        public string? InnerException { get; private set; }
 
         /// <summary>
         /// Exception HResult değeri.
         /// </summary>
-        public string? hResult { get; private set; }
+        public string? HResult { get; private set; }
 
         /// <summary>
         /// Exception data içeriği.
         /// </summary>
-        public string? data { get; private set; }
+        public string? Data { get; private set; }
 
         /// <summary>
         /// Detaylı hata mesajı.
         /// </summary>
-        public string detayMesaj { get; private set; } = "";
+        public string DetayMesaj { get; private set; } = string.Empty;
 
         /// <summary>
         /// Exception nesnesinden ExceptionLogger oluşturur.
@@ -65,16 +65,18 @@ namespace ArchiX.Library.Diagnostics
         /// <param name="exception">Yakalanan exception nesnesi.</param>
         public ExceptionLogger(Exception exception)
         {
-            stackTrace = exception.StackTrace;
-            helpLink = exception.HelpLink;
-            source = exception.Source;
-            targetSite = exception.TargetSite?.ToString();
-            innerException = exception.InnerException?.ToString();
-            hResult = exception.HResult.ToString();
-            data = exception.Data?.ToString();
-            detayMesaj = exception.Message;
+            ArgumentNullException.ThrowIfNull(exception); // CA1510
 
-            mesaj = HandleException(exception);
+            StackTrace = exception.StackTrace;
+            HelpLink = exception.HelpLink;
+            Source = exception.Source;
+            TargetSite = exception.TargetSite?.ToString();
+            InnerException = exception.InnerException?.ToString();
+            HResult = exception.HResult.ToString();
+            Data = exception.Data?.ToString();
+            DetayMesaj = exception.Message;
+
+            Mesaj = HandleException(exception);
         }
 
         /// <summary>
@@ -87,13 +89,13 @@ namespace ArchiX.Library.Diagnostics
         }
 
         /// <summary>
-        /// Exception detaylarını log dosyasına kaydeder (yorum satırında).
+        /// Exception detaylarını log dosyasına kaydetmek için iskelet metod.
         /// </summary>
-        /// <param name="ex">Yakalanan exception nesnesi.</param>
-        public void LogException(Exception ex)
+        /// <param name="_">Kullanılmayan parametre.</param>
+        public static void LogException(Exception _)
         {
-            // var logMessage = $"[{DateTimeOffset.UtcNow:u}] {ex.GetType()} - {ex.Message}{Environment.NewLine}{ex.StackTrace}{Environment.NewLine}";
-            // File.AppendAllText(_logFilePath ?? "error_log.txt", logMessage);
+            // var logMessage = $"[{DateTimeOffset.UtcNow:u}] {_.GetType()} - {_.Message}{Environment.NewLine}{_.StackTrace}{Environment.NewLine}";
+            // File.AppendAllText("error_log.txt", logMessage);
         }
 
         /// <summary>
@@ -101,7 +103,7 @@ namespace ArchiX.Library.Diagnostics
         /// </summary>
         /// <param name="ex">Yakalanan exception nesnesi.</param>
         /// <returns>Kullanıcıya uygun mesaj.</returns>
-        public string HandleException(Exception ex)
+        private static string HandleException(Exception ex)
         {
             return ex switch
             {
