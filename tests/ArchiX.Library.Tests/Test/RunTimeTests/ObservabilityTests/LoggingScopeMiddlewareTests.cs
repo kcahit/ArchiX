@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.TestHost;
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.RunTimeTests.ObservabilityTests;
+namespace ArchiX.Library.Tests.Test.RunTimeTests.ObservabilityTests;
 
 /// <summary>LoggingScopeMiddleware’in log scope’a trace_id ve span_id eklediğini doğrular.</summary>
 public sealed class LoggingScopeMiddlewareTests : IClassFixture<WebApplicationFactory<Program>>
@@ -16,7 +16,7 @@ public sealed class LoggingScopeMiddlewareTests : IClassFixture<WebApplicationFa
     {
         _factory = factory.WithWebHostBuilder(builder =>
         {
-            builder.UseSolutionRelativeContentRoot("tests/ArchiXTest.ApiWeb");
+            builder.UseSolutionRelativeContentRoot("tests/ArchiX.Library.Tests");
             builder.UseSetting("DOTNET_ENVIRONMENT", "Testing");
 
             // Tracing ve Metrics açık
