@@ -1,54 +1,50 @@
-﻿// File: ArchiX.WebApplication/Pipeline/Mediator.cs
+﻿// File: src/ArchiX.WebApplication/Pipeline/Mediator.cs
+using System.Reflection;
+
 using ArchiX.WebApplication.Abstractions;
+
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiX.WebApplication.Pipeline
 {
-    /// <summary>
-    /// Kayıtlı handler ve davranış zinciri üzerinden istekleri işler.
-    /// </summary>
     public sealed class Mediator : IMediator
     {
-        private static readonly System.Reflection.MethodInfo SendCoreMethod =
-            typeof(Mediator).GetMethod(nameof(SendCore),
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
+        private readonly IServiceProvider _sp;
+        public Mediator(IServiceProvider sp) => _sp = sp;
 
-        private readonly IServiceProvider _serviceProvider;
-
-        public Mediator(IServiceProvider serviceProvider)
+        // IMediator: IRequest<TResponse> imzası → gerçek TRequest türüyle SendCore<TReq,TRes>
+        Task<TResponse> IMediator.SendAsync<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken)
         {
-            ArgumentNullException.ThrowIfNull(serviceProvider);
-            _serviceProvider = serviceProvider;
+            var method = typeof(Mediator).GetMethod(nameof(SendCore), BindingFlags.NonPublic | BindingFlags.Instance)!;
+            var generic = method.MakeGenericMethod(request.GetType(), typeof(TResponse));
+            return (Task<TResponse>)generic.Invoke(this, new object?[] { request, cancellationToken })!;
         }
 
-        public Task<TResponse> SendAsync<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
-        {
-            ArgumentNullException.ThrowIfNull(request);
+        // IMediator: TRequest,TResponse imzası
+        public Task<TResponse> SendAsync<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken = default)
+            where TRequest : IRequest<TResponse>
+            => SendCore<TRequest, TResponse>(request, cancellationToken);
 
-            var method = SendCoreMethod.MakeGenericMethod(request.GetType(), typeof(TResponse));
-            return (Task<TResponse>)method.Invoke(this, [request, cancellationToken])!;
-        }
-
-        private Task<TResponse> SendCore<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
+        // Gerçek yürütme
+        private async Task<TResponse> SendCore<TRequest, TResponse>(TRequest request, CancellationToken ct)
             where TRequest : IRequest<TResponse>
         {
-            var handler =
-                (IRequestHandler<TRequest, TResponse>?)_serviceProvider.GetService(typeof(IRequestHandler<TRequest, TResponse>))
-                ?? throw new InvalidOperationException($"No handler registered for {typeof(TRequest).Name}.");
+            var handlers = _sp.GetServices<IRequestHandler<TRequest, TResponse>>().ToList();
+            if (handlers.Count == 0)
+                throw new InvalidOperationException($"No handler for {typeof(TRequest).Name}");
+            if (handlers.Count > 1)
+                throw new InvalidOperationException($"Multiple handlers for {typeof(TRequest).Name}");
 
-            var behaviors =
-                (IEnumerable<IPipelineBehavior<TRequest, TResponse>>)
-                (_serviceProvider.GetService(typeof(IEnumerable<IPipelineBehavior<TRequest, TResponse>>))
-                 ?? Array.Empty<IPipelineBehavior<TRequest, TResponse>>());
+            var handler = handlers[0];
 
-            RequestHandlerDelegate<TResponse> terminal = _ => handler.HandleAsync(request, cancellationToken);
-
-            foreach (var behavior in behaviors.Reverse())
+            var behaviors = _sp.GetServices<IPipelineBehavior<TRequest, TResponse>>().Reverse().ToList();
+            RequestHandlerDelegate<TResponse> next = t => handler.HandleAsync(request, t);
+            foreach (var b in behaviors)
             {
-                var next = terminal;
-                terminal = token => behavior.HandleAsync(request, next, token);
+                var current = next;
+                next = t => b.HandleAsync(request, current, t);
             }
-
-            return terminal(cancellationToken);
+            return await next(ct).ConfigureAwait(false);
         }
     }
 }
