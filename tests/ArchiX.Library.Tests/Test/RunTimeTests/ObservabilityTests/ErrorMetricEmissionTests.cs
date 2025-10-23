@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.TestHost;
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.RunTimeTests.ObservabilityTests;
+namespace ArchiX.Library.Tests.Test.RunTimeTests.ObservabilityTests;
 
 /// <summary>
 /// ErrorMetric tetiklendikten sonra /metrics çıktısında yayımlandığını doğrular.
@@ -18,7 +18,7 @@ public sealed class ErrorMetricEmissionTests : IClassFixture<WebApplicationFacto
     {
         _factory = factory.WithWebHostBuilder(builder =>
         {
-            builder.UseSolutionRelativeContentRoot("tests/ArchiXTest.ApiWeb"); // içerik kökü düzeltildi
+            builder.UseSolutionRelativeContentRoot("tests/ArchiX.Library.Tests"); // içerik kökü düzeltildi
             builder.UseSetting("DOTNET_ENVIRONMENT", "Testing");
             builder.ConfigureAppConfiguration((_, cfg) =>
             {

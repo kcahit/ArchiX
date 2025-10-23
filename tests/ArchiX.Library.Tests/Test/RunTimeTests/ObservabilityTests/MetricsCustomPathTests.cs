@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.TestHost;
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.RunTimeTests.ObservabilityTests;
+namespace ArchiX.Library.Tests.Test.RunTimeTests.ObservabilityTests;
 
 /// <summary>
 /// Prometheus scraping yolunun konfigürasyonla değiştirilebildiğini doğrular.
@@ -22,7 +22,7 @@ public sealed class MetricsCustomPathTests : IClassFixture<WebApplicationFactory
     {
         _factory = factory.WithWebHostBuilder(builder =>
         {
-            builder.UseSolutionRelativeContentRoot("tests/ArchiXTest.ApiWeb"); // FIX
+            builder.UseSolutionRelativeContentRoot("tests/ArchiX.Library.Tests"); // FIX
 
             builder.UseSetting("DOTNET_ENVIRONMENT", "Testing");
             builder.ConfigureAppConfiguration((_, cfg) =>

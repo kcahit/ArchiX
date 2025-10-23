@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.TestHost;
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.RunTimeTests.ObservabilityTests;
+namespace ArchiX.Library.Tests.Test.RunTimeTests.ObservabilityTests;
 
 /// <summary>Metrics middleware’in route bilgisini etiketlere eklediğini doğrular.</summary>
 public sealed class RequestMetricsRouteLabelTests : IClassFixture<WebApplicationFactory<Program>>
@@ -16,7 +16,7 @@ public sealed class RequestMetricsRouteLabelTests : IClassFixture<WebApplication
     {
         _factory = factory.WithWebHostBuilder(builder =>
         {
-            builder.UseSolutionRelativeContentRoot("tests/ArchiXTest.ApiWeb");
+            builder.UseSolutionRelativeContentRoot("tests/ArchiX.Library.Tests");
             builder.UseSetting("DOTNET_ENVIRONMENT", "Testing");
 
             builder.ConfigureAppConfiguration((_, cfg) =>

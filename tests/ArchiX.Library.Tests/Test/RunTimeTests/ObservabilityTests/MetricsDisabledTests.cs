@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.TestHost;
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.RunTimeTests.ObservabilityTests;
+namespace ArchiX.Library.Tests.Test.RunTimeTests.ObservabilityTests;
 
 /// <summary>
 /// Observability devre dışıyken /metrics’in yayınlanmadığını doğrular.
@@ -18,7 +18,7 @@ public sealed class MetricsDisabledTests : IClassFixture<WebApplicationFactory<P
     {
         _factory = factory.WithWebHostBuilder(builder =>
         {
-            builder.UseSolutionRelativeContentRoot("tests/ArchiXTest.ApiWeb");
+            builder.UseSolutionRelativeContentRoot("tests/ArchiX.Library.Tests");
 
             builder.UseSetting("DOTNET_ENVIRONMENT", "Testing");
             builder.ConfigureAppConfiguration((_, cfg) =>
