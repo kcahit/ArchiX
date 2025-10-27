@@ -5,7 +5,6 @@ var uzantilarArr = new[] { ".cs", ".csproj" };
 var hedefDizin = @"C:\_git\ArchiX\notlarim";
 var dosyaAdi = "proje_kodlari";
 var format = "json";
-int islem = 3;
 
 
 /*
@@ -14,6 +13,8 @@ int islem = 3;
  * islem = 3 : Hem kod dosyalarini oku hem de TreeView olustur
  * 
  */
+int islem = 2;
+
 ProjeKodlariOkuma.DosyaTarayici.DosyaOlustur(kokDizin, uzantilarArr, hedefDizin, dosyaAdi, format,islem);
 //ProjeKodlariOkuma.TreeViewOlustur.TreeViewOlusturMethod(
 //    Path.Combine(hedefDizin, dosyaAdi + "." + format),
