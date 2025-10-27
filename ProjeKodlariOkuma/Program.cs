@@ -1,4 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿
 
 var kokDizin = @"C:\_git\ArchiX\Dev\ArchiX"; 
 var uzantilarArr = new[] { ".cs", ".csproj" };

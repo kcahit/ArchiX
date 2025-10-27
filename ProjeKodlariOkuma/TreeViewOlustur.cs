@@ -1,168 +1,129 @@
-﻿using System.Text;
-using System.Text.Json;
+﻿// File: ProjeKodlariOkuma/TreeViewOlustur.cs
+using System.Text;
 
 namespace ProjeKodlariOkuma
 {
-    internal class TreeViewOlustur
+    /// <summary>
+    /// Kaynak dosyadaki yol listesine göre metin tabanlı ağaç çıktısı üretir.
+    /// Her satır bir yol (örn: ArchiX.Library/Config/ShouldRunDbOps.cs).
+    /// Kök düzey (ilk segment) satırına " (PROJE)" eklenir.
+    /// </summary>
+    internal static class TreeViewOlustur
     {
-        // JSON dizi veya NDJSON satirlarini otomatik algilar
-        internal static void TreeViewOlusturMethod(string kaynakDosyaFullDizin, string hedefDosyaFullDizin)
+        // IDE0300: collection expression kullan.
+        private static readonly char[] PathSeparators = ['\\', '/'];
+
+        /// <summary>
+        /// Kaynak dosyadan yolları okur, hedef dosyaya ASCII ağaç yazar.
+        /// </summary>
+        /// <param name="kaynakDosyaFullDizin">İçinde yollar olan giriş dosyası.</param>
+        /// <param name="hedefDosyaFullDizin">Ağaç çıktısının yazılacağı dosya.</param>
+        public static void Olustur(string kaynakDosyaFullDizin, string hedefDosyaFullDizin)
         {
             ArgumentException.ThrowIfNullOrEmpty(kaynakDosyaFullDizin);
             ArgumentException.ThrowIfNullOrEmpty(hedefDosyaFullDizin);
 
-            if (!File.Exists(kaynakDosyaFullDizin))
+            var lines = File.ReadAllLines(kaynakDosyaFullDizin, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false))
+                            .Select(static l => l.Trim())
+                            .Where(static l => l.Length > 0 && l[0] != '#')
+                            .ToArray();
+
+            // parentKey -> children set
+            var children = new Dictionary<string, SortedSet<string>>(StringComparer.Ordinal);
+            foreach (var line in lines)
             {
-                Console.WriteLine("Uyari: Kaynak dosya yok: " + kaynakDosyaFullDizin);
+                var segments = line.Split(PathSeparators, StringSplitOptions.RemoveEmptyEntries);
+                if (segments.Length == 0)
+                    continue;
+
+                var parent = string.Empty;
+                for (var i = 0; i < segments.Length; i++)
+                {
+                    var name = segments[i];
+                    if (!children.TryGetValue(parent, out var set))
+                    {
+                        set = new SortedSet<string>(StringComparer.Ordinal);
+                        children[parent] = set;
+                    }
+
+                    set.Add(name);
+
+                    parent = parent.Length == 0 ? name : $"{parent}/{name}";
+                }
+            }
+
+            var sb = new StringBuilder();
+            sb.AppendLine("ArchiX.sln");
+
+            if (!children.TryGetValue(string.Empty, out var roots) || roots.Count == 0)
+            {
+                WriteOutput(hedefDosyaFullDizin, sb);
                 return;
             }
 
-            var outDir = Path.GetDirectoryName(hedefDosyaFullDizin);
-            if (!string.IsNullOrEmpty(outDir)) Directory.CreateDirectory(outDir);
-
-            // Kayitlari oku
-            var text = File.ReadAllText(kaynakDosyaFullDizin, new UTF8Encoding(false));
-            var span = text.AsSpan().TrimStart();
-            var recs = new List<(string Proje, string Dizin, string Dosya)>();
-
-            void Add(JsonElement el)
+            var rootList = roots.ToList();
+            for (var i = 0; i < rootList.Count; i++)
             {
-                string proje = GetStr(el, "Proje");
-                string dizin = Normalize(GetStr(el, "Dizin"));
-                string dosya = GetStr(el, "Dosya");
-                if (string.IsNullOrWhiteSpace(dosya) || dosya == "...") return;
-                if (string.IsNullOrWhiteSpace(proje))
-                    proje = InferProjectFromDir(dizin) ?? "UnknownProject";
-                recs.Add((proje, dizin, dosya));
+                var isLast = i == rootList.Count - 1;
+                var root = rootList[i];
+                sb.Append("+-- ").Append(root).AppendLine(" (PROJE)");
+                YazAltAgac(children, root, 1, new List<bool> { isLast }, sb);
             }
 
-            if (span.Length > 0 && span[0] == '[')
+            WriteOutput(hedefDosyaFullDizin, sb);
+        }
+
+        private static void YazAltAgac(
+            Dictionary<string, SortedSet<string>> children,
+            string nodeKey,
+            int level,
+            List<bool> lastFlags,
+            StringBuilder sb)
+        {
+            var key = nodeKey;
+            if (!children.TryGetValue(key, out var set) || set.Count == 0)
+                return;
+
+            var items = set.ToList();
+            for (var i = 0; i < items.Count; i++)
             {
-                using var doc = JsonDocument.Parse(text);
-                foreach (var el in doc.RootElement.EnumerateArray()) Add(el);
+                var child = items[i];
+                var isLast = i == items.Count - 1;
+
+                sb.Append(Prefix(lastFlags))
+                  .Append("+-- ")
+                  .AppendLine(child);
+
+                var childKey = $"{key}/{child}";
+                lastFlags.Add(isLast);
+                YazAltAgac(children, childKey, level + 1, lastFlags, sb);
+                lastFlags.RemoveAt(lastFlags.Count - 1);
             }
-            else
+        }
+
+        private static string Prefix(List<bool> lastFlags)
+        {
+            if (lastFlags.Count == 0)
+                return string.Empty;
+
+            var sb = new StringBuilder(lastFlags.Count * 4);
+            for (var i = 0; i < lastFlags.Count - 1; i++)
             {
-                foreach (var line in text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
-                {
-                    var s = line.Trim();
-                    if (s.Length == 0 || s == "...") continue;
-                    using var doc = JsonDocument.Parse(s);
-                    Add(doc.RootElement);
-                }
-            }
-
-            // Agaci kur
-            const string FILES = "\u0000files";
-            static SortedDictionary<string, object> NewNode()
-                => new SortedDictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-
-            static SortedSet<string> GetFiles(SortedDictionary<string, object> node)
-            {
-                if (!node.TryGetValue(FILES, out var o) || o is not SortedSet<string> set)
-                {
-                    set = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
-                    node[FILES] = set;
-                }
-                return set;
-            }
-
-            var projects = new SortedDictionary<string, SortedDictionary<string, object>>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (var r in recs)
-            {
-                var proj = r.Proje;
-                var relDir = StripPrefixes(r.Dizin, proj);
-                var parts = relDir.Split('/', StringSplitOptions.RemoveEmptyEntries)
-                                  .Where(p => p != "...").ToArray();
-
-                if (!projects.TryGetValue(proj, out var root))
-                    projects[proj] = root = NewNode();
-
-                Insert(root, parts, r.Dosya);
+                sb.Append(lastFlags[i] ? ' ' : '|').Append("   ");
             }
 
-            // Render: tek koku "PROJELER"
-            var sb = new StringBuilder();
-            sb.AppendLine("PROJELER");
+            sb.Append(lastFlags[^1] ? ' ' : '|').Append("   ");
+            return sb.ToString();
+        }
 
-            var projNames = projects.Keys.ToList();
-            for (int i = 0; i < projNames.Count; i++)
-            {
-                var name = projNames[i];
-                bool isLast = i == projNames.Count - 1;
+        private static void WriteOutput(string hedefDosyaFullDizin, StringBuilder sb)
+        {
+            var dir = Path.GetDirectoryName(hedefDosyaFullDizin);
+            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
 
-                sb.AppendLine("+-- " + name + " (PROJE)");
-
-                var childPrefix = isLast ? "    " : "|   ";
-                Render(projects[name], childPrefix, sb);
-            }
-
-            File.WriteAllText(hedefDosyaFullDizin, sb.ToString(), new UTF8Encoding(false));
-            Console.WriteLine("TreeView cikti: " + hedefDosyaFullDizin);
-
-            // ---- helpers ----
-            static string GetStr(JsonElement el, string name)
-                => el.TryGetProperty(name, out var p) && p.ValueKind == JsonValueKind.String ? p.GetString() ?? "" : "";
-
-            static string Normalize(string? p) => (p ?? "").Replace('\\', '/');
-
-            static string? InferProjectFromDir(string dizin)
-            {
-                var parts = Normalize(dizin).Trim('/').Split('/', StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length >= 2 && (parts[0].Equals("src", StringComparison.OrdinalIgnoreCase) ||
-                                          parts[0].Equals("tests", StringComparison.OrdinalIgnoreCase)))
-                    return parts[1];
-                if (parts.Length >= 1 && parts[0].Contains('.')) return parts[0];
-                return parts.Length >= 1 ? parts[0] : null;
-            }
-
-            static string StripPrefixes(string dizin, string proj)
-            {
-                var d = Normalize(dizin);
-                var p1 = $"src/{proj}/";
-                var p2 = $"tests/{proj}/";
-                var p3 = $"{proj}/";
-                if (d.StartsWith(p1, StringComparison.OrdinalIgnoreCase)) return d[p1.Length..];
-                if (d.StartsWith(p2, StringComparison.OrdinalIgnoreCase)) return d[p2.Length..];
-                if (d.StartsWith(p3, StringComparison.OrdinalIgnoreCase)) return d[p3.Length..];
-                return d;
-            }
-
-            static void Insert(SortedDictionary<string, object> node, string[] parts, string file)
-            {
-                if (parts.Length == 0)
-                {
-                    GetFiles(node).Add(file);
-                    return;
-                }
-                var head = parts[0];
-                var tail = parts.Skip(1).ToArray();
-                if (!node.TryGetValue(head, out var child) || child is not SortedDictionary<string, object> d)
-                {
-                    d = NewNode();
-                    node[head] = d;
-                }
-                Insert(d, tail, file);
-            }
-
-            static void Render(SortedDictionary<string, object> node, string prefix, StringBuilder sb)
-            {
-                var dirNames = node.Keys.Where(k => k != FILES).ToList();
-                for (int i = 0; i < dirNames.Count; i++)
-                {
-                    var name = dirNames[i];
-                    bool isLastDir = i == dirNames.Count - 1 && (!node.TryGetValue(FILES, out var f) || ((SortedSet<string>)f).Count == 0);
-                    sb.AppendLine(prefix + "+-- " + name);
-                    Render((SortedDictionary<string, object>)node[name], prefix + (isLastDir ? "    " : "|   "), sb);
-                }
-
-                if (node.TryGetValue(FILES, out var filesObj) && filesObj is SortedSet<string> files)
-                {
-                    foreach (var f in files)
-                        sb.AppendLine(prefix + "+-- " + f);
-                }
-            }
+            using var sw = new StreamWriter(hedefDosyaFullDizin, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            sw.Write(sb.ToString());
         }
     }
 }

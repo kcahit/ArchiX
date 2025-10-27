@@ -17,7 +17,7 @@ namespace ArchiX.WebApplication.Pipeline
         {
             var method = typeof(Mediator).GetMethod(nameof(SendCore), BindingFlags.NonPublic | BindingFlags.Instance)!;
             var generic = method.MakeGenericMethod(request.GetType(), typeof(TResponse));
-            return (Task<TResponse>)generic.Invoke(this, new object?[] { request, cancellationToken })!;
+            return (Task<TResponse>)generic.Invoke(this, [request, cancellationToken])!;
         }
 
         // IMediator: TRequest,TResponse imzası

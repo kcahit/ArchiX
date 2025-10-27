@@ -1,4 +1,4 @@
-﻿// File: ArchiX.WebApplication/Pipeline/ServiceCollectionExtensions.cs
+﻿// File: src/ArchiX.WebApplication/Pipeline/ServiceCollectionExtensions.cs
 using ArchiX.WebApplication.Abstractions;
 using ArchiX.WebApplication.Behaviors;
 
@@ -12,7 +12,7 @@ namespace ArchiX.WebApplication.Pipeline
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// IMediator kaydını ekler.
+        /// <see cref="IMediator"/> kaydını ekler.
         /// </summary>
         public static IServiceCollection AddArchiXMediator(this IServiceCollection services)
         {
@@ -28,6 +28,16 @@ namespace ArchiX.WebApplication.Pipeline
         {
             ArgumentNullException.ThrowIfNull(services);
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+            return services;
+        }
+
+        /// <summary>
+        /// Transaction pipeline davranışını ekler.
+        /// </summary>
+        public static IServiceCollection AddArchiXTransactionPipeline(this IServiceCollection services)
+        {
+            ArgumentNullException.ThrowIfNull(services);
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactionBehavior<,>));
             return services;
         }
     }
