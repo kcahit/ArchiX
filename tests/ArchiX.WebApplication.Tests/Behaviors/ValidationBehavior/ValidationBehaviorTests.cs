@@ -1,5 +1,5 @@
 ﻿// File: tests/ArchiX.WebApplication.Tests/Behaviors/ValidationBehavior/ValidationBehaviorTests.cs
-using ArchiX.WebApplication.Abstractions;
+using ArchiX.WebApplication.Abstractions.Interfaces;
 using ArchiX.WebApplication.Behaviors;
 using ArchiX.WebApplication.Pipeline;
 

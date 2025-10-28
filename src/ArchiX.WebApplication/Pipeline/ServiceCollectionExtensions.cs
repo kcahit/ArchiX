@@ -1,5 +1,6 @@
-﻿// File: src/ArchiX.WebApplication/Pipeline/ServiceCollectionExtensions.cs
-using ArchiX.WebApplication.Abstractions;
+﻿using System.Reflection;
+
+using ArchiX.WebApplication.Abstractions.Interfaces;
 using ArchiX.WebApplication.Behaviors;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -7,36 +8,68 @@ using Microsoft.Extensions.DependencyInjection;
 namespace ArchiX.WebApplication.Pipeline
 {
     /// <summary>
-    /// DI kayıt uzantıları.
+    /// DI kayıtları için yardımcı uzantılar.
     /// </summary>
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// <see cref="IMediator"/> kaydını ekler.
+        /// Belirtilen derlemedeki <see cref="IRequestHandler{TRequest,TResponse}"/> türlerini kaydeder.
         /// </summary>
-        public static IServiceCollection AddArchiXMediator(this IServiceCollection services)
+        public static IServiceCollection AddArchiXHandlersFrom(this IServiceCollection services, Assembly assembly)
         {
-            ArgumentNullException.ThrowIfNull(services);
-            services.AddSingleton<IMediator, Mediator>();
+            _ = assembly ?? throw new ArgumentNullException(nameof(assembly));
+
+            var handlerOpenType = typeof(IRequestHandler<,>);
+            var types = assembly
+                .GetTypes()
+                .Where(t => !t.IsAbstract && !t.IsInterface)
+                .Select(t => new
+                {
+                    Impl = t,
+                    Service = t
+                        .GetInterfaces()
+                        .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == handlerOpenType)
+                })
+                .Where(x => x.Service != null);
+
+            foreach (var t in types)
+            {
+                var exists = services.Any(sd =>
+                    sd.ServiceType == t.Service &&
+                    sd.ImplementationType == t.Impl);
+
+                if (!exists)
+                {
+                    services.AddTransient(t.Service!, t.Impl);
+                }
+            }
+
             return services;
         }
 
         /// <summary>
-        /// Validation pipeline davranışını ekler.
+        /// Authorization davranışını pipeline'a ekler.
+        /// </summary>
+        public static IServiceCollection AddArchiXAuthorizationPipeline(this IServiceCollection services)
+        {
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(AuthorizationBehavior<,>));
+            return services;
+        }
+
+        /// <summary>
+        /// Validation davranışını pipeline'a ekler.
         /// </summary>
         public static IServiceCollection AddArchiXValidationPipeline(this IServiceCollection services)
         {
-            ArgumentNullException.ThrowIfNull(services);
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             return services;
         }
 
         /// <summary>
-        /// Transaction pipeline davranışını ekler.
+        /// Transaction davranışını pipeline'a ekler.
         /// </summary>
         public static IServiceCollection AddArchiXTransactionPipeline(this IServiceCollection services)
         {
-            ArgumentNullException.ThrowIfNull(services);
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactionBehavior<,>));
             return services;
         }

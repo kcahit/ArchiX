@@ -1,36 +1,39 @@
-﻿// File: src/ArchiX.WebApplication/Pipeline/CqrsRegistrationExtensions.cs
-using System.Reflection;
-using ArchiX.WebApplication.Abstractions;
+﻿using ArchiX.WebApplication.Abstractions.Interfaces;
 using ArchiX.WebApplication.Behaviors;
+
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiX.WebApplication.Pipeline
 {
     /// <summary>
-    /// CQRS ve pipeline davranışlarının DI kayıtları.
+    /// CQRS bileşenleri için DI kayıtları.
     /// </summary>
     public static class CqrsRegistrationExtensions
     {
         /// <summary>
-        /// IMediator ve pipeline davranışlarını ekler; verilen assembly’lerden validator’ları tarar.
-        /// Kayıt sırası → dıştan içe: Validation → Transaction → Handler.
+        /// ArchiX CQRS kayıtlarını ekler.
+        /// Pipeline sırası: Authorization → Validation → Transaction.
+        /// IMediator tekil (singleton) kaydedilir.
         /// </summary>
-        public static IServiceCollection AddArchiXCqrs(this IServiceCollection services, params Assembly[] scanAssemblies)
+        public static IServiceCollection AddArchiXCqrs(this IServiceCollection services)
         {
-            ArgumentNullException.ThrowIfNull(services);
-
             services.AddSingleton<IMediator, Mediator>();
 
-            // Kayıt sırası önemlidir: GetServices().Reverse() ile dış sarmal oluyor.
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(AuthorizationBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactionBehavior<,>));
 
-            if (scanAssemblies is { Length: > 0 })
-            {
-                ValidationServiceCollectionExtensions.AddArchiXValidatorsFrom(services, scanAssemblies);
-            }
-
             return services;
+        }
+
+        /// <summary>
+        /// Belirtilen derleme bağlamında CQRS kayıtlarını ekler.
+        /// Not: İstek işleyicileri bu metotta taranmaz; testlerde ayrıca AddArchiXHandlersFrom(assembly) çağrılır.
+        /// </summary>
+        public static IServiceCollection AddArchiXCqrs(this IServiceCollection services, System.Reflection.Assembly assembly)
+        {
+            _ = assembly ?? throw new ArgumentNullException(nameof(assembly));
+            return services.AddArchiXCqrs();
         }
     }
 }

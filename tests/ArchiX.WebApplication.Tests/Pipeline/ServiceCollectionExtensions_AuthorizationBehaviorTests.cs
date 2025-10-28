@@ -1,5 +1,4 @@
-﻿// File: tests/ArchiX.WebApplication.Tests/Pipeline/ServiceCollectionExtensions_TransactionBehaviorTests.cs
-using ArchiX.WebApplication.Abstractions.Interfaces;
+﻿using ArchiX.WebApplication.Abstractions.Interfaces;
 using ArchiX.WebApplication.Behaviors;
 using ArchiX.WebApplication.Pipeline;
 
@@ -10,15 +9,15 @@ using Xunit;
 namespace ArchiX.WebApplication.Tests.Pipeline
 {
     /// <summary>
-    /// 7,0400 — ServiceCollectionExtensions: Transaction davranışı kayıt testleri.
+    /// 7,0500 — ServiceCollectionExtensions: Authorization davranışı kayıt testleri.
     /// </summary>
-    public sealed class ServiceCollectionExtensions_TransactionBehaviorTests
+    public sealed class ServiceCollectionExtensions_AuthorizationBehaviorTests
     {
         [Fact]
-        public void Adds_Only_Transaction_When_Requested()
+        public void Adds_Only_Authorization_When_Requested()
         {
             var s = new ServiceCollection();
-            s.AddArchiXTransactionPipeline();
+            s.AddArchiXAuthorizationPipeline();
 
             var descriptors = s
                 .Where(sd => sd.ServiceType.IsGenericType &&
@@ -26,13 +25,14 @@ namespace ArchiX.WebApplication.Tests.Pipeline
                 .ToArray();
 
             Assert.Single(descriptors);
-            Assert.Equal(typeof(TransactionBehavior<,>), descriptors[0].ImplementationType);
+            Assert.Equal(typeof(AuthorizationBehavior<,>), descriptors[0].ImplementationType);
         }
 
         [Fact]
-        public void Adds_Validation_Then_Transaction_In_Order()
+        public void Adds_Authorization_Then_Validation_Then_Transaction_In_Order()
         {
             var s = new ServiceCollection();
+            s.AddArchiXAuthorizationPipeline();
             s.AddArchiXValidationPipeline();
             s.AddArchiXTransactionPipeline();
 
@@ -41,9 +41,10 @@ namespace ArchiX.WebApplication.Tests.Pipeline
                              sd.ServiceType.GetGenericTypeDefinition() == typeof(IPipelineBehavior<,>))
                 .ToArray();
 
-            Assert.Equal(2, descriptors.Length);
-            Assert.Equal(typeof(ValidationBehavior<,>), descriptors[0].ImplementationType);
-            Assert.Equal(typeof(TransactionBehavior<,>), descriptors[1].ImplementationType);
+            Assert.Equal(3, descriptors.Length);
+            Assert.Equal(typeof(AuthorizationBehavior<,>), descriptors[0].ImplementationType);
+            Assert.Equal(typeof(ValidationBehavior<,>), descriptors[1].ImplementationType);
+            Assert.Equal(typeof(TransactionBehavior<,>), descriptors[2].ImplementationType);
         }
     }
 }

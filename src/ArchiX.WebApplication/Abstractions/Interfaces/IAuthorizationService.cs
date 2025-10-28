@@ -1,5 +1,5 @@
 ﻿// File: ArchiX.WebApplication/Abstractions/IAuthorizationService.cs
-namespace ArchiX.WebApplication.Abstractions
+namespace ArchiX.WebApplication.Abstractions.Interfaces
 {
     /// <summary>
     /// Evaluates authorization for the current user against roles, claims, and policies.

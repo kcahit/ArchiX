@@ -1,5 +1,5 @@
 ﻿// File: ArchiX.WebApplication/Abstractions/IMediator.cs
-namespace ArchiX.WebApplication.Abstractions
+namespace ArchiX.WebApplication.Abstractions.Interfaces
 {
     /// <summary>
     /// Uygulama içi istekleri uygun handler ve davranış hattı üzerinden işler.

@@ -1,5 +1,6 @@
 ﻿// File: ArchiX.WebApplication/Behaviors/ValidationBehavior.cs
-using ArchiX.WebApplication.Abstractions;
+using ArchiX.WebApplication.Abstractions.Delegates;
+using ArchiX.WebApplication.Abstractions.Interfaces;
 
 using FluentValidation;
 using FluentValidation.Results;

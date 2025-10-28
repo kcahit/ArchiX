@@ -1,5 +1,6 @@
 ﻿// File: src/ArchiX.WebApplication/Behaviors/TransactionBehavior.cs
-using ArchiX.WebApplication.Abstractions;
+using ArchiX.WebApplication.Abstractions.Delegates;
+using ArchiX.WebApplication.Abstractions.Interfaces;
 
 namespace ArchiX.WebApplication.Behaviors
 {

@@ -1,7 +1,7 @@
 ﻿// File: tests/ArchiX.WebApplication.Tests/Pipeline/MediatorTests.cs
 using System.Reflection;
 
-using ArchiX.WebApplication.Abstractions;
+using ArchiX.WebApplication.Abstractions.Interfaces;
 using ArchiX.WebApplication.Pipeline;
 
 using Microsoft.Extensions.DependencyInjection;

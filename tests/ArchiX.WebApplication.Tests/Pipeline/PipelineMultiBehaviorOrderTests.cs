@@ -1,5 +1,6 @@
 ﻿// File: tests/ArchiX.WebApplication.Tests/Pipeline/PipelineMultiBehaviorOrderTests.cs
-using ArchiX.WebApplication.Abstractions;
+using ArchiX.WebApplication.Abstractions.Delegates;
+using ArchiX.WebApplication.Abstractions.Interfaces;
 using ArchiX.WebApplication.Behaviors;
 using ArchiX.WebApplication.Pipeline;
 

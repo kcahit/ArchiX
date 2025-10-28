@@ -1,5 +1,7 @@
 ﻿// File: ArchiX.WebApplication/Abstractions/IPipelineBehavior.cs
-namespace ArchiX.WebApplication.Abstractions
+using ArchiX.WebApplication.Abstractions.Delegates;
+
+namespace ArchiX.WebApplication.Abstractions.Interfaces
 {
     /// <summary>
     /// İstek işleme hattında, gerçek handler'dan önce/sonra çalışabilen davranış adımı.

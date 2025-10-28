@@ -1,5 +1,5 @@
 ﻿// File: ArchiX.WebApplication/Abstractions/ICurrentUser.cs
-namespace ArchiX.WebApplication.Abstractions
+namespace ArchiX.WebApplication.Abstractions.Interfaces
 {
     /// <summary>
     /// Provides information about the currently authenticated user.
@@ -24,7 +24,7 @@ namespace ArchiX.WebApplication.Abstractions
         /// <summary>
         /// Gets the roles associated with the current user.
         /// </summary>
-        System.Collections.Generic.IReadOnlyCollection<string> Roles { get; }
+        IReadOnlyCollection<string> Roles { get; }
 
         /// <summary>
         /// Returns true if the user is in the specified role.

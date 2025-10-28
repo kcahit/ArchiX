@@ -1,7 +1,7 @@
 ﻿// File: ArchiX.WebApplication/Pipeline/HandlerRegistrationExtensions.cs
 using System.Reflection;
 
-using ArchiX.WebApplication.Abstractions;
+using ArchiX.WebApplication.Abstractions.Interfaces;
 
 using Microsoft.Extensions.DependencyInjection;
 

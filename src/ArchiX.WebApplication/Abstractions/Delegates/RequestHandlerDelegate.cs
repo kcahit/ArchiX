@@ -1,5 +1,5 @@
 ﻿// File: ArchiX.WebApplication/Abstractions/RequestHandlerDelegate.cs
-namespace ArchiX.WebApplication.Abstractions
+namespace ArchiX.WebApplication.Abstractions.Delegates
 {
     /// <summary>
     /// Pipeline'da bir sonraki adımı temsil eden temsilci.

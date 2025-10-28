@@ -1,5 +1,5 @@
 ﻿// File: ArchiX.WebApplication/Abstractions/IRequest.cs
-namespace ArchiX.WebApplication.Abstractions
+namespace ArchiX.WebApplication.Abstractions.Interfaces
 {
     /// <summary>
     /// Represents a request that produces a response handled by a corresponding handler.

@@ -1,5 +1,5 @@
 ﻿// File: ArchiX.WebApplication/Abstractions/IRequestHandler.cs
-namespace ArchiX.WebApplication.Abstractions
+namespace ArchiX.WebApplication.Abstractions.Interfaces
 {
     /// <summary>
     /// Handles a given <see cref="IRequest{TResponse}"/> and produces a response.

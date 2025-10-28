@@ -1,8 +1,8 @@
-﻿// File: tests/ArchiX.WebApplication.Tests/Pipeline/CqrsRegistrationExtensionsTests.cs
-using ArchiX.WebApplication.Abstractions;
+﻿using ArchiX.WebApplication.Abstractions.Interfaces;
 using ArchiX.WebApplication.Behaviors;
 using ArchiX.WebApplication.Pipeline;
-using ArchiX.WebApplication.Tests.Behaviors.TransactionBehavior; // FakeUnitOfWork
+using ArchiX.WebApplication.Tests.Behaviors.AuthorizationBehavior; // FakeAuthorizationService
+using ArchiX.WebApplication.Tests.Behaviors.TransactionBehavior;   // FakeUnitOfWork
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -23,7 +23,8 @@ namespace ArchiX.WebApplication.Tests.Pipeline
         public async Task AddArchiXCqrs_Composes_And_Resolves_Mediator()
         {
             var s = new ServiceCollection();
-            s.AddSingleton<IUnitOfWork, FakeUnitOfWork>();                 // <-- eklendi
+            s.AddSingleton<IUnitOfWork, FakeUnitOfWork>();
+            s.AddSingleton<IAuthorizationService, FakeAuthorizationService>(); // <-- eklendi
             s.AddArchiXCqrs(typeof(CqrsRegistrationExtensionsTests).Assembly);
             s.AddArchiXHandlersFrom(typeof(CqrsRegistrationExtensionsTests).Assembly);
             var sp = s.BuildServiceProvider();
@@ -37,7 +38,7 @@ namespace ArchiX.WebApplication.Tests.Pipeline
         }
 
         [Fact]
-        public void Registers_Validation_then_Transaction_behaviors()
+        public void Registers_Authorization_then_Validation_then_Transaction_behaviors()
         {
             var s = new ServiceCollection();
             s.AddArchiXCqrs();
@@ -47,9 +48,10 @@ namespace ArchiX.WebApplication.Tests.Pipeline
                              sd.ServiceType.GetGenericTypeDefinition() == typeof(IPipelineBehavior<,>))
                 .ToArray();
 
-            Assert.True(descriptors.Length >= 2);
-            Assert.Equal(typeof(ValidationBehavior<,>), descriptors[0].ImplementationType);
-            Assert.Equal(typeof(TransactionBehavior<,>), descriptors[1].ImplementationType);
+            Assert.True(descriptors.Length >= 3);
+            Assert.Equal(typeof(AuthorizationBehavior<,>), descriptors[0].ImplementationType);
+            Assert.Equal(typeof(ValidationBehavior<,>), descriptors[1].ImplementationType);
+            Assert.Equal(typeof(TransactionBehavior<,>), descriptors[2].ImplementationType);
         }
     }
 }

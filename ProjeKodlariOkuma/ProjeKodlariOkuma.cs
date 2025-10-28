@@ -137,8 +137,13 @@ namespace ProjeKodlariOkuma
                 Console.WriteLine("TreeView çıktı: " + treeOut);
             }
 
-            Console.WriteLine("Beklemede. Enter...");
-            Console.ReadLine();
+            //Console.WriteLine("Beklemede. Enter...");
+            //Console.ReadLine();
+
+            Console.WriteLine("Beklemede. Bir tuşa basınca çıkacak...");
+            Console.ReadKey(intercept: true); // herhangi bir tuş
+          //  Environment.Exit(0);              // veya 'return;'
+
         }
 
         private static string ReadAllTextUtf8(string path)

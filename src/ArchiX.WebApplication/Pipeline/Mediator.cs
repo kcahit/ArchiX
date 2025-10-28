@@ -1,7 +1,8 @@
 ﻿// File: src/ArchiX.WebApplication/Pipeline/Mediator.cs
 using System.Reflection;
 
-using ArchiX.WebApplication.Abstractions;
+using ArchiX.WebApplication.Abstractions.Delegates;
+using ArchiX.WebApplication.Abstractions.Interfaces;
 
 using Microsoft.Extensions.DependencyInjection;
 

@@ -1,5 +1,5 @@
 ﻿// File: tests/ArchiX.WebApplication.Tests/Pipeline/PipelineOrderTests.cs
-using ArchiX.WebApplication.Abstractions;
+using ArchiX.WebApplication.Abstractions.Interfaces;
 using ArchiX.WebApplication.Behaviors;
 using ArchiX.WebApplication.Pipeline;
 

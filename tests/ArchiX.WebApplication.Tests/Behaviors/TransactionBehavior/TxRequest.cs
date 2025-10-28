@@ -1,5 +1,5 @@
 ﻿// File: tests/ArchiX.WebApplication.Tests/Behaviors/TransactionBehavior/TxRequest.cs
-using ArchiX.WebApplication.Abstractions;
+using ArchiX.WebApplication.Abstractions.Interfaces;
 
 namespace ArchiX.WebApplication.Tests.Behaviors.TransactionBehavior
 {

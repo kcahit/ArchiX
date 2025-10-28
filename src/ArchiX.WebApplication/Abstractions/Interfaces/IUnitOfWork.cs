@@ -1,5 +1,5 @@
 ﻿// File: src/ArchiX.WebApplication/Abstractions/Persistence/IUnitOfWork.cs
-namespace ArchiX.WebApplication.Abstractions
+namespace ArchiX.WebApplication.Abstractions.Interfaces
 {
     /// <summary>
     /// Uygulama kapsamında işlem birimini temsil eder ve değişiklikleri kalıcılaştırır.
