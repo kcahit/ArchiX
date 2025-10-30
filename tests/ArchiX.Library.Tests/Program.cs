@@ -1,12 +1,12 @@
-﻿extern alias archixlib;
+﻿
 
-using archixlib::ArchiX.Library.Config;
-using archixlib::ArchiX.Library.Context;
-using archixlib::ArchiX.Library.Entities;
-using archixlib::ArchiX.Library.External;
-using archixlib::ArchiX.Library.Infrastructure.Caching;
-using archixlib::ArchiX.Library.Infrastructure.DomainEvents;
-using archixlib::ArchiX.Library.Infrastructure.Http;
+using ArchiX.Library.Config;
+using ArchiX.Library.Context;
+using ArchiX.Library.Entities;
+using ArchiX.Library.External;
+using ArchiX.Library.Infrastructure.Caching;
+using ArchiX.Library.Infrastructure.DomainEvents;
+using ArchiX.Library.Infrastructure.Http;
 
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Data.SqlClient;

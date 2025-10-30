@@ -6,7 +6,7 @@ class Program
     {
         var kokDizin = @"C:\_git\ArchiX\Dev\ArchiX";
         var uzantilarArr = new[] { ".cs", ".csproj" };
-        var hedefDizin = @"C:\_git\ArchiX\notlarim";
+        var hedefDizin = @"C:\_git\ArchiX\notlarim\Ciktilar";
         var dosyaAdi = "proje_kodlari";
         var format = "ndjson";
 

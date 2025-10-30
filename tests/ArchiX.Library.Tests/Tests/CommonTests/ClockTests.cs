@@ -3,7 +3,7 @@ using ArchiX.Library.Time;
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.CommonTests
+namespace ArchiX.Library.Tests.Tests.CommonTests
 {
     /// <summary>
     /// Saat sağlayıcı testleri.

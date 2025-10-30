@@ -39,7 +39,7 @@
 
 	<ItemGroup>
 		<!-- Alias EKLENDİ -->
-		<ProjectReference Include="..\..\src\ArchiX.Library\ArchiX.Library.csproj" Aliases="archixlib" />
+		<ProjectReference Include="..\..\src\ArchiX.Library\ArchiX.Library.csproj" />
 	</ItemGroup>
 
 	<!-- Scoped CSS dosyalarını hariç tut (BLAZOR102 çözümü) -->
