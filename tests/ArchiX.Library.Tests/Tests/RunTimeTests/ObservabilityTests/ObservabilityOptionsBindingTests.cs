@@ -2,7 +2,7 @@
 
 using Xunit;
 
-namespace ArchiX.Library.Tests.Test.RunTimeTests.ObservabilityTests;
+namespace ArchiX.Library.Tests.Tests.RunTimeTests.ObservabilityTests;
 
 /// <summary>
 /// ObservabilityOptions yapılandırma bağlamayı doğrular.

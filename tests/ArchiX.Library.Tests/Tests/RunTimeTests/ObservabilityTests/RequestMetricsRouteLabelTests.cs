@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.TestHost;
 
 using Xunit;
 
-namespace ArchiX.Library.Tests.Test.RunTimeTests.ObservabilityTests;
+namespace ArchiX.Library.Tests.Tests.RunTimeTests.ObservabilityTests;
 
 /// <summary>Metrics middleware’in route bilgisini etiketlere eklediğini doğrular.</summary>
 public sealed class RequestMetricsRouteLabelTests : IClassFixture<WebApplicationFactory<Program>>

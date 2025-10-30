@@ -1,48 +1,35 @@
-﻿// File: tests/ArchiXTest.ApiWeb/Test/InfrastructureTests/CacheServicePolicyIntegrationTests.cs
-using ArchiX.Library.Infrastructure.Caching;
+﻿using ArchiX.Library.Infrastructure.Caching;
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.InfrastructureTests
+namespace ArchiX.Library.Tests.Test.InfrastructureTests
 {
     /// <summary>
     /// <see cref="ICacheService"/> ile <see cref="ICacheKeyPolicy"/> birlikte kullanıldığında
-    /// anahtar üretimi ve temel cache işlemlerinin beklendiği gibi çalıştığını doğrulayan testler.
+    /// anahtar üretimi ve temel cache işlemlerinin beklendiği gibi çalıştığını doğrular.
     /// </summary>
     public sealed class CacheServicePolicyIntegrationTests
     {
         /// <summary>
-        /// Testlerde kullanılacak minimal servis sağlayıcıyı oluşturur:
-        /// - In-memory IDistributedCache
-        /// - RedisSerializationOptions (opsiyonel özelleştirilebilir)
-        /// - RedisCacheService (hem kendisi hem de ICacheService olarak kaydedilir)
+        /// In-memory IDistributedCache + RedisSerializationOptions + RedisCacheService kurar.
         /// </summary>
-        /// <param name="configureSerialization">Serileştirme ayarlarını özelleştirme temsilcisi.</param>
         private static ServiceProvider CreateServiceProvider(Action<RedisSerializationOptions>? configureSerialization = null)
         {
             var services = new ServiceCollection();
 
-            // Gerçek Redis yerine in-memory IDistributedCache kullanıyoruz.
             services.AddDistributedMemoryCache();
 
-            // Serileştirme ayarları (açıkça RedisSerializationOptions overload'ını seçiyoruz → CS0121 engellenir)
             if (configureSerialization is null)
                 services.AddArchiXRedisSerialization((RedisSerializationOptions _) => { });
             else
                 services.AddArchiXRedisSerialization(configureSerialization);
 
-            // Uygulama içinde ICacheService olarak kullanılsın; testlerde CA1859 uyarısını önlemek için
-            // aynı implementasyonu kendisi olarak da kaydediyoruz.
             services.AddSingleton<RedisCacheService>();
             services.AddSingleton<ICacheService>(sp => sp.GetRequiredService<RedisCacheService>());
 
             return services.BuildServiceProvider();
         }
 
-        /// <summary>
-        /// Set ardından Get ile aynı DTO’nun döndüğü ve policy’nin ürettiği
-        /// anahtarın sorunsuz çalıştığı doğrulanır.
-        /// </summary>
         [Fact]
         public async Task Set_Then_Get_Roundtrips_With_PolicyKey()
         {
@@ -69,9 +56,6 @@ namespace ArchiXTest.ApiWeb.Test.InfrastructureTests
             Assert.Equal(dto.Age, back.Age);
         }
 
-        /// <summary>
-        /// GetOrSetAsync değeri yalnızca bir kez hesaplar, sonraki çağrılarda cache’i kullanır.
-        /// </summary>
         [Fact]
         public async Task GetOrSet_Computes_Once_Then_Uses_Cache()
         {
@@ -86,7 +70,7 @@ namespace ArchiXTest.ApiWeb.Test.InfrastructureTests
             var v1 = await cache.GetOrSetAsync(
                 key,
                 async ct => { Interlocked.Increment(ref calls); await Task.Yield(); return "value"; },
-                absoluteExpiration: TimeSpan.FromMinutes(2));
+                absoluteTtl: TimeSpan.FromMinutes(2));
 
             var v2 = await cache.GetOrSetAsync(
                 key,
@@ -97,9 +81,6 @@ namespace ArchiXTest.ApiWeb.Test.InfrastructureTests
             Assert.Equal(1, calls);
         }
 
-        /// <summary>
-        /// Exists ve Remove davranışları policy ile üretilen anahtar üzerinde doğrulanır.
-        /// </summary>
         [Fact]
         public async Task Exists_And_Remove_Work_As_Expected_With_PolicyKey()
         {
@@ -117,10 +98,6 @@ namespace ArchiXTest.ApiWeb.Test.InfrastructureTests
             Assert.False(await cache.ExistsAsync(key));
         }
 
-        /// <summary>
-        /// Serileştirme ayarlarının (ör: camelCase) korunduğu doğrulanır.
-        /// Bu test, yalnızca serileştirme kurgusunun özelleştirilebildiğini ispatlar.
-        /// </summary>
         [Fact]
         public async Task Serialization_Respects_Custom_Options()
         {
@@ -144,7 +121,6 @@ namespace ArchiXTest.ApiWeb.Test.InfrastructureTests
             Assert.Equal(41, back.Age);
         }
 
-        /// <summary>Testlerde kullanılacak örnek DTO.</summary>
         private sealed record SampleDto(string FirstName, string LastName, int Age);
     }
 }

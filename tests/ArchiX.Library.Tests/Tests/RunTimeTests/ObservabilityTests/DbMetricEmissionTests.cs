@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.TestHost;
 
 using Xunit;
 
-namespace ArchiX.Library.Tests.Test.RunTimeTests.ObservabilityTests;
+namespace ArchiX.Library.Tests.Tests.RunTimeTests.ObservabilityTests;
 public sealed class DbMetricEmissionTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly WebApplicationFactory<Program> _factory;
