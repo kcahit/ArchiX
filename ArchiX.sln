@@ -5,9 +5,20 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiX.Library", "src\ArchiX.Library\ArchiX.Library.csproj", "{E5F6ECDF-3DC2-4FE2-AF91-48A7803A452B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiXTest.ApiWeb", "tests\ArchiXTest.ApiWeb\ArchiXTest.ApiWeb.csproj", "{36C68984-B5B2-4C6C-AA6B-D6210AFBF11F}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiX.Library.Tests", "tests\ArchiX.Library.Tests\ArchiX.Library.Tests.csproj", "{72F1692E-9433-1DDE-9678-61F44BE17909}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiX.WebApplication", "src\ArchiX.WebApplication\ArchiX.WebApplication.csproj", "{B4182278-9544-3116-EF0D-57C669137825}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiX.WebApplication.Tests", "tests\ArchiX.WebApplication.Tests\ArchiX.WebApplication.Tests.csproj", "{84A0DDC8-C0F7-4E92-A7B2-28D4C0803077}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjeKodlariOkuma", "ProjeKodlariOkuma\ProjeKodlariOkuma.csproj", "{CC54EF0D-DE98-4F6E-8493-11A0044C7945}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OtherProjects", "OtherProjects", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,13 +30,28 @@ Global
 		{E5F6ECDF-3DC2-4FE2-AF91-48A7803A452B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E5F6ECDF-3DC2-4FE2-AF91-48A7803A452B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E5F6ECDF-3DC2-4FE2-AF91-48A7803A452B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{36C68984-B5B2-4C6C-AA6B-D6210AFBF11F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{36C68984-B5B2-4C6C-AA6B-D6210AFBF11F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{36C68984-B5B2-4C6C-AA6B-D6210AFBF11F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{36C68984-B5B2-4C6C-AA6B-D6210AFBF11F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72F1692E-9433-1DDE-9678-61F44BE17909}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72F1692E-9433-1DDE-9678-61F44BE17909}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72F1692E-9433-1DDE-9678-61F44BE17909}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72F1692E-9433-1DDE-9678-61F44BE17909}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4182278-9544-3116-EF0D-57C669137825}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4182278-9544-3116-EF0D-57C669137825}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4182278-9544-3116-EF0D-57C669137825}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4182278-9544-3116-EF0D-57C669137825}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84A0DDC8-C0F7-4E92-A7B2-28D4C0803077}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84A0DDC8-C0F7-4E92-A7B2-28D4C0803077}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84A0DDC8-C0F7-4E92-A7B2-28D4C0803077}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84A0DDC8-C0F7-4E92-A7B2-28D4C0803077}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC54EF0D-DE98-4F6E-8493-11A0044C7945}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC54EF0D-DE98-4F6E-8493-11A0044C7945}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC54EF0D-DE98-4F6E-8493-11A0044C7945}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC54EF0D-DE98-4F6E-8493-11A0044C7945}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{CC54EF0D-DE98-4F6E-8493-11A0044C7945} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9D88D58C-C42B-40AC-80B1-026D2370BB00}

@@ -251,6 +251,17 @@ dotnet_diagnostic.IDE0063.severity = none      # Simple using statement
 dotnet_diagnostic.IDE0130.severity = error	   # Namespace klasör yapısına uymalı (zorunlu)
 dotnet_diagnostic.IDE0290.severity = none      # Primary constructor style
 
+# XML doc uyarılarını kapat
+dotnet_diagnostic.CS1591.severity = none  # Missing XML comment
+dotnet_diagnostic.CS1573.severity = none  # Parametre için eksik doc
+dotnet_diagnostic.CS1572.severity = none  # Geçersiz XML doc
+dotnet_diagnostic.CS1574.severity = none  # Geçersiz cref
+dotnet_diagnostic.CS1580.severity = none  # Invalid cref param
+dotnet_diagnostic.CS1581.severity = none  # Invalid cref param sayısı
+dotnet_diagnostic.CS1584.severity = none  # XML doc iç içe etiket hatası
+dotnet_diagnostic.CS1587.severity = none  # Geçersiz yerde XML doc
+dotnet_diagnostic.CS1712.severity = none  # Generic type param doc eksik
+
 # Varsayılan: CA1859 açık (uyarı)
 [*.cs]
 dotnet_diagnostic.CA1859.severity = warning
