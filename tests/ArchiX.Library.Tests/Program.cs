@@ -76,6 +76,10 @@ if (obsEnabled && metricsEnabled)
 app.UseMiddleware<LoggingScopeMiddleware>();
 app.UseMiddleware<RequestMetricsMiddleware>();
 
+app.UseMiddleware<CorrelationMiddleware>();
+app.UseMiddleware<LoggingScopeMiddleware>();
+app.UseMiddleware<RequestMetricsMiddleware>();
+
 app.UseRouting();
 
 app.MapControllers();
