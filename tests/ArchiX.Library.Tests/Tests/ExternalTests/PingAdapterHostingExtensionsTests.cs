@@ -1,4 +1,4 @@
-﻿// File: tests/ArchiXTest.ApiWeb/Test/ExternalTests/PingAdapterHostingExtensionsTests.cs
+﻿// File: tests/ArchiX.Library.Tests.Tests.ExternalTests/PingAdapterHostingExtensionsTests.cs
 #nullable enable
 using ArchiX.Library.External;
 
@@ -7,7 +7,8 @@ using Microsoft.Extensions.Options;
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.ExternalTests
+namespace ArchiX.Library.Tests.Tests.ExternalTests
+
 {
     /// <summary>AddPingAdapterWithHealthCheck uzantısı için kayıt testleri.</summary>
     public sealed class PingAdapterHostingExtensionsTests

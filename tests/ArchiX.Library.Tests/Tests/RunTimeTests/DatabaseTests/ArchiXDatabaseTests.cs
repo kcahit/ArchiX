@@ -2,7 +2,7 @@
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.RunTimeTests.DatabaseTests
+namespace ArchiX.Library.Tests.Tests.RunTimeTests.DatabaseTests
 {
     /// <summary>
     /// ArchiXDatabase dış yüzü için temel akış testleri.

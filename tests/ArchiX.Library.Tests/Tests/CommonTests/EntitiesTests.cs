@@ -2,7 +2,7 @@
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Tests.DomainTests
+namespace ArchiX.Library.Tests.Tests.CommonTests
 {
     public sealed class EntitiesTests
     {

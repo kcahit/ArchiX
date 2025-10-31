@@ -5,17 +5,13 @@ using System.Reflection;
 using ArchiX.Library.Infrastructure.EfCore;
 
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Hosting;
 
-using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
-namespace ArchiX.Library.Runtime.Observability
+namespace ArchiX.Library.Tests.Tests.RunTimeTests.ObservabilityTests
 {
     /// <summary>
     /// Observability servis kayıtları.
@@ -50,7 +46,7 @@ namespace ArchiX.Library.Runtime.Observability
             ArgumentException.ThrowIfNullOrEmpty(meterName);
 
             // Meter tekil olmalı
-            services.TryAddSingleton<Meter>(_ => new Meter(meterName));
+            services.TryAddSingleton(_ => new Meter(meterName));
 
             // Interceptor hem kendisi hem de taban türü ile çözümlenebilsin
             services.TryAddSingleton<DbCommandMetricsInterceptor>();

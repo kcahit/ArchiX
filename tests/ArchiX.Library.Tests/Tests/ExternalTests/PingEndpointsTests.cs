@@ -1,4 +1,4 @@
-﻿// File: tests/ArchiXTest.ApiWeb/Test/ExternalTests/PingEndpointsTests.cs
+﻿// File: tests/ArchiX.Library.Tests.Tests.ExternalTests/PingEndpointsTests.cs
 #nullable enable
 using System.Net;
 
@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.ExternalTests
+namespace ArchiX.Library.Tests.Tests.ExternalTests
 {
     public sealed class PingEndpointsTests(WebApplicationFactory<Program> factory)
         : IClassFixture<WebApplicationFactory<Program>>

@@ -4,7 +4,7 @@ using System.Text;
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.DiagnosticsTests
+namespace ArchiX.Library.Tests.Tests.DiagnosticsTests
 {
     /// <summary>
     /// 11. Test – Dosya/Veri Aktarımları (Export/Import) senaryoları.
@@ -16,8 +16,8 @@ namespace ArchiXTest.ApiWeb.Test.DiagnosticsTests
         {
             var data = new List<ProductDto>
             {
-                new ProductDto { Id = 1, Name = "Kalem", Price = 10.5m },
-                new ProductDto { Id = 2, Name = "Defter", Price = 20m }
+                new() { Id = 1, Name = "Kalem", Price = 10.5m },
+                new() { Id = 2, Name = "Defter", Price = 20m }
             };
 
             var csv = await FakeExportService.ExportToCsvAsync(data);

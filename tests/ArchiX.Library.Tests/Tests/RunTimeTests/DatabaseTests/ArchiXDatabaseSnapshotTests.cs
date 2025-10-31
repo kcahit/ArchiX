@@ -4,7 +4,7 @@ using ArchiX.Library.Runtime.Database.Core;
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.RuntimeTests.DatabaseTests
+namespace ArchiX.Library.Tests.Tests.RuntimeTests.DatabaseTests
 {
     /// <summary>
     /// Create çağrısı sonrası snapshot loglarının yazıldığını doğrular.

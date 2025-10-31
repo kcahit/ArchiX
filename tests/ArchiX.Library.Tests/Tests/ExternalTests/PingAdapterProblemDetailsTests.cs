@@ -1,4 +1,4 @@
-﻿// File: tests/ArchiXTest.ApiWeb/Test/ExternalTests/PingAdapterProblemDetailsTests.cs
+﻿// File: tests/ArchiX.Library.Tests.Tests.ExternalTests/PingAdapterProblemDetailsTests.cs
 #nullable enable
 using System.Net;
 using System.Text;
@@ -9,7 +9,8 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.ExternalTests
+namespace ArchiX.Library.Tests.Tests.ExternalTests
+
 {
     /// <summary>PingAdapter’ın RFC7807 ProblemDetails okuma davranışı.</summary>
     public sealed class PingAdapterProblemDetailsTests

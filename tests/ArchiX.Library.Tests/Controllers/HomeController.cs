@@ -1,10 +1,10 @@
 using System.Diagnostics;
 
-using ArchiXTest.ApiWeb.Models;
+using ArchiX.Library.Tests.Models;
 
 using Microsoft.AspNetCore.Mvc;
 
-namespace ArchiXTest.ApiWeb.Controllers
+namespace ArchiX.Library.Tests.Controllers
 {
     public class HomeController : Controller
     {

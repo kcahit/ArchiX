@@ -2,7 +2,7 @@
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.DiagnosticsTests
+namespace ArchiX.Library.Tests.Tests.DiagnosticsTests
 {
     public sealed class CorrelationTests
     {

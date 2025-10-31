@@ -1,4 +1,4 @@
-﻿// File: tests/ArchiXTest.ApiWeb/Test/ExternalTests/ProblemDetailsReaderTests.cs
+﻿// File: tests/rchiX.Library.Tests.Tests.ExternalTests/ProblemDetailsReaderTests.cs
 #nullable enable
 using System.Net;
 using System.Text;
@@ -7,7 +7,7 @@ using ArchiX.Library.Infrastructure.Http;
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.ExternalTests
+namespace ArchiX.Library.Tests.Tests.ExternalTests
 {
     /// <summary>ProblemDetailsReader davranış testleri.</summary>
     public sealed class ProblemDetailsReaderTests

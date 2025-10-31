@@ -1,4 +1,4 @@
-﻿// File: tests/ArchiXTest.ApiWeb/Test/ExternalTests/PingHealthCheckTests.cs
+﻿// File: tests/ ArchiX.Library.Tests.Tests.ExternalTests/PingHealthCheckTests.cs
 #nullable enable
 using ArchiX.Library.External;
 
@@ -6,7 +6,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.ExternalTests
+namespace ArchiX.Library.Tests.Tests.ExternalTests
 {
     public sealed class PingHealthCheckTests
     {

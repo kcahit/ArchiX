@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.TestHost;
 using Xunit;
 
 namespace ArchiX.Library.Tests.Tests.RunTimeTests.ObservabilityTests;
+
 public sealed class DbMetricEmissionTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly WebApplicationFactory<Program> _factory;
@@ -36,7 +37,9 @@ public sealed class DbMetricEmissionTests : IClassFixture<WebApplicationFactory<
     {
         var client = _factory.CreateClient();
 
-        DbMetric.Record(op: "seed", elapsedMs: 12.3, success: true);
+        // 🔑 DbMetric artık statik değil, DI’dan resolve et
+        var dbMetric = _factory.Services.GetRequiredService<DbMetric>();
+        dbMetric.Record(op: "seed", elapsedMs: 12.3, success: true);
 
         var metrics = await client.GetStringAsync("/metrics");
         Assert.Contains("archix_db_ops_total", metrics);

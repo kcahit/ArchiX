@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.CommonTests
+namespace ArchiX.Library.Tests.Tests.CommonTests
 {
     /// <summary>
     /// InMemory DB ile çalışan, test içinden minimal seed yapan sürüm.

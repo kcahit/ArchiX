@@ -1,4 +1,4 @@
-namespace ArchiXTest.ApiWeb.Models
+namespace ArchiX.Library.Tests.Models
 {
     public class ErrorViewModel
     {

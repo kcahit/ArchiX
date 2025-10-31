@@ -1,10 +1,11 @@
-﻿// File: tests/ArchiXTest.ApiWeb/Test/ExternalTests/PingAdapterConfigTests.cs
+﻿// File: tests/ArchiX.Library.Tests.Tests.ExternalTests/PingAdapterConfigTests.cs
 #nullable enable
 using ArchiX.Library.External;
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.ExternalTests
+namespace ArchiX.Library.Tests.Tests.ExternalTests
+
 {
     /// <summary>PingAdapter konfigürasyon bağlama/doğrulama testleri.</summary>
     public sealed class PingAdapterConfigTests

@@ -16,36 +16,30 @@ using OpenTelemetry.Trace;
 
 namespace ArchiX.Library.Runtime.Observability
 {
-    /// <summary>
-    /// Observability servis kayıtları.
-    /// </summary>
     public static class ObservabilityServiceCollectionExtensions
     {
-        /// <summary>
-        /// Varsayılan sayaç adıyla (<c>ArchiX.Library</c>) Meter ve EF komut metrik kesicisini kaydeder.
-        /// Test kolaylığı için.
-        /// </summary>
         public static IServiceCollection AddArchiXObservability(this IServiceCollection services)
             => services.AddArchiXObservability("ArchiX.Library");
 
-        /// <summary>
-        /// Verilen sayaç adıyla <see cref="Meter"/> ve <see cref="DbCommandMetricsInterceptor"/> kaydeder.
-        /// </summary>
         public static IServiceCollection AddArchiXObservability(this IServiceCollection services, string meterName)
         {
             ArgumentNullException.ThrowIfNull(services);
             ArgumentException.ThrowIfNullOrEmpty(meterName);
 
+            // Tek bir Meter instance
             services.TryAddSingleton<Meter>(_ => new Meter(meterName));
+
+            // EF Core interceptor
             services.TryAddSingleton<DbCommandMetricsInterceptor>();
             services.TryAddSingleton<DbCommandInterceptor>(sp => sp.GetRequiredService<DbCommandMetricsInterceptor>());
+
+            // Metrik servisleri
+            services.TryAddSingleton<ErrorMetric>();
+            services.TryAddSingleton<DbMetric>();
 
             return services;
         }
 
-        /// <summary>
-        /// OpenTelemetry metrik ve izleme kayıtlarını yapar. Ayrıca Meter ve EF interceptor’ı ekler.
-        /// </summary>
         public static IServiceCollection AddArchiXObservability(
             this IServiceCollection services,
             IConfiguration configuration,
@@ -54,15 +48,28 @@ namespace ArchiX.Library.Runtime.Observability
             ArgumentNullException.ThrowIfNull(services);
 
             var section = configuration.GetSection("Observability");
+
             var meterName = section.GetValue<string?>("MeterName")
-                             ?? environment.ApplicationName
-                             ?? "ArchiX";
+                ?? environment.ApplicationName
+                ?? "ArchiX";
 
             services.AddArchiXObservability(meterName);
 
             var enableMetrics = section.GetValue("Metrics:Enabled", true);
             var enablePrometheus = section.GetValue("Metrics:Prometheus:Enabled", true);
             var enableTracing = section.GetValue("Tracing:Enabled", true);
+
+            // Scrape path konfigürasyonu (testin kullandığı anahtarlar dahil)
+            // Öncelik: ScrapeEndpointPath → ScrapeEndpoint → Path → "/metrics"
+            var scrapePath =
+                section.GetValue<string?>("Metrics:Prometheus:ScrapeEndpointPath")
+                ?? section.GetValue<string?>("Metrics:Prometheus:ScrapeEndpoint")
+                ?? section.GetValue<string?>("Metrics:Prometheus:Path")
+                ?? section.GetValue<string?>("Metrics:ScrapeEndpoint") // test burayı veriyor
+                ?? "/metrics";
+
+            if (!string.IsNullOrWhiteSpace(scrapePath) && !scrapePath.StartsWith('/'))
+                scrapePath = "/" + scrapePath;
 
             var version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "0.0.0";
 
@@ -76,8 +83,19 @@ namespace ArchiX.Library.Runtime.Observability
                     mb.AddAspNetCoreInstrumentation();
                     mb.AddHttpClientInstrumentation();
                     mb.AddRuntimeInstrumentation();
+
+
+                    // Kritik ekleme: yalnızca bu meter export edilsin
+                    mb.AddMeter(meterName, ArchiXTelemetry.ServiceName);
+
                     if (enablePrometheus)
-                        mb.AddPrometheusExporter(); // endpoint eşleme ayrı sınıfta
+                    {
+                        // Varsayılan /metrics yerine konfigürde edilen özel yol
+                        mb.AddPrometheusExporter(options =>
+                        {
+                            options.ScrapeEndpointPath = scrapePath;
+                        });
+                    }
                 });
             }
 

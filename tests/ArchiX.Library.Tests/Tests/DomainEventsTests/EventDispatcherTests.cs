@@ -3,7 +3,7 @@ using ArchiX.Library.Infrastructure.DomainEvents;
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.DomainEventsTests
+namespace ArchiX.Library.Tests.Tests.DomainEventsTests
 {
     /// <summary>Dispatcher'ın kayıtlı handler'ları çağırdığını doğrular.</summary>
     public class EventDispatcherTests

@@ -1,4 +1,4 @@
-﻿// File: C:\_git\ArchiX\Dev\ArchiX\src\ArchiX.Library\Infrastructure\EFCore\DbCommandMetricsInterceptor.cs
+﻿// File: src/ArchiX.Library/Infrastructure/EFCore/DbCommandMetricsInterceptor.cs
 using System.Collections.Concurrent;
 using System.Data.Common;
 using System.Diagnostics;
@@ -21,9 +21,9 @@ namespace ArchiX.Library.Infrastructure.EfCore
         public DbCommandMetricsInterceptor(Meter meter)
         {
             ArgumentNullException.ThrowIfNull(meter);
-            _total = meter.CreateCounter<long>("archix_db_command_total");
-            _failed = meter.CreateCounter<long>("archix_db_command_failed_total");
-            _durationMs = meter.CreateHistogram<double>("archix_db_command_duration_ms");
+            _total = meter.CreateCounter<long>("archix_db_ops_total");
+            _failed = meter.CreateCounter<long>("archix_db_ops_failed_total");
+            _durationMs = meter.CreateHistogram<double>("archix_db_op_duration_ms");
         }
 
         private void Begin(Guid key) => _startTicks[key] = Stopwatch.GetTimestamp();
@@ -41,8 +41,6 @@ namespace ArchiX.Library.Infrastructure.EfCore
         }
 
         // --- NonQuery ---
-
-        /// <inheritdoc/>
         public override InterceptionResult<int> NonQueryExecuting(
             DbCommand command,
             CommandEventData eventData,
@@ -52,7 +50,6 @@ namespace ArchiX.Library.Infrastructure.EfCore
             return base.NonQueryExecuting(command, eventData, result);
         }
 
-        /// <inheritdoc/>
         public override ValueTask<InterceptionResult<int>> NonQueryExecutingAsync(
             DbCommand command,
             CommandEventData eventData,
@@ -62,7 +59,7 @@ namespace ArchiX.Library.Infrastructure.EfCore
             Begin(eventData.CommandId);
             return base.NonQueryExecutingAsync(command, eventData, result, cancellationToken);
         }
-        /// <inheritdoc/>
+
         public override int NonQueryExecuted(
             DbCommand command,
             CommandExecutedEventData eventData,
@@ -72,7 +69,6 @@ namespace ArchiX.Library.Infrastructure.EfCore
             return base.NonQueryExecuted(command, eventData, result);
         }
 
-        /// <inheritdoc/>
         public override ValueTask<int> NonQueryExecutedAsync(
             DbCommand command,
             CommandExecutedEventData eventData,
@@ -84,7 +80,6 @@ namespace ArchiX.Library.Infrastructure.EfCore
         }
 
         // --- Reader ---
-        /// <inheritdoc/>
         public override InterceptionResult<DbDataReader> ReaderExecuting(
             DbCommand command,
             CommandEventData eventData,
@@ -93,7 +88,7 @@ namespace ArchiX.Library.Infrastructure.EfCore
             Begin(eventData.CommandId);
             return base.ReaderExecuting(command, eventData, result);
         }
-        /// <inheritdoc/>
+
         public override ValueTask<InterceptionResult<DbDataReader>> ReaderExecutingAsync(
             DbCommand command,
             CommandEventData eventData,
@@ -103,7 +98,7 @@ namespace ArchiX.Library.Infrastructure.EfCore
             Begin(eventData.CommandId);
             return base.ReaderExecutingAsync(command, eventData, result, cancellationToken);
         }
-        /// <inheritdoc/>
+
         public override DbDataReader ReaderExecuted(
             DbCommand command,
             CommandExecutedEventData eventData,
@@ -112,7 +107,7 @@ namespace ArchiX.Library.Infrastructure.EfCore
             End(eventData.CommandId, success: true);
             return base.ReaderExecuted(command, eventData, result);
         }
-        /// <inheritdoc/>
+
         public override ValueTask<DbDataReader> ReaderExecutedAsync(
             DbCommand command,
             CommandExecutedEventData eventData,
@@ -124,7 +119,6 @@ namespace ArchiX.Library.Infrastructure.EfCore
         }
 
         // --- Scalar ---
-        /// <inheritdoc/>
         public override InterceptionResult<object> ScalarExecuting(
             DbCommand command,
             CommandEventData eventData,
@@ -134,7 +128,6 @@ namespace ArchiX.Library.Infrastructure.EfCore
             return base.ScalarExecuting(command, eventData, result);
         }
 
-        /// <inheritdoc/>
         public override ValueTask<InterceptionResult<object>> ScalarExecutingAsync(
             DbCommand command,
             CommandEventData eventData,
@@ -145,7 +138,6 @@ namespace ArchiX.Library.Infrastructure.EfCore
             return base.ScalarExecutingAsync(command, eventData, result, cancellationToken);
         }
 
-        /// <inheritdoc/>
         public override object? ScalarExecuted(
             DbCommand command,
             CommandExecutedEventData eventData,
@@ -155,7 +147,6 @@ namespace ArchiX.Library.Infrastructure.EfCore
             return base.ScalarExecuted(command, eventData, result);
         }
 
-        /// <inheritdoc/>
         public override ValueTask<object?> ScalarExecutedAsync(
             DbCommand command,
             CommandExecutedEventData eventData,
@@ -166,9 +157,7 @@ namespace ArchiX.Library.Infrastructure.EfCore
             return base.ScalarExecutedAsync(command, eventData, result, cancellationToken);
         }
 
-        // --- Failures (tek giriş noktası) ---
-
-        /// <inheritdoc/>
+        // --- Failures ---
         public override void CommandFailed(DbCommand command, CommandErrorEventData eventData)
         {
             End(eventData.CommandId, success: false);

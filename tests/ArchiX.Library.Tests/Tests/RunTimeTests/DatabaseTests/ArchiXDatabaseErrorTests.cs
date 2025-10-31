@@ -3,7 +3,7 @@ using ArchiX.Library.Runtime.Database.Core;
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.RuntimeTests.DatabaseTests
+namespace ArchiX.Library.Tests.Tests.RunTimeTests.DatabaseTests
 {
     /// <summary>Hatalı sağlayıcı durumlarında ArchiXDatabase davranışını test eder.</summary>
     public sealed class ArchiXDatabaseErrorTests

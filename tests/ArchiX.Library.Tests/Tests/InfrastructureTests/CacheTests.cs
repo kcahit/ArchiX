@@ -3,7 +3,7 @@ using ArchiX.Library.Infrastructure.Caching;
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.InfrastructureTests
+namespace ArchiX.Library.Tests.Tests.InfrastructureTests
 {
     public class CacheTests
     {

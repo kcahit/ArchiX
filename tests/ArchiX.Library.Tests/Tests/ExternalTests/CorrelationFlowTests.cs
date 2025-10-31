@@ -1,4 +1,4 @@
-﻿// File: tests/ArchiXTest.ApiWeb/Test/ExternalTests/CorrelationFlowTests.cs
+﻿// File: tests/ArchiX.Library.Tests.Tests.ExternalTests/CorrelationFlowTests.cs
 #nullable enable
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.ExternalTests
+namespace ArchiX.Library.Tests.Tests.ExternalTests
 {
     /// <summary>HTTP korelasyon akışı uçtan uca doğrulama.</summary>
     public sealed partial class CorrelationFlowTests(WebApplicationFactory<Program> factory)

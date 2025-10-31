@@ -1,12 +1,12 @@
-﻿
-
-using ArchiX.Library.Config;
+﻿using ArchiX.Library.Config;
 using ArchiX.Library.Context;
 using ArchiX.Library.Entities;
 using ArchiX.Library.External;
 using ArchiX.Library.Infrastructure.Caching;
 using ArchiX.Library.Infrastructure.DomainEvents;
 using ArchiX.Library.Infrastructure.Http;
+using ArchiX.Library.Infrastructure.EfCore;
+using ArchiX.Library.Runtime.Observability;
 
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Data.SqlClient;
@@ -22,14 +22,18 @@ builder.Logging.AddConsole();
 ShouldRunDbOps.Initialize(builder.Configuration);
 
 // DbContext
-builder.Services.AddDbContext<AppDbContext>(opt =>
+builder.Services.AddDbContext<AppDbContext>((sp, opt) =>
 {
-      var cs = builder.Configuration.GetConnectionString("ArchiXDb")
+    var cs = builder.Configuration.GetConnectionString("ArchiXDb")
              ?? throw new InvalidOperationException("ConnectionStrings:ArchiXDb bulunamadı.");
     opt.UseSqlServer(cs)
        .EnableDetailedErrors()
        .EnableSensitiveDataLogging()
        .LogTo(Console.WriteLine, LogLevel.Information);
+
+    // 🔑 Interceptor’ı bağla
+    var interceptor = sp.GetRequiredService<DbCommandMetricsInterceptor>();
+    opt.AddInterceptors(interceptor);
 });
 
 builder.Services.AddControllers();
@@ -47,8 +51,8 @@ if (builder.Environment.IsDevelopment() || builder.Environment.IsEnvironment("Te
 else
     builder.Services.AddPingAdapterWithHealthCheck(builder.Configuration, "ExternalServices:Ping", "external_ping");
 
-// OpenTelemetry kayıtları — UZANTI DEĞİL, STATİK ÇAĞRI
-ArchiX.Library.Runtime.Observability.ObservabilityServiceCollectionExtensions
+// OpenTelemetry kayıtları
+ObservabilityServiceCollectionExtensions
     .AddArchiXObservability(builder.Services, builder.Configuration, builder.Environment);
 
 var app = builder.Build();
@@ -59,13 +63,18 @@ if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Testing"))
     app.UseSwaggerUI();
 }
 
-// /metrics — UZANTI DEĞİL, STATİK ÇAĞRI
-ArchiX.Library.Runtime.Observability.ObservabilityEndpointRouteBuilderExtensions
-    .MapArchiXObservability(app, builder.Configuration);
+// /metrics sadece Observability açıkken
+var obsEnabled = builder.Configuration.GetValue<bool>("Observability:Enabled");
+var metricsEnabled = builder.Configuration.GetValue<bool>("Observability:Metrics:Enabled");
+if (obsEnabled && metricsEnabled)
+{
+    ObservabilityEndpointRouteBuilderExtensions
+        .MapArchiXObservability(app, builder.Configuration);
+}
 
-// Middleware türleri tam adla
-app.UseMiddleware<ArchiX.Library.Infrastructure.Http.LoggingScopeMiddleware>();
-app.UseMiddleware<ArchiX.Library.Infrastructure.Http.RequestMetricsMiddleware>();
+// Middleware
+app.UseMiddleware<LoggingScopeMiddleware>();
+app.UseMiddleware<RequestMetricsMiddleware>();
 
 app.UseRouting();
 
@@ -79,7 +88,7 @@ var allowDbOps = ShouldRunDbOps.IsEnabled();
 if (allowDbOps)
 {
     using var __dbInitAct =
-        ArchiX.Library.Runtime.Observability.ArchiXTelemetry.Activity.StartActivity("DbInit");
+        ArchiXTelemetry.Activity.StartActivity("DbInit");
 
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -101,7 +110,7 @@ if (allowDbOps)
     try
     {
         using var __seedAct =
-            ArchiX.Library.Runtime.Observability.ArchiXTelemetry.Activity.StartActivity("DbSeed");
+            ArchiXTelemetry.Activity.StartActivity("DbSeed");
 
         var preS = await db.Set<Statu>().CountAsync();
         var preF = await db.Set<FilterItem>().IgnoreQueryFilters().CountAsync();
@@ -116,7 +125,7 @@ if (allowDbOps)
         app.Logger.LogInformation("[ArchiX] AFTER Seed  -> Status={S}, FilterItems={F}, LanguagePacks={L}", postS, postF, postL);
 
         using var __testOpsAct =
-            ArchiX.Library.Runtime.Observability.ArchiXTelemetry.Activity.StartActivity("DbTestOps");
+            ArchiXTelemetry.Activity.StartActivity("DbTestOps");
 
         var testCode = "___TEST___:" + Guid.NewGuid().ToString("N");
         var testEntity = new Statu { Code = testCode, Name = testCode, Description = "diag" };
@@ -124,17 +133,16 @@ if (allowDbOps)
         db.Add(testEntity);
         var ins = await db.SaveChangesAsync();
         app.Logger.LogInformation("[ArchiX] TEST INSERT SaveChanges affected: {Count}", ins);
-        __testOpsAct?.SetTag("insert.affected", ins);
 
         db.Remove(testEntity);
         var del = await db.SaveChangesAsync();
         app.Logger.LogInformation("[ArchiX] TEST DELETE SaveChanges affected: {Count}", del);
-        __testOpsAct?.SetTag("delete.affected", del);
     }
     catch (Exception ex)
     {
         app.Logger.LogError(ex, "[ArchiX Seed/Diag ERROR]");
-        ArchiX.Library.Runtime.Observability.ErrorMetric.Record(area: "startup", exceptionName: ex.GetType().Name);
+        var errorMetric = app.Services.GetRequiredService<ErrorMetric>();
+        errorMetric.Record("startup", ex.GetType().Name);
         throw;
     }
 }

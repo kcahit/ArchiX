@@ -7,9 +7,6 @@ using Xunit;
 
 namespace ArchiX.Library.Tests.Tests.RunTimeTests.ObservabilityTests;
 
-/// <summary>
-/// ErrorMetric tetiklendikten sonra /metrics çıktısında yayımlandığını doğrular.
-/// </summary>
 public sealed class ErrorMetricEmissionTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly WebApplicationFactory<Program> _factory;
@@ -18,7 +15,8 @@ public sealed class ErrorMetricEmissionTests : IClassFixture<WebApplicationFacto
     {
         _factory = factory.WithWebHostBuilder(builder =>
         {
-            builder.UseSolutionRelativeContentRoot("tests/ArchiX.Library.Tests"); // içerik kökü düzeltildi
+            builder.UseSolutionRelativeContentRoot("tests/ArchiX.Library.Tests");
+
             builder.UseSetting("DOTNET_ENVIRONMENT", "Testing");
             builder.ConfigureAppConfiguration((_, cfg) =>
             {
@@ -34,15 +32,14 @@ public sealed class ErrorMetricEmissionTests : IClassFixture<WebApplicationFacto
         });
     }
 
-    /// <summary>
-    /// ErrorMetric.Record çağrısı sonrası archix_errors_total metrik adını bekler.
-    /// </summary>
     [Fact]
     public async Task ErrorMetric_Should_Appear_In_Prometheus_Scrape()
     {
         var client = _factory.CreateClient();
 
-        ErrorMetric.Record(area: "test", exceptionName: "Manual");
+        // 🔑 ErrorMetric artık statik değil, DI’dan resolve et
+        var errorMetric = _factory.Services.GetRequiredService<ErrorMetric>();
+        errorMetric.Record("test", "Manual");
 
         var metrics = await client.GetStringAsync("/metrics");
         Assert.Contains("archix_errors_total", metrics);

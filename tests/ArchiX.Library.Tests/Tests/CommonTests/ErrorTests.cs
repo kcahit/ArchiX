@@ -2,7 +2,7 @@
 
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Tests.CommonTests
+namespace ArchiX.Library.Tests.Tests.CommonTests
 {
     public class ErrorTests
     {

@@ -32,7 +32,8 @@ public sealed class MetricsCustomPathTests : IClassFixture<WebApplicationFactory
                     ["Observability:Enabled"] = "true",
                     ["Observability:Metrics:Enabled"] = "true",
                     ["Observability:Metrics:Exporter"] = "prometheus",
-                    ["Observability:Metrics:ScrapeEndpoint"] = "/metricsz"
+                    ["Observability:Metrics:ScrapeEndpoint"] = "/metricsz",
+                    ["Observability:Metrics:Prometheus:ScrapeEndpoint"] = "/metricsz" // ← bunu ekle
                 };
                 cfg.AddInMemoryCollection(inmem!);
             });
@@ -54,3 +55,4 @@ public sealed class MetricsCustomPathTests : IClassFixture<WebApplicationFactory
         Assert.Equal(HttpStatusCode.OK, respCustom.StatusCode);
     }
 }
+
