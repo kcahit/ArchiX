@@ -10,7 +10,7 @@ class Program
         var dosyaAdi = "proje_kodlari";
         var format = "ndjson";
 
-       // JsonDosyaUret.Uret(kokDizin, uzantilarArr, hedefDizin, dosyaAdi, format);
+        // JsonDosyaUret.Uret(kokDizin, uzantilarArr, hedefDizin, dosyaAdi, format);
         JsonDosyaUret_Parcali.Uret(kokDizin, uzantilarArr, hedefDizin, dosyaAdi + "_parcali", format);
 
         Console.WriteLine();

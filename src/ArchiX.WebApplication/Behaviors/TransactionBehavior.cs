@@ -1,6 +1,8 @@
 ﻿// File: src/ArchiX.WebApplication/Behaviors/TransactionBehavior.cs
 using ArchiX.WebApplication.Abstractions.Delegates;
-using ArchiX.Library.Abstractions.Persistence;       // IUnitOfWork
+using ArchiX.WebApplication.Abstractions.Interfaces; // IRequest<>, IPipelineBehavior
+
+using IUnitOfWork = ArchiX.Library.Abstractions.Persistence.IUnitOfWork; // Ambiguity fix
 
 namespace ArchiX.WebApplication.Behaviors
 {
@@ -10,9 +12,8 @@ namespace ArchiX.WebApplication.Behaviors
     /// </summary>
     /// <typeparam name="TRequest">İstek türü.</typeparam>
     /// <typeparam name="TResponse">Yanıt türü.</typeparam>
-    public sealed class TransactionBehavior<TRequest, TResponse>
-        : ArchiX.WebApplication.Abstractions.Interfaces.IPipelineBehavior<TRequest, TResponse>
-        where TRequest : ArchiX.WebApplication.Abstractions.Interfaces.IRequest<TResponse>
+    public sealed class TransactionBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : IRequest<TResponse>
     {
         private readonly IUnitOfWork _unitOfWork;
 

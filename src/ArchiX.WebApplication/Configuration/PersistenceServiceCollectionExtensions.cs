@@ -1,5 +1,6 @@
 ﻿using ArchiX.Library.Abstractions.Persistence;
 using ArchiX.Library.Infrastructure.EfCore;
+
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiX.WebApplication.Configuration

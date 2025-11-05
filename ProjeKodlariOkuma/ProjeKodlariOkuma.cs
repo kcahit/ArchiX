@@ -142,7 +142,7 @@ namespace ProjeKodlariOkuma
 
             Console.WriteLine("Beklemede. Bir tuşa basınca çıkacak...");
             Console.ReadKey(intercept: true); // herhangi bir tuş
-          //  Environment.Exit(0);              // veya 'return;'
+                                              //  Environment.Exit(0);              // veya 'return;'
 
         }
 

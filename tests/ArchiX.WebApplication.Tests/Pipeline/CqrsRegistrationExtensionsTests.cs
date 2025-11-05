@@ -3,11 +3,12 @@ using ArchiX.WebApplication.Behaviors;
 using ArchiX.WebApplication.Pipeline;
 using ArchiX.WebApplication.Tests.Behaviors.AuthorizationBehavior; // FakeAuthorizationService
 using ArchiX.WebApplication.Tests.Behaviors.TransactionBehavior;   // FakeUnitOfWork
-using IUnitOfWork = ArchiX.Library.Abstractions.Persistence.IUnitOfWork; // ← Library sözleşmesine sabitle
 
 using Microsoft.Extensions.DependencyInjection;
 
 using Xunit;
+
+using IUnitOfWork = ArchiX.Library.Abstractions.Persistence.IUnitOfWork; // ← Library sözleşmesine sabitle
 
 namespace ArchiX.WebApplication.Tests.Pipeline
 {

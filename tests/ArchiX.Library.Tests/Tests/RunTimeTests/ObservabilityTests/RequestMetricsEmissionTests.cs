@@ -24,7 +24,7 @@ public sealed class RequestMetricsEmissionTests : IClassFixture<WebApplicationFa
                     ["Observability:Metrics:Enabled"] = "true",
                     ["Observability:Metrics:Exporter"] = "prometheus",
                     ["Observability:Metrics:ScrapeEndpoint"] = "/metrics",
-                    ["Observability:MeterName"] = "ArchiX" 
+                    ["Observability:MeterName"] = "ArchiX"
                 };
                 cfg.AddInMemoryCollection(inmem!);
             });
