@@ -1,11 +1,12 @@
-﻿using ArchiX.Library.Config;
+﻿using ArchiX.Library.Abstractions.Persistence;     // IUnitOfWork
+using ArchiX.Library.Config;
 using ArchiX.Library.Context;
 using ArchiX.Library.Entities;
 using ArchiX.Library.External;
 using ArchiX.Library.Infrastructure.Caching;
 using ArchiX.Library.Infrastructure.DomainEvents;
-using ArchiX.Library.Infrastructure.Http;
 using ArchiX.Library.Infrastructure.EfCore;
+using ArchiX.Library.Infrastructure.Http;
 using ArchiX.Library.Runtime.Observability;
 
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -29,7 +30,7 @@ builder.Services.AddDbContext<AppDbContext>((sp, opt) =>
     opt.UseSqlServer(cs)
        .EnableDetailedErrors()
        .EnableSensitiveDataLogging()
-       .LogTo(Console.WriteLine, LogLevel.Information);
+        .LogTo(Console.WriteLine, LogLevel.Information);
 
     // 🔑 Interceptor’ı bağla
     var interceptor = sp.GetRequiredService<DbCommandMetricsInterceptor>();
@@ -43,6 +44,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddArchiXDomainEvents();
 builder.Services.AddArchiXCacheKeyPolicy();
 builder.Services.AddHttpPolicies(builder.Configuration);
+
+// UoW DI kaydı (scoped)
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // HealthChecks
 var hc = builder.Services.AddHealthChecks();
@@ -72,10 +76,7 @@ if (obsEnabled && metricsEnabled)
         .MapArchiXObservability(app, builder.Configuration);
 }
 
-// Middleware
-app.UseMiddleware<LoggingScopeMiddleware>();
-app.UseMiddleware<RequestMetricsMiddleware>();
-
+// Middleware (tekilleştirilmiş)
 app.UseMiddleware<CorrelationMiddleware>();
 app.UseMiddleware<LoggingScopeMiddleware>();
 app.UseMiddleware<RequestMetricsMiddleware>();
