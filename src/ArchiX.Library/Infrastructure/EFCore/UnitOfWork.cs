@@ -1,4 +1,6 @@
-﻿using ArchiX.Library.Context;
+﻿
+using ArchiX.Library.Abstractions.Persistence;
+using ArchiX.Library.Context;
 
 
 
@@ -26,6 +28,11 @@ namespace ArchiX.Library.Infrastructure.EfCore
         public async Task<int> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync();
+        }
+
+        public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
     }
 }

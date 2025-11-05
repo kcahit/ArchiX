@@ -22,6 +22,14 @@ namespace ArchiX.Library.Entities
         /// </summary>
         public static bool IncludeInSchema => MapToDb;
 
+        // ----------------- Yerleşik Statü Id sabitleri -----------------
+
+        /// <summary>Onaylandı (APR) — varsayılan statü.</summary>
+        public const int ApprovedStatusId = 3;
+
+        /// <summary>Silindi (DEL) — soft-delete için sabit ID. Bu değer sabittir.</summary>
+        public const int DeletedStatusId = 6;
+
         // ----------------- Kimlik -----------------
 
         /// <summary>Benzersiz tamsayı kimlik.</summary>
@@ -47,7 +55,7 @@ namespace ArchiX.Library.Entities
         // ----------------- Statü -----------------
 
         /// <summary>Geçerli statü kimliği (varsayılan: 3 → Approved).</summary>
-        public int StatusId { get; set; } = 3;
+        public int StatusId { get; set; } = ApprovedStatusId;
 
         /// <summary>Statü değişiminin gerçekleştiği tarih (UTC).</summary>
         public DateTimeOffset? LastStatusAt { get; set; }
@@ -82,5 +90,50 @@ namespace ArchiX.Library.Entities
 
         /// <summary>Kuyruktaki tüm domain event'leri temizler (genellikle publish sonrası çağrılır).</summary>
         public void ClearDomainEvents() => _domainEvents.Clear();
+
+        // ----------------- Yaşam Döngüsü Yardımcıları -----------------
+
+        /// <summary>Yeni oluşturulan entity için oluşturma alanlarını ayarlar.</summary>
+        /// <param name="userId">İşlemi yapan kullanıcı.</param>
+        public void MarkCreated(int userId)
+        {
+            CreatedAt = DateTimeOffset.UtcNow;
+            CreatedBy = userId;
+        }
+
+        /// <summary>Güncelleme meta verilerini ayarlar.</summary>
+        /// <param name="userId">İşlemi yapan kullanıcı.</param>
+        public void MarkUpdated(int userId)
+        {
+            UpdatedAt = DateTimeOffset.UtcNow;
+            UpdatedBy = userId;
+        }
+
+        /// <summary>Statüyü değiştirir ve zaman/kullanıcı bilgisini kaydeder.</summary>
+        /// <param name="statusId">Yeni statü Id.</param>
+        /// <param name="userId">İşlemi yapan kullanıcı.</param>
+        public void SetStatus(int statusId, int userId)
+        {
+            StatusId = statusId;
+            LastStatusAt = DateTimeOffset.UtcNow;
+            LastStatusBy = userId;
+        }
+
+        /// <summary>Soft-delete uygular (StatusId = 6/DEL).</summary>
+        /// <param name="userId">İşlemi yapan kullanıcı.</param>
+        public void SoftDelete(int userId) => SetStatus(DeletedStatusId, userId);
+
+        // ----------------- Ctor -----------------
+
+        /// <summary>
+        /// Varsayılan kurucu: CreatedAt’e güvenli başlangıç ataması yapar.
+        /// RowId ataması yapılmaz; DB (NEWSEQUENTIALID) tarafından doldurulur.
+        /// </summary>
+        protected BaseEntity()
+        {
+            // CreatedAt test beklentisini sağlar (<= UtcNow).
+            CreatedAt = DateTimeOffset.UtcNow;
+            // RowId => DB default (NEWSEQUENTIALID), burada atanmaz.
+        }
     }
 }

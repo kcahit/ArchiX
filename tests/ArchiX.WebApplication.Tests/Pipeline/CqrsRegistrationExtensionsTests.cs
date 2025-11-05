@@ -3,6 +3,7 @@ using ArchiX.WebApplication.Behaviors;
 using ArchiX.WebApplication.Pipeline;
 using ArchiX.WebApplication.Tests.Behaviors.AuthorizationBehavior; // FakeAuthorizationService
 using ArchiX.WebApplication.Tests.Behaviors.TransactionBehavior;   // FakeUnitOfWork
+using IUnitOfWork = ArchiX.Library.Abstractions.Persistence.IUnitOfWork; // ← Library sözleşmesine sabitle
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -23,8 +24,8 @@ namespace ArchiX.WebApplication.Tests.Pipeline
         public async Task AddArchiXCqrs_Composes_And_Resolves_Mediator()
         {
             var s = new ServiceCollection();
-            s.AddSingleton<IUnitOfWork, FakeUnitOfWork>();
-            s.AddSingleton<IAuthorizationService, FakeAuthorizationService>(); // <-- eklendi
+            s.AddSingleton<IUnitOfWork, FakeUnitOfWork>();                 // ← Artık Library IUnitOfWork
+            s.AddSingleton<IAuthorizationService, FakeAuthorizationService>();
             s.AddArchiXCqrs(typeof(CqrsRegistrationExtensionsTests).Assembly);
             s.AddArchiXHandlersFrom(typeof(CqrsRegistrationExtensionsTests).Assembly);
             var sp = s.BuildServiceProvider();

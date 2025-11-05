@@ -1,4 +1,5 @@
-﻿using ArchiX.Library.Context;
+﻿using ArchiX.Library.Abstractions.Persistence;
+using ArchiX.Library.Context;
 using ArchiX.Library.Entities;
 
 using Microsoft.EntityFrameworkCore;
@@ -36,12 +37,24 @@ namespace ArchiX.Library.Infrastructure.EfCore
 
         /// <summary>
         /// Belirtilen kimliğe sahip kaydı asenkron olarak getirir.
+        /// Soft-delete edilmiş kayıtlar (BaseEntity.StatusId = 6) dışlanır.
         /// </summary>
         /// <param name="id">Aranacak entity kimliği.</param>
         /// <returns>Entity veya null.</returns>
         public async Task<T?> GetByIdAsync(int id)
         {
-            return await _dbSet.FindAsync(id);
+            IQueryable<T> query = _dbSet;
+
+            // BaseEntity türevlerinde soft-delete’i açıkça hariç tut
+            if (typeof(BaseEntity).IsAssignableFrom(typeof(T)))
+            {
+                query = query.Where(e =>
+                    EF.Property<int>(e, nameof(BaseEntity.StatusId)) != BaseEntity.DeletedStatusId);
+            }
+
+            // Id üzerinden filtrele (LINQ → HasQueryFilter devrede kalır)
+            return await query.FirstOrDefaultAsync(e =>
+                EF.Property<int>(e, nameof(BaseEntity.Id)) == id);
         }
 
         /// <summary>
@@ -51,11 +64,8 @@ namespace ArchiX.Library.Infrastructure.EfCore
         /// <param name="userId">İşlemi yapan kullanıcı kimliği.</param>
         public async Task AddAsync(T entity, int userId)
         {
-            if (entity is BaseEntity baseEntity)
-            {
-                baseEntity.CreatedAt = DateTimeOffset.UtcNow;
-                baseEntity.CreatedBy = userId;
-            }
+            if (entity is BaseEntity be)
+                be.MarkCreated(userId);
 
             await _dbSet.AddAsync(entity);
         }
@@ -67,11 +77,8 @@ namespace ArchiX.Library.Infrastructure.EfCore
         /// <param name="userId">İşlemi yapan kullanıcı kimliği.</param>
         public async Task UpdateAsync(T entity, int userId)
         {
-            if (entity is BaseEntity baseEntity)
-            {
-                baseEntity.UpdatedAt = DateTimeOffset.UtcNow;
-                baseEntity.UpdatedBy = userId;
-            }
+            if (entity is BaseEntity be)
+                be.MarkUpdated(userId);
 
             _dbSet.Update(entity);
             await Task.CompletedTask;
@@ -79,7 +86,7 @@ namespace ArchiX.Library.Infrastructure.EfCore
 
         /// <summary>
         /// Belirtilen kimliğe sahip kaydı siler.
-        /// Eğer entity BaseEntity türevi ise, durum alanlarını da günceller.
+        /// BaseEntity ise soft-delete uygular; değilse fiziksel siler.
         /// </summary>
         /// <param name="id">Silinecek entity kimliği.</param>
         /// <param name="userId">İşlemi yapan kullanıcı kimliği.</param>
@@ -88,14 +95,16 @@ namespace ArchiX.Library.Infrastructure.EfCore
             var entity = await _dbSet.FindAsync(id);
             if (entity == null) return;
 
-            if (entity is BaseEntity baseEntity)
+            if (entity is BaseEntity be)
             {
-                baseEntity.LastStatusAt = DateTimeOffset.UtcNow;
-                baseEntity.LastStatusBy = userId;
-                baseEntity.StatusId = 6; // Deleted
+                // Soft-delete (DEL=6), fiziksel silme yok
+                be.SoftDelete(userId);
+                _dbSet.Update(entity);
             }
-
-            _dbSet.Remove(entity);
+            else
+            {
+                _dbSet.Remove(entity);
+            }
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using ArchiX.Library.Entities;
 
-namespace ArchiX.Library.Infrastructure.EfCore
+namespace ArchiX.Library.Abstractions.Persistence
 {
     /// <summary>
     /// Generic repository arayüzü. Tüm entity’ler için temel CRUD işlemlerini tanımlar.
@@ -36,7 +36,7 @@ namespace ArchiX.Library.Infrastructure.EfCore
         Task UpdateAsync(T entity, int userId);
 
         /// <summary>
-        /// Belirtilen kimliğe sahip kaydı siler.
+        /// Belirtilen kimliğe sahip kaydı siler (soft-delete politikası implementasyona bağlı).
         /// </summary>
         /// <param name="id">Silinecek entity kimliği.</param>
         /// <param name="userId">İşlemi yapan kullanıcı kimliği.</param>

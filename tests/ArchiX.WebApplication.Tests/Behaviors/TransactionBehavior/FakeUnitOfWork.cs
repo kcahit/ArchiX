@@ -1,5 +1,4 @@
-﻿// File: tests/ArchiX.WebApplication.Tests/Behaviors/TransactionBehavior/FakeUnitOfWork.cs
-using ArchiX.WebApplication.Abstractions.Interfaces;
+﻿using ArchiX.Library.Abstractions.Persistence;
 
 namespace ArchiX.WebApplication.Tests.Behaviors.TransactionBehavior
 {
