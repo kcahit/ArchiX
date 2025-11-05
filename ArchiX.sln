@@ -20,12 +20,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjeKodlariOkuma", "ProjeK
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OtherProjects", "OtherProjects", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_Others Documents", "_Others Documents", "{8EE771D2-8995-4CB9-9F8E-28121F68C66C}"
-	ProjectSection(SolutionItems) = preProject
-		..\..\notlarim\Aciklama Proje anlatim dokumanlari\9 numarali is planlari.docx = ..\..\notlarim\Aciklama Proje anlatim dokumanlari\9 numarali is planlari.docx
-		..\..\notlarim\Aciklama Proje anlatim dokumanlari\ArchiX_Proje_hedef_notlar.docx = ..\..\notlarim\Aciklama Proje anlatim dokumanlari\ArchiX_Proje_hedef_notlar.docx
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
