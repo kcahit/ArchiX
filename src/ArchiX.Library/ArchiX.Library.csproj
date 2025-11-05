@@ -63,13 +63,20 @@
 		<PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.13.0-beta.1" />
 	</ItemGroup>
 
-
-
-
-
-
-
 	<ItemGroup>
 		<Folder Include="Infrastructure\Others\" />
+	</ItemGroup>
+
+	<!-- Link OneDrive docs dynamically (no copy into repo) -->
+	<PropertyGroup>
+		<OneDriveDocsRoot>C:\Users\srtsr\OneDrive - ERC GLOBAL\Yazilim\_git\ArchiX\notlarim\Aciklama Proje anlatim dokumanlari</OneDriveDocsRoot>
+	</PropertyGroup>
+
+	<ItemGroup Condition="Exists('$(OneDriveDocsRoot)')">
+		<!-- Include only Word documents; change to **\*.* to include all -->
+		<None Include="$(OneDriveDocsRoot)\**\*.docx">
+			<Link>docs\Aciklama Proje anlatim dokumanlari\%(RecursiveDir)%(FileName)%(Extension)</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 	</ItemGroup>
 </Project>
