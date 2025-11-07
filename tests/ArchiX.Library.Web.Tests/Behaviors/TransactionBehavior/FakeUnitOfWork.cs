@@ -1,6 +1,4 @@
 using ArchiX.Library.Abstractions.Persistence;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace ArchiX.Library.Web.Tests.Behaviors.TransactionBehavior
 {

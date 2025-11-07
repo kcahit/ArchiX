@@ -1,8 +1,9 @@
 using ArchiX.WebApplication.Abstractions.Interfaces;
 using ArchiX.WebApplication.Behaviors;
 using ArchiX.WebApplication.Pipeline;
+
 using Microsoft.Extensions.DependencyInjection;
-using System.Linq;
+
 using Xunit;
 
 namespace ArchiX.Library.Web.Tests.Pipeline

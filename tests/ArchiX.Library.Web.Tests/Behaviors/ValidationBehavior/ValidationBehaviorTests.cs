@@ -1,6 +1,7 @@
-using ArchiX.Library.Web.Behaviors;
 using FluentValidation;
+
 using Microsoft.Extensions.DependencyInjection;
+
 using Xunit;
 
 namespace ArchiX.Library.Web.Tests.Behaviors.ValidationBehavior

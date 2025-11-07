@@ -3,9 +3,9 @@ using ArchiX.WebApplication.Abstractions.Delegates;
 using ArchiX.WebApplication.Abstractions.Interfaces;
 using ArchiX.WebApplication.Behaviors;
 using ArchiX.WebApplication.Pipeline;
+
 using Microsoft.Extensions.DependencyInjection;
-using System.Threading;
-using System.Threading.Tasks;
+
 using Xunit;
 
 namespace ArchiX.Library.Web.Tests.Behaviors.AuthorizationBehavior
@@ -17,6 +17,8 @@ namespace ArchiX.Library.Web.Tests.Behaviors.AuthorizationBehavior
  var services = new ServiceCollection();
  services.AddSingleton<IMediator, Mediator>();
  services.AddSingleton(typeof(IPipelineBehavior<,>), typeof(AuthorizationBehavior<,>));
+ // Ensure an IAuthorizationService is always available so AuthorizationBehavior can be activated by DI
+ services.AddSingleton<IAuthorizationService>(new FakeAuthorizationService { NextResult = true });
  configure?.Invoke(services);
  return services.BuildServiceProvider();
  }

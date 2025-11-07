@@ -1,8 +1,6 @@
 using ArchiX.WebApplication.Behaviors;
+
 using Xunit;
-using System.Threading;
-using System.Threading.Tasks;
-using System;
 
 namespace ArchiX.Library.Web.Tests.Behaviors.TransactionBehavior
 {

@@ -1,6 +1,4 @@
 using ArchiX.WebApplication.Abstractions.Interfaces;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace ArchiX.Library.Web.Tests.Behaviors.AuthorizationBehavior
 {

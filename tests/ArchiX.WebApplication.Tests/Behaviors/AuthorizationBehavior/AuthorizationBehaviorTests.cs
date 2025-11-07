@@ -20,6 +20,8 @@ namespace ArchiX.WebApplication.Tests.Behaviors.AuthorizationBehavior
             var services = new ServiceCollection();
             services.AddSingleton<IMediator, Mediator>();
             services.AddSingleton(typeof(IPipelineBehavior<,>), typeof(AuthorizationBehavior<,>));
+            // Provide a default authorization service so the pipeline behavior can be activated by DI
+            services.AddSingleton<IAuthorizationService>(new FakeAuthorizationService { NextResult = true });
             configure?.Invoke(services);
             return services.BuildServiceProvider();
         }

@@ -1,8 +1,9 @@
 using ArchiX.Library.Web.Behaviors;
+
 using FluentValidation;
+
 using Microsoft.Extensions.DependencyInjection;
-using System.Linq;
-using System.Reflection;
+
 using Xunit;
 
 namespace ArchiX.Library.Web.Tests.Behaviors.ValidatorRegistrationExtensions
