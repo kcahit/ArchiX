@@ -1,6 +1,4 @@
 ﻿// File: src/ArchiX.WebApplication/Mapping/MappingServiceCollectionExtensions.cs
-using AutoMapper;
-
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiX.WebApplication.Mapping
@@ -16,10 +14,8 @@ namespace ArchiX.WebApplication.Mapping
         /// </summary>
         public static IServiceCollection AddApplicationMappings(this IServiceCollection services)
         {
-            var cfg = new MapperConfiguration(c => c.AddProfile(new ApplicationProfile()));
-            services.AddSingleton<IConfigurationProvider>(cfg);
-            services.AddSingleton<IMapper>(sp => new Mapper(cfg, sp.GetService));
-            return services;
+            // Call the shared library implementation explicitly to avoid recursion
+            return ArchiX.Library.Web.Mapping.MappingServiceCollectionExtensions.AddApplicationMappings(services);
         }
     }
 }

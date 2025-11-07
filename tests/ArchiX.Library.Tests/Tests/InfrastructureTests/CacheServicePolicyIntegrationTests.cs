@@ -2,7 +2,7 @@
 
 using Xunit;
 
-namespace ArchiX.Library.Tests.Test.InfrastructureTests
+namespace ArchiX.Library.Tests.Tests.InfrastructureTests
 {
     /// <summary>
     /// <see cref="ICacheService"/> ile <see cref="ICacheKeyPolicy"/> birlikte kullanıldığında

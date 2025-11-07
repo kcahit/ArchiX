@@ -1,5 +1,5 @@
 ﻿// File: src/ArchiX.Library/Context/AppDbContext.cs
-#pragma warning disable CS1591
+
 using System.Reflection;
 
 using ArchiX.Library.Entities;       // BaseEntity, Statu, IEntity
@@ -318,4 +318,3 @@ namespace ArchiX.Library.Context
         }
     }
 }
-#pragma warning restore CS1591
