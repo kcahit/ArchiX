@@ -1,18 +1,9 @@
-﻿// File: src/ArchiX.WebApplication/Mapping/ApplicationProfile.cs
-using AutoMapper;
+using ArchiX.Library.Web.Mapping;
 
 namespace ArchiX.WebApplication.Mapping
 {
-    /// <summary>
-    /// 7,0300 — Mapping Profilleri (AutoMapper).
-    /// </summary>
-    public sealed class ApplicationProfile : Profile
-    {
-        public ApplicationProfile()
-        {
-            // Somut eşlemeleri burada tanımlayacağız.
-            // Örnek:
-            // CreateMap<Domain.Customer, Dto.CustomerDto>().ReverseMap();
-        }
-    }
+ // Forwarding type for compatibility: inherits from shared profile base
+ public sealed class ApplicationProfile : ApplicationProfileBase
+ {
+ }
 }

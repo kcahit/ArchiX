@@ -1,8 +1,12 @@
-﻿using ArchiX.Library.Abstractions.Persistence;
-using ArchiX.Library.Context;
-using ArchiX.Library.Entities;
-
+﻿using System;
+using System.Linq.Expressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+
+using ArchiX.Library.Abstractions.Persistence;
+using ArchiX.Library.Entities;
+using ArchiX.Library.Context;
 
 namespace ArchiX.Library.Infrastructure.EfCore
 {
@@ -15,6 +19,11 @@ namespace ArchiX.Library.Infrastructure.EfCore
     {
         private readonly AppDbContext _context;
         private readonly DbSet<T> _dbSet;
+        private readonly bool _isBaseEntity;
+
+        // Compiled queries are created per-context to avoid cross-model execution errors
+        private readonly Func<AppDbContext, int, T?> _compiledGetById_NoSoftDelete;
+        private readonly Func<AppDbContext, int, T?> _compiledGetById_WithSoftDelete;
 
         /// <summary>
         /// Repository kurucu metodu.
@@ -22,8 +31,18 @@ namespace ArchiX.Library.Infrastructure.EfCore
         /// <param name="context">EF Core DbContext örneği.</param>
         public Repository(AppDbContext context)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _dbSet = context.Set<T>();
+            _isBaseEntity = typeof(BaseEntity).IsAssignableFrom(typeof(T));
+
+            // Compile queries for this context's model
+            _compiledGetById_NoSoftDelete = EF.CompileQuery((AppDbContext ctx, int id) =>
+                ctx.Set<T>().AsNoTracking().FirstOrDefault(e => EF.Property<int>(e, nameof(BaseEntity.Id)) == id));
+
+            _compiledGetById_WithSoftDelete = EF.CompileQuery((AppDbContext ctx, int id) =>
+                ctx.Set<T>().AsNoTracking().FirstOrDefault(e =>
+                    EF.Property<int>(e, nameof(BaseEntity.Id)) == id &&
+                    EF.Property<int>(e, nameof(BaseEntity.StatusId)) != BaseEntity.DeletedStatusId));
         }
 
         /// <summary>
@@ -32,29 +51,42 @@ namespace ArchiX.Library.Infrastructure.EfCore
         /// <returns>Kayıt listesi.</returns>
         public async Task<IEnumerable<T>> GetAllAsync()
         {
-            return await _dbSet.ToListAsync();
+            // Apply recommended read-time optimizations: AsNoTracking by default
+            return await _dbSet.ApplyDefaultReadOptions().ToListAsync().ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Sayfalandırılmış ve projeksiyonlu sorgu.
+        /// </summary>
+        public async Task<List<TResult>> GetPageAsync<TResult>(System.Linq.Expressions.Expression<Func<T, TResult>> selector, int pageNumber, int pageSize, CancellationToken ct = default)
+        {
+            ArgumentNullException.ThrowIfNull(selector);
+            if (pageNumber <1) throw new ArgumentOutOfRangeException(nameof(pageNumber));
+            if (pageSize <1) throw new ArgumentOutOfRangeException(nameof(pageSize));
+
+            var q = _dbSet
+                .ApplyDefaultReadOptions()
+                .Select(selector)
+                .Skip((pageNumber -1) * pageSize)
+                .Take(pageSize);
+
+            return await q.ToListAsync(ct).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Belirtilen kimliğe sahip kaydı asenkron olarak getirir.
-        /// Soft-delete edilmiş kayıtlar (BaseEntity.StatusId = 6) dışlanır.
+        /// Soft-delete edilmiş kayıtlar (BaseEntity.StatusId =6) dışlanır.
         /// </summary>
         /// <param name="id">Aranacak entity kimliği.</param>
         /// <returns>Entity veya null.</returns>
-        public async Task<T?> GetByIdAsync(int id)
+        public Task<T?> GetByIdAsync(int id)
         {
-            IQueryable<T> query = _dbSet;
+            // Use compiled sync query for hot path and return as completed task
+            T? result = _isBaseEntity
+                ? _compiledGetById_WithSoftDelete(_context, id)
+                : _compiledGetById_NoSoftDelete(_context, id);
 
-            // BaseEntity türevlerinde soft-delete’i açıkça hariç tut
-            if (typeof(BaseEntity).IsAssignableFrom(typeof(T)))
-            {
-                query = query.Where(e =>
-                    EF.Property<int>(e, nameof(BaseEntity.StatusId)) != BaseEntity.DeletedStatusId);
-            }
-
-            // Id üzerinden filtrele (LINQ → HasQueryFilter devrede kalır)
-            return await query.FirstOrDefaultAsync(e =>
-                EF.Property<int>(e, nameof(BaseEntity.Id)) == id);
+            return Task.FromResult(result);
         }
 
         /// <summary>
@@ -67,7 +99,7 @@ namespace ArchiX.Library.Infrastructure.EfCore
             if (entity is BaseEntity be)
                 be.MarkCreated(userId);
 
-            await _dbSet.AddAsync(entity);
+            await _dbSet.AddAsync(entity).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -81,7 +113,7 @@ namespace ArchiX.Library.Infrastructure.EfCore
                 be.MarkUpdated(userId);
 
             _dbSet.Update(entity);
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
         }
 
         /// <summary>
@@ -92,7 +124,7 @@ namespace ArchiX.Library.Infrastructure.EfCore
         /// <param name="userId">İşlemi yapan kullanıcı kimliği.</param>
         public async Task DeleteAsync(int id, int userId)
         {
-            var entity = await _dbSet.FindAsync(id);
+            var entity = await _dbSet.FindAsync(id).ConfigureAwait(false);
             if (entity == null) return;
 
             if (entity is BaseEntity be)

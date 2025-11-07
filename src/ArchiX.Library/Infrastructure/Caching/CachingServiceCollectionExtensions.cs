@@ -6,6 +6,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
+using ArchiX.Library.Infrastructure.EfCore;
+using ArchiX.Library.Abstractions.Persistence;
+
 namespace ArchiX.Library.Infrastructure.Caching
 {
     /// <summary>
@@ -22,6 +25,24 @@ namespace ArchiX.Library.Infrastructure.Caching
 
             services.AddMemoryCache();
             services.AddSingleton<ICacheService, MemoryCacheService>();
+            return services;
+        }
+
+        /// <summary>
+        /// Register repository implementations and apply caching decorator (open-generic).
+        /// Registers concrete Repository&lt;T&gt; and resolves IRepository&lt;T&gt; to RepositoryCacheDecorator&lt;T&gt;.
+        /// Requires that an ICacheService is already registered (e.g. via AddArchiXMemoryCaching).
+        /// </summary>
+        public static IServiceCollection AddArchiXRepositoryCaching(this IServiceCollection services)
+        {
+            ArgumentNullException.ThrowIfNull(services);
+
+            // Register concrete repository so decorator can depend on it
+            services.AddScoped(typeof(Repository<>));
+
+            // When IRepository<T> is requested, resolve RepositoryCacheDecorator<T>
+            services.AddScoped(typeof(IRepository<>), typeof(RepositoryCacheDecorator<>));
+
             return services;
         }
 
