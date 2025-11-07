@@ -1,7 +1,5 @@
 ﻿// File: src/ArchiX.WebApplication/Mapping/MappingServiceCollectionExtensions.cs
-using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
-using ArchiX.Library.Web.Mapping;
 
 namespace ArchiX.WebApplication.Mapping
 {
