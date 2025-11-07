@@ -2,7 +2,10 @@
 using ArchiX.WebApplication.Abstractions.Delegates;
 using ArchiX.WebApplication.Abstractions.Interfaces;
 using ArchiX.WebApplication.Behaviors;
-
+using ArchiX.WebApplication.Pipeline;
+using Microsoft.Extensions.DependencyInjection;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace ArchiX.WebApplication.Tests.Behaviors.AuthorizationBehavior
@@ -12,6 +15,62 @@ namespace ArchiX.WebApplication.Tests.Behaviors.AuthorizationBehavior
     /// </summary>
     public sealed class AuthorizationBehaviorTests
     {
+        private static ServiceProvider Build(Action<IServiceCollection>? configure = null)
+        {
+            var services = new ServiceCollection();
+            services.AddSingleton<IMediator, Mediator>();
+            services.AddSingleton(typeof(IPipelineBehavior<,>), typeof(AuthorizationBehavior<,>));
+            configure?.Invoke(services);
+            return services.BuildServiceProvider();
+        }
+
+        [Fact]
+        public async Task No_attribute_allows_request()
+        {
+            var sp = Build(s =>
+            {
+                s.AddTransient<IRequestHandler<NoAuthReq, string>, NoAuthHandler>();
+                // No auth service registered is fine because AuthorizationBehavior won't find attribute
+            });
+
+            var med = sp.GetRequiredService<IMediator>();
+            var res = await med.SendAsync(new NoAuthReq("OK"));
+            Assert.Equal("OK", res);
+        }
+
+        [Fact]
+        public async Task With_policies_and_authorized_allows_request()
+        {
+            var sp = Build(s =>
+            {
+                s.AddTransient<IRequestHandler<ReqWithPolicies, string>, ReqWithPoliciesHandler>();
+                s.AddSingleton<IAuthorizationService>(new FakeAllowingAuthorizationService());
+            });
+
+            var med = sp.GetRequiredService<IMediator>();
+            var res = await med.SendAsync(new ReqWithPolicies("OK"));
+            Assert.Equal("OK", res);
+        }
+
+        [Fact]
+        public async Task With_policies_and_not_authorized_throws()
+        {
+            var sp = Build(s =>
+            {
+                s.AddTransient<IRequestHandler<ReqWithPolicies, string>, ReqWithPoliciesHandler>();
+                s.AddSingleton<IAuthorizationService>(new FakeDenyingAuthorizationService());
+            });
+
+            var med = sp.GetRequiredService<IMediator>();
+            var ex = await Assert.ThrowsAnyAsync<Exception>(() => med.SendAsync(new ReqWithPolicies("X")));
+            // Unwrap TargetInvocationException if present
+            if (ex is System.Reflection.TargetInvocationException tie && tie.InnerException is not null) ex = tie.InnerException;
+            Assert.IsType<UnauthorizedAccessException>(ex);
+            Assert.Contains("ReqWithPolicies", ex.Message);
+            Assert.Contains("P1", ex.Message);
+            Assert.Contains("P2", ex.Message);
+        }
+
         [Fact]
         public async Task Skips_When_No_Attribute()
         {
@@ -72,4 +131,45 @@ namespace ArchiX.WebApplication.Tests.Behaviors.AuthorizationBehavior
     /// <summary>RequireAll=false için ek örnek istek.</summary>
     [Authorize("p1", "p2", RequireAll = false)]
     public sealed record AuthAnyRequest(string Value) : IRequest<string>;
+
+    // No attribute -> should pass through
+    public sealed record NoAuthReq(string Msg) : IRequest<string>;
+    public sealed class NoAuthHandler : IRequestHandler<NoAuthReq, string>
+    {
+        public Task<string> HandleAsync(NoAuthReq request, CancellationToken ct) => Task.FromResult(request.Msg);
+    }
+
+    // Attribute with policies -> used in other tests
+    [Authorize("P1", "P2")]
+    public sealed record ReqWithPolicies(string Msg) : IRequest<string>;
+    public sealed class ReqWithPoliciesHandler : IRequestHandler<ReqWithPolicies, string>
+    {
+        public Task<string> HandleAsync(ReqWithPolicies request, CancellationToken ct) => Task.FromResult(request.Msg);
+    }
+
+    // Fake authorization service that allows
+    internal sealed class FakeAllowingAuthorizationService : IAuthorizationService
+    {
+        // Reflection-targeted method used by AuthorizationBehavior
+        public Task<bool> AuthorizeAsync(System.Collections.Generic.IReadOnlyList<string> policies, bool requireAll, CancellationToken cancellationToken)
+            => Task.FromResult(true);
+
+        // Implement interface members
+        public Task<bool> AuthorizeAsync(string policyName, CancellationToken cancellationToken = default) => Task.FromResult(true);
+        public Task EnsureAuthorizedAsync(string policyName, CancellationToken cancellationToken = default) => Task.CompletedTask;
+        public bool HasRole(string role) => false;
+        public bool HasClaim(string type, string? value = null) => false;
+    }
+
+    // Fake authorization service that denies
+    internal sealed class FakeDenyingAuthorizationService : IAuthorizationService
+    {
+        public Task<bool> AuthorizeAsync(System.Collections.Generic.IReadOnlyList<string> policies, bool requireAll, CancellationToken cancellationToken)
+            => Task.FromResult(false);
+
+        public Task<bool> AuthorizeAsync(string policyName, CancellationToken cancellationToken = default) => Task.FromResult(false);
+        public Task EnsureAuthorizedAsync(string policyName, CancellationToken cancellationToken = default) => throw new UnauthorizedAccessException();
+        public bool HasRole(string role) => false;
+        public bool HasClaim(string type, string? value = null) => false;
+    }
 }
