@@ -1,11 +1,11 @@
-using ArchiX.WebApplication.Abstractions.Authorizations;
-using ArchiX.WebApplication.Abstractions.Delegates;
-using ArchiX.WebApplication.Abstractions.Interfaces;
-using ArchiX.WebApplication.Behaviors;
-using ArchiX.WebApplication.Pipeline;
-
+using ArchiX.Library.Web.Abstractions.Authorizations;
+using ArchiX.Library.Web.Abstractions.Delegates;
+using ArchiX.Library.Web.Abstractions.Interfaces;
+using ArchiX.Library.Web.Behaviors;
+using ArchiX.Library.Web.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
-
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace ArchiX.Library.Web.Tests.Behaviors.AuthorizationBehavior
@@ -61,7 +61,6 @@ namespace ArchiX.Library.Web.Tests.Behaviors.AuthorizationBehavior
 
  var med = sp.GetRequiredService<IMediator>();
  var ex = await Assert.ThrowsAnyAsync<Exception>(() => med.SendAsync(new ReqWithPolicies("X")));
- // Unwrap TargetInvocationException if present
  if (ex is System.Reflection.TargetInvocationException tie && tie.InnerException is not null) ex = tie.InnerException;
  Assert.IsType<UnauthorizedAccessException>(ex);
  Assert.Contains("ReqWithPolicies", ex.Message);

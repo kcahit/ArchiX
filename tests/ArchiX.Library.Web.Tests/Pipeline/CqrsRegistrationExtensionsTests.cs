@@ -1,6 +1,6 @@
-using ArchiX.WebApplication.Abstractions.Interfaces;
-using ArchiX.WebApplication.Behaviors;
-using ArchiX.WebApplication.Pipeline;
+using ArchiX.Library.Web.Abstractions.Interfaces;
+using ArchiX.Library.Web.Behaviors;
+using ArchiX.Library.Web.Pipeline;
 using ArchiX.Library.Web.Tests.Behaviors.AuthorizationBehavior; // FakeAuthorizationService
 using ArchiX.Library.Web.Tests.Behaviors.TransactionBehavior; // FakeUnitOfWork
 using Microsoft.Extensions.DependencyInjection;
@@ -24,7 +24,7 @@ namespace ArchiX.Library.Web.Tests.Pipeline
  s.AddSingleton<IUnitOfWork, FakeUnitOfWork>();
  s.AddSingleton<IAuthorizationService, FakeAuthorizationService>();
  s.AddArchiXCqrs(typeof(CqrsRegistrationExtensionsTests).Assembly);
- s.AddArchiXHandlersFrom(typeof(CqrsRegistrationExtensionsTests).Assembly);
+ HandlerRegistrationExtensions.AddArchiXHandlersFrom(s, typeof(CqrsRegistrationExtensionsTests).Assembly);
  var sp = s.BuildServiceProvider();
 
  var m1 = sp.GetRequiredService<IMediator>();

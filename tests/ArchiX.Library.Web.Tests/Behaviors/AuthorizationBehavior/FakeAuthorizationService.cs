@@ -1,4 +1,6 @@
-using ArchiX.WebApplication.Abstractions.Interfaces;
+using ArchiX.Library.Web.Abstractions.Interfaces;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ArchiX.Library.Web.Tests.Behaviors.AuthorizationBehavior
 {
@@ -25,24 +27,9 @@ namespace ArchiX.Library.Web.Tests.Behaviors.AuthorizationBehavior
  return Task.FromResult(NextResult);
  }
 
- public Task<bool> AuthorizeAsync(string policyName, CancellationToken cancellationToken = default)
- {
- throw new System.NotImplementedException();
- }
-
- public Task EnsureAuthorizedAsync(string policyName, CancellationToken cancellationToken = default)
- {
- throw new System.NotImplementedException();
- }
-
- public bool HasClaim(string type, string? value = null)
- {
- throw new System.NotImplementedException();
- }
-
- public bool HasRole(string role)
- {
- throw new System.NotImplementedException();
- }
+ public Task<bool> AuthorizeAsync(string policyName, CancellationToken cancellationToken = default) => Task.FromResult(NextResult);
+ public Task EnsureAuthorizedAsync(string policyName, CancellationToken cancellationToken = default) => Task.CompletedTask;
+ public bool HasClaim(string type, string? value = null) => false;
+ public bool HasRole(string role) => false;
  }
 }

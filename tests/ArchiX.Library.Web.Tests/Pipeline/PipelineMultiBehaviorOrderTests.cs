@@ -1,7 +1,7 @@
-using ArchiX.WebApplication.Abstractions.Delegates;
-using ArchiX.WebApplication.Abstractions.Interfaces;
-using ArchiX.WebApplication.Behaviors;
-using ArchiX.WebApplication.Pipeline;
+using ArchiX.Library.Web.Abstractions.Delegates;
+using ArchiX.Library.Web.Abstractions.Interfaces;
+using ArchiX.Library.Web.Behaviors;
+using ArchiX.Library.Web.Pipeline;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;

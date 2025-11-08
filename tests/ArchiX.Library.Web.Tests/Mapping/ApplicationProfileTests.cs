@@ -1,4 +1,4 @@
-using ArchiX.WebApplication.Mapping;
+using ArchiX.Library.Web.Mapping;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -11,7 +11,7 @@ namespace ArchiX.Library.Web.Tests.Mapping
  public void ApplicationProfile_Should_Load_Via_DI()
  {
  var services = new ServiceCollection();
- services.AddAutoMapper(typeof(ApplicationProfile).Assembly);
+ services.AddAutoMapper(typeof(ApplicationProfileBase).Assembly);
  var sp = services.BuildServiceProvider();
 
  var mapper = sp.GetRequiredService<IMapper>();
@@ -22,7 +22,7 @@ namespace ArchiX.Library.Web.Tests.Mapping
  public void ApplicationProfile_Config_Should_Be_Valid()
  {
  var services = new ServiceCollection();
- services.AddAutoMapper(typeof(ApplicationProfile).Assembly);
+ services.AddAutoMapper(typeof(ApplicationProfileBase).Assembly);
  var sp = services.BuildServiceProvider();
 
  var cfg = sp.GetRequiredService<IMapper>().ConfigurationProvider;

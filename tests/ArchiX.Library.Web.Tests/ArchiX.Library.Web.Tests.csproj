@@ -15,7 +15,6 @@
  </ItemGroup>
  <ItemGroup>
  <ProjectReference Include="..\..\src\ArchiX.Library.Web\ArchiX.Library.Web.csproj" />
- <ProjectReference Include="..\..\src\ArchiX.WebApplication\ArchiX.WebApplication.csproj" />
  <ProjectReference Include="..\..\src\ArchiX.Library\ArchiX.Library.csproj" />
  </ItemGroup>
 </Project>

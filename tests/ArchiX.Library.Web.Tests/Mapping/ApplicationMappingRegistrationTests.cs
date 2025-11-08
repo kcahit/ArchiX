@@ -1,4 +1,4 @@
-using ArchiX.WebApplication.Mapping;
+using ArchiX.Library.Web.Mapping;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;

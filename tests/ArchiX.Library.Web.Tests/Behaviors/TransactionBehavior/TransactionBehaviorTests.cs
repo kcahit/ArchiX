@@ -1,4 +1,4 @@
-using ArchiX.WebApplication.Behaviors;
+using ArchiX.Library.Web.Behaviors;
 
 using Xunit;
 

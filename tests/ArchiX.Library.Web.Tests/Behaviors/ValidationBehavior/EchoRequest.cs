@@ -1,4 +1,4 @@
-using ArchiX.WebApplication.Abstractions.Interfaces;
+using ArchiX.Library.Web.Abstractions.Interfaces;
 
 namespace ArchiX.Library.Web.Tests.Behaviors.ValidationBehavior
 {

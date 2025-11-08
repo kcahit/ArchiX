@@ -1,13 +1,12 @@
+using System;
 using ArchiX.Library.Abstractions.Persistence;
-using ArchiX.Library.Context;
 using ArchiX.Library.Entities;
 using ArchiX.Library.Infrastructure.Caching;
-using ArchiX.WebApplication;
-
-using Microsoft.EntityFrameworkCore;
+using ArchiX.Library.Web;
 using Microsoft.Extensions.DependencyInjection;
-
 using Xunit;
+using Microsoft.EntityFrameworkCore;
+using ArchiX.Library.Context;
 
 namespace ArchiX.Library.Web.Tests.Tests.DependencyInjection
 {
@@ -22,7 +21,7 @@ namespace ArchiX.Library.Web.Tests.Tests.DependencyInjection
  services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase("di-test-db"));
 
  // Act
- services.AddArchiXWebAppDefaults();
+ services.AddArchiXWebDefaults();
  var sp = services.BuildServiceProvider();
 
  // Assert
