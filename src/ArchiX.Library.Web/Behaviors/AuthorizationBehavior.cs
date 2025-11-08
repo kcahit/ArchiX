@@ -16,7 +16,12 @@ namespace ArchiX.Library.Web.Behaviors
  var attr = typeof(TRequest).GetCustomAttribute<AuthorizeAttribute>(inherit: true);
  if (attr is null || attr.Policies.Count ==0) return await next(cancellationToken).ConfigureAwait(false);
  var authorized = await _authorizationService.AuthorizeAsync(attr.Policies, attr.RequireAll, cancellationToken).ConfigureAwait(false);
- if (!authorized) throw new UnauthorizedAccessException();
+ if (!authorized)
+ {
+ var reqName = typeof(TRequest).Name;
+ var policies = string.Join(", ", attr.Policies);
+ throw new UnauthorizedAccessException($"Attempted to perform an unauthorized operation '{reqName}' requiring policies [{policies}] (RequireAll={attr.RequireAll}).");
+ }
  return await next(cancellationToken).ConfigureAwait(false);
  }
  }
