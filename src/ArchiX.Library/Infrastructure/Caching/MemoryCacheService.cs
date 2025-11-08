@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics.Metrics;
 
+using ArchiX.Library.Abstractions.Caching;
+
 using Microsoft.Extensions.Caching.Memory;
 
 namespace ArchiX.Library.Infrastructure.Caching
@@ -14,6 +16,10 @@ namespace ArchiX.Library.Infrastructure.Caching
         private readonly Counter<long>? _hitCounter;
         private readonly Counter<long>? _missCounter;
         private readonly Counter<long>? _setCounter;
+
+        // Marker to represent a cached null so we can distinguish "no entry" from "cached null".
+        private sealed class NullMarker { }
+        private static readonly NullMarker _nullMarker = new();
 
         /// <summary>
         /// Yeni bir <see cref="MemoryCacheService"/> oluşturur.
@@ -33,6 +39,15 @@ namespace ArchiX.Library.Infrastructure.Caching
             }
         }
 
+        private static MemoryCacheEntryOptions? CreateOptions(TimeSpan? absoluteExpiration, TimeSpan? slidingExpiration)
+        {
+            if (!absoluteExpiration.HasValue && !slidingExpiration.HasValue) return null;
+            var opt = new MemoryCacheEntryOptions();
+            if (absoluteExpiration.HasValue) opt.AbsoluteExpirationRelativeToNow = absoluteExpiration;
+            if (slidingExpiration.HasValue) opt.SlidingExpiration = slidingExpiration;
+            return opt;
+        }
+
         /// <summary>
         /// Anahtardan değeri okur. Yoksa <see langword="default"/> döner.
         /// </summary>
@@ -43,10 +58,16 @@ namespace ArchiX.Library.Infrastructure.Caching
         {
             ArgumentNullException.ThrowIfNull(key);
 
-            if (_cache.TryGetValue(key, out T? value))
+            if (_cache.TryGetValue(key, out object? raw))
             {
+                if (ReferenceEquals(raw, _nullMarker))
+                {
+                    _hitCounter?.Add(1);
+                    return default;
+                }
+
                 _hitCounter?.Add(1);
-                return value;
+                return (T?)raw;
             }
 
             _missCounter?.Add(1);
@@ -64,16 +85,18 @@ namespace ArchiX.Library.Infrastructure.Caching
         {
             ArgumentNullException.ThrowIfNull(key);
 
-            if (ttl.HasValue)
+            if (value == null)
             {
-                _cache.Set(key, value, new MemoryCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow = ttl
-                });
+                // store marker for explicit null
+                var opts = CreateOptions(ttl, null);
+                if (opts != null) _cache.Set(key, _nullMarker, opts);
+                else _cache.Set(key, _nullMarker);
             }
             else
             {
-                _cache.Set(key, value);
+                var opts = CreateOptions(ttl, null);
+                if (opts != null) _cache.Set(key, value, opts);
+                else _cache.Set(key, value);
             }
 
             _setCounter?.Add(1);
@@ -93,28 +116,27 @@ namespace ArchiX.Library.Infrastructure.Caching
             ArgumentNullException.ThrowIfNull(key);
             ArgumentNullException.ThrowIfNull(factory);
 
-            if (_cache.TryGetValue(key, out T? cached))
+            if (_cache.TryGetValue(key, out object? raw))
             {
+                if (ReferenceEquals(raw, _nullMarker))
+                {
+                    _hitCounter?.Add(1);
+                    return default!;
+                }
+
                 _hitCounter?.Add(1);
-                return cached!;
+                return (T)raw!;
             }
 
             _missCounter?.Add(1);
             var created = await factory().ConfigureAwait(false);
+            // Only cache non-null by this API (legacy GetOrCreate semantics)
+            if (created != null)
+            {
+                Set(key, created, ttl);
+            }
 
-            if (created is null) return created!;
-            Set(key, created, ttl);
-            return created;
-        }
-
-        /// <summary>
-        /// Anahtarı ve ilişkili değeri siler.
-        /// </summary>
-        /// <param name="key">Önbellek anahtarı.</param>
-        public void Remove(object key)
-        {
-            ArgumentNullException.ThrowIfNull(key);
-            _cache.Remove(key);
+            return created!;
         }
 
         /// <summary>
@@ -129,15 +151,7 @@ namespace ArchiX.Library.Infrastructure.Caching
         /// <returns>Tamamlandığında döner.</returns>
         public Task SetAsync<T>(string key, T value, TimeSpan? absoluteExpiration = null, TimeSpan? slidingExpiration = null, CancellationToken cancellationToken = default)
         {
-            ArgumentException.ThrowIfNullOrEmpty(key);
-
-            _cache.Set(key, value, new MemoryCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = absoluteExpiration,
-                SlidingExpiration = slidingExpiration
-            });
-
-            _setCounter?.Add(1);
+            Set(key, value, absoluteExpiration);
             return Task.CompletedTask;
         }
 
@@ -150,16 +164,7 @@ namespace ArchiX.Library.Infrastructure.Caching
         /// <returns>Değer ya da <see langword="default"/>.</returns>
         public Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
         {
-            ArgumentException.ThrowIfNullOrEmpty(key);
-
-            if (_cache.TryGetValue(key, out T? value))
-            {
-                _hitCounter?.Add(1);
-                return Task.FromResult(value);
-            }
-
-            _missCounter?.Add(1);
-            return Task.FromResult(default(T));
+            return Task.FromResult(Get<T>(key));
         }
 
         /// <summary>
@@ -170,8 +175,7 @@ namespace ArchiX.Library.Infrastructure.Caching
         /// <returns>Tamamlandığında döner.</returns>
         public Task RemoveAsync(string key, CancellationToken cancellationToken = default)
         {
-            ArgumentException.ThrowIfNullOrEmpty(key);
-            _cache.Remove(key);
+            Remove(key);
             return Task.CompletedTask;
         }
 
@@ -183,9 +187,13 @@ namespace ArchiX.Library.Infrastructure.Caching
         /// <returns>Varsa <see langword="true"/>, yoksa <see langword="false"/>.</returns>
         public Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default)
         {
-            ArgumentException.ThrowIfNullOrEmpty(key);
-            var exists = _cache.TryGetValue(key, out var value) && value is not null;
-            return Task.FromResult(exists);
+            if (_cache.TryGetValue(key, out object? raw))
+            {
+                // treat cached explicit null as not present per contract
+                return Task.FromResult(!ReferenceEquals(raw, _nullMarker));
+            }
+
+            return Task.FromResult(false);
         }
 
         /// <summary>
@@ -200,35 +208,55 @@ namespace ArchiX.Library.Infrastructure.Caching
         /// <param name="cacheNull"><see langword="null"/> değerleri de yaz.</param>
         /// <param name="ct">İptal belirteci.</param>
         /// <returns>Önbellekten ya da üreticiden dönen değer.</returns>
-        public async Task<T> GetOrSetAsync<T>(
-            string key,
-            Func<CancellationToken, Task<T>> factory,
-            TimeSpan? absoluteExpiration = null,
-            TimeSpan? slidingExpiration = null,
-            bool cacheNull = false,
-            CancellationToken ct = default)
+        public Task<T> GetOrSetAsync<T>(string key, Func<CancellationToken, Task<T>> factory, TimeSpan? absoluteExpiration = null, TimeSpan? slidingExpiration = null, bool cacheNull = false, CancellationToken ct = default)
         {
-            ArgumentException.ThrowIfNullOrEmpty(key);
+            ArgumentNullException.ThrowIfNull(key);
             ArgumentNullException.ThrowIfNull(factory);
 
-            if (_cache.TryGetValue(key, out object? boxed))
+            if (_cache.TryGetValue(key, out object? raw))
             {
-                _hitCounter?.Add(1);
-                return (T?)boxed!;
+                if (ReferenceEquals(raw, _nullMarker))
+                {
+                    return Task.FromResult<T>(default!);
+                }
+
+                return Task.FromResult((T)raw!);
             }
 
-            _missCounter?.Add(1);
-            var created = await factory(ct).ConfigureAwait(false);
+            return GetAndMaybeCacheAsync();
 
-            if (created is null && !cacheNull) return created!;
-
-            _cache.Set(key, created, new MemoryCacheEntryOptions
+            async Task<T> GetAndMaybeCacheAsync()
             {
-                AbsoluteExpirationRelativeToNow = absoluteExpiration,
-                SlidingExpiration = slidingExpiration
-            });
-            _setCounter?.Add(1);
-            return created!;
+                var created = await factory(ct).ConfigureAwait(false);
+                if (created == null)
+                {
+                    if (cacheNull)
+                    {
+                        var opts = CreateOptions(absoluteExpiration, slidingExpiration);
+                        if (opts != null) _cache.Set(key, _nullMarker, opts);
+                        else _cache.Set(key, _nullMarker);
+                        _setCounter?.Add(1);
+                    }
+
+                    return default!;
+                }
+
+                var options = CreateOptions(absoluteExpiration, slidingExpiration);
+                if (options != null) _cache.Set(key, created, options);
+                else _cache.Set(key, created);
+                _setCounter?.Add(1);
+                return created;
+            }
+        }
+
+        /// <summary>
+        /// Anahtarı ve ilişkili değeri siler.
+        /// </summary>
+        /// <param name="key">Önbellek anahtarı.</param>
+        public void Remove(object key)
+        {
+            ArgumentNullException.ThrowIfNull(key);
+            _cache.Remove(key);
         }
     }
 }

@@ -1,5 +1,6 @@
-﻿using ArchiX.Library.DomainEvents.Contracts;
-using ArchiX.Library.Infrastructure.DomainEvents;
+﻿using ArchiX.Library.Abstractions.DomainEvents;
+using ArchiX.Library.Infrastructure.DomainEvents; // Extension method için
+using IEventDispatcher = ArchiX.Library.Abstractions.DomainEvents.IEventDispatcher;
 
 using Xunit;
 
@@ -9,7 +10,10 @@ namespace ArchiX.Library.Tests.Tests.DomainEventsTests
     public class EventDispatcherTests
     {
         // Basit test event'i
-        private sealed class TestEvent : DomainEvent { }
+        private sealed class TestEvent : IDomainEvent
+        {
+            public DateTimeOffset OccurredOn { get; } = DateTimeOffset.UtcNow;
+        }
 
         // Sayaçlı handler
         private sealed class TestEventHandler : IEventHandler<TestEvent>
@@ -27,15 +31,16 @@ namespace ArchiX.Library.Tests.Tests.DomainEventsTests
         {
             // Arrange
             var services = new ServiceCollection();
-            services.AddArchiXDomainEvents(); // IEventDispatcher -> EventDispatcher
+            services.AddArchiXDomainEvents();
             services.AddScoped<IEventHandler<TestEvent>, TestEventHandler>();
-
             using var provider = services.BuildServiceProvider();
             var dispatcher = provider.GetRequiredService<IEventDispatcher>();
 
             // Act
-            TestEventHandler.Count = 0;
-            await dispatcher.DispatchAsync([new TestEvent()]); // C# 12 collection expression
+            TestEventHandler.Count =0;
+#pragma warning disable IDE0300
+            await dispatcher.DispatchAsync(new[] { new TestEvent() });
+#pragma warning restore IDE0300
 
             // Assert
             Assert.Equal(1, TestEventHandler.Count);

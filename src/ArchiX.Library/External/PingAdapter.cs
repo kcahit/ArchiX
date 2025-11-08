@@ -1,7 +1,6 @@
 ﻿// File: src/ArchiX.Library/External/PingAdapter.cs
 #nullable enable
 using ArchiX.Library.Infrastructure.Http; // ProblemDetailsReader, HttpApiProblem
-
 using Microsoft.Extensions.Logging;
 
 namespace ArchiX.Library.External
@@ -10,7 +9,7 @@ namespace ArchiX.Library.External
     /// <remarks>Başarısız yanıtlarda RFC7807 ProblemDetails okumayı dener.</remarks>
     /// <param name="http">Named/typed HttpClient. BaseAddress ve header’lar DI aşamasında ayarlanır.</param>
     /// <param name="log">Adapter için logger.</param>
-    public sealed class PingAdapter(HttpClient http, ILogger<PingAdapter> log) : IPingAdapter
+    public sealed class PingAdapter(HttpClient http, ILogger<PingAdapter> log) : ArchiX.Library.Abstractions.External.IPingAdapter
     {
         private readonly HttpClient _http = http ?? throw new ArgumentNullException(nameof(http));
         private readonly ILogger<PingAdapter> _log = log ?? throw new ArgumentNullException(nameof(log));

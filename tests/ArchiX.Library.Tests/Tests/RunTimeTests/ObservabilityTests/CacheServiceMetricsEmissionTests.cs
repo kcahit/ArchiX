@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics.Metrics;
-
 using ArchiX.Library.Infrastructure.Caching;
 
 using Xunit;
@@ -72,7 +71,7 @@ namespace ArchiX.Library.Tests.Tests.RunTimeTests.ObservabilityTests
                 _ = await cache.GetOrSetAsync(
                     k2,
                     async ct => { await Task.Yield(); return "r2"; },
-                    absoluteTtl: TimeSpan.FromMinutes(1),
+                    absoluteExpiration: TimeSpan.FromMinutes(1),
                     ct: CancellationToken.None);
 
                 _ = await cache.GetOrSetAsync(

@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics.Metrics;
 using System.Text.Json;
-
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
+using ArchiX.Library.Abstractions.Caching;
 
 namespace ArchiX.Library.Infrastructure.Caching
 {
@@ -42,8 +42,6 @@ namespace ArchiX.Library.Infrastructure.Caching
             }
         }
 
-        // -------- ICacheService: senkron API (object key) --------
-
         /// <inheritdoc />
         public T? Get<T>(object key)
         {
@@ -59,7 +57,7 @@ namespace ArchiX.Library.Infrastructure.Caching
             }
 
             _hit?.Add(1);
-            return JsonSerializer.Deserialize<T>(bytes, _json);
+            return Deserialize<T>(bytes);
         }
 
         /// <inheritdoc />
@@ -69,70 +67,69 @@ namespace ArchiX.Library.Infrastructure.Caching
             var k = key.ToString();
             ArgumentException.ThrowIfNullOrEmpty(k);
 
-            var bytes = JsonSerializer.SerializeToUtf8Bytes(value, _json);
-            var opts = new DistributedCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = ttl
-            };
+            var bytes = Serialize(value);
+            var opts = new DistributedCacheEntryOptions();
+            if (ttl.HasValue) opts.AbsoluteExpirationRelativeToNow = ttl;
 
             _cache.Set(k, bytes, opts);
             _set?.Add(1);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Anahtar ve değeri ile birlikte bir fabrika işlevi sağlayarak, önbellekten veriyi alma veya oluşturup önbelleğe yazma işlemini gerçekleştirir.
+        /// </summary>
+        /// <typeparam name="T">Veri tipi.</typeparam>
+        /// <param name="key">Anahtar.</param>
+        /// <param name="factory">Veri oluşturma işlevi.</param>
+        /// <param name="ttl">Varsayılan süre bitimi.</param>
+        /// <returns>Önbellekten alınan veya önbelleğe yazılan veri.</returns>
         public async Task<T> GetOrCreateAsync<T>(object key, Func<Task<T>> factory, TimeSpan? ttl = null)
         {
             ArgumentNullException.ThrowIfNull(key);
             ArgumentNullException.ThrowIfNull(factory);
 
-            var existing = Get<T>(key);
-            if (existing is not null) return existing;
+            var k = key.ToString();
+            ArgumentException.ThrowIfNullOrEmpty(k);
+
+            var bytes = await _cache.GetAsync(k).ConfigureAwait(false);
+            if (bytes is not null)
+            {
+                _hit?.Add(1);
+                return Deserialize<T>(bytes)!;
+            }
+
+            _miss?.Add(1);
 
             var created = await factory().ConfigureAwait(false);
-            if (created is null) return created!;
-
             Set(key, created, ttl);
             return created;
         }
 
         /// <inheritdoc />
-        public void Remove(object key)
-        {
-            ArgumentNullException.ThrowIfNull(key);
-            var k = key.ToString();
-            ArgumentException.ThrowIfNullOrEmpty(k);
-            _cache.Remove(k);
-        }
-
-        // -------- ICacheService: async yardımcı API (string key) --------
-
-        /// <summary>Değeri yazar.</summary>
         public async Task SetAsync<T>(
             string key,
             T value,
             TimeSpan? absoluteExpiration = null,
             TimeSpan? slidingExpiration = null,
-            CancellationToken ct = default)
+            CancellationToken cancellationToken = default)
         {
             ArgumentException.ThrowIfNullOrEmpty(key);
 
-            var bytes = JsonSerializer.SerializeToUtf8Bytes(value, _json);
-            var opts = new DistributedCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = absoluteExpiration,
-                SlidingExpiration = slidingExpiration
-            };
+            var bytes = Serialize(value);
+            var opts = new DistributedCacheEntryOptions();
+            if (absoluteExpiration.HasValue) opts.AbsoluteExpirationRelativeToNow = absoluteExpiration;
+            if (slidingExpiration.HasValue) opts.SlidingExpiration = slidingExpiration;
 
-            await _cache.SetAsync(key, bytes, opts, ct).ConfigureAwait(false);
+            await _cache.SetAsync(key, bytes, opts, cancellationToken).ConfigureAwait(false);
             _set?.Add(1);
         }
 
-        /// <summary>Değeri okur. Yoksa <see langword="default"/>.</summary>
-        public async Task<T?> GetAsync<T>(string key, CancellationToken ct = default)
+        /// <inheritdoc />
+        public async Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
         {
             ArgumentException.ThrowIfNullOrEmpty(key);
 
-            var bytes = await _cache.GetAsync(key, ct).ConfigureAwait(false);
+            var bytes = await _cache.GetAsync(key, cancellationToken).ConfigureAwait(false);
             if (bytes is null)
             {
                 _miss?.Add(1);
@@ -140,34 +137,42 @@ namespace ArchiX.Library.Infrastructure.Caching
             }
 
             _hit?.Add(1);
-            return JsonSerializer.Deserialize<T>(bytes, _json);
+            return Deserialize<T>(bytes);
         }
 
-        /// <summary>Anahtar mevcut mu. Null içerikler mevcut sayılmaz.</summary>
-        public async Task<bool> ExistsAsync(string key, CancellationToken ct = default)
+        /// <inheritdoc />
+        public Task RemoveAsync(string key, CancellationToken cancellationToken = default)
         {
             ArgumentException.ThrowIfNullOrEmpty(key);
+            return _cache.RemoveAsync(key, cancellationToken);
+        }
 
-            var bytes = await _cache.GetAsync(key, ct).ConfigureAwait(false);
-            if (bytes is null || bytes.Length == 0) return false;
-
-            var token = JsonSerializer.Deserialize<object?>(bytes, _json);
-            return token is not null;
+        /// <summary>
+        /// Anahtarın önbellekte var olup olmadığını kontrol eder.
+        /// </summary>
+        /// <param name="key">Anahtar.</param>
+        /// <param name="cancellationToken">İptal token'ı.</param>
+        /// <returns>True: Anahtar mevcut, False: Anahtar mevcut değil.</returns>
+        public Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(key);
+            return Task.FromResult(_cache.Get(key) is not null);
         }
 
         /// <summary>Anahtarı siler.</summary>
-        public Task RemoveAsync(string key, CancellationToken ct = default)
+        public void Remove(object key)
         {
-            ArgumentException.ThrowIfNullOrEmpty(key);
-            return _cache.RemoveAsync(key, ct);
+            ArgumentNullException.ThrowIfNull(key);
+            var k = key.ToString();
+            if (!string.IsNullOrEmpty(k)) _cache.Remove(k);
         }
 
         /// <summary>Yoksa üretip yazar, varsa döner. Null sonuçlar yazılmaz.</summary>
         public async Task<T> GetOrSetAsync<T>(
             string key,
             Func<CancellationToken, Task<T>> factory,
-            TimeSpan? absoluteTtl = null,
-            TimeSpan? slidingTtl = null,
+            TimeSpan? absoluteExpiration = null,
+            TimeSpan? slidingExpiration = null,
             bool cacheNull = false,
             CancellationToken ct = default)
         {
@@ -180,8 +185,11 @@ namespace ArchiX.Library.Infrastructure.Caching
             var created = await factory(ct).ConfigureAwait(false);
             if (created is null && !cacheNull) return created!;
 
-            await SetAsync(key, created, absoluteTtl, slidingTtl, ct).ConfigureAwait(false);
+            await SetAsync(key, created, absoluteExpiration, slidingExpiration, ct).ConfigureAwait(false);
             return created;
         }
+
+        private byte[] Serialize<T>(T value) => JsonSerializer.SerializeToUtf8Bytes(value, _json);
+        private T? Deserialize<T>(byte[] bytes) => bytes is null ? default : JsonSerializer.Deserialize<T>(bytes, _json);
     }
 }

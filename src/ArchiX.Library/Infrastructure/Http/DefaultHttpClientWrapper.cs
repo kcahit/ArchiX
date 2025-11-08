@@ -1,5 +1,6 @@
 ﻿// File: src/ArchiX.Library/Infrastructure/Http/DefaultHttpClientWrapper.cs
 using System.Text.Json;
+using ArchiX.Library.Abstractions.Http;
 
 namespace ArchiX.Library.Infrastructure.Http
 {

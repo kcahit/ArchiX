@@ -1,12 +1,13 @@
-using System;
+using ArchiX.Library.Abstractions.Caching;
 using ArchiX.Library.Abstractions.Persistence;
+using ArchiX.Library.Context;
 using ArchiX.Library.Entities;
 using ArchiX.Library.Infrastructure.Caching;
-using ArchiX.Library.Web;
-using Microsoft.Extensions.DependencyInjection;
-using Xunit;
+
 using Microsoft.EntityFrameworkCore;
-using ArchiX.Library.Context;
+using Microsoft.Extensions.DependencyInjection;
+
+using Xunit;
 
 namespace ArchiX.Library.Web.Tests.Tests.DependencyInjection
 {

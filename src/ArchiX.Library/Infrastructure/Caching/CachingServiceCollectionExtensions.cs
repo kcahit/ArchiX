@@ -1,13 +1,12 @@
-﻿// File: src/ArchiX.Library/Infrastructure/Caching//CachingServiceCollectionExtensions.cs
+﻿// File: src/ArchiX.Library/Infrastructure/Caching/CachingServiceCollectionExtensions.cs
 using System.Text.Json;
-
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-
 using ArchiX.Library.Infrastructure.EfCore;
 using ArchiX.Library.Abstractions.Persistence;
+using ArchiX.Library.Abstractions.Caching;
 
 namespace ArchiX.Library.Infrastructure.Caching
 {

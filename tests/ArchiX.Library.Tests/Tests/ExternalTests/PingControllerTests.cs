@@ -1,20 +1,15 @@
-﻿// File: tests/ArchiXTest.ApiWeb/Test/ExternalTests/PingControllerTests.cs
+﻿// File: tests/ArchiX.Library.Tests.Tests.ExternalTests/PingControllerTests.cs
 #nullable enable
-using ArchiX.Library.External;
-
-using ArchiXTest.ApiWeb.Controllers;
-
+using ArchiX.Library.Tests.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging.Abstractions;
-
 using Xunit;
 
 namespace ArchiX.Library.Tests.Tests.ExternalTests
 {
-
     public sealed class PingControllerTests
     {
-        private sealed class FakeAdapter : IPingAdapter
+        private sealed class FakeAdapter : ArchiX.Library.Abstractions.External.IPingAdapter
         {
             public Task<string> GetStatusTextAsync(CancellationToken ct = default)
                 => Task.FromResult("""{"service":"demo","version":"1.0","uptime":"123s"}""");
@@ -45,6 +40,5 @@ namespace ArchiX.Library.Tests.Tests.ExternalTests
             Assert.Equal(200, cr.StatusCode);
             Assert.Contains(@"""service"":""demo""", cr.Content);
         }
-
     }
 }

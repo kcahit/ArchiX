@@ -1,14 +1,12 @@
-﻿using ArchiX.Library.LanguagePacks;
+﻿using Microsoft.AspNetCore.Mvc;
 
-using Microsoft.AspNetCore.Mvc;
-
-namespace ArchiXTest.ApiWeb.Controllers;
+namespace ArchiX.Library.Tests.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public sealed class LocalizationController(ILanguageService lang) : ControllerBase
+public sealed class LocalizationController(ArchiX.Library.Abstractions.Localization.ILanguageService lang) : ControllerBase
 {
-    private readonly ILanguageService _lang = lang;
+    private readonly ArchiX.Library.Abstractions.Localization.ILanguageService _lang = lang;
 
     // GET /api/localization/display-name?itemType=...&entityName=...&fieldName=...&code=...&culture=tr-TR
     [HttpGet("display-name")]

@@ -1,19 +1,15 @@
-﻿// File: tests/ArchiXTest.ApiWeb/Test/InfrastructureTests/CacheTests.cs
-using ArchiX.Library.Infrastructure.Caching;
-
+﻿// File: tests/ArchiX.Library.Tests\Tests\InfrastructureTests\CacheTests.cs
+using ArchiX.Library.Abstractions.Caching;
 using Xunit;
 
 namespace ArchiX.Library.Tests.Tests.InfrastructureTests
 {
-    public class CacheTests
+    public sealed class CacheTests
     {
         private static ICacheService CreateMemoryCacheService()
         {
-            var services = new ServiceCollection();
-            services.AddArchiXMemoryCaching();
-            var sp = services.BuildServiceProvider();
-            return sp.GetRequiredService<ICacheService>();
-
+            var mem = new Microsoft.Extensions.Caching.Memory.MemoryCache(new Microsoft.Extensions.Caching.Memory.MemoryCacheOptions());
+            return new ArchiX.Library.Infrastructure.Caching.MemoryCacheService(mem);
         }
 
         [Fact]

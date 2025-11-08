@@ -1,25 +1,11 @@
 ﻿namespace ArchiX.Library.Diagnostics
 {
-    /// <summary>
-    /// İstek zinciri korelasyon bilgisini temsil eden arayüz.
-    /// </summary>
-    public interface ICorrelationContext
-    {
-        /// <summary>
-        /// İstek ile ilişkilendirilmiş korelasyon kimliği.
-        /// </summary>
-        string CorrelationId { get; }
-
-        /// <summary>
-        /// İzleme (Trace) kimliği.
-        /// </summary>
-        string? TraceId { get; }
-    }
+    public interface ICorrelationContext : ArchiX.Library.Abstractions.Diagnostics.ICorrelationContext { }
 
     /// <summary>
     /// Basit korelasyon modeli implementasyonu.
     /// </summary>
-    public sealed class CorrelationContext : ICorrelationContext
+    public sealed class CorrelationContext : ArchiX.Library.Abstractions.Diagnostics.ICorrelationContext
     {
         /// <summary>
         /// Korelasyon kimliği.
@@ -52,12 +38,12 @@
     /// </summary>
     public static class Correlation
     {
-        private static readonly AsyncLocal<ICorrelationContext?> _ambient = new();
+        private static readonly AsyncLocal<ArchiX.Library.Abstractions.Diagnostics.ICorrelationContext?> _ambient = new();
 
         /// <summary>
         /// Geçerli korelasyon bağlamı (ambient).
         /// </summary>
-        public static ICorrelationContext? Ambient => _ambient.Value;
+        public static ArchiX.Library.Abstractions.Diagnostics.ICorrelationContext? Ambient => _ambient.Value;
 
         /// <summary>
         /// Yeni bir korelasyon kapsamı başlatır.
@@ -78,13 +64,13 @@
         /// </summary>
         private sealed class Scope : IDisposable
         {
-            private readonly ICorrelationContext? _previous;
+            private readonly ArchiX.Library.Abstractions.Diagnostics.ICorrelationContext? _previous;
 
             /// <summary>
             /// Yeni bir Scope oluşturur.
             /// </summary>
             /// <param name="previous">Önceki korelasyon bağlamı.</param>
-            public Scope(ICorrelationContext? previous) => _previous = previous;
+            public Scope(ArchiX.Library.Abstractions.Diagnostics.ICorrelationContext? previous) => _previous = previous;
 
             /// <summary>
             /// Dispose edildiğinde önceki korelasyon bağlamını geri yükler.

@@ -1,16 +1,14 @@
 ﻿using ArchiX.Library.Context;
 using ArchiX.Library.Entities;
 using ArchiX.Library.Infrastructure.EfCore;
-
 using Microsoft.EntityFrameworkCore;
-
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Tests.InfrastructureTests
+namespace ArchiX.Library.Tests.Tests.InfrastructureTests
 {
     public sealed class RepositoryUowTests
     {
-        private (Repository<Statu> repo, UnitOfWork uow) CreateInMemory()
+        private static (Repository<Statu> repo, UnitOfWork uow) CreateInMemory()
         {
             var options = new DbContextOptionsBuilder<AppDbContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())

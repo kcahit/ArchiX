@@ -1,6 +1,7 @@
 ﻿// File: src/ArchiX.Library/Infrastructure/Http/IHttpClientWrapperExtensions.cs
 using System.Text;
 using System.Text.Json;
+using ArchiX.Library.Abstractions.Http;
 
 namespace ArchiX.Library.Infrastructure.Http
 {
@@ -81,12 +82,10 @@ namespace ArchiX.Library.Infrastructure.Http
             using var response = await wrapper.SendAsync(request, cancellationToken).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
-            // ✅ CS8602 fix: Content null olabilir; önce kontrol et
             var respContent = response.Content;
             if (respContent is null)
                 return default;
 
-            // İçerik uzunluğu 0 ise okumaya gerek yok
             if (respContent.Headers?.ContentLength is long len && len == 0)
                 return default;
 

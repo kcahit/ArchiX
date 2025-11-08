@@ -1,15 +1,12 @@
 ﻿using ArchiX.Library.Context;
 using ArchiX.Library.Entities;
 using ArchiX.Library.LanguagePacks;
-
-using ArchiXTest.ApiWeb.Controllers;
-
+using ArchiX.Library.Tests.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.DiagnosticsTests
+namespace ArchiX.Library.Tests.Tests.DiagnosticsTests
 {
     public class LocalizationControllerTests
     {
@@ -21,23 +18,24 @@ namespace ArchiXTest.ApiWeb.Test.DiagnosticsTests
 
             var db = new AppDbContext(opts);
 
-            // Aktif (StatusId == 3) kayıtlar
-            db.Set<LanguagePack>().AddRange(
-            [
-                new LanguagePack { Id = -1001, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "Equals",     Culture = "tr-TR", DisplayName = "Eşittir",    Description = "Değer eşit olmalı",       StatusId = 3 },
-                new LanguagePack { Id = -1002, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "Equals",     Culture = "en-US", DisplayName = "Equals",     Description = "Value must be equal",      StatusId = 3 },
-                new LanguagePack { Id = -1003, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotEquals",  Culture = "tr-TR", DisplayName = "Eşit Değil", Description = "Değer eşit olmamalı",      StatusId = 3 },
-                new LanguagePack { Id = -1004, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotEquals",  Culture = "en-US", DisplayName = "Not Equal",  Description = "Value must not be equal",  StatusId = 3 },
-                new LanguagePack { Id = -1005, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "StartsWith", Culture = "tr-TR", DisplayName = "Başlar",     Description = "Başlangıç eşleşmesi",      StatusId = 3 },
-                new LanguagePack { Id = -1006, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "StartsWith", Culture = "en-US", DisplayName = "Starts With",Description = "Value starts with...",      StatusId = 3 },
+            // suppress IDE0300: prefer explicit AddRange here to keep readability in tests
+#pragma warning disable IDE0300
+            db.Set<LanguagePack>().AddRange(new[]
+            {
+                new LanguagePack { Id = -1001, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "Equals",     Culture = "tr-TR", DisplayName = "Eşittir",    StatusId =3 },
+                new LanguagePack { Id = -1002, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "Equals",     Culture = "en-US", DisplayName = "Equals",     StatusId =3 },
+                new LanguagePack { Id = -1003, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotEquals",  Culture = "tr-TR", DisplayName = "Eşit Değil", StatusId =3 },
+                new LanguagePack { Id = -1004, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotEquals",  Culture = "en-US", DisplayName = "Not Equal",  StatusId =3 },
+                new LanguagePack { Id = -1005, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "StartsWith", Culture = "tr-TR", DisplayName = "Başlar",     StatusId =3 },
+                new LanguagePack { Id = -1006, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "StartsWith", Culture = "en-US", DisplayName = "Starts With", StatusId =3 },
 
                 // Pasif (görünmemeli)
-                new LanguagePack { Id = -1999, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "Hidden",     Culture = "tr-TR", DisplayName = "Gizli",      Description = "Pasif kayıt",              StatusId = 2 }
-            ]);
+                new LanguagePack { Id = -1999, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "Hidden",     Culture = "tr-TR", DisplayName = "Gizli",      StatusId =2 }
+            });
+#pragma warning restore IDE0300
             db.SaveChanges();
 
-            // LanguageService db'den aktifleri (disp:/list:) belleğe yükler
-            var lang = new LanguageService(db: db);
+            var lang = new LanguageService(db);
             controller = new LocalizationController(lang);
             return db;
         }
@@ -67,7 +65,7 @@ namespace ArchiXTest.ApiWeb.Test.DiagnosticsTests
             var notFound = await ctrl.GetDisplayName("Operator", "FilterItem", "Code", "DoesNotExist", "tr-TR", CancellationToken.None);
             Assert.IsType<NotFoundResult>(notFound.Result);
 
-            // Pasif kayıt => 404
+            // Pasif kayıt =>404
             var hidden = await ctrl.GetDisplayName("Operator", "FilterItem", "Code", "Hidden", "tr-TR", CancellationToken.None);
             Assert.IsType<NotFoundResult>(hidden.Result);
         }

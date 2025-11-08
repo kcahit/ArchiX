@@ -1,4 +1,4 @@
-﻿using ArchiX.Library.Entities;
+﻿using ArchiX.Library.Abstractions.Entities;
 
 namespace ArchiX.Library.Abstractions.Persistence
 {

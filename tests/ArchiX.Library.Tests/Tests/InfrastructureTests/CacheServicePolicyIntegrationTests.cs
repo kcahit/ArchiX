@@ -1,4 +1,5 @@
 ﻿using ArchiX.Library.Infrastructure.Caching;
+using ArchiX.Library.Abstractions.Caching;
 
 using Xunit;
 
@@ -70,7 +71,7 @@ namespace ArchiX.Library.Tests.Tests.InfrastructureTests
             var v1 = await cache.GetOrSetAsync(
                 key,
                 async ct => { Interlocked.Increment(ref calls); await Task.Yield(); return "value"; },
-                absoluteTtl: TimeSpan.FromMinutes(2));
+                absoluteExpiration: TimeSpan.FromMinutes(2));
 
             var v2 = await cache.GetOrSetAsync(
                 key,

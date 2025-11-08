@@ -2,7 +2,8 @@
 
 using System.Reflection;
 
-using ArchiX.Library.Entities;       // BaseEntity, Statu, IEntity
+using ArchiX.Library.Entities; // BaseEntity, Statu
+using AE = ArchiX.Library.Abstractions.Entities; // alias for IEntity
 
 using Humanizer;
 
@@ -26,9 +27,9 @@ namespace ArchiX.Library.Context
 
             var asm = typeof(AppDbContext).Assembly;
 
-            // 1) IEntity tiplerini tara; BaseEntity.MapToDb=false olanları IGNORE et; kalanları çoğul tabloya map et
+            //1) IEntity tiplerini tara; BaseEntity.MapToDb=false olanları IGNORE et; kalanları çoğul tabloya map et
             var entityTypes = asm.GetTypes()
-                .Where(t => typeof(IEntity).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract);
+                .Where(t => typeof(AE.IEntity).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract);
 
             foreach (var t in entityTypes)
             {
@@ -55,7 +56,7 @@ namespace ArchiX.Library.Context
                 modelBuilder.Entity(t).ToTable(t.Name.Pluralize());
             }
 
-            // 2) BaseEntity ortak kolonlar + (Statu hariç) StatusId→Statu.Id FK
+            //2) BaseEntity ortak kolonlar + (Statu hariç) StatusId→Statu.Id FK
             foreach (var et in modelBuilder.Model.GetEntityTypes()
                          .Where(et => typeof(BaseEntity).IsAssignableFrom(et.ClrType)
                                   && et.ClrType != typeof(BaseEntity)))
@@ -64,7 +65,7 @@ namespace ArchiX.Library.Context
                 {
                     b.Property<int>(nameof(BaseEntity.Id))
                      .ValueGeneratedOnAdd()
-                     .UseIdentityColumn(1, 1);
+                     .UseIdentityColumn(1,1);
 
                     b.Property<Guid>(nameof(BaseEntity.RowId))
                      .HasDefaultValueSql("NEWSEQUENTIALID()")

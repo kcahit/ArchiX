@@ -11,6 +11,7 @@ using ArchiX.Library.Context;
 using ArchiX.Library.Entities;
 using ArchiX.Library.Infrastructure.EfCore;
 using ArchiX.Library.Infrastructure.Caching;
+using ArchiX.Library.Abstractions.Caching;
 
 namespace BenchmarkSuite1
 {
@@ -25,6 +26,7 @@ namespace BenchmarkSuite1
         private Repository<Statu>? _repo;
         private RepositoryCacheDecorator<Statu>? _repoCached;
         private int _existingId;
+        private ICacheService? _memSvc;
 
         [GlobalSetup]
         public void Setup()
@@ -45,14 +47,12 @@ namespace BenchmarkSuite1
 
             _repo = new Repository<Statu>(_db);
             _existingId = _db.Set<Statu>().AsNoTracking().Select(s => s.Id).First();
-
-            // create memory cache & memory cache service and decorator
             var mem = new MemoryCache(new MemoryCacheOptions());
-            var memSvc = new MemoryCacheService(mem);
-            _repoCached = new RepositoryCacheDecorator<Statu>(_repo, memSvc, TimeSpan.FromMinutes(5));
-
-            // warm cache with one id
+            _memSvc = new MemoryCacheService(mem);
+            _repoCached = new RepositoryCacheDecorator<Statu>(_repo, _memSvc, TimeSpan.FromMinutes(5));
+            // warm cache for id + all
             var _ = _repoCached.GetByIdAsync(_existingId).GetAwaiter().GetResult();
+            var _allWarm = _repoCached.GetAllAsync().GetAwaiter().GetResult();
         }
 
         [GlobalCleanup]
@@ -68,6 +68,13 @@ namespace BenchmarkSuite1
         public async Task<List<Statu>> GetAllAsync_Bench()
         {
             var r = (await _repo!.GetAllAsync()).ToList();
+            return r;
+        }
+
+        [Benchmark]
+        public async Task<List<Statu>> GetAllAsync_Cached_Bench()
+        {
+            var r = (await _repoCached!.GetAllAsync()).ToList();
             return r;
         }
 

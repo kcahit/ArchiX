@@ -1,11 +1,9 @@
 ﻿// File: tests/ArchiX.Library.Tests.Tests.ExternalTests/PingAdapterConfigTests.cs
 #nullable enable
 using ArchiX.Library.External;
-
 using Xunit;
 
 namespace ArchiX.Library.Tests.Tests.ExternalTests
-
 {
     /// <summary>PingAdapter konfigürasyon bağlama/doğrulama testleri.</summary>
     public sealed class PingAdapterConfigTests
@@ -28,7 +26,7 @@ namespace ArchiX.Library.Tests.Tests.ExternalTests
             var sp = services.BuildServiceProvider();
 
             // Assert
-            var svc = sp.GetService<IPingAdapter>();
+            var svc = sp.GetService<ArchiX.Library.Abstractions.External.IPingAdapter>();
             Assert.NotNull(svc);
         }
 

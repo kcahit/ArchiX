@@ -5,10 +5,10 @@ using System.Text.Json;
 namespace ArchiX.Library.Infrastructure.Http
 {
     /// <summary>
-    /// <see cref="IHttpClientWrapper"/> için temel implementasyon.
+    /// <see cref="ArchiX.Library.Abstractions.Http.IHttpClientWrapper"/> için temel implementasyon.
     /// Ortak JSON serileştirme, istek gönderme ve hata eşleme mantığını içerir.
     /// </summary>
-    public abstract class HttpClientWrapperBase : IHttpClientWrapper
+    public abstract class HttpClientWrapperBase : ArchiX.Library.Abstractions.Http.IHttpClientWrapper
     {
         /// <summary>HTTP çağrıları için kullanılan <see cref="HttpClient"/> örneği.</summary>
         protected readonly HttpClient Client;

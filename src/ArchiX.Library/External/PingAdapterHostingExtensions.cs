@@ -9,7 +9,7 @@ namespace ArchiX.Library.External
     public static class PingAdapterHostingExtensions
     {
         /// <summary>
-        /// Tek çağrıyla <see cref="IPingAdapter"/> kaydı ve <c>PingHealthCheck</c> ekler.
+        /// Tek çağrıyla <see cref="ArchiX.Library.Abstractions.External.IPingAdapter"/> kaydı ve <c>PingHealthCheck</c> ekler.
         /// Varsayılan konfig yolu: <c>ExternalServices:Ping</c>, health check adı: <c>external_ping</c>.
         /// </summary>
         /// <param name="services">DI koleksiyonu.</param>
@@ -24,7 +24,6 @@ namespace ArchiX.Library.External
         {
             ArgumentNullException.ThrowIfNull(services);
             ArgumentNullException.ThrowIfNull(config);
-
             services.AddPingAdapter(config, sectionPath);
             services.AddHealthChecks().AddCheck<PingHealthCheck>(healthCheckName);
             return services;

@@ -1,15 +1,13 @@
-﻿// File: tests/ArchiXTest.ApiWeb/Controllers/PingController.cs
+﻿// File: tests/ArchiX.Library.Tests/Controllers/PingController.cs
 #nullable enable
-using ArchiX.Library.External;
-
 using Microsoft.AspNetCore.Mvc;
 
-namespace ArchiXTest.ApiWeb.Controllers;
+namespace ArchiX.Library.Tests.Controllers;
 
 [ApiController]
-public sealed class PingController(IPingAdapter adapter, ILogger<PingController> logger) : ControllerBase
+public sealed class PingController(ArchiX.Library.Abstractions.External.IPingAdapter adapter, ILogger<PingController> logger) : ControllerBase
 {
-    private readonly IPingAdapter _adapter = adapter;
+    private readonly ArchiX.Library.Abstractions.External.IPingAdapter _adapter = adapter;
     private readonly ILogger<PingController> _logger = logger;
 
     [HttpGet("/ping/status")]

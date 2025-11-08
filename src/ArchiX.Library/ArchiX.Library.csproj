@@ -6,6 +6,11 @@
 		<Nullable>enable</Nullable>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	</PropertyGroup>
+	<ItemGroup>
+	  <Compile Remove="Infrastructure\Others\**" />
+	  <EmbeddedResource Remove="Infrastructure\Others\**" />
+	  <None Remove="Infrastructure\Others\**" />
+	</ItemGroup>
 
 	<!-- ASP.NET Core HTTP türleri için şart -->
 	<ItemGroup>
@@ -64,7 +69,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Infrastructure\Others\" />
+	  <Folder Include="DomainEvents\Contracts\" />
 	</ItemGroup>
 
 	

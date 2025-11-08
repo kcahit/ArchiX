@@ -1,12 +1,9 @@
 ﻿#nullable enable
 using System.Collections.Concurrent;
 using System.Globalization;
-
-using ArchiX.Library.LanguagePacks;
-
 using Xunit;
 
-namespace ArchiXTest.ApiWeb.Test.DiagnosticsTests
+namespace ArchiX.Library.Tests.Tests.DiagnosticsTests
 {
     /// <summary>
     /// ILanguageService için kültür fallback, throwIfMissing, format, context ayrımı ve concurrency testleri.
@@ -14,7 +11,7 @@ namespace ArchiXTest.ApiWeb.Test.DiagnosticsTests
     /// </summary>
     public class LanguageServiceFallbackTests
     {
-        private sealed class FakeLanguageService : ILanguageService
+        private sealed class FakeLanguageService : ArchiX.Library.Abstractions.Localization.ILanguageService
         {
             private readonly string _defaultCulture;
             private readonly ConcurrentDictionary<string, Dictionary<string, string>> _dict = new();
@@ -38,28 +35,22 @@ namespace ArchiXTest.ApiWeb.Test.DiagnosticsTests
 
             public void Set(string culture, string key)
             {
-                if (!_dict.ContainsKey(culture))
-                    _dict[culture] = new(StringComparer.OrdinalIgnoreCase);
-                if (!_dict[culture].ContainsKey(key))
-                    _dict[culture][key] = key; // default display equals key
+                if (!_dict.ContainsKey(culture)) _dict[culture] = new(StringComparer.OrdinalIgnoreCase);
+                if (!_dict[culture].ContainsKey(key)) _dict[culture][key] = key;
             }
 
             public bool TryGet(string key, out string value)
             {
                 var cur = CurrentCulture.Name;
-                if (_dict.TryGetValue(cur, out var map) && map.TryGetValue(key, out var v1))
-                { value = v1; return true; }
-                if (_dict.TryGetValue(_defaultCulture, out var def) && def.TryGetValue(key, out var v2))
-                { value = v2; return true; }
-                value = string.Empty;
-                return false;
+                if (_dict.TryGetValue(cur, out var map) && map.TryGetValue(key, out var v1)) { value = v1; return true; }
+                if (_dict.TryGetValue(_defaultCulture, out var def) && def.TryGetValue(key, out var v2)) { value = v2; return true; }
+                value = string.Empty; return false;
             }
 
             public string T(string key, bool throwIfMissing)
             {
                 if (TryGet(key, out var v)) return v;
-                if (throwIfMissing)
-                    throw new KeyNotFoundException($"Missing translation for '{key}' in '{CurrentCulture.Name}' and default '{_defaultCulture}'.");
+                if (throwIfMissing) throw new KeyNotFoundException($"Missing translation for '{key}' in '{CurrentCulture.Name}' and default '{_defaultCulture}'."); 
                 return key; // graceful fallback
             }
 

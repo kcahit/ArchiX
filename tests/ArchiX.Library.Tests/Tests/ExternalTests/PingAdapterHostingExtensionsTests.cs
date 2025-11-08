@@ -1,14 +1,11 @@
 ﻿// File: tests/ArchiX.Library.Tests.Tests.ExternalTests/PingAdapterHostingExtensionsTests.cs
 #nullable enable
 using ArchiX.Library.External;
-
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
-
 using Xunit;
 
 namespace ArchiX.Library.Tests.Tests.ExternalTests
-
 {
     /// <summary>AddPingAdapterWithHealthCheck uzantısı için kayıt testleri.</summary>
     public sealed class PingAdapterHostingExtensionsTests
@@ -32,7 +29,7 @@ namespace ArchiX.Library.Tests.Tests.ExternalTests
             var sp = services.BuildServiceProvider();
 
             // Assert: IPingAdapter çözümlenir
-            var adapter = sp.GetService<IPingAdapter>();
+            var adapter = sp.GetService<ArchiX.Library.Abstractions.External.IPingAdapter>();
             Assert.NotNull(adapter);
 
             // Assert: HealthCheck kaydı mevcut
