@@ -14,7 +14,7 @@ namespace ArchiX.Library.Web.Security.TwoFactor
  {
  if (!_providers.TryGetValue(preferred, out var provider))
  return AuthResult.Failure("2FA_CHANNEL_NOT_REGISTERED", $"Channel {preferred} not registered");
- var code = await provider.GenerateCodeAsync(subjectId, ct).ConfigureAwait(false);
+ _ = await provider.GenerateCodeAsync(subjectId, ct).ConfigureAwait(false);
  _logger.LogInformation("2FA code generated for {Subject} via {Channel}", subjectId, preferred);
  return AuthResult.Success();
  }

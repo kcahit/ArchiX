@@ -2,7 +2,6 @@
 using ArchiX.Library.Abstractions.Security;
 using ArchiX.Library.Web.Security.TwoFactor;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace ArchiX.Library.Web.Tests.Tests.Security

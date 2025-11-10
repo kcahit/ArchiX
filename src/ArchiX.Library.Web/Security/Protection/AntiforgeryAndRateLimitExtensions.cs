@@ -1,8 +1,6 @@
 #nullable enable
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.RateLimiting;
-using System.Threading.RateLimiting;
 using ArchiX.Library.Abstractions.Security;
 
 namespace ArchiX.Library.Web.Security.Protection

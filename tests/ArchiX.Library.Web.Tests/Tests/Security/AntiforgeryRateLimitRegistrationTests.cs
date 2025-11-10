@@ -1,5 +1,4 @@
 #nullable enable
-using ArchiX.Library.Abstractions.Security;
 using ArchiX.Library.Web.Security.Protection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.RateLimiting;
