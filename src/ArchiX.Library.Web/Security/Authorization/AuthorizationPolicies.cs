@@ -1,7 +1,5 @@
 #nullable enable
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Authorization;
-using ArchiX.Library.Abstractions.Security;
 using ArchiX.Library.Abstractions.Security;
 
 namespace ArchiX.Library.Web.Security.Authorization

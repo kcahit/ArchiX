@@ -10,6 +10,8 @@ namespace ArchiX.Library.Web.Tests.Tests.Security
 {
  public class AuthorizationPoliciesTests
  {
+ private static readonly Claim[] ExportPermission = [new(ClaimTypesEx.Permission, "export")];
+
  [Fact]
  public async Task AdminPolicy_Requires_Admin_Role()
  {
@@ -19,7 +21,7 @@ namespace ArchiX.Library.Web.Tests.Tests.Security
  s.AddArchiXPolicies();
  var sp = s.BuildServiceProvider();
  var auth = sp.GetRequiredService<IAuthorizationService>();
- var user = new ClaimsPrincipal(new ClaimsIdentity(new[]{new Claim(ClaimTypes.Role,"Admin")}, "test"));
+ var user = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.Role, "Admin")], "test"));
  var result = await auth.AuthorizeAsync(user, null, PolicyNames.Admin);
  Assert.True(result.Succeeded);
  }
@@ -33,7 +35,7 @@ namespace ArchiX.Library.Web.Tests.Tests.Security
  s.AddArchiXPolicies();
  var sp = s.BuildServiceProvider();
  var auth = sp.GetRequiredService<IAuthorizationService>();
- var user = new ClaimsPrincipal(new ClaimsIdentity(new[]{new Claim(ClaimTypesEx.Permission,"export")}, "test"));
+ var user = new ClaimsPrincipal(new ClaimsIdentity(ExportPermission, "test"));
  var result = await auth.AuthorizeAsync(user, null, PolicyNames.CanExport);
  Assert.True(result.Succeeded);
  }

@@ -15,8 +15,8 @@ namespace ArchiX.Library.Web.Security.Jwt
 
  public async Task<TokenPair> CreateTokenPairAsync(TokenDescriptor descriptor, CancellationToken cancellationToken = default)
  {
- var (access, accessExp) = await CreateAccessTokenAsync(BuildClaims(descriptor), cancellationToken);
- var (refresh, refreshExp) = await CreateRefreshTokenAsync(descriptor.SubjectId, cancellationToken);
+ var (access, accessExp) = await CreateAccessTokenAsync(BuildClaims(descriptor), cancellationToken).ConfigureAwait(false);
+ var (refresh, refreshExp) = await CreateRefreshTokenAsync(descriptor.SubjectId, cancellationToken).ConfigureAwait(false);
  return new TokenPair(access, refresh, accessExp, refreshExp);
  }
 
@@ -42,7 +42,7 @@ namespace ArchiX.Library.Web.Security.Jwt
  return Task.FromResult<(string, DateTimeOffset)>((token, expires));
  }
 
- private static IEnumerable<Claim> BuildClaims(TokenDescriptor d)
+ private static List<Claim> BuildClaims(TokenDescriptor d)
  {
  var claims = new List<Claim>
  {
@@ -52,7 +52,7 @@ namespace ArchiX.Library.Web.Security.Jwt
  };
  if (d.Scopes is { Length: >0 })
  {
- claims.AddRange(d.Scopes.Select(s => new Claim("scope", s)));
+ claims.AddRange(d.Scopes.Select(static s => new Claim("scope", s)));
  }
  if (d.Claims is { Count: >0 }) claims.AddRange(d.Claims);
  return claims;

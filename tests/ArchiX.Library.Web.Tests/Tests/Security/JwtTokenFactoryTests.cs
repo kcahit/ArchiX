@@ -3,7 +3,6 @@ using System.Security.Claims;
 using ArchiX.Library.Abstractions.Security;
 using ArchiX.Library.Web.Security.Jwt;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace ArchiX.Library.Web.Tests.Tests.Security
@@ -29,8 +28,11 @@ namespace ArchiX.Library.Web.Tests.Tests.Security
  {
  SubjectId = "user1",
  SubjectName = "User One",
- Claims = new() { new Claim("custom","v") },
- Scopes = new [] {"scope1"}
+ Claims =
+ {
+ new Claim("custom", "v")
+ },
+ Scopes = ["scope1"]
  });
  Assert.False(string.IsNullOrWhiteSpace(pair.AccessToken));
  Assert.False(string.IsNullOrWhiteSpace(pair.RefreshToken));
