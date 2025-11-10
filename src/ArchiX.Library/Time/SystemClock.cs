@@ -1,4 +1,4 @@
-﻿namespace ArchiX.Library.Time;
+namespace ArchiX.Library.Time;
 
 public sealed class SystemClock : ArchiX.Library.Abstractions.Time.IClock
 {
