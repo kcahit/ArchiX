@@ -1,4 +1,4 @@
- <Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
  <PropertyGroup>
  <TargetFramework>net9.0</TargetFramework>
  <ImplicitUsings>enable</ImplicitUsings>
@@ -16,5 +16,8 @@
  <ItemGroup>
  <ProjectReference Include="..\..\src\ArchiX.Library.Web\ArchiX.Library.Web.csproj" />
  <ProjectReference Include="..\..\src\ArchiX.Library\ArchiX.Library.csproj" />
+ </ItemGroup>
+ <ItemGroup>
+ <FrameworkReference Include="Microsoft.AspNetCore.App" />
  </ItemGroup>
 </Project>
