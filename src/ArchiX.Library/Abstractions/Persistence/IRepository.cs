@@ -1,4 +1,4 @@
-﻿using ArchiX.Library.Abstractions.Entities;
+﻿using ArchiX.Library.Entities;
 
 namespace ArchiX.Library.Abstractions.Persistence
 {
@@ -6,7 +6,7 @@ namespace ArchiX.Library.Abstractions.Persistence
     /// Generic repository arayüzü. Tüm entity’ler için temel CRUD işlemlerini tanımlar.
     /// </summary>
     /// <typeparam name="T">Entity tipi.</typeparam>
-    public interface IRepository<T> where T : class, IEntity
+    public interface IRepository<T> where T : BaseEntity
     {
         /// <summary>
         /// Tüm kayıtları asenkron olarak getirir.

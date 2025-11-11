@@ -3,7 +3,6 @@
 using System.Reflection;
 
 using ArchiX.Library.Entities; // BaseEntity, Statu
-using AE = ArchiX.Library.Abstractions.Entities; // alias for IEntity
 
 using Humanizer;
 
@@ -27,9 +26,9 @@ namespace ArchiX.Library.Context
 
             var asm = typeof(AppDbContext).Assembly;
 
-            //1) IEntity tiplerini tara; BaseEntity.MapToDb=false olanları IGNORE et; kalanları çoğul tabloya map et
+            //1) BaseEntity tiplerini tara; BaseEntity.MapToDb=false olanları IGNORE et; kalanları çoğul tabloya map et
             var entityTypes = asm.GetTypes()
-                .Where(t => typeof(AE.IEntity).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract);
+                .Where(t => typeof(BaseEntity).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract);
 
             foreach (var t in entityTypes)
             {

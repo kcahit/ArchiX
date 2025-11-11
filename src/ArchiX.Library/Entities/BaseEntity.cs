@@ -8,7 +8,7 @@ namespace ArchiX.Library.Entities
  /// Tüm kalıcı varlıklar (entity) için ortak taban sınıf.
  /// Zamanlar DateTimeOffset (precision4) kullanır.
  /// </summary>
- public abstract class BaseEntity : ArchiX.Library.Abstractions.Entities.IEntity
+ public abstract class BaseEntity
  {
  /// <summary>
  /// Bu türün tabloya haritalanıp haritalanmayacağını belirleyen bayrak (mevcut mimari).
@@ -119,7 +119,7 @@ namespace ArchiX.Library.Entities
  LastStatusBy = userId;
  }
 
- /// <summary>Soft-delete uygular (StatusId = 6/DEL).</summary>
+ /// <summary>Soft-delete uygular (StatusId =6/DEL).</summary>
  /// <param name="userId">İşlemi yapan kullanıcı.</param>
  public void SoftDelete(int userId) => SetStatus(DeletedStatusId, userId);
 

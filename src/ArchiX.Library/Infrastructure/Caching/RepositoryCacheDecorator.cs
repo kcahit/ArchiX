@@ -1,5 +1,6 @@
 using ArchiX.Library.Abstractions.Caching;
 using ArchiX.Library.Abstractions.Persistence;
+using ArchiX.Library.Entities;
 using ArchiX.Library.Infrastructure.EfCore;
 
 namespace ArchiX.Library.Infrastructure.Caching
@@ -8,7 +9,7 @@ namespace ArchiX.Library.Infrastructure.Caching
  /// Simple repository decorator that caches GetById results using ICacheService.
  /// Invalidates cache on Add/Update/Delete.
  /// </summary>
- public sealed class RepositoryCacheDecorator<T> : IRepository<T> where T : class, ArchiX.Library.Abstractions.Entities.IEntity
+ public sealed class RepositoryCacheDecorator<T> : IRepository<T> where T : BaseEntity
  {
  private readonly Repository<T> _inner; // concrete repository
  private readonly ICacheService _cache;
@@ -21,12 +22,11 @@ namespace ArchiX.Library.Infrastructure.Caching
  _ttl = ttl ?? TimeSpan.FromMinutes(5);
  }
 
- private string KeyForId(int id) => $"repo:{typeof(T).FullName}:id:{id}";
- private string KeyForAll() => $"repo:{typeof(T).FullName}:all"; // aggregate list key
+ private static string KeyForId(int id) => $"repo:{typeof(T).FullName}:id:{id}";
+ private static string KeyForAll() => $"repo:{typeof(T).FullName}:all"; // aggregate list key
 
  public async Task<IEnumerable<T>> GetAllAsync()
  {
- // Cache the full list; typical read-most use cases benefit. Invalidated on mutations.
  return await _cache.GetOrSetAsync<IEnumerable<T>>(KeyForAll(), async ct => await _inner.GetAllAsync().ConfigureAwait(false), absoluteExpiration: _ttl, cacheNull: false, ct: CancellationToken.None).ConfigureAwait(false);
  }
 
@@ -39,23 +39,16 @@ namespace ArchiX.Library.Infrastructure.Caching
  public async Task AddAsync(T entity, int userId)
  {
  await _inner.AddAsync(entity, userId).ConfigureAwait(false);
- // Invalidate single + aggregate keys
- if (entity is ArchiX.Library.Entities.BaseEntity be)
- {
- var key = KeyForId(be.Id);
+ var key = KeyForId(entity.Id);
  await _cache.RemoveAsync(key).ConfigureAwait(false);
- }
  await _cache.RemoveAsync(KeyForAll()).ConfigureAwait(false);
  }
 
  public async Task UpdateAsync(T entity, int userId)
  {
  await _inner.UpdateAsync(entity, userId).ConfigureAwait(false);
- if (entity is ArchiX.Library.Entities.BaseEntity be)
- {
- var key = KeyForId(be.Id);
+ var key = KeyForId(entity.Id);
  await _cache.RemoveAsync(key).ConfigureAwait(false);
- }
  await _cache.RemoveAsync(KeyForAll()).ConfigureAwait(false);
  }
 

@@ -29,13 +29,14 @@ namespace ArchiX.Library.Web.Tests.Tests.Security
  public async Task Email_And_Sms_Providers_Work()
  {
  var s = new ServiceCollection();
+ s.AddLogging();
  s.Configure<TwoFactorOptions>(o => { o.CodeExpirySeconds =60; o.CodeLength =6; });
  s.AddTwoFactorCore();
  s.AddEmailTwoFactor<InMemoryCodeStore, NoopEmail>();
  s.AddSmsTwoFactor<InMemoryCodeStore, NoopSms>();
  var sp = s.BuildServiceProvider();
- var email = sp.GetRequiredService<ITwoFactorProvider>() as EmailTwoFactorProvider;
- var code = await email!.GenerateCodeAsync("u1");
+ var email = sp.GetServices<ITwoFactorProvider>().OfType<EmailTwoFactorProvider>().Single();
+ var code = await email.GenerateCodeAsync("u1");
  Assert.True(await email.ValidateCodeAsync("u1", code));
  }
 
@@ -43,6 +44,7 @@ namespace ArchiX.Library.Web.Tests.Tests.Security
  public async Task Authenticator_Provider_Works()
  {
  var s = new ServiceCollection();
+ s.AddLogging();
  s.Configure<TwoFactorOptions>(o => { o.CodeLength =6; });
  s.AddTwoFactorCore();
  s.AddAuthenticatorTwoFactor<SecretStore>();

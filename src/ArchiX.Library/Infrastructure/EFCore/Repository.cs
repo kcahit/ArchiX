@@ -1,5 +1,6 @@
 ﻿using ArchiX.Library.Abstractions.Persistence;
 using ArchiX.Library.Context;
+using ArchiX.Library.Entities;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -9,8 +10,8 @@ namespace ArchiX.Library.Infrastructure.EfCore
     /// Generic repository implementasyonu.
     /// EF Core üzerinden temel CRUD (Create, Read, Update, Delete) işlemlerini gerçekleştirir.
     /// </summary>
-    /// <typeparam name="T">Entity tipi (IEntity implementasyonu olmalı).</typeparam>
-    public class Repository<T> : IRepository<T> where T : class, ArchiX.Library.Abstractions.Entities.IEntity
+    /// <typeparam name="T">Entity tipi (BaseEntity türevi).</typeparam>
+    public class Repository<T> : IRepository<T> where T : BaseEntity
     {
         private readonly AppDbContext _context;
         private readonly DbSet<T> _dbSet;
@@ -28,16 +29,16 @@ namespace ArchiX.Library.Infrastructure.EfCore
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _dbSet = context.Set<T>();
-            _isBaseEntity = typeof(ArchiX.Library.Entities.BaseEntity).IsAssignableFrom(typeof(T));
+            _isBaseEntity = true; // T her zaman BaseEntity
 
             // Compile queries for this context's model
             _compiledGetById_NoSoftDelete = EF.CompileQuery((AppDbContext ctx, int id) =>
-                ctx.Set<T>().AsNoTracking().FirstOrDefault(e => EF.Property<int>(e, nameof(ArchiX.Library.Entities.BaseEntity.Id)) == id));
+                ctx.Set<T>().AsNoTracking().FirstOrDefault(e => EF.Property<int>(e, nameof(BaseEntity.Id)) == id));
 
-            _compiledGetById_WithSoftDelete = EF.CompileQuery((AppDbContext ctx, int id) =>
+            _compiledGetById_WithSoftDelete = EF. CompileQuery((AppDbContext ctx, int id) =>
                 ctx.Set<T>().AsNoTracking().FirstOrDefault(e =>
-                    EF.Property<int>(e, nameof(ArchiX.Library.Entities.BaseEntity.Id)) == id &&
-                    EF.Property<int>(e, nameof(ArchiX.Library.Entities.BaseEntity.StatusId)) != ArchiX.Library.Entities.BaseEntity.DeletedStatusId));
+                    EF.Property<int>(e, nameof(BaseEntity.Id)) == id &&
+                    EF.Property<int>(e, nameof(BaseEntity.StatusId)) != BaseEntity.DeletedStatusId));
         }
 
         /// <summary>
@@ -77,9 +78,7 @@ namespace ArchiX.Library.Infrastructure.EfCore
         public Task<T?> GetByIdAsync(int id)
         {
             // Use compiled sync query for hot path and return as completed task
-            T? result = _isBaseEntity
-                ? _compiledGetById_WithSoftDelete(_context, id)
-                : _compiledGetById_NoSoftDelete(_context, id);
+            T? result = _compiledGetById_WithSoftDelete(_context, id);
 
             return Task.FromResult(result);
         }
@@ -91,8 +90,7 @@ namespace ArchiX.Library.Infrastructure.EfCore
         /// <param name="userId">İşlemi yapan kullanıcı kimliği.</param>
         public async Task AddAsync(T entity, int userId)
         {
-            if (entity is ArchiX.Library.Entities.BaseEntity be)
-                be.MarkCreated(userId);
+            entity.MarkCreated(userId);
 
             await _dbSet.AddAsync(entity).ConfigureAwait(false);
         }
@@ -104,8 +102,7 @@ namespace ArchiX.Library.Infrastructure.EfCore
         /// <param name="userId">İşlemi yapan kullanıcı kimliği.</param>
         public async Task UpdateAsync(T entity, int userId)
         {
-            if (entity is ArchiX.Library.Entities.BaseEntity be)
-                be.MarkUpdated(userId);
+            entity.MarkUpdated(userId);
 
             _dbSet.Update(entity);
             await Task.CompletedTask.ConfigureAwait(false);
@@ -122,16 +119,8 @@ namespace ArchiX.Library.Infrastructure.EfCore
             var entity = await _dbSet.FindAsync(id).ConfigureAwait(false);
             if (entity == null) return;
 
-            if (entity is ArchiX.Library.Entities.BaseEntity be)
-            {
-                // Soft-delete (DEL=6), fiziksel silme yok
-                be.SoftDelete(userId);
-                _dbSet.Update(entity);
-            }
-            else
-            {
-                _dbSet.Remove(entity);
-            }
+            entity.SoftDelete(userId);
+            _dbSet.Update(entity);
         }
     }
 }
