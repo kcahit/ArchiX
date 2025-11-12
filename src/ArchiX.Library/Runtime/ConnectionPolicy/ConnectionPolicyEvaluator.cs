@@ -41,7 +41,18 @@ namespace ArchiX.Library.Runtime.ConnectionPolicy
             if (!options.AllowIntegratedSecurity && info.IntegratedSecurity == true)
                 return Decide(mode, ConnectionPolicyReasonCodes.FORBIDDEN_INTEGRATED_SECURITY, info);
 
-            // C-1: whitelist henüz yok → başarılı
+            // C-2: Whitelist kontrolleri
+            if (options.IsWhitelistEmpty)
+            {
+                // Whitelist boşsa uyar/engelle (mode'a göre)
+                return Decide(mode, ConnectionPolicyReasonCodes.WHITELIST_EMPTY, info);
+            }
+
+            if (!IsWhitelisted(info, options))
+            {
+                return Decide(mode, ConnectionPolicyReasonCodes.SERVER_NOT_WHITELISTED, info);
+            }
+
             return new ConnectionPolicyResult(mode, "Allowed", null, info.NormalizedServer);
         }
 
@@ -100,7 +111,7 @@ namespace ArchiX.Library.Runtime.ConnectionPolicy
             bool? integrated = TryBool(GetFirst(kv, ["Integrated Security", "Trusted_Connection"]));
 
             var normalizedServer = port.HasValue ? $"{host}:{port}" : host;
-            return new ConnInfo(normalizedServer, encrypt, trust, integrated);
+            return new ConnInfo(normalizedServer, host, port, encrypt, trust, integrated);
         }
 
         private static string? GetFirst(Dictionary<string, string> kv, ReadOnlySpan<string> keys)
@@ -123,8 +134,106 @@ namespace ArchiX.Library.Runtime.ConnectionPolicy
             return null;
         }
 
+        // C-2: whitelist helpers
+
+        private static bool IsWhitelisted(ConnInfo info, ConnectionPolicyOptions options)
+        {
+            if (MatchAllowedHosts(info, options.AllowedHosts))
+                return true;
+
+            if (MatchAllowedCidrs(info, options.AllowedCidrs))
+                return true;
+
+            return false;
+        }
+
+        private static bool MatchAllowedHosts(ConnInfo info, string[] allowedHosts)
+        {
+            if (allowedHosts.Length == 0) return false;
+
+            foreach (var raw in allowedHosts)
+            {
+                var entry = raw?.Trim();
+                if (string.IsNullOrEmpty(entry)) continue;
+
+                // If entry has an explicit port, compare normalized "host:port"
+                if (entry.Contains(':', StringComparison.Ordinal))
+                {
+                    if (string.Equals(info.NormalizedServer, entry, StringComparison.OrdinalIgnoreCase))
+                        return true;
+                }
+                else
+                {
+                    // Compare host-only
+                    if (string.Equals(info.Host, entry, StringComparison.OrdinalIgnoreCase))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool MatchAllowedCidrs(ConnInfo info, string[] allowedCidrs)
+        {
+            if (allowedCidrs.Length == 0) return false;
+
+            if (!System.Net.IPAddress.TryParse(info.Host, out var ip))
+                return false;
+
+            foreach (var raw in allowedCidrs)
+            {
+                var entry = raw?.Trim();
+                if (string.IsNullOrEmpty(entry)) continue;
+                if (IsIpInCidr(ip, entry)) return true;
+            }
+
+            return false;
+        }
+
+        private static bool IsIpInCidr(System.Net.IPAddress ip, string cidrOrIp)
+        {
+            // Allow plain IP without slash
+            if (!cidrOrIp.Contains('/', StringComparison.Ordinal))
+            {
+                if (System.Net.IPAddress.TryParse(cidrOrIp, out var exact))
+                {
+                    return ip.Equals(exact);
+                }
+                return false;
+            }
+
+            var parts = cidrOrIp.Split('/', 2, StringSplitOptions.TrimEntries);
+            if (parts.Length != 2) return false;
+
+            if (!System.Net.IPAddress.TryParse(parts[0], out var prefix)) return false;
+            if (!int.TryParse(parts[1], System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var maskLen)) return false;
+
+            if (ip.AddressFamily != prefix.AddressFamily) return false;
+
+            var ipBytes = ip.GetAddressBytes();
+            var prefixBytes = prefix.GetAddressBytes();
+            var totalBits = ipBytes.Length * 8;
+
+            if (maskLen < 0 || maskLen > totalBits) return false;
+
+            var fullBytes = maskLen / 8;
+            var remainingBits = maskLen % 8;
+
+            for (int i = 0; i < fullBytes; i++)
+            {
+                if (ipBytes[i] != prefixBytes[i]) return false;
+            }
+
+            if (remainingBits == 0) return true;
+
+            byte mask = (byte)~(0xFF >> remainingBits);
+            return (ipBytes[fullBytes] & mask) == (prefixBytes[fullBytes] & mask);
+        }
+
         private readonly record struct ConnInfo(
             string NormalizedServer,
+            string Host,
+            int? Port,
             bool? Encrypt,
             bool? TrustServerCertificate,
             bool? IntegratedSecurity

@@ -109,7 +109,9 @@ namespace ArchiX.Library.Tests.Tests.RuntimeTests.ConnectionPolicy
                 Mode = "Enforce",
                 RequireEncrypt = true,
                 ForbidTrustServerCertificate = true,
-                AllowIntegratedSecurity = false
+                AllowIntegratedSecurity = false,
+                // C-2: whitelist sağlamak için ekle
+                AllowedHosts = new[] { "dev-db-01" }
             };
             var sut = CreateEvaluator(opts);
 
