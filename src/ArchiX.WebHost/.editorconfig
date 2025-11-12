@@ -13,8 +13,7 @@ tab_width = 4
 
 # New line preferences
 end_of_line = crlf
-insert_final_newline = true
-trim_trailing_whitespace = true
+insert_final_newline = false
 
 #### .NET Code Actions ####
 
@@ -29,8 +28,8 @@ dotnet_search_reference_assemblies = true
 #### .NET Coding Conventions ####
 
 # Organize usings
-dotnet_separate_import_directive_groups = true
-dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+dotnet_sort_system_directives_first = false
 file_header_template = unset
 
 # this. and Me. preferences
@@ -94,14 +93,14 @@ csharp_style_var_for_built_in_types = false
 csharp_style_var_when_type_is_apparent = false
 
 # Expression-bodied members
-csharp_style_expression_bodied_accessors = true
-csharp_style_expression_bodied_constructors = false
-csharp_style_expression_bodied_indexers = true
-csharp_style_expression_bodied_lambdas = true
-csharp_style_expression_bodied_local_functions = false
-csharp_style_expression_bodied_methods = false
-csharp_style_expression_bodied_operators = false
-csharp_style_expression_bodied_properties = true
+csharp_style_expression_bodied_accessors = true:silent
+csharp_style_expression_bodied_constructors = false:silent
+csharp_style_expression_bodied_indexers = true:silent
+csharp_style_expression_bodied_lambdas = true:silent
+csharp_style_expression_bodied_local_functions = false:silent
+csharp_style_expression_bodied_methods = false:silent
+csharp_style_expression_bodied_operators = false:silent
+csharp_style_expression_bodied_properties = true:silent
 
 # Pattern matching preferences
 csharp_style_pattern_matching_over_as_with_null_check = true
@@ -122,13 +121,13 @@ csharp_style_prefer_readonly_struct = true
 csharp_style_prefer_readonly_struct_member = true
 
 # Code-block preferences
-csharp_prefer_braces = true
-csharp_prefer_simple_using_statement = true
-csharp_prefer_system_threading_lock = true
-csharp_style_namespace_declarations = block_scoped
-csharp_style_prefer_method_group_conversion = true
-csharp_style_prefer_primary_constructors = true
-csharp_style_prefer_top_level_statements = true
+csharp_prefer_braces = true:silent
+csharp_prefer_simple_using_statement = true:suggestion
+csharp_prefer_system_threading_lock = true:suggestion
+csharp_style_namespace_declarations = block_scoped:silent
+csharp_style_prefer_method_group_conversion = true:silent
+csharp_style_prefer_primary_constructors = true:suggestion
+csharp_style_prefer_top_level_statements = true:silent
 
 # Expression-level preferences
 csharp_prefer_simple_default_expression = true
@@ -148,7 +147,7 @@ csharp_style_unused_value_assignment_preference = discard_variable
 csharp_style_unused_value_expression_statement_preference = discard_variable
 
 # 'using' directive preferences
-csharp_using_directive_placement = outside_namespace
+csharp_using_directive_placement = outside_namespace:silent
 
 # New line preferences
 csharp_style_allow_blank_line_after_colon_in_constructor_initializer_experimental = true
@@ -207,6 +206,7 @@ csharp_preserve_single_line_statements = true
 #### Naming styles ####
 
 # Naming rules
+
 dotnet_naming_rule.interface_should_be_begins_with_i.severity = suggestion
 dotnet_naming_rule.interface_should_be_begins_with_i.symbols = interface
 dotnet_naming_rule.interface_should_be_begins_with_i.style = begins_with_i
@@ -220,59 +220,37 @@ dotnet_naming_rule.non_field_members_should_be_pascal_case.symbols = non_field_m
 dotnet_naming_rule.non_field_members_should_be_pascal_case.style = pascal_case
 
 # Symbol specifications
+
 dotnet_naming_symbols.interface.applicable_kinds = interface
 dotnet_naming_symbols.interface.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
-dotnet_naming_symbols.interface.required_modifiers =
+dotnet_naming_symbols.interface.required_modifiers = 
 
 dotnet_naming_symbols.types.applicable_kinds = class, struct, interface, enum
 dotnet_naming_symbols.types.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
-dotnet_naming_symbols.types.required_modifiers =
+dotnet_naming_symbols.types.required_modifiers = 
 
 dotnet_naming_symbols.non_field_members.applicable_kinds = property, event, method
 dotnet_naming_symbols.non_field_members.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
-dotnet_naming_symbols.non_field_members.required_modifiers =
+dotnet_naming_symbols.non_field_members.required_modifiers = 
 
 # Naming styles
-dotnet_naming_style.pascal_case.required_prefix =
-dotnet_naming_style.pascal_case.required_suffix =
-dotnet_naming_style.pascal_case.word_separator =
+
+dotnet_naming_style.pascal_case.required_prefix = 
+dotnet_naming_style.pascal_case.required_suffix = 
+dotnet_naming_style.pascal_case.word_separator = 
 dotnet_naming_style.pascal_case.capitalization = pascal_case
 
 dotnet_naming_style.begins_with_i.required_prefix = I
-dotnet_naming_style.begins_with_i.required_suffix =
-dotnet_naming_style.begins_with_i.word_separator =
+dotnet_naming_style.begins_with_i.required_suffix = 
+dotnet_naming_style.begins_with_i.word_separator = 
 dotnet_naming_style.begins_with_i.capitalization = pascal_case
 
-# Kod stilleri ve uyarı ayarları
-dotnet_diagnostic.IDE0005.severity = warning   # Remove unnecessary usings
-dotnet_diagnostic.IDE0028.severity = none      # Collection initialization simplification
-dotnet_diagnostic.IDE0055.severity = none      # Format document
-dotnet_diagnostic.IDE0063.severity = none      # Simple using statement
-dotnet_diagnostic.IDE0130.severity = error	   # Namespace klasör yapısına uymalı (zorunlu)
-dotnet_diagnostic.IDE0290.severity = none      # Primary constructor style
-dotnet_diagnostic.IDE0300.severity = none      # Collection expression simplification
-
-# XML doc uyarılarını kapat
-dotnet_diagnostic.CS1591.severity = none  # Missing XML comment
-dotnet_diagnostic.CS1573.severity = none  # Parametre için eksik doc
-dotnet_diagnostic.CS1572.severity = none  # Geçersiz XML doc
-dotnet_diagnostic.CS1574.severity = none  # Geçersiz cref
-dotnet_diagnostic.CS1580.severity = none  # Invalid cref param
-dotnet_diagnostic.CS1581.severity = none  # Invalid cref param sayısı
-dotnet_diagnostic.CS1584.severity = none  # XML doc iç içe etiket hatası
-dotnet_diagnostic.CS1587.severity = none  # Geçersiz yerde XML doc
-dotnet_diagnostic.CS1712.severity = none  # Generic type param doc eksik
-dotnet_diagnostic.CA1861.severity = none  # Constant arrays not reused
-
-# Varsayılan: CA1859 açık (uyarı)
-[*.cs]
-dotnet_diagnostic.CA1859.severity = warning
-# Sadece ArchiXDatabase.cs için kapat
-[src/ArchiX.Library/Runtime/Database/Core/ArchiXDatabase.cs]
-dotnet_diagnostic.CA1859.severity = none
-# Tüm test dosyaları için kapat
-[tests/**/*.cs]
-dotnet_diagnostic.CA1859.severity = none
-
-
-
+[*.{cs,vb}]
+dotnet_style_operator_placement_when_wrapping = beginning_of_line
+tab_width = 4
+indent_size = 4
+end_of_line = crlf
+dotnet_style_coalesce_expression = true:suggestion
+dotnet_style_null_propagation = true:suggestion
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true:suggestion
+dotnet_style_prefer_auto_properties = true:silent

@@ -1,11 +1,8 @@
 ﻿// File: src/ArchiX.Library/Context/AppDbContext.cs
 
 using System.Reflection;
-
-using ArchiX.Library.Entities; // BaseEntity, Statu
-
+using ArchiX.Library.Entities; // BaseEntity, Statu, + ConnectionPolicy entities
 using Humanizer;
-
 using Microsoft.EntityFrameworkCore;
 
 namespace ArchiX.Library.Context
@@ -19,6 +16,11 @@ namespace ArchiX.Library.Context
         public int RejectedStatusId { get; private set; }
         public int PassiveStatusId { get; private set; }
         public int DeletedStatusId { get; private set; }
+
+        // ConnectionPolicy DbSets (single declarations)
+        public DbSet<ArchiXSetting> ArchiXSettings => Set<ArchiXSetting>();
+        public DbSet<ConnectionServerWhitelist> ConnectionServerWhitelist => Set<ConnectionServerWhitelist>();
+        public DbSet<ConnectionAudit> ConnectionAudits => Set<ConnectionAudit>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -143,6 +145,51 @@ namespace ArchiX.Library.Context
                 var lambda = System.Linq.Expressions.Expression.Lambda(lambdaType, body, p);
                 modelBuilder.Entity(entityType).HasQueryFilter(lambda);
             }
+
+            // 7) ConnectionPolicy model configuration (with EF Core 9 check-constraint style)
+            modelBuilder.Entity<ArchiXSetting>(e =>
+            {
+                e.ToTable("ArchiXSettings");
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Key).IsRequired().HasMaxLength(200);
+                e.Property(x => x.Group).HasMaxLength(50);
+                e.Property(x => x.Description).HasMaxLength(250);
+                e.Property(x => x.UpdatedAt).HasPrecision(4);
+                e.HasIndex(x => x.Key).IsUnique();
+                e.HasIndex(x => x.Group);
+            });
+
+            modelBuilder.Entity<ConnectionServerWhitelist>(e =>
+            {
+                e.ToTable("ConnectionServerWhitelist", t =>
+                {
+                    t.HasCheckConstraint("CK_Whitelist_ServerOrCidr",
+                        "[ServerName] IS NOT NULL OR [Cidr] IS NOT NULL");
+                });
+                e.HasKey(x => x.Id);
+                e.Property(x => x.ServerName).HasMaxLength(200);
+                e.Property(x => x.Cidr).HasMaxLength(43);
+                e.Property(x => x.EnvScope).HasMaxLength(20);
+                e.Property(x => x.AddedAt).HasPrecision(4);
+                e.HasIndex(x => new { x.ServerName, x.IsActive });
+                e.HasIndex(x => new { x.Cidr, x.IsActive });
+                e.HasIndex(x => x.EnvScope);
+            });
+
+            modelBuilder.Entity<ConnectionAudit>(e =>
+            {
+                e.ToTable("ConnectionAudit");
+                e.HasKey(x => x.Id);
+                e.Property(x => x.AttemptedAt).HasPrecision(4);
+                e.Property(x => x.NormalizedServer).HasMaxLength(200).IsRequired();
+                e.Property(x => x.Mode).HasMaxLength(10).IsRequired();
+                e.Property(x => x.Result).HasMaxLength(10).IsRequired();
+                e.Property(x => x.ReasonCode).HasMaxLength(50);
+                e.Property(x => x.RawConnectionMasked).HasMaxLength(1024).IsRequired();
+                e.HasIndex(x => x.AttemptedAt);
+                e.HasIndex(x => x.Result);
+                e.HasIndex(x => x.CorrelationId);
+            });
         }
 
         /// <summary>Çekirdek seed: Statu, FilterItem, LanguagePack. Id verilmez, Code bazlı idempotent.</summary>
