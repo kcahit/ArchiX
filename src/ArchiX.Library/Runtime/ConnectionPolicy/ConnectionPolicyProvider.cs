@@ -81,6 +81,30 @@ namespace ArchiX.Library.Runtime.ConnectionPolicy
                     ApplyDelimited(settings, "AllowedHosts", vals => options = options with { AllowedHosts = vals });
                     ApplyDelimited(settings, "AllowedCidrs", vals => options = options with { AllowedCidrs = vals });
                 }
+
+                // Merge DB whitelist entries (active + env match/null)
+                var env = _env;
+                var wl = db.Set<ConnectionServerWhitelist>()
+                           .AsNoTracking()
+                           .Where(x => x.IsActive && (x.EnvScope == null || x.EnvScope == env))
+                           .ToList();
+
+                if (wl.Count > 0)
+                {
+                    var hostsFromDb = wl.Where(x => x.ServerName != null)
+                        .Select(x => x.Port.HasValue ? $"{x.ServerName}:{x.Port}" : x.ServerName!)
+                        .ToArray();
+
+                    var cidrsFromDb = wl.Where(x => x.Cidr != null)
+                                        .Select(x => x.Cidr!)
+                                        .ToArray();
+
+                    options = options with
+                    {
+                        AllowedHosts = [.. options.AllowedHosts.Concat(hostsFromDb).Distinct(StringComparer.OrdinalIgnoreCase)],
+                        AllowedCidrs = [.. options.AllowedCidrs.Concat(cidrsFromDb).Distinct(StringComparer.OrdinalIgnoreCase)],
+                    };
+                }
             }
 
             OverrideEnv("ARCHIX__CONNECTIONPOLICY__MODE", v => options = options with { Mode = v });

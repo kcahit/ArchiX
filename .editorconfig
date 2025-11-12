@@ -264,6 +264,7 @@ dotnet_diagnostic.CS1587.severity = none  # Geçersiz yerde XML doc
 dotnet_diagnostic.CS1712.severity = none  # Generic type param doc eksik
 dotnet_diagnostic.CA1861.severity = none  # Constant arrays not reused
 
+
 # Varsayılan: CA1859 açık (uyarı)
 [*.cs]
 dotnet_diagnostic.CA1859.severity = warning
@@ -273,6 +274,8 @@ dotnet_diagnostic.CA1859.severity = none
 # Tüm test dosyaları için kapat
 [tests/**/*.cs]
 dotnet_diagnostic.CA1859.severity = none
+[*.cs]
+dotnet_diagnostic.IDE0305.severity = none
 
 
 

@@ -5,10 +5,18 @@ namespace ArchiX.Library.Runtime.ConnectionPolicy
     internal sealed class ConnectionPolicyEvaluator : IConnectionPolicyEvaluator
     {
         private readonly IConnectionPolicyProvider _provider;
+        private readonly IConnectionPolicyAuditor _auditor;
 
         public ConnectionPolicyEvaluator(IConnectionPolicyProvider provider)
         {
             _provider = provider;
+            _auditor = new NoOpAuditor();
+        }
+
+        public ConnectionPolicyEvaluator(IConnectionPolicyProvider provider, IConnectionPolicyAuditor auditor)
+        {
+            _provider = provider;
+            _auditor = auditor;
         }
 
         public ConnectionPolicyResult Evaluate(string connectionString)
@@ -23,7 +31,7 @@ namespace ArchiX.Library.Runtime.ConnectionPolicy
             if (mode == "Off")
             {
                 var offInfo = Parse(connectionString);
-                return new ConnectionPolicyResult("Off", "Allowed", null, offInfo.NormalizedServer);
+                return Return(connectionString, new ConnectionPolicyResult("Off", "Allowed", null, offInfo.NormalizedServer));
             }
 
             // Bayrak kontrolleri (C-1 kapsamı)
@@ -31,29 +39,34 @@ namespace ArchiX.Library.Runtime.ConnectionPolicy
 
             // RequireEncrypt
             if (options.RequireEncrypt && info.Encrypt != true)
-                return Decide(mode, ConnectionPolicyReasonCodes.ENCRYPT_REQUIRED, info);
+                return Return(connectionString, Decide(mode, ConnectionPolicyReasonCodes.ENCRYPT_REQUIRED, info));
 
             // ForbidTrustServerCertificate
             if (options.ForbidTrustServerCertificate && info.TrustServerCertificate == true)
-                return Decide(mode, ConnectionPolicyReasonCodes.TRUST_CERT_FORBIDDEN, info);
+                return Return(connectionString, Decide(mode, ConnectionPolicyReasonCodes.TRUST_CERT_FORBIDDEN, info));
 
             // IntegratedSecurity
             if (!options.AllowIntegratedSecurity && info.IntegratedSecurity == true)
-                return Decide(mode, ConnectionPolicyReasonCodes.FORBIDDEN_INTEGRATED_SECURITY, info);
+                return Return(connectionString, Decide(mode, ConnectionPolicyReasonCodes.FORBIDDEN_INTEGRATED_SECURITY, info));
 
             // C-2: Whitelist kontrolleri
             if (options.IsWhitelistEmpty)
             {
-                // Whitelist boşsa uyar/engelle (mode'a göre)
-                return Decide(mode, ConnectionPolicyReasonCodes.WHITELIST_EMPTY, info);
+                return Return(connectionString, Decide(mode, ConnectionPolicyReasonCodes.WHITELIST_EMPTY, info));
             }
 
             if (!IsWhitelisted(info, options))
             {
-                return Decide(mode, ConnectionPolicyReasonCodes.SERVER_NOT_WHITELISTED, info);
+                return Return(connectionString, Decide(mode, ConnectionPolicyReasonCodes.SERVER_NOT_WHITELISTED, info));
             }
 
-            return new ConnectionPolicyResult(mode, "Allowed", null, info.NormalizedServer);
+            return Return(connectionString, new ConnectionPolicyResult(mode, "Allowed", null, info.NormalizedServer));
+        }
+
+        private ConnectionPolicyResult Return(string raw, ConnectionPolicyResult result)
+        {
+            _auditor.TryWrite(raw, result);
+            return result;
         }
 
         private static ConnectionPolicyResult Decide(string mode, string reason, ConnInfo info)
@@ -228,6 +241,11 @@ namespace ArchiX.Library.Runtime.ConnectionPolicy
 
             byte mask = (byte)~(0xFF >> remainingBits);
             return (ipBytes[fullBytes] & mask) == (prefixBytes[fullBytes] & mask);
+        }
+
+        private sealed class NoOpAuditor : IConnectionPolicyAuditor
+        {
+            public void TryWrite(string rawConnectionString, ConnectionPolicyResult result) { }
         }
 
         private readonly record struct ConnInfo(

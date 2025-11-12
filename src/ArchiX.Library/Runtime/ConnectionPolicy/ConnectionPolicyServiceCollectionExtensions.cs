@@ -7,6 +7,11 @@ namespace ArchiX.Library.Runtime.ConnectionPolicy
     {
         public static IServiceCollection AddConnectionPolicyEvaluator(this IServiceCollection services)
         {
+            // Provider (cached options)
+            services.AddSingleton<IConnectionPolicyProvider, ConnectionPolicyProvider>();
+            // Auditor
+            services.AddSingleton<IConnectionPolicyAuditor, ConnectionPolicyAuditor>();
+            // Evaluator (ctor injects provider + auditor)
             services.AddSingleton<IConnectionPolicyEvaluator, ConnectionPolicyEvaluator>();
             return services;
         }
