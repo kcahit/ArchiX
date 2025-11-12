@@ -11,7 +11,7 @@ namespace ArchiX.Library.Runtime.ConnectionPolicy
             services.AddSingleton<IConnectionPolicyProvider, ConnectionPolicyProvider>();
             // Auditor
             services.AddSingleton<IConnectionPolicyAuditor, ConnectionPolicyAuditor>();
-            // Evaluator (ctor injects provider + auditor)
+            // Evaluator (injects provider + auditor)
             services.AddSingleton<IConnectionPolicyEvaluator, ConnectionPolicyEvaluator>();
             return services;
         }
