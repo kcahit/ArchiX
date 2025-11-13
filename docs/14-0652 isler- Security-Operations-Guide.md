@@ -37,45 +37,40 @@ Bu doküman C-1..C-6 kapsamında yapılan güvenlik özelliklerinin kullanım ve
 - Observability: `app.MapArchiXObservability(app.Configuration);`
 
 4) Çalışma Zamanı Davranışı
-- ConnectionPolicy Evaluate
-  - Mode=Off → her şey Allowed.
-  - Mode=Warn | Enforce → ihlaller `Warn` veya `Blocked` döner.
-  - Whitelist boşsa: `WHITELIST_EMPTY` (Warn/Blocked).
-  - Whitelist dışı: `SERVER_NOT_WHITELISTED`.
-  - Audit tüm değerlendirmelerde yazılır (maskeli raw cs + korelasyon).
-- AttemptLimiter
-  - `TryBeginAsync(subjectId)` true → denemeye izin, false → 429 önerisi.
-  - Başarılı login’den sonra `ResetAsync(subjectId)` çağırın.
-  - `subjectId` önerisi: `username|remoteIp`.
+- Parametre Okuma
+  - `ConnectionPolicyProvider` artık `Group="ConnectionPolicy"` altında `Parameters` tablosunu kullanır.
+  - Versiyon izleme `(UpdatedAt ?? CreatedAt)` ile yapılır, bellek önbelleği (TTL) ile birlikte.
+- Secret Değerler
+  - Şifreli saklanması gereken içerikler için `ParameterDataType = Secret` kullanın (uygulama katmanında encrypt/decrypt).
 
-5) Doğrulama (Hızlı Test)
-- Ping:
-  - GET /ping/status → 200, text/plain
-  - GET /ping/status.json → 200, JSON
-  - GET /health/ping → 200
-- Observability:
-  - GET /metrics (konfige bağlı yol) → Prometheus endpoint
-- ConnectionPolicy:
-  - Örnek: `Server=prod-db-01;Encrypt=True;TrustServerCertificate=False;Integrated Security=False` → Allowed.
-  - `TrustServerCertificate=True` → Reason: `TRUST_CERT_FORBIDDEN`.
-- AttemptLimiter:
-  - Aynı kullanıcı+IP ile MaxAttempts üstü denemede false (uygulamada 429 döndürün).
-  - Başarılı login’de Reset sonrası tekrar izin.
+Operasyon Akışları
+- Parametre ekleme/güncelleme
+  - `Group`, `Key`, `ParameterDataTypeId`, `Value`, `Description` alanlarını doldurun.
+  - JSON tiplerinde `Template` örnek şema sağlayabilir.
+- Whitelist birleşimi
+  - `ConnectionServerWhitelist` aktif kayıtları (EnvScope eşleşmesi varsa) AllowedHosts/Cidrs ile birleştirilir.
+- Cache Tazeleme
+  - Connection Policy için anlık yenileme: `ConnectionPolicyProvider.ForceRefresh()`.
 
-6) Operasyon Notları
-- UTF-8 encoding kullanın (Türkçe karakterler için): VS kaydet uyarısında “UTF-8” seçin; .editorconfig → `charset = utf-8`.
-- IDE stil önerileri (IDE0305 vb.) için __Run Code Cleanup__ veya .editorconfig ile `dotnet_diagnostic.IDE0305.severity = none`.
-- DB whitelist güncellemesi sonrası `ConnectionPolicyProvider.ForceRefresh()` çağrısı ya da TTL süresini bekleyin.
+Yayına Alma (Migrasyon) Notları
+- EF Core migration ve DB güncellemesi:
+  - VS PMC: __Add-Migration__ → __Update-Database__
+  - veya CLI: `dotnet ef migrations add <name>` → `dotnet ef database update`
+- Not: `AppDbContext` sağlayıcıya duyarlı default’lar içerir (SQL Server’da Identity/NEWSEQUENTIALID/SYSDATETIMEOFFSET; diğer sağlayıcılarda CLR default’ları).
 
-7) Sık Sorulanlar
-- IPv6 whitelist nasıl? AllowedHosts: “[fe80::1]:1433” veya AllowedCidrs: “fe80::/64”.
-- Instance bazlı whitelist? AllowedHosts: “host\instance” (tam eşleşme). Sadece host yazarsanız tüm instance’ları kapsar.
-- Whitelist boş olursa? Mode’a göre Warn/Blocked ve Reason=`WHITELIST_EMPTY`.
+Testler
+- SQL Server ile birim/integration testleri yeşil.
+- LocalDB tabanlı test stratejisi:
+  - Her testte benzersiz DB oluşturma → `EnsureCreated()` → seed → doğrulama → DB drop.
+- Çalıştırma:
+  - __Test Explorer__ veya `dotnet test`
 
-8) Sonraki Opsiyonel Adımlar (gereksinim doğarsa)
-- Dağıtık limiter (Redis).
-- Login audit (başarılı/başarısız giriş kaydı).
-- Masking parametrelerini konfigüre edilebilir yapmak.
-- Ek parser varyantları (örn. tcp:host,port).
+Geri Dönüş (Rollback)
+- Geri dönüş gereksiniminde ilgili migrasyonu geri alabilirsiniz:
+  - VS PMC: __Update-Database__ (hedef migration adıyla)
+  - CLI: `dotnet ef database update <previous-migration>`
+- Not: `ArchiXSetting` artık modelden hariçtir; rollback öncesi tabloyu yeniden oluşturmanız gerekebilir.
 
-Bu doküman üretime alınacak yapı için yeterlidir. İhtiyaç halinde ilgili genişletmeleri ayrı fazda ekleyebiliriz.
+Ek Notlar
+- Parametre tip yelpazesi (NVARCHAR/Numeric/Temporal/Other) ileride genişletilebilir; yalnızca `ParameterDataType` seed listesine eklemek yeterlidir.
+- Performans: Bellek önbelleği (TTL) + `(UpdatedAt ?? CreatedAt)` temelli versiyon kontrolü ile okuma maliyeti minimize edildi.
