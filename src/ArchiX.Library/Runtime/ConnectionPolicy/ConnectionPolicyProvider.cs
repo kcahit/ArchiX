@@ -61,23 +61,26 @@ namespace ArchiX.Library.Runtime.ConnectionPolicy
 
             using (var db = _dbFactory.CreateDbContext())
             {
-                var settings = db.ArchiXSettings
+                // Read Parameters instead of ArchiXSettings
+                var settings = db.Parameters
                                  .Where(x => x.Group == "ConnectionPolicy")
                                  .AsNoTracking()
                                  .ToList();
 
                 var latestUpdated = settings.Count == 0
                     ? DateTimeOffset.MinValue
-                    : settings.Max(x => x.UpdatedAt);
+                    : settings.Max(x => x.UpdatedAt ?? x.CreatedAt);
 
                 var cachedVersion = _cache.Get<DateTimeOffset?>(VersionKey);
                 if (!cachedVersion.HasValue || latestUpdated >= cachedVersion.Value)
                 {
                     _cache.Set(VersionKey, latestUpdated, Ttl);
+
                     ApplySetting(settings, "Mode", v => options = options with { Mode = v });
                     ApplySetting(settings, "RequireEncrypt", v => options = options with { RequireEncrypt = ParseBool(v, true) });
                     ApplySetting(settings, "ForbidTrustServerCertificate", v => options = options with { ForbidTrustServerCertificate = ParseBool(v, DefaultForbidTrust(_env)) });
                     ApplySetting(settings, "AllowIntegratedSecurity", v => options = options with { AllowIntegratedSecurity = ParseBool(v, DefaultAllowIntegratedSecurity(_env)) });
+
                     ApplyDelimited(settings, "AllowedHosts", vals => options = options with { AllowedHosts = vals });
                     ApplyDelimited(settings, "AllowedCidrs", vals => options = options with { AllowedCidrs = vals });
                 }
@@ -117,16 +120,17 @@ namespace ArchiX.Library.Runtime.ConnectionPolicy
             return options;
         }
 
-        private static void ApplySetting(List<ArchiXSetting> settings, string key, Action<string> apply)
+        // Helpers now work with Parameter instead of ArchiXSetting
+        private static void ApplySetting(IReadOnlyList<Parameter> settings, string key, Action<string> apply)
         {
-            var item = settings.FirstOrDefault(x => x.Key == $"ConnectionPolicy:{key}");
+            var item = settings.FirstOrDefault(x => x.Key == key);
             if (item != null && !string.IsNullOrWhiteSpace(item.Value))
                 apply(item.Value.Trim());
         }
 
-        private static void ApplyDelimited(List<ArchiXSetting> settings, string key, Action<string[]> apply)
+        private static void ApplyDelimited(IReadOnlyList<Parameter> settings, string key, Action<string[]> apply)
         {
-            var item = settings.FirstOrDefault(x => x.Key == $"ConnectionPolicy:{key}");
+            var item = settings.FirstOrDefault(x => x.Key == key);
             if (item != null && !string.IsNullOrWhiteSpace(item.Value))
                 apply(SplitList(item.Value));
         }

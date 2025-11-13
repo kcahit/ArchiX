@@ -2,9 +2,13 @@
 
 namespace ArchiX.Library.Entities
 {
-    /// <summary>Key/Value hierarchical settings table (precedence: Env > DB > appsettings).</summary>
+    /// <summary>DEPRECATED: Yerine 'Parameter' ve 'ParameterDataType' kullanın.</summary>
+    [Obsolete("DEPRECATED: Use 'Parameter' and 'ParameterDataType'. This type is excluded from EF model.")]
     public class ArchiXSetting : BaseEntity
     {
+        // EF şemasından hariç tut.
+        public new static readonly bool MapToDb = false;
+
         [Required, MaxLength(200)]
         public string Key { get; set; } = null!;
 
