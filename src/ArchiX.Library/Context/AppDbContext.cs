@@ -28,7 +28,7 @@ namespace ArchiX.Library.Context
 
             var asm = typeof(AppDbContext).Assembly;
 
-            //1) BaseEntity tiplerini tara; BaseEntity.MapToDb=false olanları IGNORE et; kalanları çoğul tabloya map et
+            //1) BaseEntity tiplerini tara; MapToDb=false olanları ignore et; kalanları çoğul tabloya map et
             var entityTypes = asm.GetTypes()
                 .Where(t => typeof(BaseEntity).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract);
 
@@ -36,17 +36,13 @@ namespace ArchiX.Library.Context
             {
                 var include = true;
 
-                if (typeof(BaseEntity).IsAssignableFrom(t))
-                {
-                    // Türe özgü/kalıtılan static bool MapToDb alanını oku
-                    var fi = t.GetField(nameof(BaseEntity.MapToDb),
-                              BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
-                             ?? t.GetField(nameof(BaseEntity.MapToDb),
-                              BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+                var fi = t.GetField(nameof(BaseEntity.MapToDb),
+                                    BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
+                         ?? t.GetField(nameof(BaseEntity.MapToDb),
+                                    BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
 
-                    if (fi?.FieldType == typeof(bool))
-                        include = (bool)fi.GetValue(null)!;
-                }
+                if (fi?.FieldType == typeof(bool))
+                    include = (bool)fi.GetValue(null)!;
 
                 if (!include)
                 {
@@ -98,7 +94,7 @@ namespace ArchiX.Library.Context
                 });
             }
 
-            // 3) Statu — Code unique, self-FK yok (sadece kolon ismi tutulur)
+            // 3) Statu — Code unique, self-FK yok
             modelBuilder.Entity<Statu>(e =>
             {
                 e.HasKey(x => x.Id);
@@ -146,10 +142,9 @@ namespace ArchiX.Library.Context
                 modelBuilder.Entity(entityType).HasQueryFilter(lambda);
             }
 
-            // 7) ConnectionPolicy model configuration (with EF Core 9 check-constraint style)
+            // 7) ArchiXSetting — tablo adı globalde otomatik çoğul
             modelBuilder.Entity<ArchiXSetting>(e =>
             {
-                e.ToTable("ArchiXSettings");
                 e.HasKey(x => x.Id);
                 e.Property(x => x.Key).IsRequired().HasMaxLength(200);
                 e.Property(x => x.Group).HasMaxLength(50);
@@ -159,26 +154,30 @@ namespace ArchiX.Library.Context
                 e.HasIndex(x => x.Group);
             });
 
-            modelBuilder.Entity<ConnectionServerWhitelist>(e =>
+            // 8) ConnectionServerWhitelist — tablo adı globalde otomatik çoğul
+                modelBuilder.Entity<ConnectionServerWhitelist>(e =>
             {
-                e.ToTable("ConnectionServerWhitelist", t =>
-                {
-                    t.HasCheckConstraint("CK_Whitelist_ServerOrCidr",
-                        "[ServerName] IS NOT NULL OR [Cidr] IS NOT NULL");
-                });
                 e.HasKey(x => x.Id);
                 e.Property(x => x.ServerName).HasMaxLength(200);
                 e.Property(x => x.Cidr).HasMaxLength(43);
                 e.Property(x => x.EnvScope).HasMaxLength(20);
-                e.Property(x => x.AddedAt).HasPrecision(4);
+
+                // Check constraint — yeni stil (obsoletion yok)
+                e.ToTable(t =>
+                {
+                    t.HasCheckConstraint("CK_Whitelist_ServerOrCidr",
+                        "[ServerName] IS NOT NULL OR [Cidr] IS NOT NULL");
+                });
+
                 e.HasIndex(x => new { x.ServerName, x.IsActive });
                 e.HasIndex(x => new { x.Cidr, x.IsActive });
                 e.HasIndex(x => x.EnvScope);
+                // İhtiyaç olursa: e.HasIndex(x => x.CreatedAt);
             });
 
+            // 9) ConnectionAudit — tablo adı globalde otomatik çoğul
             modelBuilder.Entity<ConnectionAudit>(e =>
             {
-                e.ToTable("ConnectionAudit");
                 e.HasKey(x => x.Id);
                 e.Property(x => x.AttemptedAt).HasPrecision(4);
                 e.Property(x => x.NormalizedServer).HasMaxLength(200).IsRequired();
@@ -215,7 +214,6 @@ namespace ArchiX.Library.Context
             {
                 if (!existingStatusCodes.Contains(s.Code))
                 {
-                    // CreatedBy / LastStatusBy varsayılan 0; StatusId default 3 (BaseEntity)
                     Add(s);
                 }
                 else
@@ -259,7 +257,7 @@ namespace ArchiX.Library.Context
             };
 
             var existingFilters = await Set<FilterItem>()
-                .IgnoreQueryFilters() // güvence
+                .IgnoreQueryFilters()
                 .AsNoTracking()
                 .Select(x => new { x.ItemType, x.Code })
                 .ToListAsync(ct);
@@ -271,7 +269,7 @@ namespace ArchiX.Library.Context
             }
             await SaveChangesAsync(ct);
 
-            // 4) LanguagePack — TR & EN (36 satır)
+            // 4) LanguagePack — TR & EN
             var languagePacks = new[]
             {
                 // Equals / NotEquals
@@ -328,7 +326,7 @@ namespace ArchiX.Library.Context
             };
 
             var existingLangs = await Set<LanguagePack>()
-                .IgnoreQueryFilters() // güvence
+                .IgnoreQueryFilters()
                 .AsNoTracking()
                 .Select(x => new { x.ItemType, x.EntityName, x.FieldName, x.Code, x.Culture })
                 .ToListAsync(ct);
@@ -342,10 +340,7 @@ namespace ArchiX.Library.Context
                     x.Code == lp.Code &&
                     x.Culture == lp.Culture);
 
-                if (!exists)
-                {
-                    Add(lp);
-                }
+                if (!exists) Add(lp);
                 else
                 {
                     var e = await Set<LanguagePack>().SingleAsync(x =>

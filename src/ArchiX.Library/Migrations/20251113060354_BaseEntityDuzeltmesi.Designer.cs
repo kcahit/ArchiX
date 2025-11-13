@@ -4,6 +4,7 @@ using ArchiX.Library.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ArchiX.Library.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251113060354_BaseEntityDuzeltmesi")]
+    partial class BaseEntityDuzeltmesi
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -97,11 +100,11 @@ namespace ArchiX.Library.Migrations
 
             modelBuilder.Entity("ArchiX.Library.Entities.ConnectionAudit", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<DateTimeOffset>("AttemptedAt")
                         .HasPrecision(4)
@@ -109,27 +112,6 @@ namespace ArchiX.Library.Migrations
 
                     b.Property<Guid>("CorrelationId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasPrecision(4)
-                        .HasColumnType("datetimeoffset(4)")
-                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
-
-                    b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsProtected")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("LastStatusAt")
-                        .ValueGeneratedOnAdd()
-                        .HasPrecision(4)
-                        .HasColumnType("datetimeoffset(4)")
-                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
-
-                    b.Property<int>("LastStatusBy")
-                        .HasColumnType("int");
 
                     b.Property<string>("Mode")
                         .IsRequired()
@@ -155,21 +137,6 @@ namespace ArchiX.Library.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
-                    b.Property<Guid>("RowId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("NEWSEQUENTIALID()");
-
-                    b.Property<int>("StatusId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasPrecision(4)
-                        .HasColumnType("datetimeoffset(4)");
-
-                    b.Property<int?>("UpdatedBy")
-                        .HasColumnType("int");
-
                     b.Property<int?>("UserId")
                         .HasColumnType("int");
 
@@ -181,31 +148,24 @@ namespace ArchiX.Library.Migrations
 
                     b.HasIndex("Result");
 
-                    b.HasIndex("StatusId");
-
-                    b.ToTable("ConnectionAudits", (string)null);
+                    b.ToTable("ConnectionAudit", (string)null);
                 });
 
             modelBuilder.Entity("ArchiX.Library.Entities.ConnectionServerWhitelist", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTimeOffset>("AddedAt")
+                        .HasPrecision(4)
+                        .HasColumnType("datetimeoffset(4)");
 
                     b.Property<string>("Cidr")
                         .HasMaxLength(43)
                         .HasColumnType("nvarchar(43)");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasPrecision(4)
-                        .HasColumnType("datetimeoffset(4)")
-                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
-
-                    b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
 
                     b.Property<string>("EnvScope")
                         .HasMaxLength(20)
@@ -214,51 +174,22 @@ namespace ArchiX.Library.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsProtected")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("LastStatusAt")
-                        .ValueGeneratedOnAdd()
-                        .HasPrecision(4)
-                        .HasColumnType("datetimeoffset(4)")
-                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
-
-                    b.Property<int>("LastStatusBy")
-                        .HasColumnType("int");
-
                     b.Property<int?>("Port")
                         .HasColumnType("int");
-
-                    b.Property<Guid>("RowId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("NEWSEQUENTIALID()");
 
                     b.Property<string>("ServerName")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<int>("StatusId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasPrecision(4)
-                        .HasColumnType("datetimeoffset(4)");
-
-                    b.Property<int?>("UpdatedBy")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("EnvScope");
-
-                    b.HasIndex("StatusId");
 
                     b.HasIndex("Cidr", "IsActive");
 
                     b.HasIndex("ServerName", "IsActive");
 
-                    b.ToTable("ConnectionServerWhitelists", null, t =>
+                    b.ToTable("ConnectionServerWhitelist", null, t =>
                         {
                             t.HasCheckConstraint("CK_Whitelist_ServerOrCidr", "[ServerName] IS NOT NULL OR [Cidr] IS NOT NULL");
                         });
@@ -285,9 +216,6 @@ namespace ArchiX.Library.Migrations
 
                     b.Property<int>("CreatedBy")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsProtected")
-                        .HasColumnType("bit");
 
                     b.Property<string>("ItemType")
                         .IsRequired()
@@ -366,9 +294,6 @@ namespace ArchiX.Library.Migrations
                     b.Property<string>("FieldName")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<bool>("IsProtected")
-                        .HasColumnType("bit");
-
                     b.Property<string>("ItemType")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -432,9 +357,6 @@ namespace ArchiX.Library.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsProtected")
-                        .HasColumnType("bit");
-
                     b.Property<DateTimeOffset?>("LastStatusAt")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(4)
@@ -474,24 +396,6 @@ namespace ArchiX.Library.Migrations
                 });
 
             modelBuilder.Entity("ArchiX.Library.Entities.ArchiXSetting", b =>
-                {
-                    b.HasOne("ArchiX.Library.Entities.Statu", null)
-                        .WithMany()
-                        .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("ArchiX.Library.Entities.ConnectionAudit", b =>
-                {
-                    b.HasOne("ArchiX.Library.Entities.Statu", null)
-                        .WithMany()
-                        .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("ArchiX.Library.Entities.ConnectionServerWhitelist", b =>
                 {
                     b.HasOne("ArchiX.Library.Entities.Statu", null)
                         .WithMany()

@@ -3,10 +3,8 @@
 namespace ArchiX.Library.Entities
 {
     /// <summary>Key/Value hierarchical settings table (precedence: Env > DB > appsettings).</summary>
-    public class ArchiXSetting
+    public class ArchiXSetting : BaseEntity
     {
-        public int Id { get; set; }
-
         [Required, MaxLength(200)]
         public string Key { get; set; } = null!;
 
@@ -14,10 +12,6 @@ namespace ArchiX.Library.Entities
 
         [MaxLength(50)]
         public string? Group { get; set; }
-
-        public bool IsProtected { get; set; }
-
-        public DateTimeOffset UpdatedAt { get; set; }
 
         [MaxLength(250)]
         public string? Description { get; set; }
