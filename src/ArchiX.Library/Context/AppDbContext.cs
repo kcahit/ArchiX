@@ -1,11 +1,8 @@
 ﻿// File: src/ArchiX.Library/Context/AppDbContext.cs
-#pragma warning disable CS1591
+
 using System.Reflection;
-
-using ArchiX.Library.Entities;       // BaseEntity, Statu, IEntity
-
+using ArchiX.Library.Entities; // BaseEntity, Statu, + ConnectionPolicy entities
 using Humanizer;
-
 using Microsoft.EntityFrameworkCore;
 
 namespace ArchiX.Library.Context
@@ -20,31 +17,33 @@ namespace ArchiX.Library.Context
         public int PassiveStatusId { get; private set; }
         public int DeletedStatusId { get; private set; }
 
+        // DbSets
+        public DbSet<ConnectionServerWhitelist> ConnectionServerWhitelist => Set<ConnectionServerWhitelist>();
+        public DbSet<ConnectionAudit> ConnectionAudits => Set<ConnectionAudit>();
+        public DbSet<ParameterDataType> ParameterDataTypes => Set<ParameterDataType>();
+        public DbSet<Parameter> Parameters => Set<Parameter>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
             var asm = typeof(AppDbContext).Assembly;
 
-            // 1) IEntity tiplerini tara; BaseEntity.MapToDb=false olanları IGNORE et; kalanları çoğul tabloya map et
+            //1) BaseEntity tiplerini tara; MapToDb=false olanları ignore et; kalanları çoğul tabloya map et
             var entityTypes = asm.GetTypes()
-                .Where(t => typeof(IEntity).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract);
+                .Where(t => typeof(BaseEntity).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract);
 
             foreach (var t in entityTypes)
             {
                 var include = true;
 
-                if (typeof(BaseEntity).IsAssignableFrom(t))
-                {
-                    // Türe özgü/kalıtılan static bool MapToDb alanını oku
-                    var fi = t.GetField(nameof(BaseEntity.MapToDb),
-                              BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
-                             ?? t.GetField(nameof(BaseEntity.MapToDb),
-                              BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+                var fi = t.GetField(nameof(BaseEntity.MapToDb),
+                                    BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
+                         ?? t.GetField(nameof(BaseEntity.MapToDb),
+                                    BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
 
-                    if (fi?.FieldType == typeof(bool))
-                        include = (bool)fi.GetValue(null)!;
-                }
+                if (fi?.FieldType == typeof(bool))
+                    include = (bool)fi.GetValue(null)!;
 
                 if (!include)
                 {
@@ -55,7 +54,7 @@ namespace ArchiX.Library.Context
                 modelBuilder.Entity(t).ToTable(t.Name.Pluralize());
             }
 
-            // 2) BaseEntity ortak kolonlar + (Statu hariç) StatusId→Statu.Id FK
+            //2) BaseEntity ortak kolonlar + (Statu hariç) StatusId→Statu.Id FK
             foreach (var et in modelBuilder.Model.GetEntityTypes()
                          .Where(et => typeof(BaseEntity).IsAssignableFrom(et.ClrType)
                                   && et.ClrType != typeof(BaseEntity)))
@@ -64,7 +63,7 @@ namespace ArchiX.Library.Context
                 {
                     b.Property<int>(nameof(BaseEntity.Id))
                      .ValueGeneratedOnAdd()
-                     .UseIdentityColumn(1, 1);
+                     .UseIdentityColumn(1,1);
 
                     b.Property<Guid>(nameof(BaseEntity.RowId))
                      .HasDefaultValueSql("NEWSEQUENTIALID()")
@@ -96,7 +95,7 @@ namespace ArchiX.Library.Context
                 });
             }
 
-            // 3) Statu — Code unique, self-FK yok (sadece kolon ismi tutulur)
+            // 3) Statu — Code unique, self-FK yok
             modelBuilder.Entity<Statu>(e =>
             {
                 e.HasKey(x => x.Id);
@@ -143,9 +142,71 @@ namespace ArchiX.Library.Context
                 var lambda = System.Linq.Expressions.Expression.Lambda(lambdaType, body, p);
                 modelBuilder.Entity(entityType).HasQueryFilter(lambda);
             }
+
+            // 7) ConnectionServerWhitelist — tablo adı globalde otomatik çoğul
+            modelBuilder.Entity<ConnectionServerWhitelist>(e =>
+            {
+                e.HasKey(x => x.Id);
+                e.Property(x => x.ServerName).HasMaxLength(200);
+                e.Property(x => x.Cidr).HasMaxLength(43);
+                e.Property(x => x.EnvScope).HasMaxLength(20);
+
+                // Check constraint — yeni stil (obsoletion yok)
+                e.ToTable(t =>
+                {
+                    t.HasCheckConstraint("CK_Whitelist_ServerOrCidr",
+                        "[ServerName] IS NOT NULL OR [Cidr] IS NOT NULL");
+                });
+
+                e.HasIndex(x => new { x.ServerName, x.IsActive });
+                e.HasIndex(x => new { x.Cidr, x.IsActive });
+                e.HasIndex(x => x.EnvScope);
+            });
+
+            // 8) ConnectionAudit — tablo adı globalde otomatik çoğul
+            modelBuilder.Entity<ConnectionAudit>(e =>
+            {
+                e.HasKey(x => x.Id);
+                e.Property(x => x.AttemptedAt).HasPrecision(4);
+                e.Property(x => x.NormalizedServer).HasMaxLength(200).IsRequired();
+                e.Property(x => x.Mode).HasMaxLength(10).IsRequired();
+                e.Property(x => x.Result).HasMaxLength(10).IsRequired();
+                e.Property(x => x.ReasonCode).HasMaxLength(50);
+                e.Property(x => x.RawConnectionMasked).HasMaxLength(1024).IsRequired();
+                e.HasIndex(x => x.AttemptedAt);
+                e.HasIndex(x => x.Result);
+                e.HasIndex(x => x.CorrelationId);
+            });
+
+            // 9) ParameterDataType — Code/Name unique
+            modelBuilder.Entity<ParameterDataType>(e =>
+            {
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Code).IsRequired();
+                e.Property(x => x.Name).IsRequired().HasMaxLength(100);
+                e.Property(x => x.Category).HasMaxLength(20);
+                e.Property(x => x.Description).IsRequired().HasMaxLength(500);
+                e.HasIndex(x => x.Code).IsUnique();
+                e.HasIndex(x => x.Name).IsUnique();
+            });
+
+            // 10) Parameter — (Group, Key) unique, FK→ParameterDataType
+            modelBuilder.Entity<Parameter>(e =>
+            {
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Group).IsRequired().HasMaxLength(75);
+                e.Property(x => x.Key).IsRequired().HasMaxLength(150);
+                e.Property(x => x.Description).IsRequired().HasMaxLength(500);
+                e.HasIndex(x => new { x.Group, x.Key }).IsUnique();
+
+                e.HasOne(x => x.DataType)
+                 .WithMany()
+                 .HasForeignKey(x => x.ParameterDataTypeId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
         }
 
-        /// <summary>Çekirdek seed: Statu, FilterItem, LanguagePack. Id verilmez, Code bazlı idempotent.</summary>
+        /// <summary>Çekirdek seed: Statu, FilterItem, LanguagePack, ParameterDataType, TwoFactor default JSON.</summary>
         public async Task EnsureCoreSeedsAndBindAsync(CancellationToken ct = default)
         {
             await using var tx = await Database.BeginTransactionAsync(ct);
@@ -168,7 +229,6 @@ namespace ArchiX.Library.Context
             {
                 if (!existingStatusCodes.Contains(s.Code))
                 {
-                    // CreatedBy / LastStatusBy varsayılan 0; StatusId default 3 (BaseEntity)
                     Add(s);
                 }
                 else
@@ -212,7 +272,7 @@ namespace ArchiX.Library.Context
             };
 
             var existingFilters = await Set<FilterItem>()
-                .IgnoreQueryFilters() // güvence
+                .IgnoreQueryFilters()
                 .AsNoTracking()
                 .Select(x => new { x.ItemType, x.Code })
                 .ToListAsync(ct);
@@ -224,7 +284,7 @@ namespace ArchiX.Library.Context
             }
             await SaveChangesAsync(ct);
 
-            // 4) LanguagePack — TR & EN (36 satır)
+            // 4) LanguagePack — TR & EN
             var languagePacks = new[]
             {
                 // Equals / NotEquals
@@ -266,22 +326,10 @@ namespace ArchiX.Library.Context
                 new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "LessThan",            Culture = "en-US", DisplayName = "Less Than",               Description = "Value must be less than the given one",        StatusId = ApprovedStatusId },
                 new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "LessThanOrEqual",     Culture = "tr-TR", DisplayName = "Küçük Eşittir",           Description = "Değer belirtilenden küçük veya eşit olmalı",  StatusId = ApprovedStatusId },
                 new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "LessThanOrEqual",     Culture = "en-US", DisplayName = "Less Than Or Equal",      Description = "Value must be less than or equal to",          StatusId = ApprovedStatusId },
-
-                // In / NotIn
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "In",                  Culture = "tr-TR", DisplayName = "İçinde",                  Description = "Değer listede olmalı",                        StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "In",                  Culture = "en-US", DisplayName = "In",                      Description = "Value must be in the list",                   StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotIn",               Culture = "tr-TR", DisplayName = "İçinde Değil",            Description = "Değer listede olmamalı",                      StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotIn",               Culture = "en-US", DisplayName = "Not In",                  Description = "Value must not be in the list",               StatusId = ApprovedStatusId },
-
-                // IsNull / IsNotNull
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "IsNull",              Culture = "tr-TR", DisplayName = "Boş",                     Description = "Değer null ya da boş olmalı",                  StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "IsNull",              Culture = "en-US", DisplayName = "Is Null/Empty",           Description = "Value must be null or empty",                  StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "IsNotNull",           Culture = "tr-TR", DisplayName = "Boş Değil",               Description = "Değer null değil ve boş değil olmalı",         StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "IsNotNull",           Culture = "en-US", DisplayName = "Is Not Null/Empty",       Description = "Value is not null and not empty",              StatusId = ApprovedStatusId },
             };
 
             var existingLangs = await Set<LanguagePack>()
-                .IgnoreQueryFilters() // güvence
+                .IgnoreQueryFilters()
                 .AsNoTracking()
                 .Select(x => new { x.ItemType, x.EntityName, x.FieldName, x.Code, x.Culture })
                 .ToListAsync(ct);
@@ -295,10 +343,7 @@ namespace ArchiX.Library.Context
                     x.Code == lp.Code &&
                     x.Culture == lp.Culture);
 
-                if (!exists)
-                {
-                    Add(lp);
-                }
+                if (!exists) Add(lp);
                 else
                 {
                     var e = await Set<LanguagePack>().SingleAsync(x =>
@@ -314,8 +359,98 @@ namespace ArchiX.Library.Context
             }
 
             await SaveChangesAsync(ct);
+
+            // 5) ParameterDataType — seed (idempotent, Code bazlı)
+            var paramTypes = new[]
+            {
+                // NVARCHAR (1–100)
+                new ParameterDataType { Code = 60,  Name = "NVarChar_50",  Category="NVarChar", Description = "NVARCHAR logical length 50 (Value stored as nvarchar(max))",  StatusId = ApprovedStatusId },
+                new ParameterDataType { Code = 70,  Name = "NVarChar_100", Category="NVarChar", Description = "NVARCHAR logical length 100 (Value stored as nvarchar(max))", StatusId = ApprovedStatusId },
+                new ParameterDataType { Code = 80,  Name = "NVarChar_250", Category="NVarChar", Description = "NVARCHAR logical length 250 (Value stored as nvarchar(max))", StatusId = ApprovedStatusId },
+                new ParameterDataType { Code = 90,  Name = "NVarChar_500", Category="NVarChar", Description = "NVARCHAR logical length 500 (Value stored as nvarchar(max))", StatusId = ApprovedStatusId },
+                new ParameterDataType { Code = 100, Name = "NVarChar_Max", Category="NVarChar", Description = "NVARCHAR(MAX) logical length (Value stored as nvarchar(max))", StatusId = ApprovedStatusId },
+
+                // Numeric (200+)
+                new ParameterDataType { Code = 200, Name = "Byte",        Category="Numeric", Description = "Unsigned 8-bit integer (0..255)",                      StatusId = ApprovedStatusId },
+                new ParameterDataType { Code = 210, Name = "SmallInt",    Category="Numeric", Description = "16-bit integer",                                        StatusId = ApprovedStatusId },
+                new ParameterDataType { Code = 220, Name = "Int",         Category="Numeric", Description = "32-bit integer (InvariantCulture)",                     StatusId = ApprovedStatusId },
+                new ParameterDataType { Code = 230, Name = "BigInt",      Category="Numeric", Description = "64-bit integer (InvariantCulture)",                     StatusId = ApprovedStatusId },
+                new ParameterDataType { Code = 240, Name = "Decimal18_6", Category="Numeric", Description = "Decimal(18,6) InvariantCulture (e.g., \"12345.123456\")", StatusId = ApprovedStatusId },
+
+                // Temporal (300+)
+                new ParameterDataType { Code = 300, Name = "Date",     Category="Temporal", Description = "ISO-8601 date: yyyy-MM-dd",                    StatusId = ApprovedStatusId },
+                new ParameterDataType { Code = 310, Name = "Time",     Category="Temporal", Description = "ISO-8601 time: HH:mm:ss[.FFFFFF]",            StatusId = ApprovedStatusId },
+                new ParameterDataType { Code = 320, Name = "DateTime", Category="Temporal", Description = "ISO-8601 datetime: yyyy-MM-ddTHH:mm:ss[.fffffff]Z", StatusId = ApprovedStatusId },
+
+                // Other (900+)
+                new ParameterDataType { Code = 900, Name = "Bool",   Category="Other", Description = "Boolean: true|false",             StatusId = ApprovedStatusId },
+                new ParameterDataType { Code = 910, Name = "Json",   Category="Other", Description = "Valid JSON (object/array)",       StatusId = ApprovedStatusId },
+                new ParameterDataType { Code = 920, Name = "Secret", Category="Other", Description = "Application-encrypted secret",    StatusId = ApprovedStatusId },
+            };
+
+            var existingTypeCodes = await Set<ParameterDataType>().AsNoTracking()
+                .Select(x => x.Code).ToListAsync(ct);
+
+            foreach (var t in paramTypes)
+            {
+                if (!existingTypeCodes.Contains(t.Code))
+                {
+                    Add(t);
+                }
+                else
+                {
+                    var e = await Set<ParameterDataType>().SingleAsync(x => x.Code == t.Code, ct);
+                    e.Name = t.Name;
+                    e.Category = t.Category;
+                    e.Description = t.Description;
+                }
+            }
+            await SaveChangesAsync(ct);
+
+            // 6) TwoFactor — default JSON param (default channel = SMS)
+            var jsonTypeId = await Set<ParameterDataType>()
+                .Where(x => x.Name == "Json")
+                .Select(x => x.Id)
+                .SingleAsync(ct);
+
+            var tfExisting = await Set<Parameter>()
+                .IgnoreQueryFilters()
+                .AsNoTracking()
+                .SingleOrDefaultAsync(x => x.Group == "TwoFactor" && x.Key == "Options", ct);
+
+            if (tfExisting == null)
+            {
+                var value = """
+                            {
+                              "defaultChannel": "Sms"
+                            }
+                            """;
+
+                var template = """
+                               {
+                                 "defaultChannel": "Sms",
+                                 "channels": {
+                                   "Sms": { "codeLength": 6, "expirySeconds": 300 },
+                                   "Email": { "codeLength": 6, "expirySeconds": 300 },
+                                   "Authenticator": { "digits": 6, "periodSeconds": 30, "hashAlgorithm": "SHA1" }
+                                 }
+                               }
+                               """;
+
+                Add(new Parameter
+                {
+                    Group = "TwoFactor",
+                    Key = "Options",
+                    ParameterDataTypeId = jsonTypeId,
+                    Value = value,
+                    Template = template,
+                    Description = "İkili doğrulama (2FA) varsayılan kanal ve kanal ayarları (JSON). Varsayılan: Sms.",
+                    StatusId = ApprovedStatusId
+                });
+                await SaveChangesAsync(ct);
+            }
+
             await tx.CommitAsync(ct);
         }
     }
 }
-#pragma warning restore CS1591

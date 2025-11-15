@@ -1,9 +1,7 @@
 ﻿// File: src/ArchiX.Library/External/PingAdapterServiceCollectionExtensions.cs
 #nullable enable
 using System.ComponentModel.DataAnnotations;
-
-using ArchiX.Library.Infrastructure.Http; // CorrelationHandler, OutboundLoggingHandler, RetryHandler, TimeoutHandler, ProblemDetailsHandler, HttpPoliciesOptions
-
+using ArchiX.Library.Infrastructure.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -32,7 +30,7 @@ namespace ArchiX.Library.External
             services.AddTransient<ProblemDetailsHandler>();
 
             // Retry/Timeout handler'larını options'a göre kur
-            services.AddHttpClient<IPingAdapter, PingAdapter>(client =>
+            services.AddHttpClient<ArchiX.Library.Abstractions.External.IPingAdapter, PingAdapter>(client =>
             {
                 client.BaseAddress = baseAddress;
                 if (timeout is { } t) client.Timeout = t;
@@ -79,9 +77,7 @@ namespace ArchiX.Library.External
                        ?? throw new InvalidOperationException($"{sectionPath} bölümü okunamadı.");
             ValidateOptions(opts, sectionPath);
 
-            var baseUri = opts.GetBaseUri();
-            var timeout = opts.GetTimeout();
-            return services.AddPingAdapter(baseUri, timeout);
+            return services.AddPingAdapter(opts.GetBaseUri(), opts.GetTimeout());
         }
 
         private static void ValidateOptions(PingAdapterOptions opts, string sectionPath)
