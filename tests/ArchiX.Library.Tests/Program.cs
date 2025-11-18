@@ -1,4 +1,5 @@
-﻿using ArchiX.Library.Abstractions.Persistence;     // IUnitOfWork
+﻿// File: tests/ArchiX.Library.Tests/Program.cs
+using ArchiX.Library.Abstractions.Persistence;     // IUnitOfWork
 using ArchiX.Library.Config;
 using ArchiX.Library.Context;
 using ArchiX.Library.Entities;
@@ -16,6 +17,14 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Library appsettings.Development.json (opsiyonel) — test host da görsün
+try
+{
+    var libConfigPath = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "..", "..", "src", "ArchiX.Library", "appsettings.Development.json"));
+    builder.Configuration.AddJsonFile(libConfigPath, optional: true, reloadOnChange: false);
+}
+catch { }
+
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
@@ -30,9 +39,8 @@ builder.Services.AddDbContext<AppDbContext>((sp, opt) =>
     opt.UseSqlServer(cs)
        .EnableDetailedErrors()
        .EnableSensitiveDataLogging()
-        .LogTo(Console.WriteLine, LogLevel.Information);
+       .LogTo(Console.WriteLine, LogLevel.Information);
 
-    // 🔑 Interceptor’ı bağla
     var interceptor = sp.GetRequiredService<DbCommandMetricsInterceptor>();
     opt.AddInterceptors(interceptor);
 });
@@ -76,7 +84,7 @@ if (obsEnabled && metricsEnabled)
         .MapArchiXObservability(app, builder.Configuration);
 }
 
-// Middleware (tekilleştirilmiş)
+// Middleware
 app.UseMiddleware<CorrelationMiddleware>();
 app.UseMiddleware<LoggingScopeMiddleware>();
 app.UseMiddleware<RequestMetricsMiddleware>();

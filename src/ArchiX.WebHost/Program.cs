@@ -1,15 +1,37 @@
 using ArchiX.Library.Abstractions.Time;
+using ArchiX.Library.Context;
 using ArchiX.Library.External;
 using ArchiX.Library.Infrastructure.Caching;
 using ArchiX.Library.Infrastructure.DomainEvents;
 using ArchiX.Library.Runtime.ConnectionPolicy;
+using ArchiX.Library.Runtime.Database; // AdminProvisionerRunner
 using ArchiX.Library.Runtime.Observability;
 using ArchiX.Library.Time;
 using ArchiX.Library.Web;
 using ArchiX.Library.Web.Mapping;
 using ArchiX.Library.Web.Security;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Library-level development config (opsiyonel, host ayarlarýný ezmez)
+try
+{
+    var libConfigPath = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "..", "ArchiX.Library", "appsettings.Development.json"));
+    builder.Configuration.AddJsonFile(libConfigPath, optional: true, reloadOnChange: false);
+}
+catch
+{
+    // optional dosya yoksa/yüklenemezse yok say
+}
+
+// Register AppDbContext (host connection string veya library opsiyonel config kullanýlýr)
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("ArchiXDb")
+        ?? builder.Configuration.GetConnectionString("Default"),
+        sql => sql.EnableRetryOnFailure()
+    ));
 
 // 1) Temel web varsayýlanlarý
 builder.Services.AddArchiXWebDefaults();
@@ -25,7 +47,6 @@ builder.Services.AddAttemptLimiter(builder.Configuration);
 
 // 5) Two-Factor çekirdek (opsiyonel: config yoksa default deðerler)
 builder.Services.AddTwoFactorCore(builder.Configuration, "ArchiX:TwoFactor");
-// Eðer email/sms/authenticator provider eklemek istiyorsan burada generic parametreler ile ekle:
 // builder.Services.AddEmailTwoFactor<MyEmailCodeStore, MyEmailSender>();
 
 // 6) JWT security (opsiyonel, config section "ArchiX:Jwt")
@@ -34,7 +55,6 @@ builder.Services.AddJwtSecurity(builder.Configuration, "ArchiX:Jwt");
 // 7) Caching (in-memory + repository decorator)
 builder.Services.AddArchiXMemoryCaching();
 builder.Services.AddArchiXRepositoryCaching();
-// Opsiyonel redis:
 // builder.Services.AddArchiXRedisCaching(builder.Configuration.GetConnectionString("Redis")!, "archix:");
 
 // 8) Domain events
@@ -48,9 +68,13 @@ builder.Services.AddPingAdapterWithHealthCheck(builder.Configuration);
 
 // 11) Observability (Prometheus /metrics vs.)
 builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 
-// Middleware sýralamasý (isteðe göre ekle)
+// DB provisioning: tetikleme için kütüphane metodu (isteðe baðlý).
+var forceProvision = string.Equals(Environment.GetEnvironmentVariable("ARCHIX_DB_FORCE_PROVISION"), "true", StringComparison.OrdinalIgnoreCase);
+await AdminProvisionerRunner.EnsureDatabaseProvisionedAsync(app.Services, force: forceProvision);
+
 // app.UseAuthentication();
 // app.UseAuthorization();
 

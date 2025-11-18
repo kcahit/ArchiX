@@ -25,6 +25,10 @@ namespace ArchiX.Library.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // Varsayılan collation — SQL Server 2019+ için UTF-8 destekli collation önerisi
+            // Sunucunuz destekliyorsa kullanın; destek yoksa burayı kaldırın veya uygun bir collation seçin.
+            modelBuilder.UseCollation("Latin1_General_100_CI_AS_SC_UTF8");
+
             base.OnModelCreating(modelBuilder);
 
             var asm = typeof(AppDbContext).Assembly;
@@ -63,7 +67,7 @@ namespace ArchiX.Library.Context
                 {
                     b.Property<int>(nameof(BaseEntity.Id))
                      .ValueGeneratedOnAdd()
-                     .UseIdentityColumn(1,1);
+                     .UseIdentityColumn(1, 1);
 
                     b.Property<Guid>(nameof(BaseEntity.RowId))
                      .HasDefaultValueSql("NEWSEQUENTIALID()")
@@ -214,13 +218,13 @@ namespace ArchiX.Library.Context
             // 1) Statu
             var statusItems = new[]
             {
-                new Statu { Code = "DFT", Name = "Draft",              Description = "Record is in draft state" },
-                new Statu { Code = "AWT", Name = "Awaiting Approval",  Description = "Record is waiting for approval" },
-                new Statu { Code = "APR", Name = "Approved",           Description = "Record has been approved" },
-                new Statu { Code = "REJ", Name = "Rejected",           Description = "Record has been rejected" },
-                new Statu { Code = "PSV", Name = "Passive",            Description = "Record is passive / inactive" },
-                new Statu { Code = "DEL", Name = "Deleted",            Description = "Record has been deleted" },
-            };
+                    new Statu { Code = "DFT", Name = "Draft",              Description = "Record is in draft state" },
+                    new Statu { Code = "AWT", Name = "Awaiting Approval",  Description = "Record is waiting for approval" },
+                    new Statu { Code = "APR", Name = "Approved",           Description = "Record has been approved" },
+                    new Statu { Code = "REJ", Name = "Rejected",           Description = "Record has been rejected" },
+                    new Statu { Code = "PSV", Name = "Passive",            Description = "Record is passive / inactive" },
+                    new Statu { Code = "DEL", Name = "Deleted",            Description = "Record has been deleted" },
+                };
 
             var existingStatusCodes = await Set<Statu>().AsNoTracking()
                 .Select(x => x.Code).ToListAsync(ct);
@@ -251,25 +255,25 @@ namespace ArchiX.Library.Context
             // 3) FilterItem — StatusId = Approved
             var filterItems = new[]
             {
-                new FilterItem { ItemType = "Operator", Code = "Equals",              StatusId = ApprovedStatusId },
-                new FilterItem { ItemType = "Operator", Code = "NotEquals",           StatusId = ApprovedStatusId },
-                new FilterItem { ItemType = "Operator", Code = "StartsWith",          StatusId = ApprovedStatusId },
-                new FilterItem { ItemType = "Operator", Code = "NotStartsWith",       StatusId = ApprovedStatusId },
-                new FilterItem { ItemType = "Operator", Code = "EndsWith",            StatusId = ApprovedStatusId },
-                new FilterItem { ItemType = "Operator", Code = "NotEndsWith",         StatusId = ApprovedStatusId },
-                new FilterItem { ItemType = "Operator", Code = "Contains",            StatusId = ApprovedStatusId },
-                new FilterItem { ItemType = "Operator", Code = "NotContains",         StatusId = ApprovedStatusId },
-                new FilterItem { ItemType = "Operator", Code = "Between",             StatusId = ApprovedStatusId },
-                new FilterItem { ItemType = "Operator", Code = "NotBetween",          StatusId = ApprovedStatusId },
-                new FilterItem { ItemType = "Operator", Code = "GreaterThan",         StatusId = ApprovedStatusId },
-                new FilterItem { ItemType = "Operator", Code = "GreaterThanOrEqual",  StatusId = ApprovedStatusId },
-                new FilterItem { ItemType = "Operator", Code = "LessThan",            StatusId = ApprovedStatusId },
-                new FilterItem { ItemType = "Operator", Code = "LessThanOrEqual",     StatusId = ApprovedStatusId },
-                new FilterItem { ItemType = "Operator", Code = "In",                  StatusId = ApprovedStatusId },
-                new FilterItem { ItemType = "Operator", Code = "NotIn",               StatusId = ApprovedStatusId },
-                new FilterItem { ItemType = "Operator", Code = "IsNull",              StatusId = ApprovedStatusId },
-                new FilterItem { ItemType = "Operator", Code = "IsNotNull",           StatusId = ApprovedStatusId },
-            };
+                    new FilterItem { ItemType = "Operator", Code = "Equals",              StatusId = ApprovedStatusId },
+                    new FilterItem { ItemType = "Operator", Code = "NotEquals",           StatusId = ApprovedStatusId },
+                    new FilterItem { ItemType = "Operator", Code = "StartsWith",          StatusId = ApprovedStatusId },
+                    new FilterItem { ItemType = "Operator", Code = "NotStartsWith",       StatusId = ApprovedStatusId },
+                    new FilterItem { ItemType = "Operator", Code = "EndsWith",            StatusId = ApprovedStatusId },
+                    new FilterItem { ItemType = "Operator", Code = "NotEndsWith",         StatusId = ApprovedStatusId },
+                    new FilterItem { ItemType = "Operator", Code = "Contains",            StatusId = ApprovedStatusId },
+                    new FilterItem { ItemType = "Operator", Code = "NotContains",         StatusId = ApprovedStatusId },
+                    new FilterItem { ItemType = "Operator", Code = "Between",             StatusId = ApprovedStatusId },
+                    new FilterItem { ItemType = "Operator", Code = "NotBetween",          StatusId = ApprovedStatusId },
+                    new FilterItem { ItemType = "Operator", Code = "GreaterThan",         StatusId = ApprovedStatusId },
+                    new FilterItem { ItemType = "Operator", Code = "GreaterThanOrEqual",  StatusId = ApprovedStatusId },
+                    new FilterItem { ItemType = "Operator", Code = "LessThan",            StatusId = ApprovedStatusId },
+                    new FilterItem { ItemType = "Operator", Code = "LessThanOrEqual",     StatusId = ApprovedStatusId },
+                    new FilterItem { ItemType = "Operator", Code = "In",                  StatusId = ApprovedStatusId },
+                    new FilterItem { ItemType = "Operator", Code = "NotIn",               StatusId = ApprovedStatusId },
+                    new FilterItem { ItemType = "Operator", Code = "IsNull",              StatusId = ApprovedStatusId },
+                    new FilterItem { ItemType = "Operator", Code = "IsNotNull",           StatusId = ApprovedStatusId },
+                };
 
             var existingFilters = await Set<FilterItem>()
                 .IgnoreQueryFilters()
@@ -287,46 +291,46 @@ namespace ArchiX.Library.Context
             // 4) LanguagePack — TR & EN
             var languagePacks = new[]
             {
-                // Equals / NotEquals
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "Equals",              Culture = "tr-TR", DisplayName = "Eşittir",                 Description = "Değer belirtilene eşit olmalı",                 StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "Equals",              Culture = "en-US", DisplayName = "Equals",                  Description = "Value must be equal to the given one",         StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotEquals",           Culture = "tr-TR", DisplayName = "Eşit Değil",              Description = "Değer belirtilene eşit olmamalı",              StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotEquals",           Culture = "en-US", DisplayName = "Not Equal",               Description = "Value must not be equal to the given one",     StatusId = ApprovedStatusId },
+                    // Equals / NotEquals
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "Equals",              Culture = "tr-TR", DisplayName = "Eşittir",                 Description = "Değer belirtilene eşit olmalı",                 StatusId = ApprovedStatusId },
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "Equals",              Culture = "en-US", DisplayName = "Equals",                  Description = "Value must be equal to the given one",         StatusId = ApprovedStatusId },
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotEquals",           Culture = "tr-TR", DisplayName = "Eşit Değil",              Description = "Değer belirtilene eşit olmamalı",              StatusId = ApprovedStatusId },
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotEquals",           Culture = "en-US", DisplayName = "Not Equal",               Description = "Value must not be equal to the given one",     StatusId = ApprovedStatusId },
 
-                // StartsWith / NotStartsWith
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "StartsWith",          Culture = "tr-TR", DisplayName = "İle Başlar",               Description = "Değer belirtilen metinle başlamalı",          StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "StartsWith",          Culture = "en-US", DisplayName = "Starts With",             Description = "Value must start with the given text",         StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotStartsWith",       Culture = "tr-TR", DisplayName = "İle Başlamaz",            Description = "Değer belirtilen metinle başlamamalı",        StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotStartsWith",       Culture = "en-US", DisplayName = "Not Starts With",         Description = "Value must not start with the given text",     StatusId = ApprovedStatusId },
+                    // StartsWith / NotStartsWith
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "StartsWith",          Culture = "tr-TR", DisplayName = "İle Başlar",               Description = "Değer belirtilen metinle başlamalı",          StatusId = ApprovedStatusId },
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "StartsWith",          Culture = "en-US", DisplayName = "Starts With",             Description = "Value must start with the given text",         StatusId = ApprovedStatusId },
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotStartsWith",       Culture = "tr-TR", DisplayName = "İle Başlamaz",            Description = "Değer belirtilen metinle başlamamalı",        StatusId = ApprovedStatusId },
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotStartsWith",       Culture = "en-US", DisplayName = "Not Starts With",         Description = "Value must not start with the given text",     StatusId = ApprovedStatusId },
 
-                // EndsWith / NotEndsWith
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "EndsWith",            Culture = "tr-TR", DisplayName = "İle Biter",               Description = "Değer belirtilen metinle bitmeli",            StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "EndsWith",            Culture = "en-US", DisplayName = "Ends With",               Description = "Value must end with the given text",           StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotEndsWith",         Culture = "tr-TR", DisplayName = "İle Bitmez",              Description = "Değer belirtilen metinle bitmemeli",          StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotEndsWith",         Culture = "en-US", DisplayName = "Not Ends With",           Description = "Value must not end with the given text",       StatusId = ApprovedStatusId },
+                    // EndsWith / NotEndsWith
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "EndsWith",            Culture = "tr-TR", DisplayName = "İle Biter",               Description = "Değer belirtilen metinle bitmeli",            StatusId = ApprovedStatusId },
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "EndsWith",            Culture = "en-US", DisplayName = "Ends With",               Description = "Value must end with the given text",           StatusId = ApprovedStatusId },
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotEndsWith",         Culture = "tr-TR", DisplayName = "İle Bitmez",              Description = "Değer belirtilen metinle bitmemeli",          StatusId = ApprovedStatusId },
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotEndsWith",         Culture = "en-US", DisplayName = "Not Ends With",           Description = "Value must not end with the given text",       StatusId = ApprovedStatusId },
 
-                // Contains / NotContains
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "Contains",            Culture = "tr-TR", DisplayName = "İçerir",                  Description = "Değer metni içermeli",                         StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "Contains",            Culture = "en-US", DisplayName = "Contains",                Description = "Value must contain the text",                  StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotContains",         Culture = "tr-TR", DisplayName = "İçermez",                 Description = "Değer metni içermemeli",                       StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotContains",         Culture = "en-US", DisplayName = "Does Not Contain",        Description = "Value must not contain the text",              StatusId = ApprovedStatusId },
+                    // Contains / NotContains
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "Contains",            Culture = "tr-TR", DisplayName = "İçerir",                  Description = "Değer metni içermeli",                         StatusId = ApprovedStatusId },
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "Contains",            Culture = "en-US", DisplayName = "Contains",                Description = "Value must contain the text",                  StatusId = ApprovedStatusId },
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotContains",         Culture = "tr-TR", DisplayName = "İçermez",                 Description = "Değer metni içermemeli",                       StatusId = ApprovedStatusId },
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotContains",         Culture = "en-US", DisplayName = "Does Not Contain",        Description = "Value must not contain the text",              StatusId = ApprovedStatusId },
 
-                // Between / NotBetween
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "Between",             Culture = "tr-TR", DisplayName = "Arasında",                Description = "Değer aralık içinde olmalı",                  StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "Between",             Culture = "en-US", DisplayName = "Between",                 Description = "Value must be within the range",               StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotBetween",          Culture = "tr-TR", DisplayName = "Arasında Değil",          Description = "Değer aralık dışında olmalı",                 StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotBetween",          Culture = "en-US", DisplayName = "Not Between",             Description = "Value must be outside the range",              StatusId = ApprovedStatusId },
+                    // Between / NotBetween
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "Between",             Culture = "tr-TR", DisplayName = "Arasında",                Description = "Değer aralık içinde olmalı",                  StatusId = ApprovedStatusId },
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "Between",             Culture = "en-US", DisplayName = "Between",                 Description = "Value must be within the range",               StatusId = ApprovedStatusId },
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotBetween",          Culture = "tr-TR", DisplayName = "Arasında Değil",          Description = "Değer aralık dışında olmalı",                 StatusId = ApprovedStatusId },
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotBetween",          Culture = "en-US", DisplayName = "Not Between",             Description = "Value must be outside the range",              StatusId = ApprovedStatusId },
 
-                // Greater / Less
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "GreaterThan",         Culture = "tr-TR", DisplayName = "Büyüktür",                Description = "Değer belirtilenden büyük olmalı",            StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "GreaterThan",         Culture = "en-US", DisplayName = "Greater Than",            Description = "Value must be greater than the given one",     StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "GreaterThanOrEqual",  Culture = "tr-TR", DisplayName = "Büyük Eşittir",           Description = "Değer belirtilenden büyük veya eşit olmalı",  StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "GreaterThanOrEqual",  Culture = "en-US", DisplayName = "Greater Than Or Equal",   Description = "Value must be greater than or equal to",       StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "LessThan",            Culture = "tr-TR", DisplayName = "Küçüktür",                Description = "Değer belirtilenden küçük olmalı",            StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "LessThan",            Culture = "en-US", DisplayName = "Less Than",               Description = "Value must be less than the given one",        StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "LessThanOrEqual",     Culture = "tr-TR", DisplayName = "Küçük Eşittir",           Description = "Değer belirtilenden küçük veya eşit olmalı",  StatusId = ApprovedStatusId },
-                new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "LessThanOrEqual",     Culture = "en-US", DisplayName = "Less Than Or Equal",      Description = "Value must be less than or equal to",          StatusId = ApprovedStatusId },
-            };
+                    // Greater / Less
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "GreaterThan",         Culture = "tr-TR", DisplayName = "Büyüktür",                Description = "Değer belirtilenden büyük olmalı",            StatusId = ApprovedStatusId },
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "GreaterThan",         Culture = "en-US", DisplayName = "Greater Than",            Description = "Value must be greater than the given one",     StatusId = ApprovedStatusId },
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "GreaterThanOrEqual",  Culture = "tr-TR", DisplayName = "Büyük Eşittir",           Description = "Değer belirtilenden büyük veya eşit olmalı",  StatusId = ApprovedStatusId },
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "GreaterThanOrEqual",  Culture = "en-US", DisplayName = "Greater Than Or Equal",   Description = "Value must be greater than or equal to",       StatusId = ApprovedStatusId },
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "LessThan",            Culture = "tr-TR", DisplayName = "Küçüktür",                Description = "Değer belirtilenden küçük olmalı",            StatusId = ApprovedStatusId },
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "LessThan",            Culture = "en-US", DisplayName = "Less Than",               Description = "Value must be less than the given one",        StatusId = ApprovedStatusId },
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "LessThanOrEqual",     Culture = "tr-TR", DisplayName = "Küçük Eşittir",           Description = "Değer belirtilenden küçük veya eşit olmalı",  StatusId = ApprovedStatusId },
+                    new LanguagePack { ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "LessThanOrEqual",     Culture = "en-US", DisplayName = "Less Than Or Equal",      Description = "Value must be less than or equal to",          StatusId = ApprovedStatusId },
+                };
 
             var existingLangs = await Set<LanguagePack>()
                 .IgnoreQueryFilters()
@@ -363,30 +367,30 @@ namespace ArchiX.Library.Context
             // 5) ParameterDataType — seed (idempotent, Code bazlı)
             var paramTypes = new[]
             {
-                // NVARCHAR (1–100)
-                new ParameterDataType { Code = 60,  Name = "NVarChar_50",  Category="NVarChar", Description = "NVARCHAR logical length 50 (Value stored as nvarchar(max))",  StatusId = ApprovedStatusId },
-                new ParameterDataType { Code = 70,  Name = "NVarChar_100", Category="NVarChar", Description = "NVARCHAR logical length 100 (Value stored as nvarchar(max))", StatusId = ApprovedStatusId },
-                new ParameterDataType { Code = 80,  Name = "NVarChar_250", Category="NVarChar", Description = "NVARCHAR logical length 250 (Value stored as nvarchar(max))", StatusId = ApprovedStatusId },
-                new ParameterDataType { Code = 90,  Name = "NVarChar_500", Category="NVarChar", Description = "NVARCHAR logical length 500 (Value stored as nvarchar(max))", StatusId = ApprovedStatusId },
-                new ParameterDataType { Code = 100, Name = "NVarChar_Max", Category="NVarChar", Description = "NVARCHAR(MAX) logical length (Value stored as nvarchar(max))", StatusId = ApprovedStatusId },
+                    // NVARCHAR (1–100)
+                    new ParameterDataType { Code = 60,  Name = "NVarChar_50",  Category="NVarChar", Description = "NVARCHAR logical length 50 (Value stored as nvarchar(max))",  StatusId = ApprovedStatusId },
+                    new ParameterDataType { Code = 70,  Name = "NVarChar_100", Category="NVarChar", Description = "NVARCHAR logical length 100 (Value stored as nvarchar(max))", StatusId = ApprovedStatusId },
+                    new ParameterDataType { Code = 80,  Name = "NVarChar_250", Category="NVarChar", Description = "NVARCHAR logical length 250 (Value stored as nvarchar(max))", StatusId = ApprovedStatusId },
+                    new ParameterDataType { Code = 90,  Name = "NVarChar_500", Category="NVarChar", Description = "NVARCHAR logical length 500 (Value stored as nvarchar(max))", StatusId = ApprovedStatusId },
+                    new ParameterDataType { Code = 100, Name = "NVarChar_Max", Category="NVarChar", Description = "NVARCHAR(MAX) logical length (Value stored as nvarchar(max))", StatusId = ApprovedStatusId },
 
-                // Numeric (200+)
-                new ParameterDataType { Code = 200, Name = "Byte",        Category="Numeric", Description = "Unsigned 8-bit integer (0..255)",                      StatusId = ApprovedStatusId },
-                new ParameterDataType { Code = 210, Name = "SmallInt",    Category="Numeric", Description = "16-bit integer",                                        StatusId = ApprovedStatusId },
-                new ParameterDataType { Code = 220, Name = "Int",         Category="Numeric", Description = "32-bit integer (InvariantCulture)",                     StatusId = ApprovedStatusId },
-                new ParameterDataType { Code = 230, Name = "BigInt",      Category="Numeric", Description = "64-bit integer (InvariantCulture)",                     StatusId = ApprovedStatusId },
-                new ParameterDataType { Code = 240, Name = "Decimal18_6", Category="Numeric", Description = "Decimal(18,6) InvariantCulture (e.g., \"12345.123456\")", StatusId = ApprovedStatusId },
+                    // Numeric (200+)
+                    new ParameterDataType { Code = 200, Name = "Byte",        Category="Numeric", Description = "Unsigned 8-bit integer (0..255)",                      StatusId = ApprovedStatusId },
+                    new ParameterDataType { Code = 210, Name = "SmallInt",    Category="Numeric", Description = "16-bit integer",                                        StatusId = ApprovedStatusId },
+                    new ParameterDataType { Code = 220, Name = "Int",         Category="Numeric", Description = "32-bit integer (InvariantCulture)",                     StatusId = ApprovedStatusId },
+                    new ParameterDataType { Code = 230, Name = "BigInt",      Category="Numeric", Description = "64-bit integer (InvariantCulture)",                     StatusId = ApprovedStatusId },
+                    new ParameterDataType { Code = 240, Name = "Decimal18_6", Category="Numeric", Description = "Decimal(18,6) InvariantCulture (e.g., \"12345.123456\")", StatusId = ApprovedStatusId },
 
-                // Temporal (300+)
-                new ParameterDataType { Code = 300, Name = "Date",     Category="Temporal", Description = "ISO-8601 date: yyyy-MM-dd",                    StatusId = ApprovedStatusId },
-                new ParameterDataType { Code = 310, Name = "Time",     Category="Temporal", Description = "ISO-8601 time: HH:mm:ss[.FFFFFF]",            StatusId = ApprovedStatusId },
-                new ParameterDataType { Code = 320, Name = "DateTime", Category="Temporal", Description = "ISO-8601 datetime: yyyy-MM-ddTHH:mm:ss[.fffffff]Z", StatusId = ApprovedStatusId },
+                    // Temporal (300+)
+                    new ParameterDataType { Code = 300, Name = "Date",     Category="Temporal", Description = "ISO-8601 date: yyyy-MM-dd",                    StatusId = ApprovedStatusId },
+                    new ParameterDataType { Code = 310, Name = "Time",     Category="Temporal", Description = "ISO-8601 time: HH:mm:ss[.FFFFFF]",            StatusId = ApprovedStatusId },
+                    new ParameterDataType { Code = 320, Name = "DateTime", Category="Temporal", Description = "ISO-8601 datetime: yyyy-MM-ddTHH:mm:ss[.fffffff]Z", StatusId = ApprovedStatusId },
 
-                // Other (900+)
-                new ParameterDataType { Code = 900, Name = "Bool",   Category="Other", Description = "Boolean: true|false",             StatusId = ApprovedStatusId },
-                new ParameterDataType { Code = 910, Name = "Json",   Category="Other", Description = "Valid JSON (object/array)",       StatusId = ApprovedStatusId },
-                new ParameterDataType { Code = 920, Name = "Secret", Category="Other", Description = "Application-encrypted secret",    StatusId = ApprovedStatusId },
-            };
+                    // Other (900+)
+                    new ParameterDataType { Code = 900, Name = "Bool",   Category="Other", Description = "Boolean: true|false",             StatusId = ApprovedStatusId },
+                    new ParameterDataType { Code = 910, Name = "Json",   Category="Other", Description = "Valid JSON (object/array)",       StatusId = ApprovedStatusId },
+                    new ParameterDataType { Code = 920, Name = "Secret", Category="Other", Description = "Application-encrypted secret",    StatusId = ApprovedStatusId },
+                };
 
             var existingTypeCodes = await Set<ParameterDataType>().AsNoTracking()
                 .Select(x => x.Code).ToListAsync(ct);
@@ -421,21 +425,21 @@ namespace ArchiX.Library.Context
             if (tfExisting == null)
             {
                 var value = """
-                            {
-                              "defaultChannel": "Sms"
-                            }
-                            """;
+                                {
+                                  "defaultChannel": "Sms"
+                                }
+                                """;
 
                 var template = """
-                               {
-                                 "defaultChannel": "Sms",
-                                 "channels": {
-                                   "Sms": { "codeLength": 6, "expirySeconds": 300 },
-                                   "Email": { "codeLength": 6, "expirySeconds": 300 },
-                                   "Authenticator": { "digits": 6, "periodSeconds": 30, "hashAlgorithm": "SHA1" }
-                                 }
-                               }
-                               """;
+                                   {
+                                     "defaultChannel": "Sms",
+                                     "channels": {
+                                       "Sms": { "codeLength": 6, "expirySeconds": 300 },
+                                       "Email": { "codeLength": 6, "expirySeconds": 300 },
+                                       "Authenticator": { "digits": 6, "periodSeconds": 30, "hashAlgorithm": "SHA1" }
+                                     }
+                                   }
+                                   """;
 
                 Add(new Parameter
                 {
