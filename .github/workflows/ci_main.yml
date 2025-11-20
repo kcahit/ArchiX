@@ -2,32 +2,56 @@ name: ArchiX CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - prod
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
+
+concurrency:
+  group: cicd-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: 9.0.x
 
 jobs:
   ci_main:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup .NET 9
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
-          cache: 'nuget'
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', '**/packages.lock.json') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: dotnet --info
+        run: dotnet --info
 
       - name: Restore
         run: dotnet restore
 
       - name: Build
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build -c Release --no-restore
 
       - name: Test (produce TRX, blame, diag)
         run: |
-          dotnet test --no-build --verbosity normal --logger "trx;LogFileName=tests.trx" --blame --diag:dotnet-test-diag.txt
+          dotnet test --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=tests.trx" --blame --diag:dotnet-test-diag.txt
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -37,3 +61,20 @@ jobs:
             **/TestResults/*.trx
             **/tests.trx
             **/dotnet-test-diag.txt
+
+  deploy_prod:
+    if: github.ref == 'refs/heads/prod'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: dotnet --info
+        run: dotnet --info
+      - name: Restore
+        run: dotnet restore
+      - name: Note
+        run: echo "6.03 migration/seed CI adýmlarý kaldýrýldý. Migrasyonlar runtime uygulanacak."
