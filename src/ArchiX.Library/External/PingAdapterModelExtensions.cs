@@ -17,7 +17,7 @@ namespace ArchiX.Library.External
         /// /status yanıtını tipli modele döndürür.
         /// JSON parse başarısız olursa metni <see cref="PingStatus.Text"/> alanına koyar.
         /// </summary>
-        public static async Task<PingStatus> GetStatusAsync(this IPingAdapter adapter, CancellationToken ct = default)
+        public static async Task<PingStatus> GetStatusAsync(this ArchiX.Library.Abstractions.External.IPingAdapter adapter, CancellationToken ct = default)
         {
             ArgumentNullException.ThrowIfNull(adapter);
             var text = await adapter.GetStatusTextAsync(ct).ConfigureAwait(false);

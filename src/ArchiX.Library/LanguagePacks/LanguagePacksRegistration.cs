@@ -13,7 +13,7 @@ namespace ArchiX.Library.LanguagePacks
         /// </summary>
         public static IServiceCollection AddLanguagePacks(this IServiceCollection services)
         {
-            services.AddScoped<ILanguageService, LanguageService>();
+            services.AddScoped<ArchiX.Library.Abstractions.Localization.ILanguageService, LanguageService>();
             return services;
         }
     }

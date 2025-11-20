@@ -1,101 +1,91 @@
-﻿using ArchiX.Library.Context;
+﻿using ArchiX.Library.Abstractions.Persistence;
+using ArchiX.Library.Context;
 using ArchiX.Library.Entities;
-
 using Microsoft.EntityFrameworkCore;
 
 namespace ArchiX.Library.Infrastructure.EfCore
 {
     /// <summary>
     /// Generic repository implementasyonu.
-    /// EF Core üzerinden temel CRUD (Create, Read, Update, Delete) işlemlerini gerçekleştirir.
+    /// EF Core üzerinden temel CRUD işlemlerini gerçekleştirir.
     /// </summary>
-    /// <typeparam name="T">Entity tipi (IEntity implementasyonu olmalı).</typeparam>
-    public class Repository<T> : IRepository<T> where T : class, IEntity
+    /// <typeparam name="T">Entity tipi (BaseEntity türevi).</typeparam>
+    public class Repository<T> : IRepository<T> where T : BaseEntity
     {
         private readonly AppDbContext _context;
         private readonly DbSet<T> _dbSet;
 
-        /// <summary>
-        /// Repository kurucu metodu.
-        /// </summary>
-        /// <param name="context">EF Core DbContext örneği.</param>
+        // Compiled queries (per context model)
+        private readonly Func<AppDbContext, int, T?> _compiledGetById_NoSoftDelete;
+        private readonly Func<AppDbContext, int, T?> _compiledGetById_WithSoftDelete;
+
         public Repository(AppDbContext context)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _dbSet = context.Set<T>();
+
+            _compiledGetById_NoSoftDelete = EF.CompileQuery(
+                (AppDbContext ctx, int id) =>
+                    ctx.Set<T>().AsNoTracking()
+                       .FirstOrDefault(e => EF.Property<int>(e, nameof(BaseEntity.Id)) == id));
+
+            _compiledGetById_WithSoftDelete = EF.CompileQuery(
+                (AppDbContext ctx, int id) =>
+                    ctx.Set<T>().AsNoTracking()
+                       .FirstOrDefault(e =>
+                           EF.Property<int>(e, nameof(BaseEntity.Id)) == id &&
+                           EF.Property<int>(e, nameof(BaseEntity.StatusId)) != BaseEntity.DeletedStatusId));
         }
 
-        /// <summary>
-        /// Tüm kayıtları asenkron olarak getirir.
-        /// </summary>
-        /// <returns>Kayıt listesi.</returns>
         public async Task<IEnumerable<T>> GetAllAsync()
         {
-            return await _dbSet.ToListAsync();
+            return await _dbSet
+                .ApplyDefaultReadOptions()
+                .ToListAsync()
+                .ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Belirtilen kimliğe sahip kaydı asenkron olarak getirir.
-        /// </summary>
-        /// <param name="id">Aranacak entity kimliği.</param>
-        /// <returns>Entity veya null.</returns>
-        public async Task<T?> GetByIdAsync(int id)
+        public async Task<List<TResult>> GetPageAsync<TResult>(
+            System.Linq.Expressions.Expression<Func<T, TResult>> selector,
+            int pageNumber,
+            int pageSize,
+            CancellationToken ct = default)
         {
-            return await _dbSet.FindAsync(id);
+            ArgumentNullException.ThrowIfNull(selector);
+            ArgumentOutOfRangeException.ThrowIfLessThan(pageNumber, 1, nameof(pageNumber));
+            ArgumentOutOfRangeException.ThrowIfLessThan(pageSize, 1, nameof(pageSize));
+
+            var q = _dbSet
+                .ApplyDefaultReadOptions()
+                .Select(selector)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize);
+
+            return await q.ToListAsync(ct).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Yeni bir kayıt ekler ve BaseEntity özelliklerini günceller.
-        /// </summary>
-        /// <param name="entity">Eklenecek entity.</param>
-        /// <param name="userId">İşlemi yapan kullanıcı kimliği.</param>
+        public Task<T?> GetByIdAsync(int id)
+            => Task.FromResult(_compiledGetById_WithSoftDelete(_context, id));
+
         public async Task AddAsync(T entity, int userId)
         {
-            if (entity is BaseEntity baseEntity)
-            {
-                baseEntity.CreatedAt = DateTimeOffset.UtcNow;
-                baseEntity.CreatedBy = userId;
-            }
-
-            await _dbSet.AddAsync(entity);
+            entity.MarkCreated(userId);
+            await _dbSet.AddAsync(entity).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Var olan bir kaydı günceller ve BaseEntity özelliklerini günceller.
-        /// </summary>
-        /// <param name="entity">Güncellenecek entity.</param>
-        /// <param name="userId">İşlemi yapan kullanıcı kimliği.</param>
-        public async Task UpdateAsync(T entity, int userId)
+        public Task UpdateAsync(T entity, int userId)
         {
-            if (entity is BaseEntity baseEntity)
-            {
-                baseEntity.UpdatedAt = DateTimeOffset.UtcNow;
-                baseEntity.UpdatedBy = userId;
-            }
-
+            entity.MarkUpdated(userId);
             _dbSet.Update(entity);
-            await Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
-        /// <summary>
-        /// Belirtilen kimliğe sahip kaydı siler.
-        /// Eğer entity BaseEntity türevi ise, durum alanlarını da günceller.
-        /// </summary>
-        /// <param name="id">Silinecek entity kimliği.</param>
-        /// <param name="userId">İşlemi yapan kullanıcı kimliği.</param>
         public async Task DeleteAsync(int id, int userId)
         {
-            var entity = await _dbSet.FindAsync(id);
+            var entity = await _dbSet.FindAsync(id).ConfigureAwait(false);
             if (entity == null) return;
-
-            if (entity is BaseEntity baseEntity)
-            {
-                baseEntity.LastStatusAt = DateTimeOffset.UtcNow;
-                baseEntity.LastStatusBy = userId;
-                baseEntity.StatusId = 6; // Deleted
-            }
-
-            _dbSet.Remove(entity);
+            entity.SoftDelete(userId);
+            _dbSet.Update(entity);
         }
     }
 }
