@@ -71,6 +71,7 @@
 	<ItemGroup>
 	  <Folder Include="Abstractions\Entities\" />
 	  <Folder Include="DomainEvents\Contracts\" />
+	  <Folder Include="Migrations\" />
 	</ItemGroup>
 
 	
