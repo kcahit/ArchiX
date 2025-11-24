@@ -8,78 +8,55 @@ on:
   pull_request:
     branches:
       - main
-
-concurrency:
-  group: cicd-${{ github.ref }}
-  cancel-in-progress: true
-
-permissions:
-  contents: read
-
-env:
-  DOTNET_VERSION: 9.0.x
+  workflow_dispatch:
 
 jobs:
   ci_main:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Cache NuGet packages
+          dotnet-version: 9.0.x
+      - name: Cache NuGet
         uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
-          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', '**/packages.lock.json') }}
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
           restore-keys: |
             nuget-${{ runner.os }}-
-
-      - name: dotnet --info
-        run: dotnet --info
-
       - name: Restore
-        run: dotnet restore
-
+        run: dotnet restore ArchiX.sln
       - name: Build
-        run: dotnet build -c Release --no-restore
-
-      - name: Test (produce TRX, blame, diag)
-        run: |
-          dotnet test --no-build --configuration Release --verbosity detailed --logger "trx;LogFileName=tests.trx" --blame --diag:dotnet-test-diag.txt
-
-      - name: Upload test results
+        run: dotnet build ArchiX.sln -c Release --no-restore
+      - name: Test Library
+        run: dotnet test tests/ArchiX.Library.Tests/ArchiX.Library.Tests.csproj -c Release --no-build --logger "trx;LogFileName=library.trx" --verbosity normal
+      - name: Test Web
+        run: dotnet test tests/ArchiX.Library.Web.Tests/ArchiX.Library.Web.Tests.csproj -c Release --no-build --logger "trx;LogFileName=web.trx" --verbosity normal
+      - name: Upload test artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
+          name: tests
           path: |
             **/TestResults/*.trx
-            **/tests.trx
-            **/dotnet-test-diag.txt
+            library.trx
+            web.trx
 
   deploy_prod:
     if: github.ref == 'refs/heads/prod'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: dotnet --info
-        run: dotnet --info
-
+          dotnet-version: 9.0.x
       - name: Restore
-        run: dotnet restore
-
+        run: dotnet restore ArchiX.sln
+      - name: Build
+        run: dotnet build ArchiX.sln -c Release --no-restore
       - name: Note
-        run: echo "6.03 migration/seed CI adýmlarý kaldýrýldý. Migrasyonlar runtime uygulanacak."
+        run: echo "Prod deploy placeholder. Migrations runtime."
