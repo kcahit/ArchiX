@@ -51,9 +51,10 @@ jobs:
 
       - name: Test (produce TRX, blame, diag)
         run: |
-          dotnet test --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=tests.trx" --blame --diag:dotnet-test-diag.txt
+          dotnet test --no-build --configuration Release --verbosity detailed --logger "trx;LogFileName=tests.trx" --blame --diag:dotnet-test-diag.txt
 
       - name: Upload test results
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: test-results
@@ -68,13 +69,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
+
       - name: dotnet --info
         run: dotnet --info
+
       - name: Restore
         run: dotnet restore
+
       - name: Note
         run: echo "6.03 migration/seed CI adýmlarý kaldýrýldý. Migrasyonlar runtime uygulanacak."
