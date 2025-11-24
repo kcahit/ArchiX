@@ -43,23 +43,23 @@ namespace ArchiX.Library.Tests.Tests.CommonTests
 
                 var items = new[]
                 {
-                    new FilterItem
-                    {
-                        ItemType = "Operator",
-                        Code = "Equals",
-                        CreatedBy = createdBy,
-                        LastStatusBy = lastStatusBy,
-                        StatusId = statusId
-                    },
-                    new FilterItem
-                    {
-                        ItemType = "Operator",
-                        Code = "NotEquals",
-                        CreatedBy = createdBy,
-                        LastStatusBy = lastStatusBy,
-                        StatusId = statusId
-                    }
-                };
+                        new FilterItem
+                        {
+                            ItemType = "Operator",
+                            Code = "Equals",
+                            CreatedBy = createdBy,
+                            LastStatusBy = lastStatusBy,
+                            StatusId = statusId
+                        },
+                        new FilterItem
+                        {
+                            ItemType = "Operator",
+                            Code = "NotEquals",
+                            CreatedBy = createdBy,
+                            LastStatusBy = lastStatusBy,
+                            StatusId = statusId
+                        }
+                    };
 
                 db.Set<FilterItem>().AddRange(items);
                 db.SaveChanges();
@@ -114,7 +114,7 @@ namespace ArchiX.Library.Tests.Tests.CommonTests
 
             var entity = new Statu
             {
-                Id = 1,
+                // Id verilmez; EF kimliği üretsin (seed ile çakışmasın)
                 Code = "TST",
                 Name = "Test",
                 Description = "Test record",
@@ -126,7 +126,7 @@ namespace ArchiX.Library.Tests.Tests.CommonTests
             db.Add(entity);
             db.SaveChanges();
 
-            var result = db.Set<Statu>().FirstOrDefault(e => e.Id == 1);
+            var result = db.Set<Statu>().FirstOrDefault(e => e.Id == entity.Id);
 
             Assert.NotNull(result);
             Assert.Equal("TST", result!.Code);
