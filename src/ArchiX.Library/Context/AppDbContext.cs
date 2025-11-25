@@ -23,7 +23,9 @@ namespace ArchiX.Library.Context
         public DbSet<Application> Applications => Set<Application>();
         public DbSet<User> Users => Set<User>();
         public DbSet<UserApplication> UserApplications => Set<UserApplication>();
-
+        public DbSet<Statu> Status => Set<Statu>();
+        public DbSet<FilterItem> FilterItems => Set<FilterItem>();
+        public DbSet<LanguagePack> LanguagePacks => Set<LanguagePack>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.UseCollation("Latin1_General_100_CI_AS_SC_UTF8");
