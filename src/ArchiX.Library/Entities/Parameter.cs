@@ -3,8 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ArchiX.Library.Entities
 {
-    /// <summary>Uygulama parametresi. (Group, Key) benzersizdir.</summary>
-    [Index(nameof(Group), nameof(Key), IsUnique = true)]
+    /// <summary>Uygulama parametresi. (Group, Key, ApplicationId) benzersizdir.</summary>
+    [Index(nameof(Group), nameof(Key), nameof(ApplicationId), IsUnique = true)]
     [Index(nameof(ParameterDataTypeId))]
     public sealed class Parameter : BaseEntity
     {
@@ -13,6 +13,10 @@ namespace ArchiX.Library.Entities
 
         [Required, MaxLength(150)]
         public string Key { get; set; } = null!;
+
+        // Uygulama (tenant/proje) FK
+        public int ApplicationId { get; set; }
+        public Application Application { get; set; } = null!;
 
         // DataType (FK)
         public int ParameterDataTypeId { get; set; }
