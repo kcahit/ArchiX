@@ -241,7 +241,7 @@ namespace ArchiX.Library.Context
                     Key = "Options",
                     ApplicationId = 1,
                     ParameterDataTypeId = 15,
-                    Value = "{\n  \"defaultChannel\": \"Sms\"\n}",
+                    Value = "{\n  \"defaultChannel\": \"Email\"\n}",
                     Template = "{\n  \"defaultChannel\": \"Sms\",\n  \"channels\": {\n    \"Sms\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Email\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Authenticator\": { \"digits\": 6, \"periodSeconds\": 30, \"hashAlgorithm\": \"SHA1\" }\n  }\n}",
                     Description = "Ýkili doðrulama varsayýlan kanal ve seçenekleri",
                     StatusId = 3
