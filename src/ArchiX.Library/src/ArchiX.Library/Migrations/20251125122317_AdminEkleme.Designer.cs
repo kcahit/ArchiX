@@ -4,16 +4,19 @@ using ArchiX.Library.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace ArchiX.Library.Migrations
+namespace ArchiX.Library.src.ArchiX.Library.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251125122317_AdminEkleme")]
+    partial class AdminEkleme
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1367,7 +1370,7 @@ namespace ArchiX.Library.Migrations
                             DisplayName = "System Admin",
                             Email = "admin@example.com",
                             IsAdmin = true,
-                            IsProtected = true,
+                            IsProtected = false,
                             LastStatusBy = 0,
                             NormalizedEmail = "ADMIN@EXAMPLE.COM",
                             NormalizedUserName = "ADMIN",
@@ -1445,7 +1448,7 @@ namespace ArchiX.Library.Migrations
                             ApplicationId = 1,
                             CreatedAt = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             CreatedBy = 0,
-                            IsProtected = true,
+                            IsProtected = false,
                             LastStatusBy = 0,
                             RowId = new Guid("00000000-0000-0000-0000-000000000000"),
                             StatusId = 3,

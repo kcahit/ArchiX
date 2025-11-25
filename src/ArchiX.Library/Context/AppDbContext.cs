@@ -1,7 +1,6 @@
 // File: src / ArchiX.Library / Context / AppDbContext.cs
-using System.Reflection;
 using ArchiX.Library.Entities;
-using Humanizer;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace ArchiX.Library.Context
@@ -22,6 +21,8 @@ namespace ArchiX.Library.Context
         public DbSet<ParameterDataType> ParameterDataTypes => Set<ParameterDataType>();
         public DbSet<Parameter> Parameters => Set<Parameter>();
         public DbSet<Application> Applications => Set<Application>();
+        public DbSet<User> Users => Set<User>();
+        public DbSet<UserApplication> UserApplications => Set<UserApplication>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -29,40 +30,9 @@ namespace ArchiX.Library.Context
             base.OnModelCreating(modelBuilder);
 
             var asm = typeof(AppDbContext).Assembly;
-            var entityTypes = asm.GetTypes()
-                .Where(t => typeof(BaseEntity).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract)
-                .OrderBy(t => t.FullName);
+            modelBuilder.ApplyPluralizeAndMapToDb(asm);
 
-            foreach (var t in entityTypes)
-            {
-                var fi = t.GetField(nameof(BaseEntity.MapToDb), BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
-                      ?? t.GetField(nameof(BaseEntity.MapToDb), BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
-                var include = fi?.FieldType == typeof(bool) ? (bool)fi.GetValue(null)! : true;
-                if (!include) { modelBuilder.Ignore(t); continue; }
-                modelBuilder.Entity(t).ToTable(t.Name.Pluralize());
-            }
-
-            foreach (var et in modelBuilder.Model.GetEntityTypes()
-                         .Where(et => typeof(BaseEntity).IsAssignableFrom(et.ClrType) && et.ClrType != typeof(BaseEntity)))
-            {
-                modelBuilder.Entity(et.ClrType, b =>
-                {
-                    b.Property<int>(nameof(BaseEntity.Id)).ValueGeneratedOnAdd().UseIdentityColumn(1, 1);
-                    b.Property<Guid>(nameof(BaseEntity.RowId)).HasDefaultValueSql("NEWSEQUENTIALID()").ValueGeneratedOnAdd();
-                    b.Property<DateTimeOffset>(nameof(BaseEntity.CreatedAt)).HasDefaultValueSql("SYSDATETIMEOFFSET()").HasPrecision(4);
-                    b.Property<int>(nameof(BaseEntity.CreatedBy));
-                    b.Property<DateTimeOffset?>(nameof(BaseEntity.UpdatedAt)).HasPrecision(4);
-                    b.Property<int?>(nameof(BaseEntity.UpdatedBy));
-                    b.Property<DateTimeOffset?>(nameof(BaseEntity.LastStatusAt)).HasDefaultValueSql("SYSDATETIMEOFFSET()").HasPrecision(4);
-                    b.Property<int>(nameof(BaseEntity.LastStatusBy));
-                    if (et.ClrType != typeof(Statu))
-                    {
-                        b.Property<int>(nameof(BaseEntity.StatusId)).IsRequired();
-                        b.HasIndex(nameof(BaseEntity.StatusId));
-                        b.HasOne(typeof(Statu)).WithMany().HasForeignKey(nameof(BaseEntity.StatusId)).OnDelete(DeleteBehavior.Restrict);
-                    }
-                });
-            }
+            modelBuilder.ApplyBaseEntityConventions();
 
             // Application entity
             modelBuilder.Entity<Application>(e =>
@@ -104,20 +74,7 @@ namespace ArchiX.Library.Context
                 e.HasIndex(lp => new { lp.ItemType, lp.EntityName, lp.FieldName, lp.Code, lp.Culture }).IsUnique();
             });
 
-            foreach (var et in modelBuilder.Model.GetEntityTypes()
-                         .Where(et => typeof(BaseEntity).IsAssignableFrom(et.ClrType)
-                                   && et.ClrType != typeof(BaseEntity)
-                                   && et.ClrType != typeof(Statu)))
-            {
-                var entityType = et.ClrType;
-                var p = System.Linq.Expressions.Expression.Parameter(entityType, "e");
-                var statusProp = System.Linq.Expressions.Expression.Property(p, nameof(BaseEntity.StatusId));
-                var delConst = System.Linq.Expressions.Expression.Constant(BaseEntity.DeletedStatusId);
-                var body = System.Linq.Expressions.Expression.NotEqual(statusProp, delConst);
-                var lambdaType = typeof(Func<,>).MakeGenericType(entityType, typeof(bool));
-                var lambda = System.Linq.Expressions.Expression.Lambda(lambdaType, body, p);
-                modelBuilder.Entity(entityType).HasQueryFilter(lambda);
-            }
+           
 
             modelBuilder.Entity<ConnectionServerWhitelist>(e =>
             {
@@ -169,6 +126,33 @@ namespace ArchiX.Library.Context
                 e.HasOne(x => x.DataType).WithMany().HasForeignKey(x => x.ParameterDataTypeId).OnDelete(DeleteBehavior.Restrict);
                 e.HasOne(x => x.Application).WithMany().HasForeignKey(x => x.ApplicationId).OnDelete(DeleteBehavior.Restrict);
             });
+
+
+            modelBuilder.Entity<User>().HasData(
+                new User
+                {
+                    Id = 1,
+                    UserName = "admin",
+                    NormalizedUserName = "ADMIN",
+                    DisplayName = "System Admin",
+                    Email = "admin@example.com",
+                    NormalizedEmail = "ADMIN@EXAMPLE.COM",
+                    IsAdmin = true,
+                    IsProtected = true,
+                    StatusId = BaseEntity.ApprovedStatusId
+                }
+            );
+
+            modelBuilder.Entity<UserApplication>().HasData(
+                new UserApplication
+                {
+                    Id = 1,
+                    UserId = 1,
+                    ApplicationId = 1,
+                    IsProtected = true,
+                    StatusId = BaseEntity.ApprovedStatusId
+                }
+            );
 
             // Seeds
             modelBuilder.Entity<Statu>().HasData(
@@ -247,6 +231,8 @@ namespace ArchiX.Library.Context
                     StatusId = 3
                 }
             );
+
+            modelBuilder.ApplySoftDeleteFilters();
         }
 
         public async Task EnsureCoreSeedsAndBindAsync(CancellationToken ct = default)

@@ -4,16 +4,19 @@ using ArchiX.Library.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace ArchiX.Library.Migrations
+namespace ArchiX.Library.src.ArchiX.Library.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251125120451_AppDBContext_Duzenleme")]
+    partial class AppDBContext_Duzenleme
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1357,24 +1360,6 @@ namespace ArchiX.Library.Migrations
                     b.HasIndex("StatusId");
 
                     b.ToTable("Users", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedAt = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            CreatedBy = 0,
-                            DisplayName = "System Admin",
-                            Email = "admin@example.com",
-                            IsAdmin = true,
-                            IsProtected = true,
-                            LastStatusBy = 0,
-                            NormalizedEmail = "ADMIN@EXAMPLE.COM",
-                            NormalizedUserName = "ADMIN",
-                            RowId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            StatusId = 3,
-                            UserName = "admin"
-                        });
                 });
 
             modelBuilder.Entity("ArchiX.Library.Entities.UserApplication", b =>
@@ -1437,20 +1422,6 @@ namespace ArchiX.Library.Migrations
                         .IsUnique();
 
                     b.ToTable("UserApplications", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            ApplicationId = 1,
-                            CreatedAt = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            CreatedBy = 0,
-                            IsProtected = true,
-                            LastStatusBy = 0,
-                            RowId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            StatusId = 3,
-                            UserId = 1
-                        });
                 });
 
             modelBuilder.Entity("ArchiX.Library.Entities.Application", b =>
