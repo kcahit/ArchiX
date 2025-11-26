@@ -3,7 +3,7 @@ using ArchiX.Library.Services.Security;
 using Microsoft.Extensions.Caching.Memory;
 using Xunit;
 
-namespace ArchiX.Library.Tests.Tests.Security
+namespace ArchiX.Library.Tests.Tests.SecurityTests
 {
     public class AttemptLimiterTests
     {

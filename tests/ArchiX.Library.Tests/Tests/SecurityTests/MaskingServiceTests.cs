@@ -2,7 +2,7 @@
 using ArchiX.Library.Services.Security;
 using Xunit;
 
-namespace ArchiX.Library.Tests.Tests.Security
+namespace ArchiX.Library.Tests.Tests.SecurityTests
 {
  public sealed class MaskingServiceTests
  {

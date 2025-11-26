@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 using Xunit;
 
-namespace ArchiX.Library.Tests.Tests.Performance
+namespace ArchiX.Library.Tests.Tests.PerformanceTests
 {
     public class EfQueryOptionsTests
     {

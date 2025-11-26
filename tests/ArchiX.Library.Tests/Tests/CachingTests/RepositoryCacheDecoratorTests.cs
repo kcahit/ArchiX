@@ -1,14 +1,14 @@
-using System;
-using System.Threading.Tasks;
 using ArchiX.Library.Context;
 using ArchiX.Library.Entities;
 using ArchiX.Library.Infrastructure.Caching;
 using ArchiX.Library.Infrastructure.EfCore;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+
 using Xunit;
 
-namespace ArchiX.Library.Tests.Tests.Caching
+namespace ArchiX.Library.Tests.Tests.CachingTests
 {
  public class RepositoryCacheDecoratorTests
  {

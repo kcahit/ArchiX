@@ -4,7 +4,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 using Xunit;
-namespace ArchiX.Library.Tests.Tests.Persistence
+namespace ArchiX.Library.Tests.Tests.PersistenceTests
 {
     public class AppDbContextSeedsTests
     {
