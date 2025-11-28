@@ -10,53 +10,82 @@ on:
       - main
   workflow_dispatch:
 
+# Ayný daldaki paralel çalýþmalarý iptal et
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   ci_main:
-    if: github.ref == 'refs/heads/main'
+    # Hem main dalýnda hem de PR'larda çalýþsýn
+    if: ${{ github.ref == 'refs/heads/main' || github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
+    env:
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      NUGET_PACKAGES: ~/.nuget/packages
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup .NET
+      - name: Kaynak kodu al
+        uses: actions/checkout@v4
+
+      - name: .NET SDK kurulumu
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
-      - name: Cache NuGet
+
+      - name: NuGet önbelleðini kullan
         uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
           key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
           restore-keys: |
             nuget-${{ runner.os }}-
-      - name: Restore
+
+      - name: Baðýmlýlýklarý geri yükle
         run: dotnet restore ArchiX.sln
-      - name: Build
+
+      - name: Derle (Release)
         run: dotnet build ArchiX.sln -c Release --no-restore
-      - name: Test Library
+
+      - name: Test (Library)
         run: dotnet test tests/ArchiX.Library.Tests/ArchiX.Library.Tests.csproj -c Release --no-build --logger "trx;LogFileName=library.trx" --verbosity normal
-      - name: Test Web
+
+      - name: Test (Web)
         run: dotnet test tests/ArchiX.Library.Web.Tests/ArchiX.Library.Web.Tests.csproj -c Release --no-build --logger "trx;LogFileName=web.trx" --verbosity normal
-      - name: Upload test artifacts
+
+      - name: Test sonuçlarýný yükle
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: tests
           path: |
-            **/TestResults/*.trx
+            **/TestResults/**/*.trx
             library.trx
             web.trx
 
   deploy_prod:
     if: github.ref == 'refs/heads/prod'
     runs-on: ubuntu-latest
+    env:
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup .NET
+      - name: Kaynak kodu al
+        uses: actions/checkout@v4
+
+      - name: .NET SDK kurulumu
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
-      - name: Restore
+
+      - name: Baðýmlýlýklarý geri yükle
         run: dotnet restore ArchiX.sln
-      - name: Build
+
+      - name: Derle (Release)
         run: dotnet build ArchiX.sln -c Release --no-restore
-      - name: Note
-        run: echo "Prod deploy placeholder. Migrations runtime."
+
+      - name: Not
+        run: echo "Prod daðýtým placeholder. Migrations runtime uygulanacak."

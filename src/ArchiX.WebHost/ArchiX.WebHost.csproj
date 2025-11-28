@@ -15,6 +15,9 @@
    <EditorConfigFiles Remove="C:\_git\ArchiX\Dev\ArchiX\src\ArchiX.WebHost\.editorconfig" />
  </ItemGroup>
  <ItemGroup>
+   <Content Include="Properties\launchSettings.json" />
+ </ItemGroup>
+ <ItemGroup>
    <None Include="C:\_git\ArchiX\Dev\ArchiX\src\ArchiX.WebHost\.editorconfig" />
  </ItemGroup>
 </Project>

@@ -3,9 +3,9 @@ using ArchiX.Library.Web.Abstractions.Delegates;
 using ArchiX.Library.Web.Abstractions.Interfaces;
 using ArchiX.Library.Web.Behaviors;
 using ArchiX.Library.Web.Pipeline;
+
 using Microsoft.Extensions.DependencyInjection;
-using System.Threading;
-using System.Threading.Tasks;
+
 using Xunit;
 
 namespace ArchiX.Library.Web.Tests.Behaviors.AuthorizationBehavior

@@ -3,6 +3,7 @@ using ArchiX.Library.Abstractions.Persistence;
 using ArchiX.Library.Context;
 using ArchiX.Library.Entities;
 using ArchiX.Library.Infrastructure.Caching;
+using ArchiX.Library.Web.Configuration;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

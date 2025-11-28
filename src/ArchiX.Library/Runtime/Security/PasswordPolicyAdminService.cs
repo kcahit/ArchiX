@@ -1,0 +1,93 @@
+﻿// File: src/ArchiX.Library/Runtime/Security/PasswordPolicyAdminService.cs
+using System.Text.Json;
+
+using ArchiX.Library.Abstractions.Security;
+using ArchiX.Library.Context;
+using ArchiX.Library.Entities;
+using ArchiX.Library.Formatting;
+
+using Microsoft.EntityFrameworkCore;
+
+namespace ArchiX.Library.Runtime.Security
+{
+    // UYARI: Bu sınıf artık Abstractions katmanındaki IPasswordPolicyAdminService'i uygular.
+    internal sealed class PasswordPolicyAdminService : IPasswordPolicyAdminService
+    {
+        private const string Group = "Security";
+        private const string Key = "PasswordPolicy";
+        private const int JsonParameterTypeId = 15;
+
+        private readonly IDbContextFactory<AppDbContext> _dbFactory;
+        private readonly IPasswordPolicyProvider _provider;
+        private readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web) { PropertyNameCaseInsensitive = true };
+
+
+        public PasswordPolicyAdminService(IDbContextFactory<AppDbContext> dbFactory, IPasswordPolicyProvider provider)
+        {
+            _dbFactory = dbFactory;
+            _provider = provider;
+        }
+
+        public async Task<string> GetRawJsonAsync(int applicationId = 1, CancellationToken ct = default)
+        {
+            await using var db = await _dbFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+            var entity = await db.Parameters.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.ApplicationId == applicationId && x.Group == Group && x.Key == Key, ct)
+                .ConfigureAwait(false);
+
+            if (entity is not null && !string.IsNullOrWhiteSpace(entity.Value))
+                return entity.Value;
+
+            // Yoksa, mevcut policy’i JSON’a çevirip döner
+            var options = await _provider.GetAsync(applicationId, ct).ConfigureAwait(false);
+            return JsonSerializer.Serialize(options, _jsonOptions);
+        }
+
+        public async Task UpdateAsync(string json, int applicationId = 1, CancellationToken ct = default)
+        {
+            ArgumentNullException.ThrowIfNull(json);
+
+            // Ham JSON parse edilebilir mi?
+            if (!JsonTextFormatter.TryValidate(json, out var err))
+                throw new InvalidOperationException($"PasswordPolicy JSON deserialize edilemedi: {err}");
+
+            // Şema (record) tipine maplenebiliyor mu?
+            var parsed = JsonSerializer.Deserialize<PasswordPolicyOptions>(json, _jsonOptions)
+                         ?? throw new InvalidOperationException("PasswordPolicy JSON tip eşlemesi başarısız.");
+
+            // Minify (tek satır depolama)
+            json = JsonTextFormatter.Minify(json);
+
+            await using var db = await _dbFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
+            var entity = await db.Parameters
+                .FirstOrDefaultAsync(x => x.ApplicationId == applicationId && x.Group == Group && x.Key == Key, ct)
+                .ConfigureAwait(false);
+
+            if (entity is null)
+            {
+                entity = new Parameter
+                {
+                    ApplicationId = applicationId,
+                    Group = Group,
+                    Key = Key,
+                    ParameterDataTypeId = JsonParameterTypeId,
+                    Value = json,
+                    Description = "Parola politikası (yönetim)",
+                    StatusId = 3,
+                    CreatedBy = 0
+                };
+                db.Parameters.Add(entity);
+            }
+            else
+            {
+                entity.ParameterDataTypeId = JsonParameterTypeId;
+                entity.Value = json;
+            }
+
+            await db.SaveChangesAsync(ct).ConfigureAwait(false);
+
+            _provider.Invalidate(applicationId);
+        }
+    }
+}

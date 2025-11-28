@@ -9,6 +9,7 @@ public static class PasswordSecurityServiceCollectionExtensions
     {
         services.AddSingleton<IPasswordPolicyProvider, PasswordPolicyProvider>();
         services.AddSingleton<IPasswordHasher, Argon2PasswordHasher>();
+        services.AddSingleton<IPasswordPolicyAdminService, PasswordPolicyAdminService>();
         return services;
     }
 }

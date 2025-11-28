@@ -13,6 +13,7 @@ namespace ArchiX.Library.Runtime.Observability
     {
         /// <summary>
         /// Prometheus scraping endpoint’ini bayraklara göre eşler.
+        /// Exporter yoksa uygulamayı çökertmez; bilgilendirici fallback sağlar.
         /// </summary>
         public static IEndpointRouteBuilder MapArchiXObservability(
             this IEndpointRouteBuilder endpoints,
@@ -36,14 +37,25 @@ namespace ArchiX.Library.Runtime.Observability
 
             if (enableMetrics && enablePrometheus)
             {
-                // Yalnızca belirtilen path'i Prometheus için eşle.
-                endpoints.MapPrometheusScrapingEndpoint(customPath);
+                try
+                {
+                    // OpenTelemetry Prometheus exporter eklendiyse bu çağrı başarılı olur
+                    endpoints.MapPrometheusScrapingEndpoint(customPath);
+                }
+                catch (InvalidOperationException)
+                {
+                    // Exporter yoksa uygulamayı çökertmeyelim; bilgilendirici 501 dönen stub
+                    endpoints.MapGet(customPath, static async context =>
+                    {
+                        context.Response.StatusCode = StatusCodes.Status501NotImplemented;
+                        await context.Response.WriteAsync("Prometheus exporter is not configured.");
+                    });
+                }
 
-                // Test beklentisi: Özel bir yol verildiyse, /metrics NOT FOUND dönmeli.
-                // Bu nedenle, customPath "/metrics" değilse, /metrics'i 404'e sabitle.
+                // Özel bir yol verildiyse, /metrics NOT FOUND dönmeli.
                 if (!string.Equals(customPath, "/metrics", StringComparison.OrdinalIgnoreCase))
                 {
-                    endpoints.MapGet("/metrics", async context =>
+                    endpoints.MapGet("/metrics", static async context =>
                     {
                         context.Response.StatusCode = StatusCodes.Status404NotFound;
                         await context.Response.CompleteAsync();
