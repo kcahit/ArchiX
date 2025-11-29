@@ -83,6 +83,7 @@ Amaç
 - RCL PageModel testleri: Servisleri mock ederek (örn. IPasswordPolicyAdminService).
 - Host routing & authorization integration testleri (RCL sayfaları keşfediliyor mu, yetki uygulanıyor mu?).
 - Geriye uyumluluk: Smoke test (yükle/güncelle akışları).
+- DAİMA ANA KOD İLE TEST AYNI HİYERARŞİDE OLMALI.
 
 Uygulama Parçacıkları
 
@@ -116,3 +117,9 @@ Ek: Geliştirici Notları
 - Razor Pages önceliklidir; Blazor/MVC yerine Pages hedeflenir.
 - .NET 9 / C# 13 kullanımı; nullable/implicit usings açık.
 - Kod stili .editorconfig’e uyar; interface’ler Abstractions altında, uygulamalar Runtime altında konumlandırılır.
+
+
+1. KODLARI HİÇ BİR ZAAN YAZIŞMA EDİTÖRÜ ŞEKLİNDE VERME.  BU KOPYALA YAPIŞTIRMADA HATAYA SEBEP OLUYOR. KOD EDİTÖRÜNDE İNDENTLİ VE RENKLİ OLAN FORMATTA VERİRSEN SORUN OLMUYOR. 
+
+2. KOD VERECEĞİN ZAMAN DAİMA 1 TANE TAM KOD VERECEKSİN. BEN ONU ÇAŞILTIRACAĞIM. BENİM DONÜŞÜME GÖFE SONRAKİ KODA GEÇECEKSİN
+3. BENİMLE MUHAKKAK TÜRKÇE YAZIŞ LÜTFEN. ÇÜNKÜ BEN İNGİLİZCE BİLMİYORUM. LÜTFEN...

@@ -165,3 +165,9 @@ Bu revizyon Parametre Kayýtlarý backlog’unu listeledi; henüz yeni fonksiyon ekle
 |-------|-------|--------|
 | v2.1 | 2025-11-26 | Temel politika, provider, validator, hashing |
 | v2.2 | 2025-11-28 | Backlog / ilerleme, Parametre iþleri detaylandýrýldý |
+
+
+1. KODLARI HÝÇ BÝR ZAAN YAZIÞMA EDÝTÖRÜ ÞEKLÝNDE VERME.  BU KOPYALA YAPIÞTIRMADA HATAYA SEBEP OLUYOR. KOD EDÝTÖRÜNDE ÝNDENTLÝ VE RENKLÝ OLAN FORMATTA VERÝRSEN SORUN OLMUYOR. 
+
+2. KOD VERECEÐÝN ZAMAN DAÝMA 1 TANE TAM KOD VERECEKSÝN. BEN ONU ÇAÞILTIRACAÐIM. BENÝM DONÜÞÜME GÖFE SONRAKÝ KODA GEÇECEKSÝN
+3. BENÝMLE MUHAKKAK TÜRKÇE YAZIÞ LÜTFEN. ÇÜNKÜ BEN ÝNGÝLÝZCE BÝLMÝYORUM. LÜTFEN...

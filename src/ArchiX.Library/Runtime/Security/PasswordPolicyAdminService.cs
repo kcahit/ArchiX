@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ArchiX.Library.Runtime.Security
 {
-    // UYARI: Bu sınıf artık Abstractions katmanındaki IPasswordPolicyAdminService'i uygular.
+    // UYARI: Bu sınıf Abstractions katmanındaki IPasswordPolicyAdminService'i uygular.
     internal sealed class PasswordPolicyAdminService : IPasswordPolicyAdminService
     {
         private const string Group = "Security";
@@ -19,10 +19,12 @@ namespace ArchiX.Library.Runtime.Security
 
         private readonly IDbContextFactory<AppDbContext> _dbFactory;
         private readonly IPasswordPolicyProvider _provider;
-        private readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web) { PropertyNameCaseInsensitive = true };
+        private readonly JsonSerializerOptions _jsonOptions =
+            new(JsonSerializerDefaults.Web) { PropertyNameCaseInsensitive = true };
 
-
-        public PasswordPolicyAdminService(IDbContextFactory<AppDbContext> dbFactory, IPasswordPolicyProvider provider)
+        public PasswordPolicyAdminService(
+            IDbContextFactory<AppDbContext> dbFactory,
+            IPasswordPolicyProvider provider)
         {
             _dbFactory = dbFactory;
             _provider = provider;
@@ -31,14 +33,16 @@ namespace ArchiX.Library.Runtime.Security
         public async Task<string> GetRawJsonAsync(int applicationId = 1, CancellationToken ct = default)
         {
             await using var db = await _dbFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+
             var entity = await db.Parameters.AsNoTracking()
-                .FirstOrDefaultAsync(x => x.ApplicationId == applicationId && x.Group == Group && x.Key == Key, ct)
+                .FirstOrDefaultAsync(x => x.ApplicationId == applicationId &&
+                                          x.Group == Group &&
+                                          x.Key == Key, ct)
                 .ConfigureAwait(false);
 
             if (entity is not null && !string.IsNullOrWhiteSpace(entity.Value))
                 return entity.Value;
 
-            // Yoksa, mevcut policy’i JSON’a çevirip döner
             var options = await _provider.GetAsync(applicationId, ct).ConfigureAwait(false);
             return JsonSerializer.Serialize(options, _jsonOptions);
         }
@@ -47,22 +51,26 @@ namespace ArchiX.Library.Runtime.Security
         {
             ArgumentNullException.ThrowIfNull(json);
 
-            // Ham JSON parse edilebilir mi?
             if (!JsonTextFormatter.TryValidate(json, out var err))
-                throw new InvalidOperationException($"PasswordPolicy JSON deserialize edilemedi: {err}");
+                throw new InvalidOperationException($"PasswordPolicy JSON geçersiz: {err}");
 
-            // Şema (record) tipine maplenebiliyor mu?
-            var parsed = JsonSerializer.Deserialize<PasswordPolicyOptions>(json, _jsonOptions)
-                         ?? throw new InvalidOperationException("PasswordPolicy JSON tip eşlemesi başarısız.");
+            PasswordPolicySchemaValidator.ValidateOrThrow(json);
 
-            // Minify (tek satır depolama)
+            _ = JsonSerializer.Deserialize<PasswordPolicyOptions>(json, _jsonOptions)
+                ?? throw new InvalidOperationException("PasswordPolicy tip eşlemesi başarısız.");
+
             json = JsonTextFormatter.Minify(json);
 
             await using var db = await _dbFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
+            await using var tx = await db.Database.BeginTransactionAsync(ct).ConfigureAwait(false);
 
             var entity = await db.Parameters
-                .FirstOrDefaultAsync(x => x.ApplicationId == applicationId && x.Group == Group && x.Key == Key, ct)
+                .FirstOrDefaultAsync(x => x.ApplicationId == applicationId &&
+                                          x.Group == Group &&
+                                          x.Key == Key, ct)
                 .ConfigureAwait(false);
+
+            var oldJson = entity?.Value ?? string.Empty;
 
             if (entity is null)
             {
@@ -85,9 +93,21 @@ namespace ArchiX.Library.Runtime.Security
                 entity.Value = json;
             }
 
+            db.Set<PasswordPolicyAudit>().Add(new PasswordPolicyAudit
+            {
+                ApplicationId = applicationId,
+                UserId = 0,
+                OldJson = oldJson,
+                NewJson = json,
+                StatusId = 3,
+                CreatedBy = 0
+            });
+
             await db.SaveChangesAsync(ct).ConfigureAwait(false);
+            await tx.CommitAsync(ct).ConfigureAwait(false);
 
             _provider.Invalidate(applicationId);
         }
     }
+
 }
