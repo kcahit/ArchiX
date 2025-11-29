@@ -7,7 +7,7 @@ using ArchiX.Library.Infrastructure.Http;                // HttpPolicies
 using ArchiX.Library.Runtime.ConnectionPolicy;
 using ArchiX.Library.Runtime.Database;                  // AdminProvisionerRunner
 using ArchiX.Library.Runtime.Observability;
-using ArchiX.Library.Runtime.Security;                  // AddPasswordSecurity
+using ArchiX.Library.Runtime.Security;                  // AddPasswordSecurity + PasswordPolicyStartup
 using ArchiX.Library.Services.Security;                 // MaskingService
 using ArchiX.Library.Time;
 using ArchiX.Library.Web;
@@ -43,7 +43,7 @@ builder.Services.AddScoped(sp =>
 // Web defaults
 builder.Services.AddArchiXWebDefaults();
 
-// Razor Pages + Dev’te PasswordPolicy anonim
+// Razor Pages + Dev’de PasswordPolicy anonim
 builder.Services.AddRazorPages(opts =>
 {
     if (builder.Environment.IsDevelopment())
@@ -96,6 +96,9 @@ var forceProvision = string.Equals(
     StringComparison.OrdinalIgnoreCase);
 
 await AdminProvisionerRunner.EnsureDatabaseProvisionedAsync(app.Services, force: forceProvision);
+
+// PK-02 & PK-08: Policy yoksa seed + pepper uyarýsý
+await PasswordPolicyStartup.EnsureSeedAndWarningsAsync(app.Services, 1);
 
 // Middleware
 app.UseStaticFiles();

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ArchiX.Library.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251126142123_TwoFactorDefaultChannelSms")]
-    partial class TwoFactorDefaultChannelSms
+    [Migration("20251129092307_AddParameterRowVersion")]
+    partial class AddParameterRowVersion
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -783,6 +783,11 @@ namespace ArchiX.Library.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWSEQUENTIALID()");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.Property<int>("StatusId")
                         .HasColumnType("int");
 
@@ -828,7 +833,7 @@ namespace ArchiX.Library.Migrations
                             RowId = new Guid("00000000-0000-0000-0000-000000000000"),
                             StatusId = 3,
                             Template = "{\n  \"defaultChannel\": \"Sms\",\n  \"channels\": {\n    \"Sms\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Email\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Authenticator\": { \"digits\": 6, \"periodSeconds\": 30, \"hashAlgorithm\": \"SHA1\" }\n  }\n}",
-                            Value = "{\n  \"defaultChannel\": \"Email\"\n}"
+                            Value = "{\n  \"defaultChannel\": \"Sms\"\n}"
                         },
                         new
                         {
@@ -1147,6 +1152,76 @@ namespace ArchiX.Library.Migrations
                             RowId = new Guid("00000000-0000-0000-0000-000000000000"),
                             StatusId = 3
                         });
+                });
+
+            modelBuilder.Entity("ArchiX.Library.Entities.PasswordPolicyAudit", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ApplicationId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("ChangedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(4)
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsProtected")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LastStatusAt")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(4)
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
+
+                    b.Property<int>("LastStatusBy")
+                        .HasColumnType("int");
+
+                    b.Property<string>("NewJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OldJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("RowId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+                    b.Property<int>("StatusId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasPrecision(4)
+                        .HasColumnType("datetimeoffset(4)");
+
+                    b.Property<int?>("UpdatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationId");
+
+                    b.HasIndex("StatusId");
+
+                    b.ToTable("PasswordPolicyAudits", (string)null);
                 });
 
             modelBuilder.Entity("ArchiX.Library.Entities.Statu", b =>
@@ -1544,6 +1619,15 @@ namespace ArchiX.Library.Migrations
                 });
 
             modelBuilder.Entity("ArchiX.Library.Entities.ParameterDataType", b =>
+                {
+                    b.HasOne("ArchiX.Library.Entities.Statu", null)
+                        .WithMany()
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ArchiX.Library.Entities.PasswordPolicyAudit", b =>
                 {
                     b.HasOne("ArchiX.Library.Entities.Statu", null)
                         .WithMany()

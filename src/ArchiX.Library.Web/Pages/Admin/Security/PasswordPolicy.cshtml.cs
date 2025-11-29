@@ -16,6 +16,9 @@ namespace ArchiX.Library.Web.Pages.Admin.Security
         private readonly IPasswordPolicyAdminService _admin;
         private readonly ILogger<PasswordPolicyModel> _logger;
 
+        // CA1869: JsonSerializerOptions tekil instance
+        private static readonly JsonSerializerOptions PrettyJson = new() { WriteIndented = true };
+
         public PasswordPolicyModel(IPasswordPolicyAdminService admin, ILogger<PasswordPolicyModel> logger)
         {
             _admin = admin;
@@ -54,14 +57,14 @@ namespace ArchiX.Library.Web.Pages.Admin.Security
                 return Page();
             }
 
-            // Pretty formatlý JSON'u sakla
+            // Pretty formatlý JSON'u editörde göster
             Json = normalized ?? Json;
 
             try
             {
                 await _admin.UpdateAsync(Json, ApplicationId, ct).ConfigureAwait(false);
 
-                // Güncelleme sonrasý cache invalidate (varsa provider kayýtlýysa)
+                // Güncelleme sonrasý cache invalidate (provider varsa)
                 if (HttpContext.RequestServices.GetService(typeof(IPasswordPolicyProvider)) is IPasswordPolicyProvider provider)
                     provider.Invalidate(ApplicationId);
 
@@ -72,6 +75,12 @@ namespace ArchiX.Library.Web.Pages.Admin.Security
             {
                 _logger.LogWarning("Parola politikasý güncellemesi iptal edildi. ApplicationId={ApplicationId}.", ApplicationId);
                 ModelState.AddModelError(string.Empty, "Ýþlem iptal edildi.");
+                return Page();
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex, "Parola politikasý güncellemesi reddedildi. ApplicationId={ApplicationId}.", ApplicationId);
+                ModelState.AddModelError(string.Empty, ex.Message);
                 return Page();
             }
             catch (Exception ex)
@@ -105,12 +114,9 @@ namespace ArchiX.Library.Web.Pages.Admin.Security
             return Page();
         }
 
-        private static int NormalizeApplicationId(int applicationId)
-        {
-            return applicationId > 0 ? applicationId : 1;
-        }
+        private static int NormalizeApplicationId(int applicationId) => applicationId > 0 ? applicationId : 1;
 
-        // docs/PasswordPolicy-Design-v2.1.md þemasýna göre temel kontrol + pretty format
+        // Temel alan kontrolleri + pretty format
         private static bool TryValidateJson(string raw, out string? normalized, out string? error)
         {
             normalized = null;
@@ -122,7 +128,7 @@ namespace ArchiX.Library.Web.Pages.Admin.Security
                 var root = document.RootElement;
 
                 // Zorunlu alanlar (camelCase)
-                string[] required = new[]
+                string[] required =
                 {
                     "version","minLength","maxLength","requireUpper","requireLower","requireDigit","requireSymbol",
                     "allowedSymbols","minDistinctChars","maxRepeatedSequence","blockList","historyCount","lockoutThreshold",
@@ -150,8 +156,8 @@ namespace ArchiX.Library.Web.Pages.Admin.Security
                     return false;
                 }
 
-                // Pretty serialize
-                normalized = JsonSerializer.Serialize(root, new JsonSerializerOptions { WriteIndented = true });
+                // Pretty serialize (CA1869: cached options)
+                normalized = JsonSerializer.Serialize(root, PrettyJson);
                 return true;
             }
             catch (JsonException jex)
