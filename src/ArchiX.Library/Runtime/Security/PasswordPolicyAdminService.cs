@@ -33,7 +33,6 @@ namespace ArchiX.Library.Runtime.Security
         public async Task<string> GetRawJsonAsync(int applicationId = 1, CancellationToken ct = default)
         {
             await using var db = await _dbFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-
             var entity = await db.Parameters.AsNoTracking()
                 .FirstOrDefaultAsync(x => x.ApplicationId == applicationId &&
                                           x.Group == Group &&
@@ -64,6 +63,7 @@ namespace ArchiX.Library.Runtime.Security
             await using var db = await _dbFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
             await using var tx = await db.Database.BeginTransactionAsync(ct).ConfigureAwait(false);
 
+            // Tracking (RowVersion için gerekli)
             var entity = await db.Parameters
                 .FirstOrDefaultAsync(x => x.ApplicationId == applicationId &&
                                           x.Group == Group &&
@@ -91,6 +91,7 @@ namespace ArchiX.Library.Runtime.Security
             {
                 entity.ParameterDataTypeId = JsonParameterTypeId;
                 entity.Value = json;
+                entity.UpdatedAt = DateTimeOffset.UtcNow;
             }
 
             db.Set<PasswordPolicyAudit>().Add(new PasswordPolicyAudit
@@ -103,8 +104,16 @@ namespace ArchiX.Library.Runtime.Security
                 CreatedBy = 0
             });
 
-            await db.SaveChangesAsync(ct).ConfigureAwait(false);
-            await tx.CommitAsync(ct).ConfigureAwait(false);
+            try
+            {
+                await db.SaveChangesAsync(ct).ConfigureAwait(false);
+                await tx.CommitAsync(ct).ConfigureAwait(false);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                await tx.RollbackAsync(ct).ConfigureAwait(false);
+                throw new InvalidOperationException("Çakışma: kayıt başka bir işlem tarafından değiştirildi. Sayfayı yenileyip tekrar deneyin.");
+            }
 
             _provider.Invalidate(applicationId);
         }
