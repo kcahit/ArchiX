@@ -1,72 +1,78 @@
-# Parola Politikası Tasarım Dokümanı (PasswordPolicy)
+ï»¿# Parola PolitikasÄ± TasarÄ±m DokÃ¼manÄ± (PasswordPolicy)
 
 Revizyon: v2.2 (2025-11-28)
-Önceki sürüm: v2.1 (2025-11-26)
+Ã–nceki sÃ¼rÃ¼m: v2.1 (2025-11-26)
 
-Bu doküman v2.1 içeriğini TAM olarak korur + "Parametre Kayıtları" (ApplicationId=1) kapsamı için kalan iş kalemlerini ve ilerleme yüzdesini ekler.
+Bu dokÃ¼man v2.1 iÃ§eriÄŸini TAM olarak korur + "Parametre KayÄ±tlarÄ±" (ApplicationId=1) kapsamÄ± iÃ§in kalan iÅŸ kalemlerini ve ilerleme yÃ¼zdesini ekler.
 
 ---
-## 0. Revizyon Notları (v2.2)
-Tamamlanan çekirdek (v2.1):
+## 0. Revizyon NotlarÄ± (v2.2)
+Tamamlanan Ã§ekirdek (v2.1):
 - Tek JSON model (Group=Security, Key=PasswordPolicy, ParameterDataTypeId=15)
-- Provider + IMemoryCache + Invalidate akışı
-- Validator (uzunluk, kategori, farklı karakter, tekrar sekansı, blok liste)
-- Argon2id hashing + PBKDF2-SHA512 fallback + pepperEnabled bayrağı
-- Yönetim Razor Page ile JSON görüntüleme / düzenleme / doğrulama / önizleme
+- Provider + IMemoryCache + Invalidate akÄ±ÅŸÄ±
+- Validator (uzunluk, kategori, farklÄ± karakter, tekrar sekansÄ±, blok liste)
+- Argon2id hashing + PBKDF2-SHA512 fallback + pepperEnabled bayraÄŸÄ±
+- YÃ¶netim Razor Page ile JSON gÃ¶rÃ¼ntÃ¼leme / dÃ¼zenleme / doÄŸrulama / Ã¶nizleme
 
-Parametre Kayıtları bölümü gerçekleşme oranı: ~%50
+Parametre KayÄ±tlarÄ± bÃ¶lÃ¼mÃ¼ gerÃ§ekleÅŸme oranÄ±: ~%50
 
-Kalan özel işler (sadece Parametre Kayıtları açısından):
-1. Çoklu ApplicationId seed/migration senaryoları (varsayılan dışı politikalar).
-2. Otomatik migration: Politika kaydı yoksa idempotent insert (başlangıç kontrolü).
-3. Şema validation (server-side) – required alan + tür doğrulama (JSON Schema / custom).
-4. allowedSymbols senkronizasyonu: UI örneği ile parametre içeriğinin tutarlılık kontrolü.
-5. Audit trail: Eski / yeni JSON + kullanıcı + zaman (ayrı PasswordPolicyAudit tablosu).
-6. Concurrency kontrolü: RowVersion veya ETag mantığı ile yarış durumları engelleme.
-7. Versiyonlama stratejisi: version alanı için yükseltme hook’ları (future schema evolution).
-8. PepperEnabled=true & ortam değişkeni yok senaryosu için kayıt düzeyinde uyarı/log.
-9. Bütünlük / rollback: Geçersiz JSON kaydı durumunda önceki değeri koruma (transaction + validation önce).
-10. İmza / bütünlük doğrulaması (opsiyonel): JSON üzerinde HMAC veya checksum kolon.
-11. İzleme metrikleri: parametre okuma sayısı, invalidate çağrı sayısı.
-12. Yönetim ekranında normalize/minify: Kaydetmeden önce satır sonu + boşluk standardizasyonu.
+Kalan Ã¶zel iÅŸler (sadece Parametre KayÄ±tlarÄ± aÃ§Ä±sÄ±ndan):
+1. Ã‡oklu ApplicationId seed/migration senaryolarÄ± (varsayÄ±lan dÄ±ÅŸÄ± politikalar).
+2. Otomatik migration: Politika kaydÄ± yoksa idempotent insert (baÅŸlangÄ±Ã§ kontrolÃ¼).
+3. Åema validation (server-side) â€“ required alan + tÃ¼r doÄŸrulama (JSON Schema / custom).
+4. allowedSymbols senkronizasyonu: UI Ã¶rneÄŸi ile parametre iÃ§eriÄŸinin tutarlÄ±lÄ±k kontrolÃ¼.
+5. Audit trail: Eski / yeni JSON + kullanÄ±cÄ± + zaman (ayrÄ± PasswordPolicyAudit tablosu).
+6. Concurrency kontrolÃ¼: RowVersion veya ETag mantÄ±ÄŸÄ± ile yarÄ±ÅŸ durumlarÄ± engelleme.
+7. Versiyonlama stratejisi: version alanÄ± iÃ§in yÃ¼kseltme hookâ€™larÄ± (future schema evolution).
+8. PepperEnabled=true & ortam deÄŸiÅŸkeni yok senaryosu iÃ§in kayÄ±t dÃ¼zeyinde uyarÄ±/log.
+9. BÃ¼tÃ¼nlÃ¼k / rollback: GeÃ§ersiz JSON kaydÄ± durumunda Ã¶nceki deÄŸeri koruma (transaction + validation Ã¶nce).
+10. Ä°mza / bÃ¼tÃ¼nlÃ¼k doÄŸrulamasÄ± (opsiyonel): JSON Ã¼zerinde HMAC veya checksum kolon.
+11. Ä°zleme metrikleri: parametre okuma sayÄ±sÄ±, invalidate Ã§aÄŸrÄ± sayÄ±sÄ±.
+12. YÃ¶netim ekranÄ±nda normalize/minify: Kaydetmeden Ã¶nce satÄ±r sonu + boÅŸluk standardizasyonu.
 
-Önerilen kısa vadeli sırala: (1)–(3) temel; sonra (5)(6)(7); ardından (8)(9)(11); opsiyonel (10)(12).
+Ã–nerilen kÄ±sa vadeli sÄ±rala: (1)â€“(3) temel; sonra (5)(6)(7); ardÄ±ndan (8)(9)(11); opsiyonel (10)(12).
 
 Backlog durum etiketleri:
-- PLAN: Henüz başlanmadı
-- WIP: Çalışılıyor
-- DONE: Tamamlandı
+- PLAN: HenÃ¼z baÅŸlanmadÄ±
+- WIP: Ã‡alÄ±ÅŸÄ±lÄ±yor
+- DONE: TamamlandÄ±
 
-| ID | İş | Durum | Not |
+| ID | Ä°ÅŸ | Durum | Not |
 |----|-----|-------|-----|
-| PK-01 | Çoklu ApplicationId seed | PLAN | Migration + fallback lookup |
-| PK-02 | Otomatik insert / idempotent migration | PLAN | Startup kontrolü |
+| PK-01 | Ã‡oklu ApplicationId seed | PLAN | Migration + fallback lookup |
+| PK-02 | Otomatik insert / idempotent migration | PLAN | Startup kontrolÃ¼ |
 | PK-03 | Server-side schema validation | PLAN | FluentValidation / System.Text.Json node traversal |
-| PK-04 | allowedSymbols konsistens kontrolü | PLAN | UI vs parametre diff |
+| PK-04 | allowedSymbols konsistens kontrolÃ¼ | PLAN | UI vs parametre diff |
 | PK-05 | Audit trail tablosu | PLAN | (Id, AppId, OldJson, NewJson, UserId, Utc) |
 | PK-06 | Concurrency (RowVersion) | PLAN | EF Core concurrency token |
 | PK-07 | Schema version upgrade hook | PLAN | Strategy class / version dispatcher |
-| PK-08 | PepperEnabled env uyarısı | PLAN | Logger + health check |
-| PK-09 | Rollback mekanizması | PLAN | Validation önce transaction |
-| PK-10 | HMAC bütünlük | PLAN | Opsiyonel güvenlik sertleştirme |
+| PK-08 | PepperEnabled env uyarÄ±sÄ± | PLAN | Logger + health check |
+| PK-09 | Rollback mekanizmasÄ± | PLAN | Validation Ã¶nce transaction |
+| PK-10 | HMAC bÃ¼tÃ¼nlÃ¼k | PLAN | Opsiyonel gÃ¼venlik sertleÅŸtirme |
 | PK-11 | Parametre metrikleri | PLAN | Prometheus counters |
 | PK-12 | Normalize/minify JSON | PLAN | Strip trailing spaces + stable ordering |
 
-İlerleme (Parametre Kayıtları kısmi yüzdesi): 50% (çekirdek kayıt/okuma/güncelleme tamam, yukarıdaki backlog açık).
+Ä°lerleme (Parametre KayÄ±tlarÄ± kÄ±smi yÃ¼zdesi): 50% (Ã§ekirdek kayÄ±t/okuma/gÃ¼ncelleme tamam, yukarÄ±daki backlog aÃ§Ä±k).
+
+â€¢	PK-02: Startup idempotent insertâ€™i prod ortamlarÄ±nda da doÄŸrula (loglar ve tek kayÄ±t).
+â€¢	PK-06: Concurrency testi (iki istemciyle aynÄ± kaydÄ± deÄŸiÅŸtirme â†’ Ã§akÄ±ÅŸma mesajÄ±).
+â€¢	PK-08: ARCHIX_PEPPER ayarla ve uyarÄ±nÄ±n kaybolduÄŸunu kontrol et.
+â€¢	PK-01: Ã‡oklu ApplicationId iÃ§in seed stratejisi (liste Ã¼zerinden baÅŸlangÄ±Ã§ politikalarÄ±).
+â€¢	PK-07: version alanÄ± iÃ§in upgrade hook taslaÄŸÄ± (v1â†’v2 dÃ¶nÃ¼ÅŸtÃ¼rÃ¼cÃ¼).
 
 ---
-## 1. Amaç / Kapsam
-Parola güvenliği, veritabanındaki JSON parametreleri ile yönetilir; değişiklik için deploy gerekmez. Uygulama, `Parameters` tablosundan politikayı okur ve bellekte önbellekler.
+## 1. AmaÃ§ / Kapsam
+Parola gÃ¼venliÄŸi, veritabanÄ±ndaki JSON parametreleri ile yÃ¶netilir; deÄŸiÅŸiklik iÃ§in deploy gerekmez. Uygulama, `Parameters` tablosundan politikayÄ± okur ve bellekte Ã¶nbellekler.
 
-## 2. Parametre Kayıtları (ApplicationId=1)
-- Parola politikası (tekleştirilmiş model):
+## 2. Parametre KayÄ±tlarÄ± (ApplicationId=1)
+- Parola politikasÄ± (tekleÅŸtirilmiÅŸ model):
   - Group: `Security`, Key: `PasswordPolicy`, ParameterDataTypeId: `15 (Json)`
-- İkili doğrulama (bilgi amaçlı):
-  - Group: `TwoFactor`, Key: `Options`, varsayılan `Value`: `{"defaultChannel":"Sms"}`
+- Ä°kili doÄŸrulama (bilgi amaÃ§lÄ±):
+  - Group: `TwoFactor`, Key: `Options`, varsayÄ±lan `Value`: `{"defaultChannel":"Sms"}`
 
-Not: Eski “Group=PasswordPolicy / Key=Options,Argon2” yaklaşımı yerine tek JSON altında `hash` bölümü bulunan yapı kullanılır.
+Not: Eski â€œGroup=PasswordPolicy / Key=Options,Argon2â€ yaklaÅŸÄ±mÄ± yerine tek JSON altÄ±nda `hash` bÃ¶lÃ¼mÃ¼ bulunan yapÄ± kullanÄ±lÄ±r.
 
-## 3. PasswordPolicy JSON Şeması (Kesin)
+## 3. PasswordPolicy JSON ÅemasÄ± (Kesin)
 Alanlar:
 - version: number
 - minLength: number
@@ -94,18 +100,18 @@ Alanlar:
     - iterations: number
   - pepperEnabled: boolean
 
-Örnek Value:
+Ã–rnek Value:
 ```json
 { "version": 1, "minLength": 12, "maxLength": 128, "requireUpper": true, "requireLower": true, "requireDigit": true, "requireSymbol": true, "allowedSymbols": "!@#$%^&*_-+=:?.,;", "minDistinctChars": 5, "maxRepeatedSequence": 3, "blockList": ["password", "123456", "qwerty", "admin"], "historyCount": 10, "lockoutThreshold": 5, "lockoutSeconds": 900, "hash": { "algorithm": "Argon2id", "memoryKb": 65536, "parallelism": 2, "iterations": 3, "saltLength": 16, "hashLength": 32, "fallback": { "algorithm": "PBKDF2-SHA512", "iterations": 210000 }, "pepperEnabled": false } }
 ```
 
-## 4. DTO Sınıfları (Gerçek Kod)
+## 4. DTO SÄ±nÄ±flarÄ± (GerÃ§ek Kod)
 ```json
 { "version": 1, "minLength": 12, "maxLength": 128, "requireUpper": true, "requireLower": true, "requireDigit": true, "requireSymbol": true, "allowedSymbols": "!@#$%^&*_-+=:?.,;", "minDistinctChars": 5, "maxRepeatedSequence": 3, "blockList": ["password", "123456", "qwerty", "admin"], "historyCount": 10, "lockoutThreshold": 5, "lockoutSeconds": 900, "hash": { "algorithm": "Argon2id", "memoryKb": 65536, "parallelism": 2, "iterations": 3, "saltLength": 16, "hashLength": 32, "fallback": { "algorithm": "PBKDF2-SHA512", "iterations": 210000 }, "pepperEnabled": false } }
 ```
 
-## 5. Sağlayıcı (Provider) ve Önbellek
-Gerçek arayüz:
+## 5. SaÄŸlayÄ±cÄ± (Provider) ve Ã–nbellek
+GerÃ§ek arayÃ¼z:
 ```csharp
 public interface IPasswordPolicyProvider
 {
@@ -113,61 +119,61 @@ public interface IPasswordPolicyProvider
     void Invalidate(int applicationId = 1);
 }
 ```
-Davranış:
-- `GetAsync` ilk çağrıda DB’den okur, `IMemoryCache` ile önbelleğe alır.
-- Politika güncellendiğinde `Invalidate(appId)` çağrılır; sonraki `GetAsync` yeniden yükler.
+DavranÄ±ÅŸ:
+- `GetAsync` ilk Ã§aÄŸrÄ±da DBâ€™den okur, `IMemoryCache` ile Ã¶nbelleÄŸe alÄ±r.
+- Politika gÃ¼ncellendiÄŸinde `Invalidate(appId)` Ã§aÄŸrÄ±lÄ±r; sonraki `GetAsync` yeniden yÃ¼kler.
 
-## 6. Doğrulama (Validator)
-- İmza: `IReadOnlyList<string> Validate(string password, PasswordPolicyOptions policy)`
-- Hata kodları: `EMPTY`, `MIN_LENGTH`, `MAX_LENGTH`, `REQ_UPPER`, `REQ_LOWER`, `REQ_DIGIT`, `REQ_SYMBOL`, `MIN_DISTINCT`, `REPEAT_SEQ`, `BLOCK_LIST`
-- Sıra: uzunluk ? kategori kontrolleri ? ayırt edici karakter ? tekrar sekansı ? blok liste
-- Not: HIBP/Pwned ve yaş/geçmiş kontrolleri yol haritasındadır.
+## 6. DoÄŸrulama (Validator)
+- Ä°mza: `IReadOnlyList<string> Validate(string password, PasswordPolicyOptions policy)`
+- Hata kodlarÄ±: `EMPTY`, `MIN_LENGTH`, `MAX_LENGTH`, `REQ_UPPER`, `REQ_LOWER`, `REQ_DIGIT`, `REQ_SYMBOL`, `MIN_DISTINCT`, `REPEAT_SEQ`, `BLOCK_LIST`
+- SÄ±ra: uzunluk ? kategori kontrolleri ? ayÄ±rt edici karakter ? tekrar sekansÄ± ? blok liste
+- Not: HIBP/Pwned ve yaÅŸ/geÃ§miÅŸ kontrolleri yol haritasÄ±ndadÄ±r.
 
 ## 7. Hashleme
 - Algoritma: Argon2id (Isopoh.Cryptography.Argon2)
-- Çıktı: Standart Argon2 encoded string
-- Pepper: `ARCHIX_PEPPER` ortam değişkeni (pepperEnabled true ise eklenir)
+- Ã‡Ä±ktÄ±: Standart Argon2 encoded string
+- Pepper: `ARCHIX_PEPPER` ortam deÄŸiÅŸkeni (pepperEnabled true ise eklenir)
 - Fallback: PBKDF2-SHA512
 
 ## 8. Seed / Migration
-- Relational DB: Migration örn. TwoFactorDefaultChannelSms.
-- InMemory: `HasData` tohumları.
+- Relational DB: Migration Ã¶rn. TwoFactorDefaultChannelSms.
+- InMemory: `HasData` tohumlarÄ±.
 
-## 9. Güncelleme Akışı
-1) `Parameters.Value` güncellenir  
-2) `IPasswordPolicyProvider.Invalidate(appId)` çağrılır  
-3) Sonraki `GetAsync` yeni değeri yükler
+## 9. GÃ¼ncelleme AkÄ±ÅŸÄ±
+1) `Parameters.Value` gÃ¼ncellenir  
+2) `IPasswordPolicyProvider.Invalidate(appId)` Ã§aÄŸrÄ±lÄ±r  
+3) Sonraki `GetAsync` yeni deÄŸeri yÃ¼kler
 
-## 10. İzleme / Metrikler (Öneri)
+## 10. Ä°zleme / Metrikler (Ã–neri)
 - `password_validation_total`, `password_validation_error_total{code}`
 - `password_hash_duration_ms`
 - `password_hash_algorithm_info{algo="argon2id", memKb=..., it=..., p=...}`
 
-## 11. Güvenlik Notları
-- Düz metin parola saklanmaz
-- Pepper gizli tutulmalı
-- Sabit zamanlı karşılaştırma
-- Lockout uygulama katmanı
+## 11. GÃ¼venlik NotlarÄ±
+- DÃ¼z metin parola saklanmaz
+- Pepper gizli tutulmalÄ±
+- Sabit zamanlÄ± karÅŸÄ±laÅŸtÄ±rma
+- Lockout uygulama katmanÄ±
 
-## 12. Yol Haritası (Genel)
-- Pwned Passwords kontrolü
-- Blacklist genişletme / parametrik yönetim
-- `UserPasswordHistory` + son N parolanın reddi
-- Ek yönetim ekranları
-
----
-## 13. Oturum Özeti (v2.2 Ek)
-Bu revizyon Parametre Kayıtları backlog’unu listeledi; henüz yeni fonksiyon eklenmedi. Bir sonraki sürüm (v2.3) hedefi: PK-01, PK-02, PK-03 tamamlanması.
+## 12. Yol HaritasÄ± (Genel)
+- Pwned Passwords kontrolÃ¼
+- Blacklist geniÅŸletme / parametrik yÃ¶netim
+- `UserPasswordHistory` + son N parolanÄ±n reddi
+- Ek yÃ¶netim ekranlarÄ±
 
 ---
-## 14. Sürüm Takibi
-| Sürüm | Tarih | İçerik |
+## 13. Oturum Ã–zeti (v2.2 Ek)
+Bu revizyon Parametre KayÄ±tlarÄ± backlogâ€™unu listeledi; henÃ¼z yeni fonksiyon eklenmedi. Bir sonraki sÃ¼rÃ¼m (v2.3) hedefi: PK-01, PK-02, PK-03 tamamlanmasÄ±.
+
+---
+## 14. SÃ¼rÃ¼m Takibi
+| SÃ¼rÃ¼m | Tarih | Ä°Ã§erik |
 |-------|-------|--------|
 | v2.1 | 2025-11-26 | Temel politika, provider, validator, hashing |
-| v2.2 | 2025-11-28 | Backlog / ilerleme, Parametre işleri detaylandırıldı |
+| v2.2 | 2025-11-28 | Backlog / ilerleme, Parametre iÅŸleri detaylandÄ±rÄ±ldÄ± |
 
 
-1. KODLARI HİÇ BİR ZAAN YAZIŞMA EDİTÖRÜ ŞEKLİNDE VERME.  BU KOPYALA YAPIŞTIRMADA HATAYA SEBEP OLUYOR. KOD EDİTÖRÜNDE İNDENTLİ VE RENKLİ OLAN FORMATTA VERİRSEN SORUN OLMUYOR. 
+1. KODLARI HÄ°Ã‡ BÄ°R ZAAN YAZIÅMA EDÄ°TÃ–RÃœ ÅEKLÄ°NDE VERME.  BU KOPYALA YAPIÅTIRMADA HATAYA SEBEP OLUYOR. KOD EDÄ°TÃ–RÃœNDE Ä°NDENTLÄ° VE RENKLÄ° OLAN FORMATTA VERÄ°RSEN SORUN OLMUYOR. 
 
-2. KOD VERECEĞİN ZAMAN DAİMA 1 TANE TAM KOD VERECEKSİN. BEN ONU ÇAŞILTIRACAĞIM. BENİM DONÜŞÜME GÖFE SONRAKİ KODA GEÇECEKSİN
-3. BENİMLE MUHAKKAK TÜRKÇE YAZIŞ LÜTFEN. ÇÜNKÜ BEN İNGİLİZCE BİLMİYORUM. LÜTFEN...
+2. KOD VERECEÄÄ°N ZAMAN DAÄ°MA 1 TANE TAM KOD VERECEKSÄ°N. BEN ONU Ã‡AÅILTIRACAÄIM. BENÄ°M DONÃœÅÃœME GÃ–FE SONRAKÄ° KODA GEÃ‡ECEKSÄ°N
+3. BENÄ°MLE MUHAKKAK TÃœRKÃ‡E YAZIÅ LÃœTFEN. Ã‡ÃœNKÃœ BEN Ä°NGÄ°LÄ°ZCE BÄ°LMÄ°YORUM. LÃœTFEN...

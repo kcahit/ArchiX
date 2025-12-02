@@ -1,5 +1,4 @@
-﻿// File: src/ArchiX.Library/Runtime/Security/PasswordPolicyAdminService.cs
-using System.Text.Json;
+﻿using System.Text.Json;
 
 using ArchiX.Library.Abstractions.Security;
 using ArchiX.Library.Context;
@@ -7,24 +6,18 @@ using ArchiX.Library.Entities;
 using ArchiX.Library.Formatting;
 
 using Microsoft.EntityFrameworkCore;
-
 namespace ArchiX.Library.Runtime.Security
 {
-    // UYARI: Bu sınıf Abstractions katmanındaki IPasswordPolicyAdminService'i uygular.
     internal sealed class PasswordPolicyAdminService : IPasswordPolicyAdminService
     {
         private const string Group = "Security";
         private const string Key = "PasswordPolicy";
         private const int JsonParameterTypeId = 15;
-
         private readonly IDbContextFactory<AppDbContext> _dbFactory;
         private readonly IPasswordPolicyProvider _provider;
-        private readonly JsonSerializerOptions _jsonOptions =
-            new(JsonSerializerDefaults.Web) { PropertyNameCaseInsensitive = true };
+        private readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web) { PropertyNameCaseInsensitive = true };
 
-        public PasswordPolicyAdminService(
-            IDbContextFactory<AppDbContext> dbFactory,
-            IPasswordPolicyProvider provider)
+        public PasswordPolicyAdminService(IDbContextFactory<AppDbContext> dbFactory, IPasswordPolicyProvider provider)
         {
             _dbFactory = dbFactory;
             _provider = provider;
@@ -34,9 +27,7 @@ namespace ArchiX.Library.Runtime.Security
         {
             await using var db = await _dbFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
             var entity = await db.Parameters.AsNoTracking()
-                .FirstOrDefaultAsync(x => x.ApplicationId == applicationId &&
-                                          x.Group == Group &&
-                                          x.Key == Key, ct)
+                .FirstOrDefaultAsync(x => x.ApplicationId == applicationId && x.Group == Group && x.Key == Key, ct)
                 .ConfigureAwait(false);
 
             if (entity is not null && !string.IsNullOrWhiteSpace(entity.Value))
@@ -46,7 +37,8 @@ namespace ArchiX.Library.Runtime.Security
             return JsonSerializer.Serialize(options, _jsonOptions);
         }
 
-        public async Task UpdateAsync(string json, int applicationId = 1, CancellationToken ct = default)
+        // Client RowVersion sağlanmışsa EF Core eşzamanlılık çatışmasını tespit edebilir.
+        public async Task UpdateAsync(string json, int applicationId = 1, byte[]? clientRowVersion = null, CancellationToken ct = default)
         {
             ArgumentNullException.ThrowIfNull(json);
 
@@ -61,13 +53,12 @@ namespace ArchiX.Library.Runtime.Security
             json = JsonTextFormatter.Minify(json);
 
             await using var db = await _dbFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-            await using var tx = await db.Database.BeginTransactionAsync(ct).ConfigureAwait(false);
+            Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction? tx = null;
+            if (db.Database.IsRelational())
+                tx = await db.Database.BeginTransactionAsync(ct).ConfigureAwait(false);
 
-            // Tracking (RowVersion için gerekli)
             var entity = await db.Parameters
-                .FirstOrDefaultAsync(x => x.ApplicationId == applicationId &&
-                                          x.Group == Group &&
-                                          x.Key == Key, ct)
+                .FirstOrDefaultAsync(x => x.ApplicationId == applicationId && x.Group == Group && x.Key == Key, ct)
                 .ConfigureAwait(false);
 
             var oldJson = entity?.Value ?? string.Empty;
@@ -89,9 +80,21 @@ namespace ArchiX.Library.Runtime.Security
             }
             else
             {
+                if (clientRowVersion is not null && clientRowVersion.Length > 0)
+                {
+                    var entry = db.Entry(entity);
+                    entry.Property(nameof(Parameter.RowVersion)).OriginalValue = clientRowVersion;
+                }
+
                 entity.ParameterDataTypeId = JsonParameterTypeId;
                 entity.Value = json;
                 entity.UpdatedAt = DateTimeOffset.UtcNow;
+
+                // For non-relational providers (e.g., InMemory), simulate rowversion changes
+                if (!db.Database.IsRelational())
+                {
+                    entity.RowVersion = System.Security.Cryptography.RandomNumberGenerator.GetBytes(8);
+                }
             }
 
             db.Set<PasswordPolicyAudit>().Add(new PasswordPolicyAudit
@@ -107,16 +110,21 @@ namespace ArchiX.Library.Runtime.Security
             try
             {
                 await db.SaveChangesAsync(ct).ConfigureAwait(false);
-                await tx.CommitAsync(ct).ConfigureAwait(false);
+                if (tx != null) await tx.CommitAsync(ct).ConfigureAwait(false);
             }
             catch (DbUpdateConcurrencyException)
             {
-                await tx.RollbackAsync(ct).ConfigureAwait(false);
+                if (tx != null) await tx.RollbackAsync(ct).ConfigureAwait(false);
                 throw new InvalidOperationException("Çakışma: kayıt başka bir işlem tarafından değiştirildi. Sayfayı yenileyip tekrar deneyin.");
             }
 
             _provider.Invalidate(applicationId);
         }
-    }
 
+        public Task UpdateAsync(string json, int applicationId = 1, CancellationToken ct = default)
+        {
+            // Delegate to main overload without client-supplied RowVersion
+            return UpdateAsync(json, applicationId, null, ct);
+        }
+    }
 }
