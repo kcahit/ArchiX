@@ -1,0 +1,142 @@
+/* ========================================
+   BUTTONS
+   ======================================== */
+
+/* Button Base Overrides */
+.btn {
+    font-weight: var(--font-weight-medium);
+    border-radius: 8px;
+    transition: var(--transition-base);
+    padding: var(--spacing-2) var(--spacing-4);
+}
+
+.btn:focus {
+    box-shadow: 0 0 0 0.25rem rgba(var(--color-primary-rgb), 0.25);
+}
+
+/* Button Sizes */
+.btn-xs {
+    padding: var(--spacing-1) var(--spacing-2);
+    font-size: var(--font-size-xs);
+}
+
+.btn-sm {
+    padding: calc(var(--spacing-1) * 1.5) var(--spacing-3);
+    font-size: var(--font-size-sm);
+}
+
+.btn-lg {
+    padding: var(--spacing-3) var(--spacing-5);
+    font-size: var(--font-size-lg);
+}
+
+/* Button Variants */
+.btn-primary {
+    background: var(--gradient-primary);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-gradient {
+    background: var(--gradient-primary);
+    border: none;
+    color: white;
+}
+
+.btn-gradient:hover {
+    background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Icon Buttons */
+.btn-icon {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--border-radius-md);
+}
+
+.btn-icon.btn-sm {
+    width: 32px;
+    height: 32px;
+}
+
+.btn-icon.btn-lg {
+    width: 48px;
+    height: 48px;
+}
+
+/* Button Groups */
+.btn-group-custom {
+    display: inline-flex;
+    gap: var(--spacing-2);
+}
+
+.btn-group-custom .btn {
+    margin: 0;
+}
+
+/* Social Buttons */
+.btn-social {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-4);
+    border-radius: var(--border-radius-md);
+    font-weight: var(--font-weight-medium);
+    transition: var(--transition-base);
+}
+
+.btn-facebook {
+    background-color: #1877f2;
+    color: white;
+    border: none;
+}
+
+.btn-facebook:hover {
+    background-color: #0c63d4;
+    color: white;
+}
+
+.btn-google {
+    background-color: white;
+    color: #333;
+    border: 1px solid var(--border-color);
+}
+
+.btn-google:hover {
+    background-color: var(--background-light);
+    color: #333;
+}
+
+/* Button States */
+.btn-loading {
+    position: relative;
+    color: transparent;
+    pointer-events: none;
+}
+
+.btn-loading::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spinner 0.6s linear infinite;
+}

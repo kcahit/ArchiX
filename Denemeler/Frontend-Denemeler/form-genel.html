@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Stok ve Müşteri Tanımları</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+	<link rel="stylesheet" href="css/main.css">
+</head>
+<body class="definition-page">
+	<div class="definition-shell container py-4 py-lg-5">
+		<header class="definition-hero card border-0 shadow-sm mb-5">
+			<div class="definition-hero__body p-4 p-lg-5">
+				<div>
+					<p class="hero-kicker">Operasyonel Kart Merkezi</p>
+					<h1 class="hero-title">Stok &amp; Müşteri Tanımları</h1>
+					<p class="hero-lead">Grid kullanmadan, Bootstrap destekli modern form akışıyla stok ve müşteri kartlarını tek ekranda düzenleyin.</p>
+				</div>
+				<div class="definition-hero__actions d-flex flex-wrap gap-3">
+					<button class="btn btn-primary btn-lg">
+						<i class="bi bi-stars me-2"></i>Akıllı Taslak<br class="d-none d-md-block">Oluştur
+					</button>
+					<button class="btn btn-outline-primary btn-lg">
+						<i class="bi bi-briefcase me-2"></i>Şablon Seç
+					</button>
+					<button class="btn btn-outline-secondary btn-lg">
+						<i class="bi bi-upload me-2"></i>CSV Yükle
+					</button>
+				</div>
+				<div class="definition-hero__meta d-grid gap-3 gap-lg-4 mt-4 mt-lg-5">
+					<div class="meta-pill">
+						<span>Aktif Stok Kartı</span>
+						<strong>276</strong>
+						<small class="text-success">+18 bu hafta</small>
+					</div>
+					<div class="meta-pill">
+						<span>Aktif Müşteri</span>
+						<strong>1.392</strong>
+						<small class="text-info">4 yeni hesap</small>
+					</div>
+					<div class="meta-pill">
+						<span>Son Güncelleyen</span>
+						<strong>Admin Panel</strong>
+						<small>12:47 - 04/12/2025</small>
+					</div>
+				</div>
+			</div>
+		</header>
+
+		<main class="definition-flow d-flex flex-column gap-5">
+			<section id="stok-tanimi" class="definition-card">
+				<div class="definition-card__head">
+					<div>
+						<p class="definition-kicker">Stok Tanımı</p>
+						<h2>Ürün Kartı</h2>
+						<p class="definition-subtitle">Kritik stok seviyesi, renk, dosya yükleme ve şifre dahil tüm alan tipleri.</p>
+					</div>
+					<div class="definition-status">
+						<span class="status-chip status-chip--success">
+							<i class="bi bi-check2-circle"></i>Siparişe açık
+						</span>
+						<button class="btn btn-outline-secondary btn-sm">Şablonu Kaydet</button>
+						<button class="btn btn-outline-primary btn-sm">Kopyala</button>
+					</div>
+				</div>
+				<form class="definition-form row g-4" novalidate>
+					<div class="col-md-6 col-xl-4">
+						<label class="form-label" for="stokKodu">Stok Kodu</label>
+						<input id="stokKodu" type="text" class="form-control form-control-lg" placeholder="STK-09231" required>
+						<div class="form-text">Otomatik numara için boş bırakabilirsiniz.</div>
+					</div>
+					<div class="col-md-6 col-xl-4">
+						<label class="form-label" for="stokAdi">Stok Adı</label>
+						<input id="stokAdi" type="text" class="form-control form-control-lg" placeholder="Akıllı Sensör" required>
+					</div>
+					<div class="col-md-6 col-xl-4">
+						<label class="form-label" for="stokTuru">Stok Türü</label>
+						<select id="stokTuru" class="form-select form-select-lg" required>
+							<option value="" disabled selected>Seçiniz</option>
+							<option value="mamul">Mamül</option>
+							<option value="yari">Yarı Mamül</option>
+							<option value="hizmet">Hizmet</option>
+						</select>
+					</div>
+					<div class="col-md-6 col-xl-3">
+						<label class="form-label" for="birim">Birim</label>
+						<select id="birim" class="form-select">
+							<option value="adet">Adet</option>
+							<option value="kutu">Kutu</option>
+							<option value="kg">Kilogram</option>
+						</select>
+					</div>
+					<div class="col-md-6 col-xl-3">
+						<label class="form-label" for="kritikStok">Kritik Miktar</label>
+						<input id="kritikStok" type="number" min="0" step="1" class="form-control" value="50">
+					</div>
+					<div class="col-md-6 col-xl-3">
+						<label class="form-label" for="maksimumStok">Maksimum Miktar</label>
+						<input id="maksimumStok" type="number" min="0" step="5" class="form-control" value="500">
+					</div>
+					<div class="col-md-6 col-xl-3">
+						<label class="form-label" for="tedarikSure">Tedarik Süresi (gün)</label>
+						<input id="tedarikSure" type="number" min="1" step="1" class="form-control" value="12">
+					</div>
+					<div class="col-md-6 col-xl-3">
+						<label class="form-label" for="rafBitis">Raf Bitiş Tarihi</label>
+						<input id="rafBitis" type="date" class="form-control">
+					</div>
+					<div class="col-md-6 col-xl-3">
+						<label class="form-label" for="barkod">Barkod</label>
+						<input id="barkod" type="text" class="form-control" placeholder="869...">
+					</div>
+					<div class="col-md-6 col-xl-3">
+						<label class="form-label" for="seriTakip">Seri Takip No</label>
+						<input id="seriTakip" type="text" class="form-control" placeholder="SR-2025-90">
+					</div>
+					<div class="col-md-6 col-xl-3">
+						<label class="form-label" for="urunSifresi">Ürün Şifresi</label>
+						<input id="urunSifresi" type="password" class="form-control" placeholder="********">
+					</div>
+					<div class="col-md-6 col-xl-3">
+						<label class="form-label" for="etiketRengi">Etiket Rengi</label>
+						<input id="etiketRengi" type="color" class="form-control form-control-color" value="#ff6f61" title="Etiket rengi">
+					</div>
+					<div class="col-md-6 col-xl-3">
+						<label class="form-label" for="iskontoOran">İskonto Oranı</label>
+						<input id="iskontoOran" type="range" class="form-range" min="0" max="50" step="5" value="15" data-range-source="iskontoOran">
+						<div class="range-output">%<span data-range-output="iskontoOran">15</span> hedef stokta</div>
+					</div>
+					<div class="col-md-6 col-xl-3">
+						<label class="form-label" for="stokDosya">Ürün Fotoğrafı</label>
+						<input id="stokDosya" type="file" class="form-control" accept="image/*">
+					</div>
+					<div class="col-12">
+						<div class="definition-divider"></div>
+					</div>
+					<div class="col-lg-7">
+						<label class="form-label" for="stokAciklama">Detaylı Açıklama</label>
+						<textarea id="stokAciklama" rows="3" class="form-control" placeholder="Depolama, paketleme ve fire kurallarını ekleyin..."></textarea>
+					</div>
+					<div class="col-lg-5">
+						<label class="form-label" for="stokNotu">Satın Alma Notu</label>
+						<textarea id="stokNotu" rows="3" class="form-control" placeholder="Ödeme şartları, minimum sipariş vb."></textarea>
+					</div>
+					<div class="col-12">
+						<div class="definition-switches d-flex flex-wrap gap-4">
+							<div class="form-check form-switch">
+								<input id="otomatikSiparis" class="form-check-input" type="checkbox" checked>
+								<label class="form-check-label" for="otomatikSiparis">Kritik stokta otomatik sipariş</label>
+							</div>
+							<div class="form-check form-switch">
+								<input id="fireTakibi" class="form-check-input" type="checkbox">
+								<label class="form-check-label" for="fireTakibi">Fire takibi zorunlu</label>
+							</div>
+							<div class="form-check form-switch">
+								<input id="serbestStok" class="form-check-input" type="checkbox" checked>
+								<label class="form-check-label" for="serbestStok">Serbest stokta göster</label>
+							</div>
+						</div>
+					</div>
+					<div class="col-12 d-flex flex-wrap gap-3">
+						<button type="button" class="btn btn-outline-secondary btn-lg">Taslak Kaydet</button>
+						<button type="submit" class="btn btn-primary btn-lg">Stok Kartını Kaydet</button>
+						<button type="button" class="btn btn-outline-primary btn-lg">PDF Önizleme</button>
+					</div>
+				</form>
+			</section>
+
+			<section id="musteri-tanimi" class="definition-card">
+				<div class="definition-card__head">
+					<div>
+						<p class="definition-kicker">Müşteri Tanımı</p>
+						<h2>CRM Kartı</h2>
+						<p class="definition-subtitle">Vergi bilgisi, kredi limiti, parola alanı, range ve KVKK onayları tek panelde.</p>
+					</div>
+					<div class="definition-status">
+						<span class="status-chip status-chip--warning">
+							<i class="bi bi-exclamation-diamond"></i>Onay bekliyor
+						</span>
+						<button class="btn btn-outline-secondary btn-sm">Toplu Aktar</button>
+					</div>
+				</div>
+				<form class="definition-form row g-4" novalidate>
+					<div class="col-md-6 col-xl-4">
+						<label class="form-label" for="musteriKodu">Müşteri Kodu</label>
+						<input id="musteriKodu" type="text" class="form-control form-control-lg" placeholder="MST-1029" required>
+					</div>
+					<div class="col-md-6 col-xl-4">
+						<label class="form-label" for="ticariUnvan">Ticari Ünvan</label>
+						<input id="ticariUnvan" type="text" class="form-control form-control-lg" placeholder="Nova Yazılım A.Ş." required>
+					</div>
+					<div class="col-md-6 col-xl-4">
+						<label class="form-label" for="vergiDairesi">Vergi Dairesi</label>
+						<input id="vergiDairesi" type="text" class="form-control" placeholder="Ataşehir">
+					</div>
+					<div class="col-md-6 col-xl-4">
+						<label class="form-label" for="vergiNo">Vergi / TCKN</label>
+						<input id="vergiNo" type="number" class="form-control" placeholder="1234567890">
+					</div>
+					<div class="col-md-6 col-xl-4">
+						<label class="form-label" for="musteriEmail">E-Posta</label>
+						<input id="musteriEmail" type="email" class="form-control" placeholder="iletisim@...">
+						<div class="form-text">Bildirimler bu adresle gider.</div>
+					</div>
+					<div class="col-md-6 col-xl-4">
+						<label class="form-label" for="musteriTelefon">Telefon</label>
+						<input id="musteriTelefon" type="tel" class="form-control" placeholder="0 216 ...">
+					</div>
+					<div class="col-md-6 col-xl-4">
+						<label class="form-label" for="dogumTarihi">Kuruluş / Doğum Tarihi</label>
+						<input id="dogumTarihi" type="date" class="form-control">
+					</div>
+					<div class="col-md-6 col-xl-4">
+						<label class="form-label" for="musteriSegment">Segment</label>
+						<select id="musteriSegment" class="form-select">
+							<option value="a">Kurumsal A</option>
+							<option value="b">Kurumsal B</option>
+							<option value="c">Bireysel</option>
+						</select>
+					</div>
+					<div class="col-md-6 col-xl-4">
+						<label class="form-label" for="krediLimiti">Kredi Limiti</label>
+						<input id="krediLimiti" type="number" class="form-control" min="0" step="1000" value="25000">
+					</div>
+					<div class="col-md-6 col-xl-4">
+						<label class="form-label" for="portalSifre">Portal Şifresi</label>
+						<input id="portalSifre" type="password" class="form-control" placeholder="********">
+					</div>
+					<div class="col-md-6 col-xl-4">
+						<label class="form-label" for="portalSifreTekrar">Tekrar Şifre</label>
+						<input id="portalSifreTekrar" type="password" class="form-control" placeholder="********">
+					</div>
+					<div class="col-md-6 col-xl-4">
+						<label class="form-label" for="riskSkoru">Risk Skoru</label>
+						<input id="riskSkoru" type="range" class="form-range" min="0" max="100" value="48" data-range-source="riskSkoru">
+						<div class="range-output">Skor: <span data-range-output="riskSkoru">48</span></div>
+					</div>
+					<div class="col-md-6 col-xl-4">
+						<label class="form-label" for="temsilci">Temsilci</label>
+						<select id="temsilci" class="form-select">
+							<option value="asli">Aslı Demir</option>
+							<option value="burak">Burak Çetin</option>
+							<option value="kerem">Kerem Tok</option>
+						</select>
+					</div>
+					<div class="col-md-6 col-xl-4">
+						<label class="form-label" for="logoRengi">Logo Rengi</label>
+						<input id="logoRengi" type="color" class="form-control form-control-color" value="#21aaff" title="Logo rengi">
+					</div>
+					<div class="col-md-6 col-xl-4">
+						<label class="form-label" for="sozlesmeDosya">Sözleşme</label>
+						<input id="sozlesmeDosya" type="file" class="form-control" accept="application/pdf">
+					</div>
+					<div class="col-12">
+						<label class="form-label" for="adres">Fatura Adresi</label>
+						<textarea id="adres" rows="3" class="form-control" placeholder="Mahalle, cadde, vergi dairesi..."></textarea>
+					</div>
+					<div class="col-12">
+						<label class="form-label" for="musteriNotu">Notlar</label>
+						<textarea id="musteriNotu" rows="3" class="form-control" placeholder="Görüşme özetleri, özel koşullar..."></textarea>
+					</div>
+					<div class="col-12 d-flex flex-wrap gap-4 align-items-center">
+						<div class="form-check form-switch">
+							<input id="kvkkOnay" class="form-check-input" type="checkbox" checked>
+							<label class="form-check-label" for="kvkkOnay">KVKK onayı alındı</label>
+						</div>
+						<div class="form-check">
+							<input id="kanalOnline" class="form-check-input" type="radio" name="kanal" checked>
+							<label class="form-check-label" for="kanalOnline">Online Kanal</label>
+						</div>
+						<div class="form-check">
+							<input id="kanalSaha" class="form-check-input" type="radio" name="kanal">
+							<label class="form-check-label" for="kanalSaha">Saha Ekibi</label>
+						</div>
+						<div class="form-check">
+							<input id="kanalBayii" class="form-check-input" type="radio" name="kanal">
+							<label class="form-check-label" for="kanalBayii">Bayii Kanalı</label>
+						</div>
+					</div>
+					<div class="col-12 d-flex flex-wrap gap-3">
+						<button type="reset" class="btn btn-outline-secondary btn-lg">Formu Temizle</button>
+						<button type="submit" class="btn btn-primary btn-lg">Müşteri Kaydet</button>
+						<button type="button" class="btn btn-outline-primary btn-lg">CRM'e Gönder</button>
+					</div>
+				</form>
+			</section>
+
+			<section id="crud-metadata" class="definition-card crud-panel">
+				<div class="definition-card__head">
+					<div>
+						<p class="definition-kicker">CRUD Kolonları</p>
+						<h2>Audit Trail</h2>
+						<p class="definition-subtitle">Create, Read, Update, Delete işlemlerini ve zaman damgalarını izleyin.</p>
+					</div>
+					<div class="definition-status">
+						<span class="status-chip status-chip--info">
+							<i class="bi bi-activity"></i>Log kaydı açık
+						</span>
+					</div>
+				</div>
+				<div class="crud-grid row g-4">
+					<div class="col-12 col-md-6 col-xl-3">
+						<div class="crud-item">
+							<span class="crud-item__label">Create</span>
+							<input type="text" class="form-control" placeholder="Oluşturan kullanıcı">
+							<input type="datetime-local" class="form-control">
+						</div>
+					</div>
+					<div class="col-12 col-md-6 col-xl-3">
+						<div class="crud-item">
+							<span class="crud-item__label">Read</span>
+							<input type="text" class="form-control" placeholder="Son okuyan">
+							<input type="datetime-local" class="form-control">
+						</div>
+					</div>
+					<div class="col-12 col-md-6 col-xl-3">
+						<div class="crud-item">
+							<span class="crud-item__label">Update</span>
+							<input type="text" class="form-control" placeholder="Güncelleyen">
+							<input type="datetime-local" class="form-control">
+						</div>
+					</div>
+					<div class="col-12 col-md-6 col-xl-3">
+						<div class="crud-item">
+							<span class="crud-item__label">Delete</span>
+							<input type="text" class="form-control" placeholder="Silme talebi">
+							<input type="datetime-local" class="form-control">
+						</div>
+					</div>
+				</div>
+				<div class="crud-actions d-flex flex-wrap gap-3 mt-4">
+					<div class="form-check form-switch">
+						<input id="softDelete" class="form-check-input" type="checkbox" checked>
+						<label class="form-check-label" for="softDelete">Soft delete işaretle</label>
+					</div>
+					<div class="form-check form-switch">
+						<input id="logExport" class="form-check-input" type="checkbox">
+						<label class="form-check-label" for="logExport">Logları dışa aktar</label>
+					</div>
+					<button class="btn btn-outline-secondary">Logu Görüntüle</button>
+					<button class="btn btn-primary">Değişiklikleri Kaydet</button>
+				</div>
+			</section>
+		</main>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+	<script>
+		document.querySelectorAll('[data-range-source]').forEach((input) => {
+			const key = input.getAttribute('data-range-source');
+			const output = document.querySelector(`[data-range-output="${key}"]`);
+			if (!output) {
+				return;
+			}
+			const update = () => {
+				output.textContent = input.value;
+			};
+			input.addEventListener('input', update);
+			update();
+		});
+	</script>
+</body>
+</html>
