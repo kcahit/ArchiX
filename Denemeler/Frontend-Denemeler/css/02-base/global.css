@@ -1,0 +1,238 @@
+/* ============================================
+   GLOBAL STYLES - Genel Yapı
+   ============================================ */
+
+/* Responsive Font System - Otomatik ekran boyutu algılama */
+html {
+    font-size: 16px; /* Base font size */
+}
+
+/* Büyük ekranlar (Desktop 1920px+) */
+@media (min-width: 1920px) {
+    html {
+        font-size: 17px;
+    }
+}
+
+/* Orta ekranlar (Laptop 1366-1920px) */
+@media (max-width: 1366px) {
+    html {
+        font-size: 15px;
+    }
+}
+
+/* Tablet (768-1366px) */
+@media (max-width: 768px) {
+    html {
+        font-size: 14px;
+    }
+}
+
+/* Mobil (0-576px) */
+@media (max-width: 576px) {
+    html {
+        font-size: 13px;
+    }
+}
+
+/* Text Selection - Tüm sayfalarda seçili metin görünür olsun */
+*::selection {
+    background-color: #667eea !important;
+    color: #ffffff !important;
+    text-shadow: none !important;
+}
+
+*::-moz-selection {
+    background-color: #667eea !important;
+    color: #ffffff !important;
+    text-shadow: none !important;
+}
+
+/* Body - Default background */
+body {
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-normal);
+    color: var(--text-primary);
+    overflow-x: hidden;
+    background: #f5f6fa;
+    min-height: 100vh;
+}
+
+/* Login ve Grid sayfaları için mor gradient */
+body.login-page,
+body.grid-page {
+    background: var(--primary-gradient);
+}
+
+/* Container */
+.container {
+    width: 100%;
+    margin-right: auto;
+    margin-left: auto;
+    padding-right: var(--spacing-md);
+    padding-left: var(--spacing-md);
+}
+
+@media (min-width: 576px) {
+    .container {
+        max-width: 540px;
+    }
+}
+
+@media (min-width: 768px) {
+    .container {
+        max-width: 720px;
+    }
+}
+
+@media (min-width: 992px) {
+    .container {
+        max-width: 960px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1140px;
+    }
+}
+
+@media (min-width: 1400px) {
+    .container {
+        max-width: 1320px;
+    }
+}
+
+.container-fluid {
+    width: 100%;
+    padding-right: var(--spacing-md);
+    padding-left: var(--spacing-md);
+    margin-right: auto;
+    margin-left: auto;
+}
+
+/* Row & Col */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: calc(var(--spacing-md) * -1);
+    margin-left: calc(var(--spacing-md) * -1);
+}
+
+.col {
+    flex: 1 0 0%;
+    padding-right: var(--spacing-md);
+    padding-left: var(--spacing-md);
+}
+
+/* Section */
+.section {
+    padding: var(--spacing-3xl) 0;
+}
+
+.section-sm {
+    padding: var(--spacing-2xl) 0;
+}
+
+.section-lg {
+    padding: 80px 0;
+}
+
+/* Card Container (Generic) */
+.card-container {
+    background: var(--bg-white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: var(--spacing-xl);
+}
+
+/* Page wrapper */
+.page-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.page-content {
+    flex: 1;
+}
+
+/* Loading spinner */
+.spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid var(--bg-gray);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spinner-rotate 0.6s linear infinite;
+}
+
+@keyframes spinner-rotate {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Overlay */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: var(--z-modal-backdrop);
+    display: none;
+}
+
+.overlay.active {
+    display: block;
+}
+
+/* Divider */
+.divider {
+    height: 1px;
+    background-color: var(--border-color);
+    margin: var(--spacing-lg) 0;
+}
+
+.divider-vertical {
+    width: 1px;
+    height: 100%;
+    background-color: var(--border-color);
+    margin: 0 var(--spacing-md);
+}
+
+/* Responsive helpers */
+@media (max-width: 767px) {
+    .hide-mobile {
+        display: none !important;
+    }
+}
+
+@media (min-width: 768px) {
+    .hide-desktop {
+        display: none !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .show-mobile {
+        display: block !important;
+    }
+}
+
+@media (min-width: 768px) {
+    .show-desktop {
+        display: block !important;
+    }
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+}
