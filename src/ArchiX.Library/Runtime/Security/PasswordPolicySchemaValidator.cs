@@ -2,145 +2,162 @@ using System.Text.Json;
 
 namespace ArchiX.Library.Runtime.Security;
 
-internal static class PasswordPolicySchemaValidator
+/// <summary>
+/// PasswordPolicy JSON þemasýnýn server-side doðrulamasý (PK-03).
+/// Tüm required alanlarý ve tür kontrollerini yapar.
+/// </summary>
+public static class PasswordPolicySchemaValidator
 {
-    // Zorunlu alanlar listesi (kök seviyede)
-    private static readonly string[] RequiredRootProps =
+    /// <summary>
+    /// JSON'ý parse eder ve þema kurallarýna uygunluðunu kontrol eder.
+    /// </summary>
+    /// <returns>Hata varsa liste, yoksa boþ liste.</returns>
+    public static IReadOnlyList<string> Validate(string json)
     {
-        "version",
-        "minLength",
-        "maxLength",
-        "requireUpper",
-        "requireLower",
-        "requireDigit",
-        "requireSymbol",
-        "allowedSymbols",
-        "minDistinctChars",
-        "maxRepeatedSequence",
-        "blockList",
-        "historyCount",
-        "lockoutThreshold",
-        "lockoutSeconds",
-        "hash"
-    };
+        var errors = new List<string>();
 
-    // Hash alt nesnesi için zorunlu alanlar
-    private static readonly string[] RequiredHashProps =
-    {
-        "algorithm",
-        "memoryKb",
-        "parallelism",
-        "iterations",
-        "saltLength",
-        "hashLength",
-        "fallback",
-        "pepperEnabled"
-    };
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            errors.Add("JSON boþ olamaz.");
+            return errors;
+        }
 
-    // Fallback alt nesnesi için zorunlu alanlar
-    private static readonly string[] RequiredFallbackProps =
-    {
-        "algorithm",
-        "iterations"
-    };
+        JsonDocument doc;
+        try
+        {
+            doc = JsonDocument.Parse(json);
+        }
+        catch (JsonException ex)
+        {
+            errors.Add($"JSON parse hatasý: {ex.Message}");
+            return errors;
+        }
 
-    public static void ValidateOrThrow(string rawJson)
-    {
-        if (string.IsNullOrWhiteSpace(rawJson))
-            throw new InvalidOperationException("PasswordPolicy JSON boþ olamaz.");
-
-        using var doc = JsonDocument.Parse(rawJson);
         var root = doc.RootElement;
-        if (root.ValueKind != JsonValueKind.Object)
-            throw new InvalidOperationException("PasswordPolicy JSON bir nesne olmalýdýr.");
 
-        // Kök zorunlu alanlar
-        foreach (var prop in RequiredRootProps)
+        // version (required, number)
+        if (!root.TryGetProperty("version", out var vProp) || vProp.ValueKind != JsonValueKind.Number)
+            errors.Add("'version' alaný zorunlu ve sayý olmalý.");
+
+        // minLength (required, number, >= 1)
+        if (!root.TryGetProperty("minLength", out var minLenProp) || minLenProp.ValueKind != JsonValueKind.Number)
+            errors.Add("'minLength' alaný zorunlu ve sayý olmalý.");
+        else if (minLenProp.GetInt32() < 1)
+            errors.Add("'minLength' en az 1 olmalý.");
+
+        // maxLength (required, number, >= minLength)
+        if (!root.TryGetProperty("maxLength", out var maxLenProp) || maxLenProp.ValueKind != JsonValueKind.Number)
+            errors.Add("'maxLength' alaný zorunlu ve sayý olmalý.");
+        else if (minLenProp.ValueKind == JsonValueKind.Number && maxLenProp.GetInt32() < minLenProp.GetInt32())
+            errors.Add("'maxLength' 'minLength'ten küçük olamaz.");
+
+        // requireUpper, requireLower, requireDigit, requireSymbol (required, boolean)
+        ValidateBooleanField(root, "requireUpper", errors);
+        ValidateBooleanField(root, "requireLower", errors);
+        ValidateBooleanField(root, "requireDigit", errors);
+        ValidateBooleanField(root, "requireSymbol", errors);
+
+        // allowedSymbols (required, string)
+        if (!root.TryGetProperty("allowedSymbols", out var symProp) || symProp.ValueKind != JsonValueKind.String)
+            errors.Add("'allowedSymbols' alaný zorunlu ve string olmalý.");
+
+        // minDistinctChars (required, number, >= 0)
+        ValidateNonNegativeNumber(root, "minDistinctChars", errors);
+
+        // maxRepeatedSequence (required, number, >= 0)
+        ValidateNonNegativeNumber(root, "maxRepeatedSequence", errors);
+
+        // blockList (required, array)
+        if (!root.TryGetProperty("blockList", out var blockProp) || blockProp.ValueKind != JsonValueKind.Array)
+            errors.Add("'blockList' alaný zorunlu ve array olmalý.");
+
+        // historyCount (required, number, >= 0)
+        ValidateNonNegativeNumber(root, "historyCount", errors);
+
+        // lockoutThreshold (required, number, >= 0)
+        ValidateNonNegativeNumber(root, "lockoutThreshold", errors);
+
+        // lockoutSeconds (required, number, >= 0)
+        ValidateNonNegativeNumber(root, "lockoutSeconds", errors);
+
+        // hash (required, object)
+        if (!root.TryGetProperty("hash", out var hashProp) || hashProp.ValueKind != JsonValueKind.Object)
         {
-            if (!root.TryGetProperty(prop, out var el))
-                throw new InvalidOperationException($"Eksik zorunlu alan: {prop}");
+            errors.Add("'hash' alaný zorunlu ve object olmalý.");
+        }
+        else
+        {
+            // hash.algorithm (required, string)
+            if (!hashProp.TryGetProperty("algorithm", out var algoProp) || algoProp.ValueKind != JsonValueKind.String)
+                errors.Add("'hash.algorithm' alaný zorunlu ve string olmalý.");
+
+            // hash.memoryKb, parallelism, iterations, saltLength, hashLength (required, number, > 0)
+            ValidatePositiveNumber(hashProp, "memoryKb", errors);
+            ValidatePositiveNumber(hashProp, "parallelism", errors);
+            ValidatePositiveNumber(hashProp, "iterations", errors);
+            ValidatePositiveNumber(hashProp, "saltLength", errors);
+            ValidatePositiveNumber(hashProp, "hashLength", errors);
+
+            // hash.fallback (required, object)
+            if (!hashProp.TryGetProperty("fallback", out var fbProp) || fbProp.ValueKind != JsonValueKind.Object)
+            {
+                errors.Add("'hash.fallback' alaný zorunlu ve object olmalý.");
+            }
+            else
+            {
+                if (!fbProp.TryGetProperty("algorithm", out var fbAlgoProp) || fbAlgoProp.ValueKind != JsonValueKind.String)
+                    errors.Add("'hash.fallback.algorithm' alaný zorunlu ve string olmalý.");
+
+                ValidatePositiveNumber(fbProp, "iterations", errors);
+            }
+
+            // hash.pepperEnabled (required, boolean)
+            ValidateBooleanField(hashProp, "pepperEnabled", errors);
         }
 
-        // Tür kontrolleri ve basit aralýklar
-        RequireNumber(root, "version", min: 1);
-        var minLen = RequireNumber(root, "minLength", min: 1);
-        var maxLen = RequireNumber(root, "maxLength", min: minLen);
-        RequireBool(root, "requireUpper");
-        RequireBool(root, "requireLower");
-        RequireBool(root, "requireDigit");
-        RequireBool(root, "requireSymbol");
-        RequireString(root, "allowedSymbols");
-        RequireNumber(root, "minDistinctChars", min: 0);
-        RequireNumber(root, "maxRepeatedSequence", min: 0);
-        RequireArray(root, "blockList");
-        RequireNumber(root, "historyCount", min: 0);
-        RequireNumber(root, "lockoutThreshold", min: 0);
-        RequireNumber(root, "lockoutSeconds", min: 0);
+        return errors;
+    }
 
-        // hash nesnesi
-        var hash = root.GetProperty("hash");
-        foreach (var prop in RequiredHashProps)
+    /// <summary>
+    /// JSON'ý doðrular, hata varsa exception fýrlatýr.
+    /// </summary>
+    public static void ValidateOrThrow(string json)
+    {
+        var errors = Validate(json);
+        if (errors.Count > 0)
+            throw new InvalidOperationException($"PasswordPolicy þema hatasý: {string.Join("; ", errors)}");
+    }
+
+    private static void ValidateBooleanField(JsonElement element, string fieldName, List<string> errors)
+    {
+        if (!element.TryGetProperty(fieldName, out var prop) ||
+            (prop.ValueKind != JsonValueKind.True && prop.ValueKind != JsonValueKind.False))
         {
-            if (!hash.TryGetProperty(prop, out var _))
-                throw new InvalidOperationException($"Eksik zorunlu alan: hash.{prop}");
+            errors.Add($"'{fieldName}' alaný zorunlu ve boolean olmalý.");
         }
+    }
 
-        RequireString(hash, "algorithm");
-        RequireNumber(hash, "memoryKb", min: 4096); // 4MB altý anlamsýz
-        RequireNumber(hash, "parallelism", min: 1);
-        RequireNumber(hash, "iterations", min: 1);
-        RequireNumber(hash, "saltLength", min: 8);
-        RequireNumber(hash, "hashLength", min: 16);
-        RequireBool(hash, "pepperEnabled");
-
-        var fallback = hash.GetProperty("fallback");
-        foreach (var prop in RequiredFallbackProps)
+    private static void ValidateNonNegativeNumber(JsonElement element, string fieldName, List<string> errors)
+    {
+        if (!element.TryGetProperty(fieldName, out var prop) || prop.ValueKind != JsonValueKind.Number)
         {
-            if (!fallback.TryGetProperty(prop, out var _))
-                throw new InvalidOperationException($"Eksik zorunlu alan: hash.fallback.{prop}");
+            errors.Add($"'{fieldName}' alaný zorunlu ve sayý olmalý.");
         }
-        RequireString(fallback, "algorithm");
-        RequireNumber(fallback, "iterations", min: 100000);
-
-        // allowedSymbols ile requireSymbol tutarlýlýðý
-        var requireSymbol = root.GetProperty("requireSymbol").GetBoolean();
-        var allowedSymbols = root.GetProperty("allowedSymbols").GetString() ?? string.Empty;
-        if (requireSymbol && string.IsNullOrWhiteSpace(allowedSymbols))
-            throw new InvalidOperationException("requireSymbol=true ise allowedSymbols boþ olamaz.");
-
-        // min/max mantýðý
-        if (minLen > maxLen)
-            throw new InvalidOperationException("minLength, maxLength deðerinden büyük olamaz.");
+        else if (prop.GetInt32() < 0)
+        {
+            errors.Add($"'{fieldName}' negatif olamaz.");
+        }
     }
 
-    private static int RequireNumber(JsonElement obj, string name, int? min = null, int? max = null)
+    private static void ValidatePositiveNumber(JsonElement element, string fieldName, List<string> errors)
     {
-        if (!obj.TryGetProperty(name, out var el) || el.ValueKind != JsonValueKind.Number)
-            throw new InvalidOperationException($"Alan '{name}' number olmalýdýr.");
-        if (!el.TryGetInt32(out var val))
-            throw new InvalidOperationException($"Alan '{name}' integer olmalýdýr.");
-        if (min is not null && val < min)
-            throw new InvalidOperationException($"Alan '{name}' en az {min} olmalýdýr.");
-        if (max is not null && val > max)
-            throw new InvalidOperationException($"Alan '{name}' en çok {max} olmalýdýr.");
-        return val;
-    }
-
-    private static void RequireBool(JsonElement obj, string name)
-    {
-        if (!obj.TryGetProperty(name, out var el) || el.ValueKind != JsonValueKind.True && el.ValueKind != JsonValueKind.False)
-            throw new InvalidOperationException($"Alan '{name}' boolean olmalýdýr.");
-    }
-
-    private static void RequireString(JsonElement obj, string name)
-    {
-        if (!obj.TryGetProperty(name, out var el) || el.ValueKind != JsonValueKind.String)
-            throw new InvalidOperationException($"Alan '{name}' string olmalýdýr.");
-    }
-
-    private static void RequireArray(JsonElement obj, string name)
-    {
-        if (!obj.TryGetProperty(name, out var el) || el.ValueKind != JsonValueKind.Array)
-            throw new InvalidOperationException($"Alan '{name}' array olmalýdýr.");
+        if (!element.TryGetProperty(fieldName, out var prop) || prop.ValueKind != JsonValueKind.Number)
+        {
+            errors.Add($"'{fieldName}' alaný zorunlu ve sayý olmalý.");
+        }
+        else if (prop.GetInt32() <= 0)
+        {
+            errors.Add($"'{fieldName}' pozitif olmalý.");
+        }
     }
 }
