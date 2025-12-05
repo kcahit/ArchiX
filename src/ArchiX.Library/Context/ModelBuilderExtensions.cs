@@ -1,6 +1,9 @@
 using System.Reflection;
+
 using ArchiX.Library.Entities;
+
 using Humanizer;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace ArchiX.Library.Context
@@ -18,7 +21,7 @@ namespace ArchiX.Library.Context
             {
                 var fi = t.GetField(nameof(BaseEntity.MapToDb), BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
                       ?? t.GetField(nameof(BaseEntity.MapToDb), BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
-                var include = fi?.FieldType == typeof(bool) ? (bool)fi.GetValue(null)! : true;
+                var include = (fi?.FieldType) != typeof(bool) || (bool)fi.GetValue(null)!;
                 if (!include) { modelBuilder.Ignore(t); continue; }
                 modelBuilder.Entity(t).ToTable(t.Name.Pluralize());
             }
@@ -68,6 +71,18 @@ namespace ArchiX.Library.Context
                 var lambdaType = typeof(Func<,>).MakeGenericType(entityType, typeof(bool));
                 var lambda = System.Linq.Expressions.Expression.Lambda(lambdaType, body, p);
                 modelBuilder.Entity(entityType).HasQueryFilter(lambda);
+            }
+        }
+
+        /// <summary>
+        /// Tüm foreign key'leri DeleteBehavior.Restrict yapar (audit trail için).
+        /// </summary>
+        public static void ApplyRestrictDeleteBehavior(this ModelBuilder modelBuilder)
+        {
+            foreach (var relationship in modelBuilder.Model.GetEntityTypes()
+                .SelectMany(e => e.GetForeignKeys()))
+            {
+                relationship.DeleteBehavior = DeleteBehavior.Restrict;
             }
         }
     }

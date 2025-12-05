@@ -1,4 +1,4 @@
-// File: src / ArchiX.Library / Context / AppDbContext.cs
+ï»¿// File: src / ArchiX.Library / Context / AppDbContext.cs
 using ArchiX.Library.Entities;
 
 using Microsoft.EntityFrameworkCore;
@@ -16,8 +16,6 @@ namespace ArchiX.Library.Context
         public int DeletedStatusId { get; private set; }
 
         // DbSets
-
-
         public DbSet<Statu> Status => Set<Statu>();
         public DbSet<FilterItem> FilterItems => Set<FilterItem>();
         public DbSet<LanguagePack> LanguagePacks => Set<LanguagePack>();
@@ -25,10 +23,11 @@ namespace ArchiX.Library.Context
         public DbSet<ConnectionAudit> ConnectionAudits => Set<ConnectionAudit>();
         public DbSet<ParameterDataType> ParameterDataTypes => Set<ParameterDataType>();
         public DbSet<Parameter> Parameters => Set<Parameter>();
-
         public DbSet<Application> Applications => Set<Application>();
         public DbSet<User> Users => Set<User>();
         public DbSet<UserApplication> UserApplications => Set<UserApplication>();
+        public DbSet<UserPasswordHistory> UserPasswordHistories => Set<UserPasswordHistory>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.UseCollation("Latin1_General_100_CI_AS_SC_UTF8");
@@ -36,7 +35,6 @@ namespace ArchiX.Library.Context
 
             var asm = typeof(AppDbContext).Assembly;
             modelBuilder.ApplyPluralizeAndMapToDb(asm);
-
             modelBuilder.ApplyBaseEntityConventions();
 
             // Application entity
@@ -78,8 +76,6 @@ namespace ArchiX.Library.Context
                 e.Property(lp => lp.Culture).IsRequired();
                 e.HasIndex(lp => new { lp.ItemType, lp.EntityName, lp.FieldName, lp.Code, lp.Culture }).IsUnique();
             });
-
-           
 
             modelBuilder.Entity<ConnectionServerWhitelist>(e =>
             {
@@ -132,7 +128,24 @@ namespace ArchiX.Library.Context
                 e.HasOne(x => x.Application).WithMany().HasForeignKey(x => x.ApplicationId).OnDelete(DeleteBehavior.Restrict);
             });
 
+            // UserPasswordHistory
+            modelBuilder.Entity<UserPasswordHistory>(entity =>
+            {
+                entity.ToTable("UserPasswordHistories");
+                entity.HasKey(e => e.Id);
 
+                entity.Property(e => e.UserId).IsRequired();
+                entity.Property(e => e.PasswordHash).IsRequired().HasMaxLength(300);
+                entity.Property(e => e.HashAlgorithm).IsRequired().HasMaxLength(20);
+                entity.Property(e => e.CreatedAtUtc).IsRequired().HasPrecision(4);
+
+                entity.HasIndex(e => e.UserId);
+                entity.HasIndex(e => new { e.UserId, e.CreatedAtUtc });
+
+                // BaseEntity configuration'Ä± otomatik uygulanÄ±r
+            });
+
+            // User seed
             modelBuilder.Entity<User>().HasData(
                 new User
                 {
@@ -148,6 +161,7 @@ namespace ArchiX.Library.Context
                 }
             );
 
+            // UserApplication seed
             modelBuilder.Entity<UserApplication>().HasData(
                 new UserApplication
                 {
@@ -159,7 +173,7 @@ namespace ArchiX.Library.Context
                 }
             );
 
-            // Seeds
+            // Status seeds
             modelBuilder.Entity<Statu>().HasData(
                 new Statu { Id = 1, Code = "DFT", Name = "Draft", Description = "Record is in draft state", StatusId = BaseEntity.ApprovedStatusId },
                 new Statu { Id = 2, Code = "AWT", Name = "Awaiting Approval", Description = "Record is waiting for approval", StatusId = BaseEntity.ApprovedStatusId },
@@ -169,11 +183,12 @@ namespace ArchiX.Library.Context
                 new Statu { Id = 6, Code = "DEL", Name = "Deleted", Description = "Record has been deleted", StatusId = BaseEntity.ApprovedStatusId }
             );
 
-            // Global Application seed
+            // Application seed
             modelBuilder.Entity<Application>().HasData(
                 new Application { Id = 1, Code = "Global", Name = "Global Application", Description = "Default/global scope", StatusId = BaseEntity.ApprovedStatusId, ConfigVersion = 1 }
             );
 
+            // FilterItem seeds
             modelBuilder.Entity<FilterItem>().HasData(
                 new FilterItem { Id = 1, ItemType = "Operator", Code = "Equals", StatusId = 3 },
                 new FilterItem { Id = 2, ItemType = "Operator", Code = "NotEquals", StatusId = 3 },
@@ -195,14 +210,15 @@ namespace ArchiX.Library.Context
                 new FilterItem { Id = 18, ItemType = "Operator", Code = "IsNotNull", StatusId = 3 }
             );
 
+            // LanguagePack seeds
             modelBuilder.Entity<LanguagePack>().HasData(
-                new LanguagePack { Id = 1, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "Equals", Culture = "tr-TR", DisplayName = "Eþittir", Description = "Deðer belirtilene eþit olmalý", StatusId = 3 },
+                new LanguagePack { Id = 1, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "Equals", Culture = "tr-TR", DisplayName = "EÅŸittir", Description = "DeÄŸer belirtilene eÅŸit olmalÄ±", StatusId = 3 },
                 new LanguagePack { Id = 2, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "Equals", Culture = "en-US", DisplayName = "Equals", Description = "Value must be equal to the given one", StatusId = 3 },
-                new LanguagePack { Id = 3, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotEquals", Culture = "tr-TR", DisplayName = "Eþit Deðil", Description = "Deðer belirtilene eþit olmamalý", StatusId = 3 },
+                new LanguagePack { Id = 3, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotEquals", Culture = "tr-TR", DisplayName = "EÅŸit DeÄŸil", Description = "DeÄŸer belirtilene eÅŸit olmamalÄ±", StatusId = 3 },
                 new LanguagePack { Id = 4, ItemType = "Operator", EntityName = "FilterItem", FieldName = "Code", Code = "NotEquals", Culture = "en-US", DisplayName = "Not Equal", Description = "Value must not be equal to the given one", StatusId = 3 }
-                // (devam eden seed kayýtlarý kýsaltýldý)
             );
 
+            // ParameterDataType seeds
             modelBuilder.Entity<ParameterDataType>().HasData(
                 new ParameterDataType { Id = 1, Code = 60, Name = "NVarChar_50", Category = "NVarChar", Description = "NVARCHAR logical length 50", StatusId = 3 },
                 new ParameterDataType { Id = 2, Code = 70, Name = "NVarChar_100", Category = "NVarChar", Description = "NVARCHAR logical length 100", StatusId = 3 },
@@ -222,87 +238,39 @@ namespace ArchiX.Library.Context
                 new ParameterDataType { Id = 16, Code = 920, Name = "Secret", Category = "Other", Description = "Encrypted secret", StatusId = 3 }
             );
 
+            // Parameter seeds
             modelBuilder.Entity<Parameter>().HasData(
-    new Parameter
-    {
-        Id = 1,
-        Group = "TwoFactor",
-        Key = "Options",
-        ApplicationId = 1,
-        ParameterDataTypeId = 15,
-        // TEST BEKLENTÝSÝ: defaultChannel = Sms
-        Value = "{\n  \"defaultChannel\": \"Sms\"\n}",
-        Template = "{\n  \"defaultChannel\": \"Sms\",\n  \"channels\": {\n    \"Sms\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Email\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Authenticator\": { \"digits\": 6, \"periodSeconds\": 30, \"hashAlgorithm\": \"SHA1\" }\n  }\n}",
-        Description = "Ýkili doðrulama varsayýlan kanal ve seçenekleri",
-        StatusId = 3
-    },
-    new Parameter
-    {
-        Id = 2,
-        Group = "Security",
-        Key = "PasswordPolicy",
-        ApplicationId = 1,
-        ParameterDataTypeId = 15,
-        Description = "Parola politikasý ve hash parametreleri",
-        StatusId = 3,
-        Value =
-            "{\n" +
-            "  \"version\": 1,\n" +
-            "  \"minLength\": 12,\n" +
-            "  \"maxLength\": 128,\n" +
-            "  \"requireUpper\": true,\n" +
-            "  \"requireLower\": true,\n" +
-            "  \"requireDigit\": true,\n" +
-            "  \"requireSymbol\": true,\n" +
-            "  \"allowedSymbols\": \"!@#$%^&*_-+=:?.,;\",\n" +
-            "  \"minDistinctChars\": 5,\n" +
-            "  \"maxRepeatedSequence\": 3,\n" +
-            "  \"blockList\": [\"password\", \"123456\", \"qwerty\", \"admin\"],\n" +
-            "  \"historyCount\": 10,\n" +
-            "  \"lockoutThreshold\": 5,\n" +
-            "  \"lockoutSeconds\": 900,\n" +
-            "  \"hash\": {\n" +
-            "    \"algorithm\": \"Argon2id\",\n" +
-            "    \"memoryKb\": 65536,\n" +
-            "    \"parallelism\": 2,\n" +
-            "    \"iterations\": 3,\n" +
-            "    \"saltLength\": 16,\n" +
-            "    \"hashLength\": 32,\n" +
-            "    \"fallback\": { \"algorithm\": \"PBKDF2-SHA512\", \"iterations\": 210000 },\n" +
-            "    \"pepperEnabled\": true\n" +
-            "  }\n" +
-            "}",
-        Template =
-            "{\n" +
-            "  \"version\": 1,\n" +
-            "  \"minLength\": 12,\n" +
-            "  \"maxLength\": 128,\n" +
-            "  \"requireUpper\": true,\n" +
-            "  \"requireLower\": true,\n" +
-            "  \"requireDigit\": true,\n" +
-            "  \"requireSymbol\": true,\n" +
-            "  \"allowedSymbols\": \"\",\n" +
-            "  \"minDistinctChars\": 0,\n" +
-            "  \"maxRepeatedSequence\": 0,\n" +
-            "  \"blockList\": [],\n" +
-            "  \"historyCount\": 0,\n" +
-            "  \"lockoutThreshold\": 0,\n" +
-            "  \"lockoutSeconds\": 0,\n" +
-            "  \"hash\": {\n" +
-            "    \"algorithm\": \"Argon2id\",\n" +
-            "    \"memoryKb\": 0,\n" +
-            "    \"parallelism\": 0,\n" +
-            "    \"iterations\": 0,\n" +
-            "    \"saltLength\": 0,\n" +
-            "    \"hashLength\": 0,\n" +
-            "    \"fallback\": { \"algorithm\": \"PBKDF2-SHA512\", \"iterations\": 0 },\n" +
-            "    \"pepperEnabled\": false\n" +
-            "  }\n" +
-            "}"
-    }
-);
+                new Parameter
+                {
+                    Id = 1,
+                    Group = "TwoFactor",
+                    Key = "Options",
+                    ApplicationId = 1,
+                    ParameterDataTypeId = 15,
+                    Value = "{\n  \"defaultChannel\": \"Sms\"\n}",
+                    Template = "{\n  \"defaultChannel\": \"Sms\",\n  \"channels\": {\n    \"Sms\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Email\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Authenticator\": { \"digits\": 6, \"periodSeconds\": 30, \"hashAlgorithm\": \"SHA1\" }\n  }\n}",
+                    Description = "Ä°kili doÄŸrulama varsayÄ±lan kanal ve seÃ§enekleri",
+                    StatusId = 3
+                },
+                new Parameter
+                {
+                    Id = 2,
+                    Group = "Security",
+                    Key = "PasswordPolicy",
+                    ApplicationId = 1,
+                    ParameterDataTypeId = 15,
+                    Description = "Parola politikasÄ± ve hash parametreleri",
+                    StatusId = 3,
+                    Value = "{\n  \"version\": 1,\n  \"minLength\": 12,\n  \"maxLength\": 128,\n  \"requireUpper\": true,\n  \"requireLower\": true,\n  \"requireDigit\": true,\n  \"requireSymbol\": true,\n  \"allowedSymbols\": \"!@#$%^&*_-+=:?.,;\",\n  \"minDistinctChars\": 5,\n  \"maxRepeatedSequence\": 3,\n  \"blockList\": [\"password\", \"123456\", \"qwerty\", \"admin\"],\n  \"historyCount\": 10,\n  \"lockoutThreshold\": 5,\n  \"lockoutSeconds\": 900,\n  \"hash\": {\n    \"algorithm\": \"Argon2id\",\n    \"memoryKb\": 65536,\n    \"parallelism\": 2,\n    \"iterations\": 3,\n    \"saltLength\": 16,\n    \"hashLength\": 32,\n    \"fallback\": { \"algorithm\": \"PBKDF2-SHA512\", \"iterations\": 210000 },\n    \"pepperEnabled\": true\n  }\n}",
+                    Template = "{\n  \"version\": 1,\n  \"minLength\": 12,\n  \"maxLength\": 128,\n  \"requireUpper\": true,\n  \"requireLower\": true,\n  \"requireDigit\": true,\n  \"requireSymbol\": true,\n  \"allowedSymbols\": \"\",\n  \"minDistinctChars\": 0,\n  \"maxRepeatedSequence\": 0,\n  \"blockList\": [],\n  \"historyCount\": 0,\n  \"lockoutThreshold\": 0,\n  \"lockoutSeconds\": 0,\n  \"hash\": {\n    \"algorithm\": \"Argon2id\",\n    \"memoryKb\": 0,\n    \"parallelism\": 0,\n    \"iterations\": 0,\n    \"saltLength\": 0,\n    \"hashLength\": 0,\n    \"fallback\": { \"algorithm\": \"PBKDF2-SHA512\", \"iterations\": 0 },\n    \"pepperEnabled\": false\n  }\n}"
+                }
+            );
 
+            // âœ… GLOBAL FILTERS
             modelBuilder.ApplySoftDeleteFilters();
+
+            // âœ… GLOBAL FK POLICY (EN SON!)
+            modelBuilder.ApplyRestrictDeleteBehavior();
         }
 
         public async Task EnsureCoreSeedsAndBindAsync(CancellationToken ct = default)
