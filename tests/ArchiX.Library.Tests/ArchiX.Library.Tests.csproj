@@ -60,4 +60,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.11" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Tests\FormattingTests\" />
+  </ItemGroup>
 </Project>
