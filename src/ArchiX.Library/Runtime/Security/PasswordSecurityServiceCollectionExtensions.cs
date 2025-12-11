@@ -5,7 +5,6 @@ namespace ArchiX.Library.Runtime.Security;
 
 public static class PasswordSecurityServiceCollectionExtensions
 {
-
     public static IServiceCollection AddPasswordSecurity(this IServiceCollection services)
     {
         services.AddSingleton<IPasswordPolicyProvider, PasswordPolicyProvider>();
@@ -18,7 +17,10 @@ public static class PasswordSecurityServiceCollectionExtensions
         // ✅ RL-02: Password history service
         services.AddScoped<IPasswordHistoryService, PasswordHistoryService>();
 
-        // ✅ NEW: Tam doğrulama servisi (policy + pwned + history)
+        // ✅ RL-04: Password expiration service
+        services.AddScoped<IPasswordExpirationService, PasswordExpirationService>();
+
+        // ✅ Tam doğrulama servisi (policy + pwned + expiration + history)
         services.AddScoped<PasswordValidationService>();
 
         return services;

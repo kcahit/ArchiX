@@ -80,7 +80,7 @@ IF DB_ID('{dbName}') IS NOT NULL BEGIN ALTER DATABASE [{dbName}] SET SINGLE_USER
 
                     Assert.NotNull(tf);
                     Assert.Equal("Json", tf!.DataType.Name);
-                    Assert.Contains("\"defaultChannel\": \"Sms\"", tf.Value);
+                    Assert.Contains("\"defaultChannel\": \"Email\"", tf.Value);
                     Assert.NotNull(tf.Template);
                     Assert.Equal(3 /*Approved*/, tf.StatusId);
                 }

@@ -1,4 +1,5 @@
 ﻿using ArchiX.Library.Abstractions.Security;
+using ArchiX.Library.Entities;
 using ArchiX.Library.Runtime.Security;
 
 using Moq;
@@ -10,6 +11,7 @@ namespace ArchiX.Library.Tests.Tests.SecurityTests;
 public sealed class PasswordValidationServiceTests
 {
     private readonly Mock<IPasswordPolicyProvider> _policyProvider;
+    private readonly Mock<IPasswordExpirationService> _expirationService;
     private readonly Mock<IPasswordPwnedChecker> _pwnedChecker;
     private readonly Mock<IPasswordHistoryService> _historyService;
     private readonly Mock<IPasswordHasher> _hasher;
@@ -18,6 +20,7 @@ public sealed class PasswordValidationServiceTests
     public PasswordValidationServiceTests()
     {
         _policyProvider = new Mock<IPasswordPolicyProvider>();
+        _expirationService = new Mock<IPasswordExpirationService>();
         _pwnedChecker = new Mock<IPasswordPwnedChecker>();
         _historyService = new Mock<IPasswordHistoryService>();
         _hasher = new Mock<IPasswordHasher>();
@@ -42,6 +45,7 @@ public sealed class PasswordValidationServiceTests
                 HistoryCount = 10,
                 LockoutThreshold = 5,
                 LockoutSeconds = 900,
+                MaxPasswordAgeDays = null,
                 Hash = new PasswordHashOptions
                 {
                     Algorithm = "Argon2id",
@@ -58,6 +62,11 @@ public sealed class PasswordValidationServiceTests
                     }
                 }
             });
+
+        // Default: Expiration kontrolü false
+        _expirationService
+            .Setup(x => x.IsExpired(It.IsAny<User>(), It.IsAny<PasswordPolicyOptions>(), It.IsAny<DateTimeOffset?>()))
+            .Returns(false);
 
         // Default: Pwned kontrolü false
         _pwnedChecker
@@ -79,10 +88,25 @@ public sealed class PasswordValidationServiceTests
     {
         return new PasswordValidationService(
             _policyProvider.Object,
+            _expirationService.Object,
             _pwnedChecker.Object,
             _historyService.Object,
             _hasher.Object,
             _logger);
+    }
+
+    private static User CreateTestUser(int id = 1, DateTimeOffset? passwordChangedAt = null)
+    {
+        return new User
+        {
+            Id = id,
+            UserName = "testuser",
+            NormalizedUserName = "TESTUSER",
+            Email = "test@example.com",
+            NormalizedEmail = "TEST@EXAMPLE.COM",
+            PasswordChangedAtUtc = passwordChangedAt,
+            MaxPasswordAgeDays = null
+        };
     }
 
     [Fact]
@@ -90,10 +114,11 @@ public sealed class PasswordValidationServiceTests
     {
         // Arrange
         var service = CreateService();
+        var user = CreateTestUser();
         var password = "GoodP@ssw0rd!123";
 
         // Act
-        var result = await service.ValidateAsync(password, userId: 1);
+        var result = await service.ValidateAsync(password, user);
 
         // Assert
         Assert.True(result.IsValid);
@@ -105,10 +130,11 @@ public sealed class PasswordValidationServiceTests
     {
         // Arrange
         var service = CreateService();
+        var user = CreateTestUser();
         var password = "Short1!"; // < 12 karakter
 
         // Act
-        var result = await service.ValidateAsync(password, userId: 1);
+        var result = await service.ValidateAsync(password, user);
 
         // Assert
         Assert.False(result.IsValid);
@@ -120,14 +146,35 @@ public sealed class PasswordValidationServiceTests
     {
         // Arrange
         var service = CreateService();
+        var user = CreateTestUser();
         var password = "goodp@ssw0rd!123"; // Büyük harf yok
 
         // Act
-        var result = await service.ValidateAsync(password, userId: 1);
+        var result = await service.ValidateAsync(password, user);
 
         // Assert
         Assert.False(result.IsValid);
         Assert.Contains("REQ_UPPER", result.Errors);
+    }
+
+    [Fact]
+    public async Task ValidateAsync_Expired_ReturnsExpiredError()
+    {
+        // Arrange
+        _expirationService
+            .Setup(x => x.IsExpired(It.IsAny<User>(), It.IsAny<PasswordPolicyOptions>(), It.IsAny<DateTimeOffset?>()))
+            .Returns(true); // ✅ EXPIRED!
+
+        var service = CreateService();
+        var user = CreateTestUser();
+        var password = "GoodP@ssw0rd!123";
+
+        // Act
+        var result = await service.ValidateAsync(password, user);
+
+        // Assert
+        Assert.False(result.IsValid);
+        Assert.Contains("EXPIRED", result.Errors);
     }
 
     [Fact]
@@ -139,10 +186,11 @@ public sealed class PasswordValidationServiceTests
             .ReturnsAsync(true); // ✅ PWNED!
 
         var service = CreateService();
+        var user = CreateTestUser();
         var password = "GoodP@ssw0rd!123";
 
         // Act
-        var result = await service.ValidateAsync(password, userId: 1);
+        var result = await service.ValidateAsync(password, user);
 
         // Assert
         Assert.False(result.IsValid);
@@ -158,10 +206,11 @@ public sealed class PasswordValidationServiceTests
             .ReturnsAsync(true); // ✅ Geçmişte kullanılmış!
 
         var service = CreateService();
+        var user = CreateTestUser();
         var password = "GoodP@ssw0rd!123";
 
         // Act
-        var result = await service.ValidateAsync(password, userId: 1);
+        var result = await service.ValidateAsync(password, user);
 
         // Assert
         Assert.False(result.IsValid);
@@ -190,10 +239,11 @@ public sealed class PasswordValidationServiceTests
             });
 
         var service = CreateService();
+        var user = CreateTestUser();
         var password = "GoodP@ssw0rd!123";
 
         // Act
-        var result = await service.ValidateAsync(password, userId: 1);
+        var result = await service.ValidateAsync(password, user);
 
         // Assert
         Assert.True(result.IsValid);
@@ -209,10 +259,11 @@ public sealed class PasswordValidationServiceTests
     {
         // Arrange
         var service = CreateService();
+        var user = CreateTestUser();
         var password = "short"; // MIN_LENGTH, REQ_UPPER, REQ_DIGIT, REQ_SYMBOL
 
         // Act
-        var result = await service.ValidateAsync(password, userId: 1);
+        var result = await service.ValidateAsync(password, user);
 
         // Assert
         Assert.False(result.IsValid);
@@ -227,10 +278,11 @@ public sealed class PasswordValidationServiceTests
     {
         // Arrange
         var service = CreateService();
+        var user = CreateTestUser();
         var password = "short"; // Policy hatası var
 
         // Act
-        var result = await service.ValidateAsync(password, userId: 1);
+        var result = await service.ValidateAsync(password, user);
 
         // Assert
         Assert.False(result.IsValid);
@@ -246,10 +298,11 @@ public sealed class PasswordValidationServiceTests
     {
         // Arrange
         var service = CreateService();
+        var user = CreateTestUser();
         var password = "MyPassword123!"; // "password" kelimesini içeriyor
 
         // Act
-        var result = await service.ValidateAsync(password, userId: 1);
+        var result = await service.ValidateAsync(password, user);
 
         // Assert
         Assert.False(result.IsValid);
@@ -261,10 +314,11 @@ public sealed class PasswordValidationServiceTests
     {
         // Arrange
         var service = CreateService();
+        var user = CreateTestUser();
         var password = "GoodPaaaa@ssw0rd!"; // 'aaaa' (4 tekrar > maxRepeatedSequence:3)
 
         // Act
-        var result = await service.ValidateAsync(password, userId: 1);
+        var result = await service.ValidateAsync(password, user);
 
         // Assert
         Assert.False(result.IsValid);
@@ -281,10 +335,11 @@ public sealed class PasswordValidationServiceTests
             .ReturnsAsync(policy);
 
         var service = CreateService();
+        var user = CreateTestUser();
         var password = "GoodP@ssw0rd!123";
 
         // Act
-        await service.ValidateAsync(password, userId: 1, applicationId: 1);
+        await service.ValidateAsync(password, user, applicationId: 1);
 
         // Assert
         _hasher.Verify(x => x.HashAsync(password, policy, It.IsAny<CancellationToken>()), Times.Once);
