@@ -1,0 +1,13 @@
+1. KODLARI HİÇ BİR ZAMAN YAZIŞMA EDİTÖRÜ ŞEKLİNDE VERME.  BU KOPYALA YAPIŞTIRMADA HATAYA SEBEP OLUYOR. KOD EDİTÖRÜNDE İNDENTLİ VE RENKLİ OLAN FORMATTA VERİRSEN SORUN OLMUYOR. 
+
+2. KOD VERECEĞİN ZAMAN DAİMA 1 TANE TAM KOD VERECEKSİN. BEN ONU ÇAŞILTIRACAĞIM. BENİM DONÜŞÜME GÖFE SONRAKİ KODA GEÇECEKSİN
+3. BENİMLE MUHAKKAK TÜRKÇE YAZIŞ LÜTFEN. ÇÜNKÜ BEN İNGİLİZCE BİLMİYORUM. LÜTFEN...
+4. bir kodu verdikten sonra sadece bu koda ait bir test olacaksa sonraki adım test kodunu yazıp ver .
+5. Bütün interfaceler Abstractions altında İlgili Klasöre yazılıyor.
+6. test kodları daima esas kodla hiyerarşik uyum içinde hem isim ve klasörleme ile yazılıyor.
+7. Asla sen kodlara müdahale etmeyeceksin. Kodları vereceksin ben kodu uyarlayacağım. senin otomatik müdahaleni asla istemiyorum çünkü çok yavaş oluyor. yani sen kod/dosya edit etmeyeceksin ben yapacağım tüm işlemleri.
+
+tek kod vermeyi sakın unutmaa
+tek kod vermeyi sakın unutmaa
+tek kod vermeyi sakın unutmaa
+tek kod vermeyi sakın unutmaa. daima dönüşümü bekle

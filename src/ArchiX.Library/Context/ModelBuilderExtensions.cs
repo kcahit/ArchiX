@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 
 using ArchiX.Library.Entities;
 
@@ -27,7 +27,7 @@ namespace ArchiX.Library.Context
             }
         }
 
-        // 2) Common columns + (except Statu) StatusId -> Statu.Id FK
+        // 2) Common columns + (except Statu) StatusId -> Statu.Id FK + KOLON SIRALAMASI
         public static void ApplyBaseEntityConventions(this ModelBuilder modelBuilder)
         {
             foreach (var et in modelBuilder.Model.GetEntityTypes()
@@ -36,20 +36,59 @@ namespace ArchiX.Library.Context
             {
                 modelBuilder.Entity(et.ClrType, b =>
                 {
-                    b.Property<int>(nameof(BaseEntity.Id)).ValueGeneratedOnAdd().UseIdentityColumn(1, 1);
-                    b.Property<Guid>(nameof(BaseEntity.RowId)).HasDefaultValueSql("NEWSEQUENTIALID()").ValueGeneratedOnAdd();
-                    b.Property<DateTimeOffset>(nameof(BaseEntity.CreatedAt)).HasDefaultValueSql("SYSDATETIMEOFFSET()").HasPrecision(4);
-                    b.Property<int>(nameof(BaseEntity.CreatedBy));
-                    b.Property<DateTimeOffset?>(nameof(BaseEntity.UpdatedAt)).HasPrecision(4);
-                    b.Property<int?>(nameof(BaseEntity.UpdatedBy));
-                    b.Property<DateTimeOffset?>(nameof(BaseEntity.LastStatusAt)).HasDefaultValueSql("SYSDATETIMEOFFSET()").HasPrecision(4);
-                    b.Property<int>(nameof(BaseEntity.LastStatusBy));
+                    // ✅ Id her zaman ilk sırada (order: 0)
+                    b.Property<int>(nameof(BaseEntity.Id))
+                        .ValueGeneratedOnAdd()
+                        .UseIdentityColumn(1, 1)
+                        .HasColumnOrder(0);
 
+                    // ✅ BaseEntity kolonları EN SONDA! (order: 1000+)
+                    // BaseEntity.cs'deki property sırasına göre otomatik
+                    b.Property<Guid>(nameof(BaseEntity.RowId))
+                        .HasDefaultValueSql("NEWSEQUENTIALID()")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnOrder(1000);
+
+                    b.Property<DateTimeOffset>(nameof(BaseEntity.CreatedAt))
+                        .HasDefaultValueSql("SYSDATETIMEOFFSET()")
+                        .HasPrecision(4)
+                        .ValueGeneratedOnAdd()
+                        .HasColumnOrder(1001);
+
+                    b.Property<int>(nameof(BaseEntity.CreatedBy))
+                        .HasColumnOrder(1002);
+
+                    b.Property<DateTimeOffset?>(nameof(BaseEntity.UpdatedAt))
+                        .HasPrecision(4)
+                        .HasColumnOrder(1003);
+
+                    b.Property<int?>(nameof(BaseEntity.UpdatedBy))
+                        .HasColumnOrder(1004);
+
+                    b.Property<DateTimeOffset?>(nameof(BaseEntity.LastStatusAt))
+                        .HasDefaultValueSql("SYSDATETIMEOFFSET()")
+                        .HasPrecision(4)
+                        .ValueGeneratedOnAdd()
+                        .HasColumnOrder(1006);
+
+                    b.Property<int>(nameof(BaseEntity.LastStatusBy))
+                        .HasColumnOrder(1007);
+
+                    b.Property<bool>(nameof(BaseEntity.IsProtected))
+                        .HasColumnOrder(1008);
+
+                    // FK ve index (Statu hariç)
                     if (et.ClrType != typeof(Statu))
                     {
-                        b.Property<int>(nameof(BaseEntity.StatusId)).IsRequired();
+                        b.Property<int>(nameof(BaseEntity.StatusId))
+                            .IsRequired()
+                            .HasColumnOrder(1005);
+
                         b.HasIndex(nameof(BaseEntity.StatusId));
-                        b.HasOne(typeof(Statu)).WithMany().HasForeignKey(nameof(BaseEntity.StatusId)).OnDelete(DeleteBehavior.Restrict);
+                        b.HasOne(typeof(Statu))
+                            .WithMany()
+                            .HasForeignKey(nameof(BaseEntity.StatusId))
+                            .OnDelete(DeleteBehavior.Restrict);
                     }
                 });
             }
@@ -75,7 +114,7 @@ namespace ArchiX.Library.Context
         }
 
         /// <summary>
-        /// T�m foreign key'leri DeleteBehavior.Restrict yapar (audit trail i�in).
+        /// Tüm foreign key'leri DeleteBehavior.Restrict yapar (audit trail için).
         /// </summary>
         public static void ApplyRestrictDeleteBehavior(this ModelBuilder modelBuilder)
         {

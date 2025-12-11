@@ -34,5 +34,6 @@ public sealed record PasswordPolicyOptions
     public int HistoryCount { get; init; } = 10;
     public int LockoutThreshold { get; init; } = 5;
     public int LockoutSeconds { get; init; } = 900;
+    public int? MaxPasswordAgeDays { get; init; } = null;
     public PasswordHashOptions Hash { get; init; } = new();
 }

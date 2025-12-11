@@ -26,5 +26,18 @@ namespace ArchiX.Library.Entities
         public string? Phone { get; set; }
 
         public bool IsAdmin { get; set; }
+
+        /// <summary>
+        /// Son parola deðiþim zamaný (RL-04: Aging kontrolü için).
+        /// Null = Parola hiç deðiþtirilmedi veya yaþlandýrma takibi yok.
+        /// </summary>
+        public DateTimeOffset? PasswordChangedAtUtc { get; set; }
+
+        /// <summary>
+        /// Kullanýcýya özel parola yaþlandýrma süresi (gün).
+        /// Null = Genel politika (Parameters.MaxPasswordAgeDays) kullanýlýr.
+        /// Örnek: 90 = 90 gün sonra zorunlu deðiþim.
+        /// </summary>
+        public int? MaxPasswordAgeDays { get; set; }=90;
     }
 }
