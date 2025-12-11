@@ -28,6 +28,7 @@ namespace ArchiX.Library.Context
         }
 
         // 2) Common columns + (except Statu) StatusId -> Statu.Id FK + KOLON SIRALAMASI
+        // 2) Common columns + (except Statu) StatusId -> Statu.Id FK + KOLON SIRALAMASI
         public static void ApplyBaseEntityConventions(this ModelBuilder modelBuilder)
         {
             foreach (var et in modelBuilder.Model.GetEntityTypes()
@@ -42,8 +43,20 @@ namespace ArchiX.Library.Context
                         .UseIdentityColumn(1, 1)
                         .HasColumnOrder(0);
 
+                    var entityProps = et.ClrType
+                        .GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+                        .Where(p => p.DeclaringType == et.ClrType
+                                 && p.Name != nameof(BaseEntity.Id)
+                                 && (p.PropertyType.IsValueType || p.PropertyType == typeof(string)))
+                        .ToList();
+
+                    int order = 1;
+                    foreach (var prop in entityProps)
+                    {
+                        b.Property(prop.PropertyType, prop.Name).HasColumnOrder(order++);
+                    }
+
                     // ✅ BaseEntity kolonları EN SONDA! (order: 1000+)
-                    // BaseEntity.cs'deki property sırasına göre otomatik
                     b.Property<Guid>(nameof(BaseEntity.RowId))
                         .HasDefaultValueSql("NEWSEQUENTIALID()")
                         .ValueGeneratedOnAdd()
@@ -65,6 +78,10 @@ namespace ArchiX.Library.Context
                     b.Property<int?>(nameof(BaseEntity.UpdatedBy))
                         .HasColumnOrder(1004);
 
+                    b.Property<int>(nameof(BaseEntity.StatusId))
+                        .IsRequired()
+                        .HasColumnOrder(1005);
+
                     b.Property<DateTimeOffset?>(nameof(BaseEntity.LastStatusAt))
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()")
                         .HasPrecision(4)
@@ -80,10 +97,6 @@ namespace ArchiX.Library.Context
                     // FK ve index (Statu hariç)
                     if (et.ClrType != typeof(Statu))
                     {
-                        b.Property<int>(nameof(BaseEntity.StatusId))
-                            .IsRequired()
-                            .HasColumnOrder(1005);
-
                         b.HasIndex(nameof(BaseEntity.StatusId));
                         b.HasOne(typeof(Statu))
                             .WithMany()

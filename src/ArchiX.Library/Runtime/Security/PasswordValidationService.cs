@@ -1,107 +1,131 @@
 ﻿using ArchiX.Library.Abstractions.Security;
-using ArchiX.Library.Entities;
-
-using Microsoft.Extensions.Logging;
 
 namespace ArchiX.Library.Runtime.Security;
 
 /// <summary>
-/// Tam parola doğrulama servisi (policy + expiration + pwned + history).
+/// Tam parola doğrulama servisi (policy + pwned + history + blacklist).
 /// </summary>
 public sealed class PasswordValidationService
 {
     private readonly IPasswordPolicyProvider _policyProvider;
-    private readonly IPasswordExpirationService _expirationService;
     private readonly IPasswordPwnedChecker _pwnedChecker;
     private readonly IPasswordHistoryService _historyService;
+    private readonly IPasswordBlacklistService _blacklistService;
     private readonly IPasswordHasher _hasher;
-    private readonly ILogger<PasswordValidationService> _logger;
 
     public PasswordValidationService(
         IPasswordPolicyProvider policyProvider,
-        IPasswordExpirationService expirationService,
         IPasswordPwnedChecker pwnedChecker,
         IPasswordHistoryService historyService,
-        IPasswordHasher hasher,
-        ILogger<PasswordValidationService> logger)
+        IPasswordBlacklistService blacklistService,
+        IPasswordHasher hasher)
     {
         _policyProvider = policyProvider;
-        _expirationService = expirationService;
         _pwnedChecker = pwnedChecker;
         _historyService = historyService;
+        _blacklistService = blacklistService;
         _hasher = hasher;
-        _logger = logger;
     }
 
-    /// <summary>
-    /// Parolayı tüm kurallara göre doğrular (policy + expiration + pwned + history).
-    /// </summary>
-    /// <param name="password">Düz metin parola.</param>
-    /// <param name="user">Kullanıcı entity (expiration kontrolü için gerekli).</param>
-    /// <param name="applicationId">Uygulama ID (varsayılan: 1).</param>
-    /// <param name="ct">CancellationToken.</param>
-    /// <returns>Doğrulama sonucu (başarılı/hatalı + hata kodları).</returns>
     public async Task<PasswordValidationResult> ValidateAsync(
         string password,
-        User user,
+        int userId,
         int applicationId = 1,
         CancellationToken ct = default)
     {
+        var policy = await _policyProvider.GetAsync(applicationId, ct);
         var errors = new List<string>();
 
         // 1. Policy kuralları (senkron)
-        var policy = await _policyProvider.GetAsync(applicationId, ct).ConfigureAwait(false);
-        var policyErrors = PasswordPolicyValidator.Validate(password, policy);
+        var policyErrors = ValidatePolicy(password, policy);
         errors.AddRange(policyErrors);
 
-        // Temel kontroller başarısızsa devam etme (performans optimizasyonu)
+        // Policy hatası varsa, diğer kontrolleri atla
         if (errors.Count > 0)
-        {
-            _logger.LogWarning("Parola policy kurallarını karşılamıyor (UserId: {UserId}, Errors: {Errors})",
-                user.Id, string.Join(", ", errors));
             return new PasswordValidationResult(false, errors);
-        }
 
-        // 2. Parola yaşlandırma kontrolü (senkron)
-        if (_expirationService.IsExpired(user, policy))
-        {
-            _logger.LogWarning("Parola süresi dolmuş (UserId: {UserId})", user.Id);
-            errors.Add("EXPIRED");
-        }
+        // 2. Blacklist kontrolü (async)
+        var isBlocked = await _blacklistService.IsWordBlockedAsync(password, applicationId, ct);
+        if (isBlocked)
+            errors.Add("BLACKLIST");
 
-        // 3. Pwned kontrolü (async)
-        if (await _pwnedChecker.IsPwnedAsync(password, ct).ConfigureAwait(false))
-        {
-            _logger.LogWarning("Parola HIBP veritabanında bulundu (UserId: {UserId})", user.Id);
+        // 3. Pwned kontrolü (async - her zaman çalışır)
+        var isPwned = await _pwnedChecker.IsPwnedAsync(password, ct);
+        if (isPwned)
             errors.Add("PWNED");
-        }
 
         // 4. History kontrolü (async)
         if (policy.HistoryCount > 0)
         {
-            // ✅ Parolayı hash'le (history karşılaştırması için)
-            var passwordHash = await _hasher.HashAsync(password, policy, ct).ConfigureAwait(false);
-
+            var hash = await _hasher.HashAsync(password, policy, ct);
             var inHistory = await _historyService.IsPasswordInHistoryAsync(
-                user.Id,
-                passwordHash,
-                policy.HistoryCount,
-                ct).ConfigureAwait(false);
+                userId, hash, policy.HistoryCount, ct);
 
             if (inHistory)
-            {
-                _logger.LogWarning("Parola geçmişte kullanılmış (UserId: {UserId})", user.Id);
                 errors.Add("HISTORY");
+        }
+
+        return new PasswordValidationResult(errors.Count == 0, errors);
+    }
+
+    private static List<string> ValidatePolicy(string password, PasswordPolicyOptions policy)
+    {
+        var errors = new List<string>();
+
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            errors.Add("EMPTY");
+            return errors;
+        }
+
+        if (password.Length < policy.MinLength)
+            errors.Add("MIN_LENGTH");
+
+        if (password.Length > policy.MaxLength)
+            errors.Add("MAX_LENGTH");
+
+        if (policy.RequireUpper && !password.Any(char.IsUpper))
+            errors.Add("REQ_UPPER");
+
+        if (policy.RequireLower && !password.Any(char.IsLower))
+            errors.Add("REQ_LOWER");
+
+        if (policy.RequireDigit && !password.Any(char.IsDigit))
+            errors.Add("REQ_DIGIT");
+
+        if (policy.RequireSymbol && !password.Any(c => policy.AllowedSymbols.Contains(c)))
+            errors.Add("REQ_SYMBOL");
+
+        if (policy.MinDistinctChars > 0)
+        {
+            var distinctCount = password.Distinct().Count();
+            if (distinctCount < policy.MinDistinctChars)
+                errors.Add("MIN_DISTINCT");
+        }
+
+        if (policy.MaxRepeatedSequence > 0 && HasRepeatedSequence(password, policy.MaxRepeatedSequence))
+            errors.Add("REPEAT_SEQ");
+
+        if (policy.BlockList.Any(blocked => password.Contains(blocked, StringComparison.OrdinalIgnoreCase)))
+            errors.Add("BLOCK_LIST");
+
+        return errors;
+    }
+
+    private static bool HasRepeatedSequence(string password, int maxRepeated)
+    {
+        for (int i = 0; i < password.Length - maxRepeated; i++)
+        {
+            var current = password[i];
+            var count = 1;
+            for (int j = i + 1; j < password.Length && password[j] == current; j++)
+            {
+                count++;
+                if (count > maxRepeated)
+                    return true;
             }
         }
-
-        var isValid = errors.Count == 0;
-        if (isValid)
-        {
-            _logger.LogInformation("Parola doğrulaması başarılı (UserId: {UserId})", user.Id);
-        }
-
-        return new PasswordValidationResult(isValid, errors);
+        return false;
     }
 }
 
@@ -109,7 +133,5 @@ public sealed class PasswordValidationService
 /// Parola doğrulama sonucu.
 /// </summary>
 /// <param name="IsValid">Doğrulama başarılı mı?</param>
-/// <param name="Errors">Hata kodları listesi (EMPTY, MIN_LENGTH, EXPIRED, PWNED, HISTORY vb.).</param>
-public sealed record PasswordValidationResult(
-    bool IsValid,
-    IReadOnlyList<string> Errors);
+/// <param name="Errors">Hata kodları listesi (EMPTY, MIN_LENGTH, BLACKLIST, PWNED, HISTORY vb.).</param>
+public sealed record PasswordValidationResult(bool IsValid, IReadOnlyList<string> Errors);

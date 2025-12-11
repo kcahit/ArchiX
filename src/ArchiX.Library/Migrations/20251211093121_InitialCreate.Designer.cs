@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ArchiX.Library.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251206043318_TwoFactorUpdateFullChannels")]
-    partial class TwoFactorUpdateFullChannels
+    [Migration("20251211093121_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -30,75 +30,92 @@ namespace ArchiX.Library.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(0);
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(1);
 
                     b.Property<int>("ConfigVersion")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(6);
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(4)
                         .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1001)
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
                     b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1002);
 
                     b.Property<string>("DefaultCulture")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("nvarchar(10)")
+                        .HasColumnOrder(3);
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnOrder(5);
 
                     b.Property<string>("ExternalKey")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(7);
 
                     b.Property<bool>("IsProtected")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnOrder(1008);
 
                     b.Property<DateTimeOffset?>("LastStatusAt")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(4)
                         .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1006)
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
                     b.Property<int>("LastStatusBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1007);
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnOrder(2);
 
                     b.Property<Guid>("RowId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(1000)
                         .HasDefaultValueSql("NEWSEQUENTIALID()");
 
                     b.Property<int>("StatusId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1005);
 
                     b.Property<string>("TimeZoneId")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(4);
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasPrecision(4)
-                        .HasColumnType("datetimeoffset(4)");
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1003);
 
                     b.Property<int?>("UpdatedBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1004);
 
                     b.HasKey("Id");
 
@@ -131,79 +148,97 @@ namespace ArchiX.Library.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(0);
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset>("AttemptedAt")
                         .HasPrecision(4)
-                        .HasColumnType("datetimeoffset(4)");
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1);
 
                     b.Property<Guid>("CorrelationId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(6);
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(4)
                         .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1001)
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
                     b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1002);
 
                     b.Property<bool>("IsProtected")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnOrder(1008);
 
                     b.Property<DateTimeOffset?>("LastStatusAt")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(4)
                         .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1006)
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
                     b.Property<int>("LastStatusBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1007);
 
                     b.Property<string>("Mode")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("nvarchar(10)")
+                        .HasColumnOrder(3);
 
                     b.Property<string>("NormalizedServer")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnOrder(2);
 
                     b.Property<string>("RawConnectionMasked")
                         .IsRequired()
                         .HasMaxLength(1024)
-                        .HasColumnType("nvarchar(1024)");
+                        .HasColumnType("nvarchar(1024)")
+                        .HasColumnOrder(8);
 
                     b.Property<string>("ReasonCode")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnOrder(5);
 
                     b.Property<string>("Result")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("nvarchar(10)")
+                        .HasColumnOrder(4);
 
                     b.Property<Guid>("RowId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(1000)
                         .HasDefaultValueSql("NEWSEQUENTIALID()");
 
                     b.Property<int>("StatusId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1005);
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasPrecision(4)
-                        .HasColumnType("datetimeoffset(4)");
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1003);
 
                     b.Property<int?>("UpdatedBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1004);
 
                     b.Property<int?>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(7);
 
                     b.HasKey("Id");
 
@@ -222,63 +257,78 @@ namespace ArchiX.Library.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(0);
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Cidr")
                         .HasMaxLength(43)
-                        .HasColumnType("nvarchar(43)");
+                        .HasColumnType("nvarchar(43)")
+                        .HasColumnOrder(2);
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(4)
                         .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1001)
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
                     b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1002);
 
                     b.Property<string>("EnvScope")
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnOrder(4);
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnOrder(5);
 
                     b.Property<bool>("IsProtected")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnOrder(1008);
 
                     b.Property<DateTimeOffset?>("LastStatusAt")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(4)
                         .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1006)
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
                     b.Property<int>("LastStatusBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1007);
 
                     b.Property<int?>("Port")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(3);
 
                     b.Property<Guid>("RowId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(1000)
                         .HasDefaultValueSql("NEWSEQUENTIALID()");
 
                     b.Property<string>("ServerName")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnOrder(1);
 
                     b.Property<int>("StatusId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1005);
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasPrecision(4)
-                        .HasColumnType("datetimeoffset(4)");
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1003);
 
                     b.Property<int?>("UpdatedBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1004);
 
                     b.HasKey("Id");
 
@@ -300,55 +350,67 @@ namespace ArchiX.Library.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(0);
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnOrder(2);
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(4)
                         .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1001)
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
                     b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1002);
 
                     b.Property<bool>("IsProtected")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnOrder(1008);
 
                     b.Property<string>("ItemType")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnOrder(1);
 
                     b.Property<DateTimeOffset?>("LastStatusAt")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(4)
                         .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1006)
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
                     b.Property<int>("LastStatusBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1007);
 
                     b.Property<Guid>("RowId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(1000)
                         .HasDefaultValueSql("NEWSEQUENTIALID()");
 
                     b.Property<int>("StatusId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1005);
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasPrecision(4)
-                        .HasColumnType("datetimeoffset(4)");
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1003);
 
                     b.Property<int?>("UpdatedBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1004);
 
                     b.HasKey("Id");
 
@@ -582,70 +644,87 @@ namespace ArchiX.Library.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(0);
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnOrder(4);
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(4)
                         .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1001)
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
                     b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1002);
 
                     b.Property<string>("Culture")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnOrder(5);
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnOrder(7);
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnOrder(6);
 
                     b.Property<string>("EntityName")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnOrder(2);
 
                     b.Property<string>("FieldName")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnOrder(3);
 
                     b.Property<bool>("IsProtected")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnOrder(1008);
 
                     b.Property<string>("ItemType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnOrder(1);
 
                     b.Property<DateTimeOffset?>("LastStatusAt")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(4)
                         .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1006)
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
                     b.Property<int>("LastStatusBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1007);
 
                     b.Property<Guid>("RowId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(1000)
                         .HasDefaultValueSql("NEWSEQUENTIALID()");
 
                     b.Property<int>("StatusId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1005);
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasPrecision(4)
-                        .HasColumnType("datetimeoffset(4)");
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1003);
 
                     b.Property<int?>("UpdatedBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1004);
 
                     b.HasKey("Id");
 
@@ -732,55 +811,67 @@ namespace ArchiX.Library.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(0);
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ApplicationId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(3);
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(4)
                         .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1001)
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
                     b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1002);
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnOrder(7);
 
                     b.Property<string>("Group")
                         .IsRequired()
                         .HasMaxLength(75)
-                        .HasColumnType("nvarchar(75)");
+                        .HasColumnType("nvarchar(75)")
+                        .HasColumnOrder(1);
 
                     b.Property<bool>("IsProtected")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnOrder(1008);
 
                     b.Property<string>("Key")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasColumnType("nvarchar(150)")
+                        .HasColumnOrder(2);
 
                     b.Property<DateTimeOffset?>("LastStatusAt")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(4)
                         .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1006)
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
                     b.Property<int>("LastStatusBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1007);
 
                     b.Property<int>("ParameterDataTypeId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(4);
 
                     b.Property<Guid>("RowId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(1000)
                         .HasDefaultValueSql("NEWSEQUENTIALID()");
 
                     b.Property<byte[]>("RowVersion")
@@ -789,20 +880,25 @@ namespace ArchiX.Library.Migrations
                         .HasColumnType("rowversion");
 
                     b.Property<int>("StatusId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1005);
 
                     b.Property<string>("Template")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnOrder(6);
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasPrecision(4)
-                        .HasColumnType("datetimeoffset(4)");
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1003);
 
                     b.Property<int?>("UpdatedBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1004);
 
                     b.Property<string>("Value")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnOrder(5);
 
                     b.HasKey("Id");
 
@@ -850,7 +946,7 @@ namespace ArchiX.Library.Migrations
                             RowId = new Guid("00000000-0000-0000-0000-000000000000"),
                             StatusId = 3,
                             Template = "{\n  \"version\": 1,\n  \"minLength\": 12,\n  \"maxLength\": 128,\n  \"requireUpper\": true,\n  \"requireLower\": true,\n  \"requireDigit\": true,\n  \"requireSymbol\": true,\n  \"allowedSymbols\": \"\",\n  \"minDistinctChars\": 0,\n  \"maxRepeatedSequence\": 0,\n  \"blockList\": [],\n  \"historyCount\": 0,\n  \"lockoutThreshold\": 0,\n  \"lockoutSeconds\": 0,\n  \"hash\": {\n    \"algorithm\": \"Argon2id\",\n    \"memoryKb\": 0,\n    \"parallelism\": 0,\n    \"iterations\": 0,\n    \"saltLength\": 0,\n    \"hashLength\": 0,\n    \"fallback\": { \"algorithm\": \"PBKDF2-SHA512\", \"iterations\": 0 },\n    \"pepperEnabled\": false\n  }\n}",
-                            Value = "{\n  \"version\": 1,\n  \"minLength\": 12,\n  \"maxLength\": 128,\n  \"requireUpper\": true,\n  \"requireLower\": true,\n  \"requireDigit\": true,\n  \"requireSymbol\": true,\n  \"allowedSymbols\": \"!@#$%^&*_-+=:?.,;\",\n  \"minDistinctChars\": 5,\n  \"maxRepeatedSequence\": 3,\n  \"blockList\": [\"password\", \"123456\", \"qwerty\", \"admin\"],\n  \"historyCount\": 10,\n  \"lockoutThreshold\": 5,\n  \"lockoutSeconds\": 900,\n  \"hash\": {\n    \"algorithm\": \"Argon2id\",\n    \"memoryKb\": 65536,\n    \"parallelism\": 2,\n    \"iterations\": 3,\n    \"saltLength\": 16,\n    \"hashLength\": 32,\n    \"fallback\": { \"algorithm\": \"PBKDF2-SHA512\", \"iterations\": 210000 },\n    \"pepperEnabled\": true\n  }\n}"
+                            Value = "{\n  \"version\": 1,\n  \"minLength\": 12,\n  \"maxLength\": 128,\n  \"requireUpper\": true,\n  \"requireLower\": true,\n  \"requireDigit\": true,\n  \"requireSymbol\": true,\n  \"allowedSymbols\": \"!@#$%^&*_-+=:?.,;\",\n  \"minDistinctChars\": 5,\n  \"maxRepeatedSequence\": 3,\n  \"blockList\": [\"password\", \"123456\", \"qwerty\", \"admin\"],\n  \"historyCount\": 10,\n  \"maxPasswordAgeDays\": null,\n  \"lockoutThreshold\": 5,\n  \"lockoutSeconds\": 900,\n  \"hash\": {\n    \"algorithm\": \"Argon2id\",\n    \"memoryKb\": 65536,\n    \"parallelism\": 2,\n    \"iterations\": 3,\n    \"saltLength\": 16,\n    \"hashLength\": 32,\n    \"fallback\": { \"algorithm\": \"PBKDF2-SHA512\", \"iterations\": 210000 },\n    \"pepperEnabled\": true\n  }\n}"
                         });
                 });
 
@@ -858,62 +954,76 @@ namespace ArchiX.Library.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(0);
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Category")
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnOrder(3);
 
                     b.Property<int>("Code")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1);
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(4)
                         .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1001)
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
                     b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1002);
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnOrder(4);
 
                     b.Property<bool>("IsProtected")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnOrder(1008);
 
                     b.Property<DateTimeOffset?>("LastStatusAt")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(4)
                         .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1006)
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
                     b.Property<int>("LastStatusBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1007);
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(2);
 
                     b.Property<Guid>("RowId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(1000)
                         .HasDefaultValueSql("NEWSEQUENTIALID()");
 
                     b.Property<int>("StatusId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1005);
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasPrecision(4)
-                        .HasColumnType("datetimeoffset(4)");
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1003);
 
                     b.Property<int?>("UpdatedBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1004);
 
                     b.HasKey("Id");
 
@@ -1154,66 +1264,396 @@ namespace ArchiX.Library.Migrations
                         });
                 });
 
-            modelBuilder.Entity("ArchiX.Library.Entities.PasswordPolicyAudit", b =>
+            modelBuilder.Entity("ArchiX.Library.Entities.PasswordBlacklist", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(0);
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ApplicationId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset>("ChangedAtUtc")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1);
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(4)
                         .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1001)
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
                     b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1002);
 
                     b.Property<bool>("IsProtected")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnOrder(1008);
 
                     b.Property<DateTimeOffset?>("LastStatusAt")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(4)
                         .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1006)
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
                     b.Property<int>("LastStatusBy")
-                        .HasColumnType("int");
-
-                    b.Property<string>("NewJson")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OldJson")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1007);
 
                     b.Property<Guid>("RowId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(1000)
                         .HasDefaultValueSql("NEWSEQUENTIALID()");
 
                     b.Property<int>("StatusId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1005);
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasPrecision(4)
-                        .HasColumnType("datetimeoffset(4)");
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1003);
 
                     b.Property<int?>("UpdatedBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1004);
+
+                    b.Property<string>("Word")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnOrder(2);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StatusId");
+
+                    b.HasIndex("ApplicationId", "Word")
+                        .IsUnique();
+
+                    b.ToTable("PasswordBlacklists", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ApplicationId = 1,
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 12, 11, 10, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = false,
+                            LastStatusBy = 0,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            StatusId = 3,
+                            Word = "password"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            ApplicationId = 1,
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 12, 11, 10, 0, 1, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = false,
+                            LastStatusBy = 0,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000001"),
+                            StatusId = 3,
+                            Word = "123456"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            ApplicationId = 1,
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 12, 11, 10, 0, 2, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = false,
+                            LastStatusBy = 0,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000002"),
+                            StatusId = 3,
+                            Word = "12345678"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            ApplicationId = 1,
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 12, 11, 10, 0, 3, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = false,
+                            LastStatusBy = 0,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000003"),
+                            StatusId = 3,
+                            Word = "qwerty"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            ApplicationId = 1,
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 12, 11, 10, 0, 4, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = false,
+                            LastStatusBy = 0,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000004"),
+                            StatusId = 3,
+                            Word = "abc123"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            ApplicationId = 1,
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 12, 11, 10, 0, 5, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = false,
+                            LastStatusBy = 0,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000005"),
+                            StatusId = 3,
+                            Word = "123456789"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            ApplicationId = 1,
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 12, 11, 10, 0, 6, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = false,
+                            LastStatusBy = 0,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000006"),
+                            StatusId = 3,
+                            Word = "111111"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            ApplicationId = 1,
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 12, 11, 10, 0, 7, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = false,
+                            LastStatusBy = 0,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000007"),
+                            StatusId = 3,
+                            Word = "1234567"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            ApplicationId = 1,
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 12, 11, 10, 0, 8, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = false,
+                            LastStatusBy = 0,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000008"),
+                            StatusId = 3,
+                            Word = "letmein"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            ApplicationId = 1,
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 12, 11, 10, 0, 9, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = false,
+                            LastStatusBy = 0,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000009"),
+                            StatusId = 3,
+                            Word = "welcome"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            ApplicationId = 1,
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 12, 11, 10, 0, 10, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = false,
+                            LastStatusBy = 0,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000010"),
+                            StatusId = 3,
+                            Word = "monkey"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            ApplicationId = 1,
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 12, 11, 10, 0, 11, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = false,
+                            LastStatusBy = 0,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000011"),
+                            StatusId = 3,
+                            Word = "1234567890"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            ApplicationId = 1,
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 12, 11, 10, 0, 12, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = false,
+                            LastStatusBy = 0,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000012"),
+                            StatusId = 3,
+                            Word = "dragon"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            ApplicationId = 1,
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 12, 11, 10, 0, 13, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = false,
+                            LastStatusBy = 0,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000013"),
+                            StatusId = 3,
+                            Word = "master"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            ApplicationId = 1,
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 12, 11, 10, 0, 14, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = false,
+                            LastStatusBy = 0,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000014"),
+                            StatusId = 3,
+                            Word = "sunshine"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            ApplicationId = 1,
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 12, 11, 10, 0, 15, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = false,
+                            LastStatusBy = 0,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000015"),
+                            StatusId = 3,
+                            Word = "princess"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            ApplicationId = 1,
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 12, 11, 10, 0, 16, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = false,
+                            LastStatusBy = 0,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000016"),
+                            StatusId = 3,
+                            Word = "qazwsx"
+                        },
+                        new
+                        {
+                            Id = 18,
+                            ApplicationId = 1,
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 12, 11, 10, 0, 17, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = false,
+                            LastStatusBy = 0,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000017"),
+                            StatusId = 3,
+                            Word = "654321"
+                        },
+                        new
+                        {
+                            Id = 19,
+                            ApplicationId = 1,
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 12, 11, 10, 0, 18, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = false,
+                            LastStatusBy = 0,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000018"),
+                            StatusId = 3,
+                            Word = "michael"
+                        },
+                        new
+                        {
+                            Id = 20,
+                            ApplicationId = 1,
+                            CreatedAt = new DateTimeOffset(new DateTime(2025, 12, 11, 10, 0, 19, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = false,
+                            LastStatusBy = 0,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000019"),
+                            StatusId = 3,
+                            Word = "football"
+                        });
+                });
+
+            modelBuilder.Entity("ArchiX.Library.Entities.PasswordPolicyAudit", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnOrder(0);
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ApplicationId")
+                        .HasColumnType("int")
+                        .HasColumnOrder(1);
+
+                    b.Property<DateTimeOffset>("ChangedAtUtc")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnOrder(5);
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(4)
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1001)
+                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int")
+                        .HasColumnOrder(1002);
+
+                    b.Property<bool>("IsProtected")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(1008);
+
+                    b.Property<DateTimeOffset?>("LastStatusAt")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(4)
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1006)
+                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
+
+                    b.Property<int>("LastStatusBy")
+                        .HasColumnType("int")
+                        .HasColumnOrder(1007);
+
+                    b.Property<string>("NewJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnOrder(4);
+
+                    b.Property<string>("OldJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnOrder(3);
+
+                    b.Property<Guid>("RowId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(1000)
+                        .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+                    b.Property<int>("StatusId")
+                        .HasColumnType("int")
+                        .HasColumnOrder(1005);
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasPrecision(4)
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1003);
+
+                    b.Property<int?>("UpdatedBy")
+                        .HasColumnType("int")
+                        .HasColumnOrder(1004);
 
                     b.Property<int>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(2);
 
                     b.HasKey("Id");
 
@@ -1228,56 +1668,69 @@ namespace ArchiX.Library.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(0);
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnOrder(1);
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(4)
                         .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1001)
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
                     b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1002);
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnOrder(3);
 
                     b.Property<bool>("IsProtected")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnOrder(1008);
 
                     b.Property<DateTimeOffset?>("LastStatusAt")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(4)
                         .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1006)
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
                     b.Property<int>("LastStatusBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1007);
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnOrder(2);
 
                     b.Property<Guid>("RowId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(1000)
                         .HasDefaultValueSql("NEWSEQUENTIALID()");
 
                     b.Property<int>("StatusId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1005);
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasPrecision(4)
-                        .HasColumnType("datetimeoffset(4)");
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1003);
 
                     b.Property<int?>("UpdatedBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1004);
 
                     b.HasKey("Id");
 
@@ -1373,7 +1826,8 @@ namespace ArchiX.Library.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(0);
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
@@ -1381,66 +1835,90 @@ namespace ArchiX.Library.Migrations
                         .ValueGeneratedOnAdd()
                         .HasPrecision(4)
                         .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1001)
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
                     b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1002);
 
                     b.Property<string>("DisplayName")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnOrder(3);
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("nvarchar(256)")
+                        .HasColumnOrder(4);
 
                     b.Property<bool>("IsAdmin")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnOrder(7);
 
                     b.Property<bool>("IsProtected")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnOrder(1008);
 
                     b.Property<DateTimeOffset?>("LastStatusAt")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(4)
                         .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1006)
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
                     b.Property<int>("LastStatusBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1007);
+
+                    b.Property<int?>("MaxPasswordAgeDays")
+                        .HasColumnType("int")
+                        .HasColumnOrder(9);
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("nvarchar(256)")
+                        .HasColumnOrder(5);
 
                     b.Property<string>("NormalizedUserName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(2);
+
+                    b.Property<DateTimeOffset?>("PasswordChangedAtUtc")
+                        .HasColumnType("datetimeoffset")
+                        .HasColumnOrder(8);
 
                     b.Property<string>("Phone")
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnOrder(6);
 
                     b.Property<Guid>("RowId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(1000)
                         .HasDefaultValueSql("NEWSEQUENTIALID()");
 
                     b.Property<int>("StatusId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1005);
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasPrecision(4)
-                        .HasColumnType("datetimeoffset(4)");
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1003);
 
                     b.Property<int?>("UpdatedBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1004);
 
                     b.Property<string>("UserName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(1);
 
                     b.HasKey("Id");
 
@@ -1464,6 +1942,7 @@ namespace ArchiX.Library.Migrations
                             IsAdmin = true,
                             IsProtected = true,
                             LastStatusBy = 0,
+                            MaxPasswordAgeDays = 90,
                             NormalizedEmail = "ADMIN@EXAMPLE.COM",
                             NormalizedUserName = "ADMIN",
                             RowId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -1476,51 +1955,63 @@ namespace ArchiX.Library.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(0);
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ApplicationId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(2);
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(4)
                         .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1001)
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
                     b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1002);
 
                     b.Property<bool>("IsProtected")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnOrder(1008);
 
                     b.Property<DateTimeOffset?>("LastStatusAt")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(4)
                         .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1006)
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
                     b.Property<int>("LastStatusBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1007);
 
                     b.Property<Guid>("RowId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(1000)
                         .HasDefaultValueSql("NEWSEQUENTIALID()");
 
                     b.Property<int>("StatusId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1005);
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasPrecision(4)
-                        .HasColumnType("datetimeoffset(4)");
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1003);
 
                     b.Property<int?>("UpdatedBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1004);
 
                     b.Property<int>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1);
 
                     b.HasKey("Id");
 
@@ -1552,7 +2043,8 @@ namespace ArchiX.Library.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(0);
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
@@ -1560,54 +2052,67 @@ namespace ArchiX.Library.Migrations
                         .ValueGeneratedOnAdd()
                         .HasPrecision(4)
                         .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1001)
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasPrecision(4)
-                        .HasColumnType("datetimeoffset(4)");
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(4);
 
                     b.Property<int>("CreatedBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1002);
 
                     b.Property<string>("HashAlgorithm")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnOrder(3);
 
                     b.Property<bool>("IsProtected")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnOrder(1008);
 
                     b.Property<DateTimeOffset?>("LastStatusAt")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(4)
                         .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1006)
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
                     b.Property<int>("LastStatusBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1007);
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
+                        .HasColumnType("nvarchar(300)")
+                        .HasColumnOrder(2);
 
                     b.Property<Guid>("RowId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(1000)
                         .HasDefaultValueSql("NEWSEQUENTIALID()");
 
                     b.Property<int>("StatusId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1005);
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasPrecision(4)
-                        .HasColumnType("datetimeoffset(4)");
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1003);
 
                     b.Property<int?>("UpdatedBy")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1004);
 
                     b.Property<int>("UserId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnOrder(1);
 
                     b.HasKey("Id");
 
@@ -1697,6 +2202,23 @@ namespace ArchiX.Library.Migrations
                         .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("ArchiX.Library.Entities.PasswordBlacklist", b =>
+                {
+                    b.HasOne("ArchiX.Library.Entities.Application", "Application")
+                        .WithMany()
+                        .HasForeignKey("ApplicationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ArchiX.Library.Entities.Statu", null)
+                        .WithMany()
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Application");
                 });
 
             modelBuilder.Entity("ArchiX.Library.Entities.PasswordPolicyAudit", b =>

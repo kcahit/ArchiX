@@ -27,6 +27,7 @@ namespace ArchiX.Library.Context
         public DbSet<User> Users => Set<User>();
         public DbSet<UserApplication> UserApplications => Set<UserApplication>();
         public DbSet<UserPasswordHistory> UserPasswordHistories => Set<UserPasswordHistory>();
+        public DbSet<PasswordBlacklist> PasswordBlacklists => Set<PasswordBlacklist>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -145,6 +146,40 @@ namespace ArchiX.Library.Context
                 // BaseEntity configuration'ı otomatik uygulanır
             });
 
+            // PasswordBlacklist configuration
+            modelBuilder.Entity<PasswordBlacklist>(e =>
+            {
+                e.HasIndex(x => new { x.ApplicationId, x.Word }).IsUnique();
+            });
+
+
+            // PasswordBlacklist seeds(20 yaygın parola) - SABİT DEĞERLER
+            var blacklistSeedData = new[]
+            {
+                "password", "123456", "12345678", "qwerty", "abc123",
+                "123456789", "111111", "1234567", "letmein", "welcome",
+                "monkey", "1234567890", "dragon", "master", "sunshine",
+                "princess", "qazwsx", "654321", "michael", "football"
+            };
+
+            var baseTime = new DateTimeOffset(2025, 12, 11, 10, 0, 0, TimeSpan.Zero);
+            var blacklistEntities = blacklistSeedData
+                .Select((word, index) => new PasswordBlacklist
+                {
+                    Id = index + 1,
+                    ApplicationId = 1,
+                    Word = word,
+                    RowId = new Guid($"00000000-0000-0000-0000-{index:D12}"),
+                    CreatedAt = baseTime.AddSeconds(index),
+                    CreatedBy = 0,
+                    StatusId = BaseEntity.ApprovedStatusId,
+                    LastStatusBy = 0,
+                    IsProtected = false
+                })
+                .ToArray();
+
+            modelBuilder.Entity<PasswordBlacklist>().HasData(blacklistEntities);
+
             // User seed
             modelBuilder.Entity<User>().HasData(
                 new User
@@ -247,7 +282,7 @@ namespace ArchiX.Library.Context
                     Key = "Options",
                     ApplicationId = 1,
                     ParameterDataTypeId = 15,
-                    Value    = "{\n  \"defaultChannel\": \"Email\",\n  \"channels\": {\n    \"Sms\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Email\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Authenticator\": { \"digits\": 6, \"periodSeconds\": 30, \"hashAlgorithm\": \"SHA1\" }\n  }\n}",
+                    Value = "{\n  \"defaultChannel\": \"Email\",\n  \"channels\": {\n    \"Sms\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Email\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Authenticator\": { \"digits\": 6, \"periodSeconds\": 30, \"hashAlgorithm\": \"SHA1\" }\n  }\n}",
                     Template = "{\n  \"defaultChannel\": \"Sms\",\n  \"channels\": {\n    \"Sms\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Email\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Authenticator\": { \"digits\": 6, \"periodSeconds\": 30, \"hashAlgorithm\": \"SHA1\" }\n  }\n}",
                     Description = "İkili doğrulama varsayılan kanal ve seçenekleri",
                     StatusId = 3

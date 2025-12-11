@@ -643,3 +643,495 @@ GERÇEK DURUM (Doğru Değerlendirme - Kod İncelendikten Sonra)
 •	Olması gereken = Policy → Expiration → Pwned → History
 3.	PasswordExpirationServiceTests.cs dosyası hiç yok - 12 test yazılmamış
 
+-------- 2025-12-11 09:47 RL-04 iş bitti (kalan İşler) --------
+
+Sonraki İş: RL-05 (Yönetim UI Genişletme) veya başka?
+Backlog'a bakarsak:
+ID	İş	Öncelik	Durum
+RL-03	Blacklist genişletme	Orta	⏳ TODO
+RL-04	Parola yaşlandırma	Orta	✅ DONE
+RL-05	Yönetim UI genişletme	Orta	⏳ TODO
+RL-06	History temizleme job'ı	Düşük	⏳ TODO
+RL-07	Entropy kontrolü	Düşük	⏳ TODO
+RL-08	Dictionary attack koruması	Düşük	⏳ TODO
+RL-09	Rate limiting	Orta	⏳ TODO
+RL-10	Çoklu dil desteği	Düşük	⏳ TODO
+
+Önerilerim:
+1.	RL-03 (Blacklist genişletme) - Orta, 1 gün
+2.	RL-05 (Yönetim UI) - Orta, 2 gün
+3.	RL-09 (Rate limiting) - Orta, 1 gün
+
+ 1. RL-03: Blacklist Genişletme işine başlıyoruz.
+---
+RL-03: Blacklist Genişletme (Parametrik Yönetim) - Tasarım Dokümanı v2.5
+Genel Bakış
+Mevcut BlockList (statik dizi PasswordPolicyOptions içinde) yapısının yerini, dinamik olarak yönetilebilen bir PasswordBlacklist tablosu alacak. Böylece admin, uygulama yeniden başlatmadan yeni kısıtlı kelimeleri ekleyebilecek, silebilecek ve yönetebilecek.
+---
+1. Entity Değişiklikleri
+1.1 PasswordBlacklist Entity
+Dosya: src/ArchiX.Library/Entities/PasswordBlacklist.cs
+Özellikleri:
+•	Id (int, Primary Key)
+•	ApplicationId (int, Foreign Key → Applications)
+•	Word (nvarchar(256), unique per ApplicationId)
+•	CreatedBy (int)
+•	Status (int) - BaseEntity miras (3=Active)
+•	CreatedAtUtc (datetimeoffset)
+•	UpdatedAtUtc (datetimeoffset, nullable)
+•	UpdatedBy (int, nullable)
+Özellikler:
+•	Soft-delete desteği (Status = 3 = Active)
+•	Unique index: (ApplicationId, Word) - case-insensitive
+•	Foreign Key: ApplicationId → Applications (DeleteBehavior.Restrict)
+---
+2. Configuration (EF Core)
+Dosya: src/ArchiX.Library/Entities/Configurations/PasswordBlacklistConfiguration.cs
+İçerik:
+•	Entity mapping
+•	Unique constraint: HasIndex(x => new { x.ApplicationId, x.Word }).IsUnique()
+•	Foreign Key configuration (Restrict)
+•	Seed (varsayılan 5-10 kelime örneği)
+---
+3. Database Migration
+Dosya: src/ArchiX.Library/Migrations/[timestamp]_AddPasswordBlacklistTable.cs
+İçerik:
+•	PasswordBlacklist tablosu oluştur
+•	Kolonlar: Id, ApplicationId, Word, CreatedBy, Status, CreatedAtUtc, UpdatedAtUtc, UpdatedBy
+•	Foreign Key: ApplicationId → Applications (DeleteBehavior.Restrict)
+•	Unique constraint: UC_PasswordBlacklist_ApplicationId_Word
+•	Index: IX_PasswordBlacklist_ApplicationId_Status
+•	Seed verileri: Varsayılan blacklist (ApplicationId=1 için)
+---
+4. Interface Tasarımı
+Dosya: src/ArchiX.Library/Abstractions/Security/IPasswordBlacklistService.cs
+---
+5. Service Implementasyonu
+Dosya: src/ArchiX.Library/Runtime/Security/PasswordBlacklistService.cs
+Özellikler:
+•	Cache stratejisi: IMemoryCache (30 dakika TTL)
+•	Case-insensitive kontrol
+•	Lazy loading (ilk çağrıda DB'den yükle)
+•	Soft-delete respects (Status=3 filtrelemesi)
+•	Partial matching (Contains, case-insensitive)
+Metodlar:
+1.	IsWordBlockedAsync(word, appId) - Parola içinde word varsa blocked
+2.	GetBlockedWordsAsync(appId) - Tüm bloklanmış kelimeler (cached)
+3.	AddWordAsync(word, appId) - DB'ye ekle, cache invalidate
+4.	RemoveWordAsync(word, appId) - DB'den sil, cache invalidate
+5.	GetCountAsync(appId) - Toplam sayı
+6.	InvalidateCache(appId) - Cache temizle
+---
+6. PasswordValidationService Güncellemesi
+Dosya: PasswordValidationService.cs
+Güncellemeler:
+•	Constructor'a IPasswordBlacklistService inject et
+•	ValidateAsync(string, string, CancellationToken) metodunda akış sırası:
+1.	Policy kuralları (senkron) → EMPTY, MIN_LENGTH, MAX_LENGTH, REQ_UPPER, vb.
+2.	Parola yaşlandırma (senkron) [RL-04] → EXPIRED
+3.	Dinamik blacklist kontrolü (async) ← YENİ → DYNAMIC_BLOCK
+4.	Statik blockList kontrolü (senkron) → BLOCK_LIST
+5.	Pwned kontrolü (async) → PWNED
+6.	History kontrolü (async) → HISTORY
+Not: Policy BlockList (statik) kontrolü hala var, ama dinamik blacklist'ten önce çalışacak.
+---
+7. Hata Kodları
+Yeni hata kodu:
+•	DYNAMIC_BLOCK - Kelime dinamik blacklist'te bulundu
+Mevcut kodlar:
+•	EMPTY, MIN_LENGTH, MAX_LENGTH, REQ_UPPER, REQ_LOWER, REQ_DIGIT, REQ_SYMBOL, MIN_DISTINCT, REPEAT_SEQ, BLOCK_LIST, EXPIRED, PWNED, HISTORY
+---
+8. DI Kaydı
+Dosya: src/ArchiX.Library/Extensions/PasswordSecurityServiceCollectionExtensions.cs
+---
+9. Unit Test Tasarımı
+Dosya: tests/ArchiX.Library.Tests/SecurityTests/PasswordBlacklistServiceTests.cs
+Test senaryoları (14 adet):
+IsWordBlockedAsync Testleri:
+1.	IsWordBlockedAsync_ReturnsTrue_WhenWordExists - Kelime DB'de var
+2.	IsWordBlockedAsync_ReturnsFalse_WhenWordDoesNotExist - Kelime yok
+3.	IsWordBlockedAsync_CaseInsensitive_Match - "Password" vs "password"
+4.	IsWordBlockedAsync_PartialMatch_ReturnsFalse - "pass" içinde "word" yok
+5.	IsWordBlockedAsync_UsesCacheOnSecondCall - Cache çalışıyor
+AddWordAsync Testleri:
+6.	AddWordAsync_AddsNewWord_Success - Yeni kelime başarılı
+7.	AddWordAsync_DuplicateWord_ReturnsFalse - Duplicate engellendi
+8.	AddWordAsync_InvalidatesCache - Cache reset
+9.	AddWordAsync_StoresApplicationIdCorrectly - ApplicationId kaydedildi
+RemoveWordAsync Testleri:
+10.	RemoveWordAsync_RemovesExistingWord_Success - Kelime silindi
+11.	RemoveWordAsync_NonExistentWord_ReturnsFalse - Yok olan silinemiyor
+12.	RemoveWordAsync_InvalidatesCache - Cache reset
+Entegrasyon Testleri:
+13.	PasswordValidationService_DynamicBlocklist_ReturnsDYNAMIC_BLOCK_Error - ValidateAsync hatası
+14.	PasswordValidationService_DynamicBlocklist_StopsAtDynamicBlockError - Policy'den sonra çalışır
+---
+10. Kenar Durumlar & Validasyonlar
+Durum	Davranış
+Boş string word	ArgumentException fırla
+Word > 256 char	ArgumentException fırla
+Duplicate word (aynı app)	Ekle başarısız, false döndür
+SQL injection girişi	EF Core parametrize query
+Soft-delete (Status ≠ 3)	Ignore et (soft-delete filter)
+Cache miss/expire	DB'den yeniden yükle (lazy)
+ApplicationId mismatch	Farklı uygulamalar ayrı lister
+---
+11. Yapılacaklar (Sıralı)
+İş	Dosya	Durum
+1. Entity	PasswordBlacklist.cs	⏳ TODO
+2. Configuration	PasswordBlacklistConfiguration.cs	⏳ TODO
+3. Migration	[timestamp]_AddPasswordBlacklistTable.cs	⏳ TODO
+4. Interface	IPasswordBlacklistService.cs	⏳ TODO
+5. Service	PasswordBlacklistService.cs	⏳ TODO
+6. ValidateAsync güncelle	PasswordValidationService.cs	⏳ TODO
+7. DI kaydı	PasswordSecurityServiceCollectionExtensions.cs	⏳ TODO
+8. Unit tests	PasswordBlacklistServiceTests.cs	⏳ TODO
+Tahmini Süre: ~1 gün (kod + testler)
+---
+12. Özet
+✅ Amaç: Statik BlockList → Dinamik DB tablosu (PasswordBlacklist)
+✅ Fayda:
+•	Admin, deploy olmadan kelime ekleyebilir
+•	ApplicationId bazında ayrı blacklist
+•	Soft-delete audit trail
+•	Cache performance
+•	Dinamik + statik kontroller aynı anda
+✅ Bağımlılık:
+•	RL-04 (PasswordExpiration) ile bağımsız
+•	RL-02 (UserPasswordHistory) ile bağımsız
+---
+Tasarım Tarihi: 2025-12-11 10:30 (Türkiye Saati)
+
+---
+✅ RL-03 TAMAMLANDI!
+Yapılanlar:
+1.	✅ Entity (PasswordBlacklist)
+2.	✅ Configuration (AppDbContext - unique index)
+3.	✅ Migration + Database (20 seed kelime)
+4.	✅ Interface (IPasswordBlacklistService)
+5.	✅ Service (PasswordBlacklistService - cache + CRUD)
+6.	✅ DI kaydı (SecurityServiceCollectionExtensions)
+7.	✅ PasswordValidationService entegrasyonu (BLACKLIST error kodu)
+8.	✅ Unit tests (PasswordBlacklistServiceTests - 11 test)
+9.	✅ Integration tests (PasswordValidationServiceTests - blacklist testi)
+
+Kalan RL işleri:
+•	RL-04: Parola yaşlandırma (maxPasswordAgeDays) ← Zaten yapıldı (IPasswordExpirationService)
+•	RL-05: Yönetim UI genişletme
+•	RL-06: History temizleme job'ı
+•	RL-07: Entropy kontrolü
+•	RL-08: Dictionary attack koruması
+•	RL-09: Rate limiting
+•	RL-10: Çoklu dil desteği
+
+Bitiş Tarihi: 2025-12-11 13:10 (Türkiye Saati)
+
+---
+
+RL-05: Yönetim UI Genişletme - Tasarım Dokümanı
+Dokümanı inceledim. RL-05 için detaylı bir tasarım hazırlayacağım.
+Mevcut Durum Analizi
+Tamamlanan İşler:
+•	✅ RL-01: Pwned Passwords kontrolü (HIBP API)
+•	✅ RL-02: UserPasswordHistory tablosu
+•	✅ RL-03: PasswordBlacklist tablosu (dinamik blacklist)
+•	✅ RL-04: Password Expiration (yaşlandırma)
+Mevcut Yönetim Yapısı:
+•	Tek JSON model (Group=Security, Key=PasswordPolicy)
+•	Temel Razor Page (JSON görüntüleme/düzenleme)
+•	Provider + Cache + Invalidate akışı
+---
+RL-05: Yönetim UI Genişletme - Detaylı Tasarım v2.6
+Güncelleme Tarihi: 2025-12-11 14:10 (Türkiye Saati)
+Durum: ⏳ TODO
+Öncelik: 🟡 Orta
+Tahmini Süre: 2 gün
+---
+1. Kapsam ve Hedefler
+1.1 Mevcut Sorunlar
+•	JSON düzenleme kullanıcı dostu değil
+•	Validation hataları görsel olarak gösterilmiyor
+•	Blacklist yönetimi ayrı bir UI'a ihtiyaç duyuyor
+•	Password history görüntüleme yok
+•	Policy test/önizleme yetersiz
+•	Audit trail görüntüleme yok
+1.2 Hedefler
+✅ Kullanıcı Dostu Form: JSON yerine form tabanlı düzenleme
+✅ Blacklist Yönetimi: CRUD operasyonları için ayrı sayfa
+✅ Audit Trail: Policy değişiklik geçmişi görüntüleme
+✅ Live Validation: Gerçek zamanlı doğrulama önizlemesi
+✅ Password History: Kullanıcı bazında parola geçmişi görüntüleme
+✅ Dashboard: Özet istatistikler ve metrikler
+---
+2. Sayfa Yapısı (Razor Pages)
+public class SecurityDashboardViewModel
+{
+    public PasswordPolicyOptions ActivePolicy { get; set; }
+    public int BlacklistWordCount { get; set; }
+    public int ExpiredPasswordCount { get; set; }
+    public Dictionary<string, int> Last30DaysErrors { get; set; } // error_code → count
+    public List<RecentAuditEntry> RecentChanges { get; set; }
+}
+
+3.2 Policy Settings (PolicySettings.cshtml)
+Amaç: Form tabanlı policy düzenleme (JSON yerine)
+Form Bölümleri:
+A. Uzunluk Ayarları
+•	Min Length (input, number, 8-64 arası)
+•	Max Length (input, number, 64-256 arası)
+B. Karakter Gereksinimleri (Checkbox group)
+•	Büyük harf gerekli
+•	Küçük harf gerekli
+•	Rakam gerekli
+•	Sembol gerekli
+•	İzin verilen semboller (input, text)
+C. Karmaşıklık Kuralları
+•	Min ayırt edici karakter (input, number)
+•	Max tekrar sekansı (input, number)
+D. Güvenlik Ayarları
+•	History count (input, number, 0-20)
+•	Max password age (input, number, nullable, gün)
+•	Lockout threshold (input, number)
+•	Lockout duration (input, number, saniye)
+E. Hash Ayarları (Accordion/Collapse)
+•	Argon2id parametreleri (memoryKb, parallelism, iterations)
+•	PBKDF2 fallback iterations
+•	Pepper enabled (checkbox + uyarı)
+Özellikler:
+•	Client-side validation (jquery-validate)
+•	Server-side validation (ModelState)
+•	Live preview (parola test kutusu)
+•	Save → Invalidate cache → Audit log
+
+public class PolicySettingsViewModel
+{
+    [Required, Range(8, 64)]
+    public int MinLength { get; set; }
+    
+    [Required, Range(64, 256)]
+    public int MaxLength { get; set; }
+    
+    public bool RequireUpper { get; set; }
+    public bool RequireLower { get; set; }
+    public bool RequireDigit { get; set; }
+    public bool RequireSymbol { get; set; }
+    
+    [MaxLength(50)]
+    public string AllowedSymbols { get; set; }
+    
+    [Range(1, 20)]
+    public int MinDistinctChars { get; set; }
+    
+    [Range(1, 10)]
+    public int MaxRepeatedSequence { get; set; }
+    
+    [Range(0, 20)]
+    public int HistoryCount { get; set; }
+    
+    [Range(1, 3650)] // 1 gün - 10 yıl
+    public int? MaxPasswordAgeDays { get; set; }
+    
+    // ... hash settings
+}
+
+---
+3.3 Blacklist Management (Blacklist.cshtml)
+Amaç: Dinamik blacklist CRUD işlemleri
+Özellikler:
+•	DataTable (jQuery plugin) ile liste
+•	Arama/filtreleme/sıralama
+•	Sayfalama (server-side)
+•	Toplu ekleme (textarea, her satırda bir kelime)
+•	Tekil ekleme (modal)
+•	Silme (confirmation modal)
+•	Export (CSV/Excel)
+Kolonlar:
+•	Word
+•	CreatedBy (User.Name)
+•	CreatedAtUtc
+•	Actions (Delete button)
+
+public async Task<IActionResult> OnGetAsync(int pageIndex, int pageSize, string search);
+public async Task<IActionResult> OnPostAddAsync(string word);
+public async Task<IActionResult> OnPostBulkAddAsync(string words); // newline separated
+public async Task<IActionResult> OnPostDeleteAsync(int id);
+public async Task<IActionResult> OnGetExportAsync(); // CSV
+---
+3.4 Audit Trail (AuditTrail.cshtml)
+Amaç: Policy değişiklik geçmişi görüntüleme
+Özellikler:
+•	Tablo görünümü (PasswordPolicyAudit tablosundan)
+•	Filtreleme (tarih aralığı, kullanıcı)
+•	Diff görünümü (OldJson ↔ NewJson karşılaştırma)
+•	Export (JSON/PDF)
+Kolonlar:
+•	Changed At
+•	Changed By (User.Name)
+•	Action (Update/Rollback)
+•	Changes (diff preview)
+•	View Details (modal → full JSON diff)
+Diff Gösterimi:
+•	JavaScript JSON diff kütüphanesi (jsondiffpatch)
+•	Renklendirme (kırmızı=silinen, yeşil=eklenen)
+---
+3.5 Password History (PasswordHistory.cshtml)
+Amaç: Kullanıcı bazında parola geçmişi görüntüleme
+Özellikler:
+•	Kullanıcı arama (email/username)
+•	Tablo (UserPasswordHistories)
+•	Hash görüntüleme (truncated)
+•	Algoritma bilgisi
+•	Tarih sıralama
+Kolonlar:
+•	User (Email)
+•	Password Hash (first 20 chars + ...)
+•	Algorithm
+•	Created At
+•	Status (Active/Expired)
+Güvenlik:
+•	Sadece admin yetkisi
+•	Hash'ler hiçbir zaman tam gösterilmez
+•	Audit log (kim hangi kullanıcının geçmişine baktı)
+---
+3.6 Policy Test (PolicyTest.cshtml)
+Amaç: Gerçek zamanlı parola doğrulama testi
+Özellikler:
+•	Input box (parola girişi)
+•	Live validation (AJAX)
+•	Görsel feedback (✅/❌ her kural için)
+•	Error code açıklamaları
+•	Strength meter (progress bar)
+Kurallar Listesi (Checkboxes):
+•	✅ Min length (12)
+•	✅ Max length (128)
+•	✅ Uppercase required
+•	✅ Lowercase required
+•	✅ Digit required
+•	✅ Symbol required
+•	✅ Min distinct chars (5)
+•	✅ Max repeated sequence (3)
+•	❌ Blacklist check
+•	❌ Pwned check (HIBP)
+•	❌ History check (simulated)
+•	❌ Expiration check
+AJAX Endpoint:
+public async Task<IActionResult> OnPostValidateAsync([FromBody] string password);
+// Response: { isValid: bool, errors: string[], strength: int }
+4. Layout ve Navigasyon
+4.1 Menü Yapısı (Sidebar)
+🛡️ Security Management
+  ├── 📊 Dashboard
+  ├── ⚙️ Policy Settings
+  ├── 🚫 Blacklist
+  ├── 📜 Audit Trail
+  ├── 🕒 Password History
+  └── 🧪 Policy Test
+
+4.2 Layout (_Layout.cshtml)
+•	Bootstrap 5
+•	Font Awesome icons
+•	Chart.js (dashboard grafikler)
+•	DataTables.js (liste sayfaları)
+•	jsondiffpatch (audit diff)
+---
+5. Backend Servisler
+5.1 Yeni Interface: IPasswordPolicyAdminService
+Dosya: IPasswordPolicyAdminService.cs
+public interface IPasswordPolicyAdminService
+{
+    // Dashboard
+    Task<SecurityDashboardViewModel> GetDashboardDataAsync(int appId, CancellationToken ct);
+    
+    // Policy CRUD
+    Task<PasswordPolicyOptions> GetPolicyAsync(int appId, CancellationToken ct);
+    Task<bool> UpdatePolicyAsync(int appId, PasswordPolicyOptions policy, int userId, CancellationToken ct);
+    
+    // Audit
+    Task<List<PasswordPolicyAudit>> GetAuditTrailAsync(int appId, DateTime? from, DateTime? to, CancellationToken ct);
+    Task<string> GetAuditDiffAsync(int auditId, CancellationToken ct); // JSON diff
+    
+    // History
+    Task<List<UserPasswordHistory>> GetUserPasswordHistoryAsync(int userId, CancellationToken ct);
+    
+    // Statistics
+    Task<Dictionary<string, int>> GetValidationErrorStatsAsync(int appId, int days, CancellationToken ct);
+    Task<int> GetExpiredPasswordCountAsync(int appId, CancellationToken ct);
+}
+
+6. Güvenlik ve Yetkilendirme
+Authorization Policy:
+[Authorize(Policy = "AdminOnly")]
+[Authorize(Roles = "Admin,SecurityManager")]
+
+Audit:
+•	Her policy değişikliği → PasswordPolicyAudit
+•	Her blacklist değişikliği → Audit log
+•	Password history görüntüleme → Activity log
+---
+7. Yapılacaklar (Sıralı)
+#	İş	Dosya	Durum
+1	Dashboard ViewModel	SecurityDashboardViewModel.cs	⏳ TODO
+2	Dashboard Page	Index.cshtml + Index.cshtml.cs	⏳ TODO
+3	Policy Settings ViewModel	PolicySettingsViewModel.cs	⏳ TODO
+4	Policy Settings Page	PolicySettings.cshtml + PageModel	⏳ TODO
+5	Blacklist Page	Blacklist.cshtml + PageModel	⏳ TODO
+6	Audit Trail Page	AuditTrail.cshtml + PageModel	⏳ TODO
+7	Password History Page	PasswordHistory.cshtml + PageModel	⏳ TODO
+8	Policy Test Page	PolicyTest.cshtml + PageModel	⏳ TODO
+9	Admin Service Interface	IPasswordPolicyAdminService.cs	⏳ TODO
+10	Admin Service Implementation	IPasswordPolicyAdminService.cs	⏳ TODO
+11	DI Registration	PasswordSecurityServiceCollectionExtensions.cs	⏳ TODO
+12	Layout & Navigation	_Layout.cshtml (partial)	⏳ TODO
+13	CSS/JS Assets	site.css, security-admin.js	⏳ TODO
+14	Authorization Policies	Program.cs	⏳ TODO
+---
+8. Teknolojiler
+Frontend:
+•	Bootstrap 5.3
+•	jQuery 3.7
+•	DataTables.js (blacklist/history)
+•	Chart.js (dashboard istatistikler)
+•	jsondiffpatch (audit diff)
+•	FontAwesome 6 (iconlar)
+Backend:
+•	ASP.NET Core 9 Razor Pages
+•	Entity Framework Core 9
+•	IMemoryCache (policy cache)
+---
+9. Kenar Durumlar
+Durum	Davranış
+Policy JSON bozuk	Validation error, rollback
+Concurrent update	RowVersion concurrency check
+Cache invalidation başarısız	Logger warning, devam et
+Audit kayıt hatası	Transaction rollback
+Unauthorized access	403 Forbidden
+HIBP API timeout (test sayfası)	Graceful degradation (skip pwned)
+---
+10. Test Senaryoları
+Manuel Test Checklist:
+1.	✅ Dashboard yükleniyor, istatistikler doğru
+2.	✅ Policy form validasyonu çalışıyor
+3.	✅ Policy kaydetme → cache invalidate → audit log
+4.	✅ Blacklist ekleme/silme → DB güncelliyor
+5.	✅ Audit trail diff doğru gösteriliyor
+6.	✅ Password history sadece admin görebiliyor
+7.	✅ Policy test live validation çalışıyor
+8.	✅ Concurrent policy update engellenmiş (RowVersion)
+Integration Tests: (opsiyonel)
+•	SecurityPagesTests.cs (WebApplicationFactory)
+---
+11. Özet
+✅ Amaç: Kullanıcı dostu admin UI (JSON yerine form)
+✅ Fayda:
+•	Admin artık JSON bilgisi olmadan policy yönetebilir
+•	Blacklist CRUD kolay
+•	Audit trail şeffaf
+•	Live validation test kolaylığı
+✅ Bağımlılıklar:
+•	RL-03 (Blacklist) ✅ DONE
+•	RL-04 (Expiration) ✅ DONE
+•	RL-01, RL-02 (Pwned, History) ✅ DONE
+Tahmini Süre: 2 gün (6 sayfa + backend service)
+---
+RL-05 Tasarım Tarihi: 2025-12-11 13:42 (Türkiye Saati)
+---

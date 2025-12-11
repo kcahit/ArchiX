@@ -6,6 +6,10 @@
 5. Bütün interfaceler Abstractions altında İlgili Klasöre yazılıyor.
 6. test kodları daima esas kodla hiyerarşik uyum içinde hem isim ve klasörleme ile yazılıyor.
 7. Asla sen kodlara müdahale etmeyeceksin. Kodları vereceksin ben kodu uyarlayacağım. senin otomatik müdahaleni asla istemiyorum çünkü çok yavaş oluyor. yani sen kod/dosya edit etmeyeceksin ben yapacağım tüm işlemleri.
+8. Eğer migration olacak ise . migration kodu yazma APPDbConext içine ekleyeceksin. 
+8.1  public DbSet<PasswordBlacklist> PasswordBlacklists => Set<PasswordBlacklist>(); öneiindeki gibi ekleme yapacaksın
+8.2 Hasdata ile data ekleme yapacaksın.
+9. migration dosyalarında değişiklik istemiyorum. Çünkü tüm migration dosyalarını silsem ve her şeyi sıfordan yapsam ne olacak. Birde projesine library referans ekleyen na yapacak? her zaman kaynak dosyada düeltme olacak.
 
 tek kod vermeyi sakın unutmaa
 tek kod vermeyi sakın unutmaa

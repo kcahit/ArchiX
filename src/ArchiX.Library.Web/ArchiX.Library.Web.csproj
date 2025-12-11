@@ -19,4 +19,9 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Abstractions\Security\" />
+    <Folder Include="ViewModels\Security\" />
+  </ItemGroup>
 </Project>

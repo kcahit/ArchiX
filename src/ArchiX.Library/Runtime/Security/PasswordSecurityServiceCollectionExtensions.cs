@@ -23,6 +23,9 @@ public static class PasswordSecurityServiceCollectionExtensions
         // ✅ Tam doğrulama servisi (policy + pwned + expiration + history)
         services.AddScoped<PasswordValidationService>();
 
+        // ✅ Blacklist servisi ekle
+        services.AddScoped<IPasswordBlacklistService, PasswordBlacklistService>();
+
         return services;
     }
 }
