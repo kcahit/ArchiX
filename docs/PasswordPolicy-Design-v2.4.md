@@ -1135,10 +1135,16 @@ Tahmini Süre: 2 gün (6 sayfa + backend service)
 ---
 RL-05 Tasarım Tarihi: 2025-12-11 13:42 (Türkiye Saati)
 
----
-RL-05 son durum güncellemesi:Tarih/Saat: 2025-12-11 13:55 (TR)
+--- RL-05 son durum güncellemesi:Tarih/Saat: 2025-12-11 13:55 (TR)
 
 •	Yapılanlar (RL-05): Dashboard bileşenleri, Policy Settings form alanları, Blacklist CRUD akışı, Audit Trail diff deneyimi, Password History görünümü ve Policy Test canlı doğrulama hedefleri belirlendi; gerekli Razor Page’ler, ViewModel’ler ve servis kontratları taslak olarak listelendi.
 •	Yapılacaklar (RL-05): Her sayfanın Razor markup + PageModel kodu, SecurityDashboardViewModel ve PolicySettingsViewModel, IPasswordPolicyAdminService uygulaması, DI kayıtları, yeni JS/CSS varlıkları, yetkilendirme politikaları ile DataTables/Chart.js/jsondiffpatch entegrasyonları ve canlı doğrulama API’si tamamlanacak.
 
 ---	Tarih/Saat: 2025-12-11 13:55 (TR).
+
+--- RL-05 son durum güncellemesi:Tarih/Saat: 2025-12-12 17:41(TR)
+
+•	Yapılanlar: Dashboard modülleri, Policy Settings form alanları, Blacklist CRUD akışı, Audit diff deneyimi, Password History görünümü ve Policy Test canlı doğrulama hedefleri detaylandırıldı; gerekli Razor Page’ler, ViewModel taslakları, servis kontratları ve JS/CSS/entegrasyon gereksinimleri listelendi.
+•	Kalanlar: Tüm sayfaların Razor markup + PageModel kodları, SecurityDashboardViewModel ve PolicySettingsViewModel, IPasswordPolicyAdminService implementasyonu ve DI kaydı, yeni varlıkların JS/CSS dosyaları, yetkilendirme politikaları, DataTables/Chart.js/jsondiffpatch entegrasyonları ve canlı doğrulama endpoint’i henüz uygulanmadı.
+ 
+--- Tarih/Saat: 2025-12-12 17:41(TR)
