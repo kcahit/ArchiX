@@ -1148,3 +1148,15 @@ RL-05 Tasarım Tarihi: 2025-12-11 13:42 (Türkiye Saati)
 •	Kalanlar: Tüm sayfaların Razor markup + PageModel kodları, SecurityDashboardViewModel ve PolicySettingsViewModel, IPasswordPolicyAdminService implementasyonu ve DI kaydı, yeni varlıkların JS/CSS dosyaları, yetkilendirme politikaları, DataTables/Chart.js/jsondiffpatch entegrasyonları ve canlı doğrulama endpoint’i henüz uygulanmadı.
  
 --- Tarih/Saat: 2025-12-12 17:41(TR)
+
+--- RL-05 son durum güncellemesi:Tarih/Saat: 2025-12-12 19:20 (TR)
+RL-05’in 
+Biten iş:Razor Page’lerinin (Dashboard, Policy Settings, Policy Test, Password History, Audit Trail, Blacklist) tamamı artık çalışır durumda; bu, UI katmanının ~60%’ını karşılıyor. 
+Kalan iş:Ancak servis kontratlarının genişletilmesi, yeni JS/CSS varlıkları, Chart.js/DataTables/jsondiffpatch entegrasyonlarının production’a alınması ve yetkilendirme/DI düzenlemeleri hâlâ beklemede olduğu için toplam kapsamın yaklaşık %40’ı açık.
+
+yapılan Plan
+1.	Servis katmanı – IPasswordPolicyAdminService kontratı ve implementasyonu, gerekli DTO/ViewModel’ler, ayrıca PasswordSecurityServiceCollectionExtensions içindeki DI kayıtları. Bu katman tüm Razor Page’lere güvenilir veri/veri-kaydetme akışını sağlar.
+2.	Yetkilendirme + Ortak varlıklar – Program.cs içinde politika tanımları, _Layout.cshtml menüleri, yeni security-admin.js ve site.css güncellemeleri, Chart.js/DataTables/jsondiffpatch başlangıç kodları. Böylece UI parçaları tek merkezden güvenli şekilde beslenir.
+3.	Sayfa bazlı sertifikasyon – Dashboard/Policy Settings/Blacklist/Audit/History/Policy Test PageModel’lerinin backend çağrılarını bu servise bağlayıp, ModelState doğrulamaları, Ajax endpoint’leri ve export akışlarını tamamlamak.
+
+--- Tarih/Saat: 2025-12-12 19:20 (TR)

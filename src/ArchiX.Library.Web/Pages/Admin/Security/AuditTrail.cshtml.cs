@@ -33,7 +33,7 @@ public sealed class AuditTrailModel : PageModel
     [BindProperty(SupportsGet = true)]
     public int? SelectedAuditId { get; set; }
 
-    public IReadOnlyList<PasswordPolicyAuditDto> AuditEntries { get; private set; } = Array.Empty<PasswordPolicyAuditDto>();
+    public IReadOnlyList<PasswordPolicyAuditDto> AuditEntries { get; private set; } = [];
 
     public AuditDiffDto? SelectedDiff { get; private set; }
 

@@ -1,7 +1,6 @@
-using System.Collections.Generic;
+using System.Buffers;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
 
@@ -18,6 +17,7 @@ namespace ArchiX.Library.Web.Pages.Admin.Security;
 public sealed class BlacklistModel : PageModel
 {
     private const int MaxBulkWordCount = 100;
+    private static readonly SearchValues<char> CsvSpecialChars = SearchValues.Create(['"', ',', '\n', '\r']);
 
     private readonly IPasswordPolicyAdminService _adminService;
 
@@ -38,7 +38,7 @@ public sealed class BlacklistModel : PageModel
     [Display(Name = "Toplu kelimeler (her satýra bir kelime)")]
     public string? BulkWords { get; set; }
 
-    public IReadOnlyList<PasswordBlacklistWordDto> Words { get; private set; } = Array.Empty<PasswordBlacklistWordDto>();
+    public IReadOnlyList<PasswordBlacklistWordDto> Words { get; private set; } = [];
 
     [TempData]
     public string? StatusMessage { get; set; }
@@ -93,7 +93,7 @@ public sealed class BlacklistModel : PageModel
         }
 
         var parsedWords = BulkWords
-            .Split(new[] { '\r', '\n', ';', ',', '\t' }, StringSplitOptions.RemoveEmptyEntries)
+            .Split(['\r', '\n', ';', ',', '\t'], StringSplitOptions.RemoveEmptyEntries)
             .Select(word => word.Trim())
             .Where(word => !string.IsNullOrWhiteSpace(word))
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -232,7 +232,7 @@ public sealed class BlacklistModel : PageModel
         if (string.IsNullOrEmpty(value))
             return string.Empty;
 
-        if (value.IndexOfAny(new[] { '"', ',', '\n', '\r' }) >= 0)
+        if (value.AsSpan().ContainsAny(CsvSpecialChars))
         {
             return "\"" + value.Replace("\"", "\"\"") + "\"";
         }
