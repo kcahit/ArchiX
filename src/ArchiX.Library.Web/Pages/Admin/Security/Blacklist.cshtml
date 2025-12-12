@@ -1,0 +1,92 @@
+@page
+@model ArchiX.Library.Web.Pages.Admin.Security.BlacklistModel
+@{
+    ViewData["Title"] = "Blacklist Yönetimi";
+}
+
+<div class="container-fluid py-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+            <h2 class="mb-0">Blacklist Yönetimi</h2>
+            <small class="text-muted">Application ID: @Model.ApplicationId</small>
+        </div>
+        <div class="btn-group" role="group">
+            <a asp-page="/Admin/Security/Index" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary">Dashboard</a>
+            <a asp-page="/Admin/Security/PasswordPolicy" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary">JSON Editörü</a>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        <div class="alert alert-info" role="alert">@Model.StatusMessage</div>
+    }
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">Yeni Kelime Ekle</div>
+        <div class="card-body">
+            <form method="post" asp-page-handler="Add" class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="NewWord" class="form-label"></label>
+                    <input asp-for="NewWord" class="form-control" autocomplete="off" />
+                    <span asp-validation-for="NewWord" class="text-danger"></span>
+                </div>
+                <div class="col-md-3 align-self-end">
+                    <input type="hidden" asp-for="ApplicationId" />
+                    <button type="submit" class="btn btn-primary">Ekle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Blacklist (Toplam: @Model.Words.Count)</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th style="width:40%">Kelime</th>
+                        <th style="width:25%">Ekleyen</th>
+                        <th style="width:20%">Tarih</th>
+                        <th style="width:15%" class="text-end">Ýþlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @if (Model.Words.Count == 0)
+                {
+                    <tr>
+                        <td colspan="4" class="text-muted text-center py-4">Henüz kelime eklenmemiþ.</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var word in Model.Words)
+                    {
+                        <tr>
+                            <td>
+                                <span class="fw-semibold">@word.Word</span>
+                                @if (!word.IsActive)
+                                {
+                                    <span class="badge bg-secondary ms-2">Pasif</span>
+                                }
+                            </td>
+                            <td>@word.CreatedBy</td>
+                            <td>@word.CreatedAtUtc.ToLocalTime().ToString("g")</td>
+                            <td class="text-end">
+                                <form method="post" asp-page-handler="Delete" asp-route-id="@word.Id" asp-route-applicationId="@Model.ApplicationId" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Kelimeyi silmek istediðinize emin misiniz?');" @(word.IsActive ? null : "disabled")>Sil</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
