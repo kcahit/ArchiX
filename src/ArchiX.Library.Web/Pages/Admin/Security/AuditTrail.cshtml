@@ -12,7 +12,7 @@
 }
 
 <div class="container-fluid py-3">
-    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <div class="d-flex justify-content-between alignments-center mb-3 flex-wrap gap-2">
         <div>
             <h2 class="mb-0">Policy Audit Trail</h2>
             <small class="text-muted">Application ID: @Model.ApplicationId</small>
@@ -21,6 +21,7 @@
             <a asp-page="/Admin/Security/Index" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary">Dashboard</a>
             <a asp-page="/Admin/Security/PolicySettings" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary">Policy Settings</a>
             <a asp-page="/Admin/Security/Blacklist" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary">Blacklist</a>
+            <a asp-page="/Admin/Security/PasswordHistory" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary">Password History</a>
             <a asp-page="/Admin/Security/PolicyTest" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary">Policy Test</a>
             <a asp-page="/Admin/Security/PasswordPolicy" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary">JSON Editörü</a>
         </div>
@@ -137,14 +138,15 @@
 @section Scripts {
     @if (Model.SelectedDiff is not null)
     {
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsondiffpatch@0.5.0/public/formatters-styles/html.css" integrity="sha384-gyRMxwvx6pRP70dNDO5qyxrppWdWwqzuqnBo7Q9LR4QW71oeG21zI8FqxNhfku5K" crossorigin="anonymous" />
         <style>
-            @@import url('https://cdn.jsdelivr.net/npm/jsondiffpatch@0.5.0/public/formatters-styles/html.css');
             .jsondiffpatch-result { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 0.9rem; }
             .jsondiffpatch-result pre { margin: 0; }
         </style>
         <script src="https://cdn.jsdelivr.net/npm/jsondiffpatch@0.5.0/public/build/jsondiffpatch.umd.min.js" integrity="sha384-rcP88GJ/GEGg8QUNsVq4fIv1pDcRAHkNBwAgF/5vrNWeWZXHQCt0nAl/4Q1pcH7j" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/jsondiffpatch@0.5.0/public/build/jsondiffpatch-formatters.min.js" integrity="sha384-i9DrnV9EoRrKVG+Va5Buz3vET/6en5I3Zz9NbcSwZLQJo+MZbn9l0JvcAz7PvRFM" crossorigin="anonymous"></script>
         <script>
+            @Html.Raw("// @ts-nocheck\n")
             (function () {
                 var container = document.getElementById('policy-json-diff');
                 if (!container || typeof jsondiffpatch === 'undefined' || !jsondiffpatch.formatters || !jsondiffpatch.formatters.html) {
@@ -162,7 +164,9 @@
                 try {
                     oldObject = JSON.parse(oldJsonText);
                     newObject = JSON.parse(newJsonText);
-                } catch (err) {
+                }
+                catch (err)
+                {
                     container.textContent = 'JSON içeriði çözümlenemedi.';
                     return;
                 }

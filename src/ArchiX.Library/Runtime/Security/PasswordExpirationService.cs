@@ -1,5 +1,3 @@
-using System;
-
 using ArchiX.Library.Abstractions.Security;
 using ArchiX.Library.Entities;
 
