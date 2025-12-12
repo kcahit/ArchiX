@@ -1,4 +1,4 @@
-ï»¿using System.Text.Json;
+using System.Text.Json;
 
 using ArchiX.Library.Abstractions.Security;
 using ArchiX.Library.Context;
@@ -55,34 +55,34 @@ namespace ArchiX.Library.Tests.Tests.SecurityTests
                 await db.SaveChangesAsync();
             }
 
-            // Ä°stemci A
+            // İstemci A
             var aJson = "{\"version\":1,\"minLength\":12,\"maxLength\":128,\"requireUpper\":true,\"requireLower\":true,\"requireDigit\":true,\"requireSymbol\":true,\"allowedSymbols\":\"!@#$%^&*_-+=:?.,;\",\"minDistinctChars\":5,\"maxRepeatedSequence\":3,\"blockList\":[\"password\"],\"historyCount\":10,\"lockoutThreshold\":5,\"lockoutSeconds\":900,\"hash\":{\"algorithm\":\"Argon2id\",\"memoryKb\":65536,\"parallelism\":2,\"iterations\":3,\"saltLength\":16,\"hashLength\":32,\"fallback\":{\"algorithm\":\"PBKDF2-SHA512\",\"iterations\":210000},\"pepperEnabled\":false}}";
-            // Ä°stemci B
+            // İstemci B
             var bJson = "{\"version\":1,\"minLength\":16,\"maxLength\":128,\"requireUpper\":true,\"requireLower\":true,\"requireDigit\":true,\"requireSymbol\":true,\"allowedSymbols\":\"!@#$%^&*_-+=:?.,;\",\"minDistinctChars\":6,\"maxRepeatedSequence\":3,\"blockList\":[\"password\"],\"historyCount\":10,\"lockoutThreshold\":5,\"lockoutSeconds\":900,\"hash\":{\"algorithm\":\"Argon2id\",\"memoryKb\":65536,\"parallelism\":2,\"iterations\":3,\"saltLength\":16,\"hashLength\":32,\"fallback\":{\"algorithm\":\"PBKDF2-SHA512\",\"iterations\":210000},\"pepperEnabled\":false}}";
 
-            // Seed sonrasÄ± istemci gÃ¶rÃ¼ntÃ¼sÃ¼ndeki RowVersion'Ä± al
+            // Seed sonrası istemci görüntüsündeki RowVersion'ı al
             byte[] clientRowVersion;
             await using (var db = await dbf.CreateDbContextAsync())
             {
                 var seedEntity = await db.Parameters.AsNoTracking()
                     .FirstAsync(x => x.ApplicationId == 1 && x.Group == "Security" && x.Key == "PasswordPolicy");
 
-                // RowVersion: SQL Server'da DB tarafÄ±ndan doldurulur; InMemory'de null kalÄ±r.
+                // RowVersion: SQL Server'da DB tarafından doldurulur; InMemory'de null kalır.
                 if (db.Database.IsRelational())
                     Assert.NotNull(seedEntity.RowVersion);
-                // Ä°stemci gÃ¶rÃ¼ntÃ¼sÃ¼ndeki versiyon: relational deÄŸilse sahte bir deÄŸer Ã¼ret.
+                // İstemci görüntüsündeki versiyon: relational değilse sahte bir değer üret.
                 clientRowVersion = seedEntity.RowVersion ?? System.Security.Cryptography.RandomNumberGenerator.GetBytes(8);
             }
 
-            // A kaydeder â†’ RowVersion deÄŸiÅŸir
+            // A kaydeder ? RowVersion değişir
             await admin.UpdateAsync(aJson, 1);
 
-            // B eski RowVersion ile kaydetmeye Ã§alÄ±ÅŸÄ±r â†’ eÅŸzamanlÄ±lÄ±k hatasÄ± beklenir
+            // B eski RowVersion ile kaydetmeye çalışır ? eşzamanlılık hatası beklenir
             var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 ((PasswordPolicyAdminService)admin).UpdateAsync(bJson, 1, clientRowVersion));
-            Assert.Contains("Ã§akÄ±ÅŸma", ex.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("çakışma", ex.Message, StringComparison.InvariantCultureIgnoreCase);
 
-            // Providerâ€™Ä±n gÃ¶rdÃ¼ÄŸÃ¼ deÄŸer A olmalÄ±
+            // Provider’ın gördüğü değer A olmalı
             var policy = await provider.GetAsync(1);
             Assert.Equal(12, policy.MinLength);
         }
