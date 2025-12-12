@@ -14,6 +14,8 @@ public sealed class PasswordBlacklistService : IPasswordBlacklistService
     private readonly AppDbContext _context;
     private readonly IMemoryCache _cache;
     private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(30);
+    private const int MaxWordLength = 256;
+    private const string CacheKeyPrefix = "password_blacklist_";
 
     public PasswordBlacklistService(AppDbContext context, IMemoryCache cache)
     {
@@ -21,40 +23,36 @@ public sealed class PasswordBlacklistService : IPasswordBlacklistService
         _cache = cache;
     }
 
-    public async Task<bool> IsWordBlockedAsync(string word, int applicationId, CancellationToken ct = default)
+    public async Task<bool> IsWordBlockedAsync(string password, int applicationId, CancellationToken ct = default)
     {
-        if (string.IsNullOrWhiteSpace(word))
+        if (string.IsNullOrWhiteSpace(password))
             return false;
 
-        var cacheKey = $"blacklist_{applicationId}";
-        var blockedWords = await _cache.GetOrCreateAsync(cacheKey, async entry =>
+        var blockedWords = await GetOrLoadWordsAsync(applicationId, ct).ConfigureAwait(false);
+        foreach (var word in blockedWords)
         {
-            entry.AbsoluteExpirationRelativeToNow = CacheDuration;
-            return await _context.PasswordBlacklists
-                .Where(x => x.ApplicationId == applicationId)
-                .Select(x => x.Word.ToLowerInvariant())
-                .ToHashSetAsync(ct);
-        });
+            if (password.Contains(word, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
 
-        return blockedWords?.Contains(word.ToLowerInvariant()) ?? false;
+        return false;
     }
 
     public async Task<IReadOnlyList<string>> GetBlockedWordsAsync(int applicationId, CancellationToken ct = default)
     {
-        return await _context.PasswordBlacklists
-            .Where(x => x.ApplicationId == applicationId)
-            .OrderBy(x => x.Word)
-            .Select(x => x.Word)
-            .ToListAsync(ct);
+        return await GetOrLoadWordsAsync(applicationId, ct).ConfigureAwait(false);
     }
 
     public async Task<bool> AddWordAsync(string word, int applicationId, CancellationToken ct = default)
     {
-        if (string.IsNullOrWhiteSpace(word))
+        var normalized = Normalize(word);
+        if (normalized is null)
             return false;
 
         var exists = await _context.PasswordBlacklists
-            .AnyAsync(x => x.ApplicationId == applicationId && x.Word == word, ct);
+            .IgnoreQueryFilters()
+            .AnyAsync(x => x.ApplicationId == applicationId && x.Word == normalized, ct)
+            .ConfigureAwait(false);
 
         if (exists)
             return false;
@@ -62,32 +60,36 @@ public sealed class PasswordBlacklistService : IPasswordBlacklistService
         var entity = new PasswordBlacklist
         {
             ApplicationId = applicationId,
-            Word = word,
+            Word = normalized,
             CreatedBy = 0,
-            StatusId = BaseEntity.ApprovedStatusId
+            StatusId = BaseEntity.ApprovedStatusId,
+            LastStatusBy = 0
         };
 
         _context.PasswordBlacklists.Add(entity);
-        await _context.SaveChangesAsync(ct);
-
+        await _context.SaveChangesAsync(ct).ConfigureAwait(false);
         InvalidateCache(applicationId);
         return true;
     }
 
     public async Task<bool> RemoveWordAsync(string word, int applicationId, CancellationToken ct = default)
     {
-        if (string.IsNullOrWhiteSpace(word))
+        var normalized = Normalize(word);
+        if (normalized is null)
             return false;
 
         var entity = await _context.PasswordBlacklists
-            .FirstOrDefaultAsync(x => x.ApplicationId == applicationId && x.Word == word, ct);
+            .FirstOrDefaultAsync(x => x.ApplicationId == applicationId && x.Word == normalized, ct)
+            .ConfigureAwait(false);
 
-        if (entity == null)
+        if (entity is null)
             return false;
 
         entity.SoftDelete(0);
-        await _context.SaveChangesAsync(ct);
+        entity.UpdatedAt = DateTimeOffset.UtcNow;
+        entity.UpdatedBy = 0;
 
+        await _context.SaveChangesAsync(ct).ConfigureAwait(false);
         InvalidateCache(applicationId);
         return true;
     }
@@ -95,12 +97,48 @@ public sealed class PasswordBlacklistService : IPasswordBlacklistService
     public async Task<int> GetCountAsync(int applicationId, CancellationToken ct = default)
     {
         return await _context.PasswordBlacklists
-            .CountAsync(x => x.ApplicationId == applicationId, ct);
+            .CountAsync(x => x.ApplicationId == applicationId && x.StatusId != BaseEntity.DeletedStatusId, ct)
+            .ConfigureAwait(false);
     }
 
     public void InvalidateCache(int applicationId)
     {
-        var cacheKey = $"blacklist_{applicationId}";
-        _cache.Remove(cacheKey);
+        _cache.Remove(CacheKey(applicationId));
     }
+
+    private async Task<IReadOnlyList<string>> GetOrLoadWordsAsync(int applicationId, CancellationToken ct)
+    {
+        var cacheKey = CacheKey(applicationId);
+        if (_cache.TryGetValue(cacheKey, out IReadOnlyList<string>? cached) && cached is not null)
+            return cached;
+
+        var words = await _context.PasswordBlacklists
+            .AsNoTracking()
+            .Where(x => x.ApplicationId == applicationId && x.StatusId != BaseEntity.DeletedStatusId)
+            .OrderBy(x => x.Word)
+            .Select(x => x.Word)
+            .ToArrayAsync(ct)
+            .ConfigureAwait(false);
+
+        var options = new MemoryCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = CacheDuration
+        };
+        _cache.Set(cacheKey, words, options);
+        return words;
+    }
+
+    private static string? Normalize(string word)
+    {
+        if (string.IsNullOrWhiteSpace(word))
+            return null;
+
+        var trimmed = word.Trim();
+        if (trimmed.Length > MaxWordLength)
+            trimmed = trimmed[..MaxWordLength];
+
+        return trimmed.ToLowerInvariant();
+    }
+
+    private static string CacheKey(int applicationId) => $"{CacheKeyPrefix}{applicationId}";
 }

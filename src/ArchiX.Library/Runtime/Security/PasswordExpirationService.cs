@@ -34,9 +34,12 @@ namespace ArchiX.Library.Runtime.Security
 
             var currentTime = now ?? DateTimeOffset.UtcNow;
             var expirationDate = user.PasswordChangedAtUtc.Value.AddDays(policy.MaxPasswordAgeDays.Value);
-            var daysRemaining = (expirationDate - currentTime).Days;
+            var totalDays = (expirationDate - currentTime).TotalDays;
 
-            return daysRemaining >= 0 ? daysRemaining : 0;
+            if (totalDays <= 0)
+                return 0;
+
+            return (int)Math.Ceiling(totalDays);
         }
 
         public DateTimeOffset? GetExpirationDate(User user, PasswordPolicyOptions policy)
