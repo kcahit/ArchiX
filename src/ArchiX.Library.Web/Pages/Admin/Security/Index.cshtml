@@ -1,0 +1,158 @@
+@page
+@model ArchiX.Library.Web.Pages.Admin.Security.IndexModel
+@{
+    ViewData["Title"] = "Security Dashboard";
+}
+
+<div class="container-fluid py-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="mb-0">Security Dashboard</h2>
+            <small class="text-muted">Application ID: @Model.ApplicationId</small>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-uppercase text-muted small">Blacklist Entries</div>
+                    <div class="display-6 fw-semibold">@Model.Dashboard.BlacklistWordCount</div>
+                    <div class="text-muted">Dinamik blacklist'teki toplam kelime</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-uppercase text-muted small">Expired Passwords</div>
+                    <div class="display-6 fw-semibold">@Model.Dashboard.ExpiredPasswordCount</div>
+                    <div class="text-muted">Þu an için süresi dolmuþ kullanýcý parolasý</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-uppercase text-muted small">Policy Window</div>
+                    <div class="display-6 fw-semibold">@Model.Dashboard.ActivePolicy.MinLength - @Model.Dashboard.ActivePolicy.MaxLength</div>
+                    <div class="text-muted">Ýzin verilen parola uzunluðu aralýðý</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">Son 30 Gün Hata Daðýlýmý</div>
+                <div class="card-body p-0">
+                    @if (Model.Dashboard.Last30DaysErrors.Count == 0)
+                    {
+                        <div class="p-4 text-muted">Henüz kayýtlý doðrulama hatasý yok.</div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped mb-0">
+                                <thead>
+                                    <tr>
+                                        <th style="width:70%">Hata Kodu</th>
+                                        <th class="text-end">Adet</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                @foreach (var pair in Model.Dashboard.Last30DaysErrors.OrderByDescending(x => x.Value))
+                                {
+                                    <tr>
+                                        <td>@pair.Key</td>
+                                        <td class="text-end">@pair.Value</td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">Son Deðiþiklikler</div>
+                <div class="card-body p-0">
+                    @if (!Model.Dashboard.RecentChanges.Any())
+                    {
+                        <div class="p-4 text-muted">Policy deðiþikliði kaydý bulunamadý.</div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Özet</th>
+                                        <th>Kullanýcý</th>
+                                        <th class="text-end">Tarih</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                @foreach (var audit in Model.Dashboard.RecentChanges)
+                                {
+                                    <tr>
+                                        <td>@audit.Summary</td>
+                                        <td>@audit.UserDisplayName</td>
+                                        <td class="text-end">@audit.ChangedAt.ToLocalTime().ToString("g")</td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header">Aktif Policy Özeti</div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="fw-semibold">Kategori Kurallarý</div>
+                    <ul class="list-unstyled mb-0">
+                        <li>Üst karakter: @(Model.Dashboard.ActivePolicy.RequireUpper ? "Evet" : "Hayýr")</li>
+                        <li>Alt karakter: @(Model.Dashboard.ActivePolicy.RequireLower ? "Evet" : "Hayýr")</li>
+                        <li>Rakam: @(Model.Dashboard.ActivePolicy.RequireDigit ? "Evet" : "Hayýr")</li>
+                        <li>Sembol: @(Model.Dashboard.ActivePolicy.RequireSymbol ? "Evet" : "Hayýr")</li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <div class="fw-semibold">Karmaþýklýk</div>
+                    <ul class="list-unstyled mb-0">
+                        <li>Min. farklý karakter: @Model.Dashboard.ActivePolicy.MinDistinctChars</li>
+                        <li>Maks. tekrar: @Model.Dashboard.ActivePolicy.MaxRepeatedSequence</li>
+                        <li>History sayýsý: @Model.Dashboard.ActivePolicy.HistoryCount</li>
+                        <li>Blacklist kelimeleri: @Model.Dashboard.ActivePolicy.BlockList.Length</li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <div class="fw-semibold">Güvenlik</div>
+                    <ul class="list-unstyled mb-0">
+                        <li>Lockout eþik: @Model.Dashboard.ActivePolicy.LockoutThreshold</li>
+                        <li>Lockout süresi: @Model.Dashboard.ActivePolicy.LockoutSeconds s</li>
+                        <li>Max yaþ (gün): @(Model.Dashboard.ActivePolicy.MaxPasswordAgeDays?.ToString() ?? "Sýnýrsýz")</li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <div class="fw-semibold">Hash Ayarlarý</div>
+                    <ul class="list-unstyled mb-0">
+                        <li>Algoritma: @Model.Dashboard.ActivePolicy.Hash.Algorithm</li>
+                        <li>Memory (KB): @Model.Dashboard.ActivePolicy.Hash.MemoryKb</li>
+                        <li>Iterations: @Model.Dashboard.ActivePolicy.Hash.Iterations</li>
+                        <li>Pepper: @(Model.Dashboard.ActivePolicy.Hash.PepperEnabled ? "Açýk" : "Kapalý")</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
