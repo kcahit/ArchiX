@@ -67,7 +67,7 @@ public sealed class PolicySettingsModel : PageModel
 
         try
         {
-            await _adminService.UpdateAsync(json, ApplicationId, ct).ConfigureAwait(false);
+            await _adminService.UpdateAsync(json, ApplicationId, null, ct).ConfigureAwait(false);
             StatusMessage = "Parola politikasý güncellendi.";
             return RedirectToPage(new { applicationId = ApplicationId });
         }

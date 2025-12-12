@@ -135,9 +135,23 @@ internal sealed class PasswordPolicyAdminService : IPasswordPolicyAdminService
 
                 db.Parameters.Add(parameter);
             }
-            else if (clientRowVersion is not null)
+            else
             {
-                db.Entry(parameter).Property(p => p.RowVersion).OriginalValue = clientRowVersion;
+                // *** MANUEL CONCURRENCY KONTROLÜ ***
+                if (clientRowVersion is not null)
+                {
+                    // DB'deki mevcut RowVersion ile istemcinin gördüğü RowVersion eşleşmiyorsa → çakışma
+                    if (parameter.RowVersion is not null &&
+                        !parameter.RowVersion.AsSpan().SequenceEqual(clientRowVersion))
+                    {
+                        throw new InvalidOperationException("Parola politikası başka bir kullanıcı tarafından güncellenmiştir. Lütfen sayfayı yenileyin.");
+                    }
+
+                    // Relational provider için yine de OriginalValue ayarla (SQL tarafında DbUpdateConcurrencyException için)
+                    db.Entry(parameter)
+                        .Property(p => p.RowVersion)
+                        .OriginalValue = clientRowVersion;
+                }
             }
 
             parameter.Value = minified;

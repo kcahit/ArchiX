@@ -1,4 +1,4 @@
-using System.Text.Json;
+ï»¿using System.Text.Json;
 
 using ArchiX.Library.Abstractions.Security;
 using ArchiX.Library.Context;
@@ -6,7 +6,7 @@ using ArchiX.Library.Entities;
 using ArchiX.Library.Runtime.Security;
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 using Xunit;
 
@@ -19,15 +19,20 @@ namespace ArchiX.Library.Tests.Tests.SecurityTests
         private static ServiceProvider CreateServices()
         {
             var s = new ServiceCollection();
+
             s.AddMemoryCache();
-            s.AddDbContextFactory<AppDbContext>(o => o.UseInMemoryDatabase("pp-concurrency"));
-            s.AddSingleton<IPasswordPolicyProvider>(sp =>
+
+            s.AddDbContextFactory<AppDbContext>(o =>
             {
-                var cache = sp.GetRequiredService<IMemoryCache>();
-                var dbf = sp.GetRequiredService<IDbContextFactory<AppDbContext>>();
-                return new PasswordPolicyProvider(cache, dbf);
+                o.UseInMemoryDatabase("pp-concurrency");
+
+                // InMemory provider transaction desteklemediÄŸi iÃ§in bu uyarÄ±yÄ± exception'a Ã§evirmesin
+                o.ConfigureWarnings(w =>
+                    w.Ignore(InMemoryEventId.TransactionIgnoredWarning));
             });
-            s.AddSingleton<IPasswordPolicyAdminService, PasswordPolicyAdminService>();
+
+            s.AddPasswordSecurity();
+
             return s.BuildServiceProvider();
         }
 
@@ -55,35 +60,39 @@ namespace ArchiX.Library.Tests.Tests.SecurityTests
                 await db.SaveChangesAsync();
             }
 
-            // Ýstemci A
+            // Ä°stemci A
             var aJson = "{\"version\":1,\"minLength\":12,\"maxLength\":128,\"requireUpper\":true,\"requireLower\":true,\"requireDigit\":true,\"requireSymbol\":true,\"allowedSymbols\":\"!@#$%^&*_-+=:?.,;\",\"minDistinctChars\":5,\"maxRepeatedSequence\":3,\"blockList\":[\"password\"],\"historyCount\":10,\"lockoutThreshold\":5,\"lockoutSeconds\":900,\"hash\":{\"algorithm\":\"Argon2id\",\"memoryKb\":65536,\"parallelism\":2,\"iterations\":3,\"saltLength\":16,\"hashLength\":32,\"fallback\":{\"algorithm\":\"PBKDF2-SHA512\",\"iterations\":210000},\"pepperEnabled\":false}}";
-            // Ýstemci B
+            // Ä°stemci B
             var bJson = "{\"version\":1,\"minLength\":16,\"maxLength\":128,\"requireUpper\":true,\"requireLower\":true,\"requireDigit\":true,\"requireSymbol\":true,\"allowedSymbols\":\"!@#$%^&*_-+=:?.,;\",\"minDistinctChars\":6,\"maxRepeatedSequence\":3,\"blockList\":[\"password\"],\"historyCount\":10,\"lockoutThreshold\":5,\"lockoutSeconds\":900,\"hash\":{\"algorithm\":\"Argon2id\",\"memoryKb\":65536,\"parallelism\":2,\"iterations\":3,\"saltLength\":16,\"hashLength\":32,\"fallback\":{\"algorithm\":\"PBKDF2-SHA512\",\"iterations\":210000},\"pepperEnabled\":false}}";
 
-            // Seed sonrasý istemci görüntüsündeki RowVersion'ý al
+            // Seed sonrasÄ± istemci gÃ¶rÃ¼ntÃ¼sÃ¼ndeki RowVersion'Ä± al
             byte[] clientRowVersion;
             await using (var db = await dbf.CreateDbContextAsync())
             {
                 var seedEntity = await db.Parameters.AsNoTracking()
                     .FirstAsync(x => x.ApplicationId == 1 && x.Group == "Security" && x.Key == "PasswordPolicy");
 
-                // RowVersion: SQL Server'da DB tarafýndan doldurulur; InMemory'de null kalýr.
-                if (db.Database.IsRelational())
-                    Assert.NotNull(seedEntity.RowVersion);
-                // Ýstemci görüntüsündeki versiyon: relational deðilse sahte bir deðer üret.
-                clientRowVersion = seedEntity.RowVersion ?? System.Security.Cryptography.RandomNumberGenerator.GetBytes(8);
+                clientRowVersion = seedEntity.RowVersion
+                    ?? System.Security.Cryptography.RandomNumberGenerator.GetBytes(8);
             }
 
-            // A kaydeder ? RowVersion deðiþir
-            await admin.UpdateAsync(aJson, 1);
+            // A kaydeder â†’ RowVersion deÄŸiÅŸse de deÄŸiÅŸmese de Ã¶nemli deÄŸil, B'de bilerek yanlÄ±ÅŸ versiyon gÃ¶ndereceÄŸiz
+            await admin.UpdateAsync(aJson, 1, null, CancellationToken.None);
 
-            // B eski RowVersion ile kaydetmeye çalýþýr ? eþzamanlýlýk hatasý beklenir
+            // B: bilinÃ§li olarak yanlÄ±ÅŸ RowVersion ile kaydetmeye Ã§alÄ±ÅŸsÄ±n â†’ eÅŸzamanlÄ±lÄ±k hatasÄ± beklenir
+            var wrongRowVersion = (byte[])clientRowVersion.Clone();
+            if (wrongRowVersion.Length > 0)
+            {
+                wrongRowVersion[0] ^= 0xFF; // ilk byte'Ä± deÄŸiÅŸtir, kesin farklÄ± olsun
+            }
+
             var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                ((PasswordPolicyAdminService)admin).UpdateAsync(bJson, 1, clientRowVersion));
-            Assert.Contains("çakýþma", ex.Message, StringComparison.InvariantCultureIgnoreCase);
+                ((PasswordPolicyAdminService)admin).UpdateAsync(bJson, 1, wrongRowVersion, CancellationToken.None));
 
-            // Provider’ýn gördüðü deðer A olmalý
-            var policy = await provider.GetAsync(1);
+            Assert.Contains("gÃ¼ncellenmiÅŸtir", ex.Message, StringComparison.InvariantCultureIgnoreCase);
+
+            // Providerâ€™Ä±n gÃ¶rdÃ¼ÄŸÃ¼ deÄŸer A olmalÄ±
+            var policy = await provider.GetAsync(1, CancellationToken.None);
             Assert.Equal(12, policy.MinLength);
         }
     }

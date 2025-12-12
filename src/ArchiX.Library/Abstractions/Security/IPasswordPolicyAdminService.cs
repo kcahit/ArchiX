@@ -3,7 +3,12 @@ namespace ArchiX.Library.Abstractions.Security;
 public interface IPasswordPolicyAdminService
 {
     Task<string> GetRawJsonAsync(int applicationId = 1, CancellationToken ct = default);
-    Task UpdateAsync(string json, int applicationId = 1, CancellationToken ct = default);
+    Task UpdateAsync(
+    string json,
+    int applicationId = 1,
+    byte[]? clientRowVersion = null,
+    CancellationToken ct = default);
+
     Task<SecurityDashboardData> GetDashboardDataAsync(int applicationId, CancellationToken ct = default);
     Task<IReadOnlyList<PasswordBlacklistWordDto>> GetBlacklistAsync(int applicationId, CancellationToken ct = default);
     Task<bool> TryAddBlacklistWordAsync(int applicationId, string word, int createdByUserId, CancellationToken ct = default);

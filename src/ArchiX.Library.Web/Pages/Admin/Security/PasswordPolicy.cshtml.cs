@@ -62,7 +62,7 @@ namespace ArchiX.Library.Web.Pages.Admin.Security
 
             try
             {
-                await _admin.UpdateAsync(Json, ApplicationId, ct).ConfigureAwait(false);
+                await _admin.UpdateAsync(Json, ApplicationId, null, ct).ConfigureAwait(false);
 
                 // Güncelleme sonrasý cache invalidate (provider varsa)
                 if (HttpContext.RequestServices.GetService(typeof(IPasswordPolicyProvider)) is IPasswordPolicyProvider provider)
