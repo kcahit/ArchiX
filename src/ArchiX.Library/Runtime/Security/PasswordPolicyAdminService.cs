@@ -1,4 +1,4 @@
-ï»¿using System.Text.Json;
+using System.Text.Json;
 
 using ArchiX.Library.Abstractions.Security;
 using ArchiX.Library.Context;
@@ -6,6 +6,7 @@ using ArchiX.Library.Entities;
 using ArchiX.Library.Formatting;
 
 using Microsoft.EntityFrameworkCore;
+
 namespace ArchiX.Library.Runtime.Security
 {
     internal sealed class PasswordPolicyAdminService : IPasswordPolicyAdminService
@@ -37,18 +38,18 @@ namespace ArchiX.Library.Runtime.Security
             return JsonSerializer.Serialize(options, _jsonOptions);
         }
 
-        // Client RowVersion saÄŸlanmÄ±ÅŸsa EF Core eÅŸzamanlÄ±lÄ±k Ã§atÄ±ÅŸmasÄ±nÄ± tespit edebilir.
+        // Client RowVersion saðlanmýþsa EF Core eþzamanlýlýk çatýþmasýný tespit edebilir.
         public async Task UpdateAsync(string json, int applicationId = 1, byte[]? clientRowVersion = null, CancellationToken ct = default)
         {
             ArgumentNullException.ThrowIfNull(json);
 
             if (!JsonTextFormatter.TryValidate(json, out var err))
-                throw new InvalidOperationException($"PasswordPolicy JSON geÃ§ersiz: {err}");
+                throw new InvalidOperationException($"PasswordPolicy JSON geçersiz: {err}");
 
             PasswordPolicySchemaValidator.ValidateOrThrow(json);
 
             _ = JsonSerializer.Deserialize<PasswordPolicyOptions>(json, _jsonOptions)
-                ?? throw new InvalidOperationException("PasswordPolicy tip eÅŸlemesi baÅŸarÄ±sÄ±z.");
+                ?? throw new InvalidOperationException("PasswordPolicy tip eþlemesi baþarýsýz.");
 
             json = JsonTextFormatter.Minify(json);
 
@@ -72,7 +73,7 @@ namespace ArchiX.Library.Runtime.Security
                     Key = Key,
                     ParameterDataTypeId = JsonParameterTypeId,
                     Value = json,
-                    Description = "Parola politikasÄ± (yÃ¶netim)",
+                    Description = "Parola politikasý (yönetim)",
                     StatusId = 3,
                     CreatedBy = 0
                 };
@@ -115,7 +116,7 @@ namespace ArchiX.Library.Runtime.Security
             catch (DbUpdateConcurrencyException)
             {
                 if (tx != null) await tx.RollbackAsync(ct).ConfigureAwait(false);
-                throw new InvalidOperationException("Ã‡akÄ±ÅŸma: kayÄ±t baÅŸka bir iÅŸlem tarafÄ±ndan deÄŸiÅŸtirildi. SayfayÄ± yenileyip tekrar deneyin.");
+                throw new InvalidOperationException("Çakýþma: kayýt baþka bir iþlem tarafýndan deðiþtirildi. Sayfayý yenileyip tekrar deneyin.");
             }
 
             _provider.Invalidate(applicationId);
@@ -126,5 +127,29 @@ namespace ArchiX.Library.Runtime.Security
             // Delegate to main overload without client-supplied RowVersion
             return UpdateAsync(json, applicationId, null, ct);
         }
+
+        public Task<SecurityDashboardData> GetDashboardDataAsync(int applicationId, CancellationToken ct = default)
+            => throw new NotImplementedException();
+
+        public Task<IReadOnlyList<PasswordBlacklistWordDto>> GetBlacklistAsync(int applicationId, CancellationToken ct = default)
+            => throw new NotImplementedException();
+
+        public Task<bool> TryAddBlacklistWordAsync(int applicationId, string word, int createdByUserId, CancellationToken ct = default)
+            => throw new NotImplementedException();
+
+        public Task<bool> TryRemoveBlacklistWordAsync(int wordId, int removedByUserId, CancellationToken ct = default)
+            => throw new NotImplementedException();
+
+        public Task<IReadOnlyList<PasswordPolicyAuditDto>> GetAuditTrailAsync(int applicationId, DateTimeOffset? from, DateTimeOffset? to, CancellationToken ct = default)
+            => throw new NotImplementedException();
+
+        public Task<AuditDiffDto?> GetAuditDiffAsync(int auditId, CancellationToken ct = default)
+            => throw new NotImplementedException();
+
+        public Task<IReadOnlyList<UserPasswordHistoryEntryDto>> GetUserPasswordHistoryAsync(int userId, int take, CancellationToken ct = default)
+            => throw new NotImplementedException();
+
+        public Task<PolicyTestResultDto> ValidatePasswordAsync(string password, int userId, int applicationId, CancellationToken ct = default)
+            => throw new NotImplementedException();
     }
 }
