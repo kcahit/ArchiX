@@ -44,11 +44,12 @@
 
                     @if (Model.Form.Result is not null)
                     {
+                        var strengthWidth = $"{Model.Form.Result.StrengthScore}%";
                         <hr />
                         <div class="mb-3">
                             <div class="text-muted small text-uppercase">Strength Score</div>
                             <div class="progress" style="height: 12px;">
-                                <div class="progress-bar @(Model.Form.Result.StrengthScore >= 70 ? "bg-success" : "bg-warning")" role="progressbar" style="width: @Model.Form.Result.StrengthScore%" aria-valuenow="@Model.Form.Result.StrengthScore" aria-valuemin="0" aria-valuemax="100"></div>
+                                <div class="progress-bar @(Model.Form.Result.StrengthScore >= 70 ? "bg-success" : "bg-warning")" role="progressbar" style="width:@strengthWidth" aria-valuenow="@Model.Form.Result.StrengthScore" aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
                             <small class="text-muted">@Model.Form.Result.StrengthScore / 100</small>
                         </div>

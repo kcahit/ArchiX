@@ -1,6 +1,5 @@
 // src/ArchiX.Library.Web/ViewModels/Security/PolicySettingsViewModel.cs
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 
 using ArchiX.Library.Abstractions.Security;
 
