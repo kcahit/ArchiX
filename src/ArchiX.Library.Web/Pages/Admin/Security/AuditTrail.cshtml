@@ -1,0 +1,111 @@
+@page
+@model ArchiX.Library.Web.Pages.Admin.Security.AuditTrailModel
+@{
+    ViewData["Title"] = "Policy Audit Trail";
+}
+
+<div class="container-fluid py-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+            <h2 class="mb-0">Policy Audit Trail</h2>
+            <small class="text-muted">Application ID: @Model.ApplicationId</small>
+        </div>
+        <div class="btn-group" role="group">
+            <a asp-page="/Admin/Security/Index" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary">Dashboard</a>
+            <a asp-page="/Admin/Security/PolicySettings" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary">Policy Settings</a>
+            <a asp-page="/Admin/Security/Blacklist" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary">Blacklist</a>
+            <a asp-page="/Admin/Security/PolicyTest" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary">Policy Test</a>
+            <a asp-page="/Admin/Security/PasswordPolicy" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary">JSON Editörü</a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">Filtre</div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label asp-for="From" class="form-label">Baþlangýç Tarihi</label>
+                    <input asp-for="From" class="form-control" type="date" />
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="To" class="form-label">Bitiþ Tarihi</label>
+                    <input asp-for="To" class="form-control" type="date" />
+                </div>
+                <div class="col-md-3 align-self-end">
+                    <input type="hidden" asp-for="ApplicationId" />
+                    <button type="submit" class="btn btn-primary">Filtrele</button>
+                    <a asp-page="/Admin/Security/AuditTrail" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary ms-2">Temizle</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-header">Audit Kayýtlarý</div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Tarih</th>
+                                <th>Kullanýcý</th>
+                                <th>Eylem</th>
+                                <th style="width: 10%" class="text-end">Diff</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @if (Model.AuditEntries.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">Kayýt bulunamadý.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var entry in Model.AuditEntries)
+                            {
+                                <tr class="@(Model.SelectedAuditId == entry.AuditId ? "table-active" : string.Empty)">
+                                    <td>@entry.ChangedAt.ToLocalTime().ToString("g")</td>
+                                    <td>@entry.UserDisplayName</td>
+                                    <td>@entry.ActionSummary</td>
+                                    <td class="text-end">
+                                        <a asp-page="/Admin/Security/AuditTrail"
+                                           asp-route-applicationId="@Model.ApplicationId"
+                                           asp-route-from="@Model.From?.ToString("yyyy-MM-dd")"
+                                           asp-route-to="@Model.To?.ToString("yyyy-MM-dd")"
+                                           asp-route-selectedAuditId="@entry.AuditId"
+                                           class="btn btn-sm btn-outline-primary">Diff</a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">Deðiþiklik Detayý</div>
+                <div class="card-body">
+                    @if (Model.SelectedDiff is null)
+                    {
+                        <div class="text-muted">Soldan bir kayýt seçerek diff görüntüleyin.</div>
+                    }
+                    else
+                    {
+                        <div class="mb-3">
+                            <div class="fw-semibold">Old JSON</div>
+                            <pre class="bg-light border rounded p-2 overflow-auto" style="max-height: 280px">@Model.SelectedDiff.OldJson</pre>
+                        </div>
+                        <div>
+                            <div class="fw-semibold">New JSON</div>
+                            <pre class="bg-light border rounded p-2 overflow-auto" style="max-height: 280px">@Model.SelectedDiff.NewJson</pre>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
