@@ -22,6 +22,5 @@
 
   <ItemGroup>
     <Folder Include="Abstractions\Security\" />
-    <Folder Include="ViewModels\Security\" />
   </ItemGroup>
 </Project>

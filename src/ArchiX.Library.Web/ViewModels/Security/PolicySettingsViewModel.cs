@@ -1,11 +1,15 @@
 // src/ArchiX.Library.Web/ViewModels/Security/PolicySettingsViewModel.cs
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+
 using ArchiX.Library.Abstractions.Security;
 
 namespace ArchiX.Library.Web.ViewModels.Security;
 
 public sealed class PolicySettingsViewModel
 {
+    public int Version { get; set; } = 1;
+
     [Range(8, 256)]
     public int MinLength { get; set; }
 
@@ -43,11 +47,15 @@ public sealed class PolicySettingsViewModel
 
     public string[] BlockList { get; set; } = Array.Empty<string>();
 
+    [Display(Name = "Blacklist (her satýra bir kelime)")]
+    public string BlockListRaw { get; set; } = string.Empty;
+
     public PasswordHashSettingsViewModel Hash { get; set; } = new();
 
     public static PolicySettingsViewModel FromOptions(PasswordPolicyOptions options) =>
         new()
         {
+            Version = options.Version,
             MinLength = options.MinLength,
             MaxLength = options.MaxLength,
             RequireUpper = options.RequireUpper,
@@ -62,8 +70,48 @@ public sealed class PolicySettingsViewModel
             LockoutThreshold = options.LockoutThreshold,
             LockoutSeconds = options.LockoutSeconds,
             BlockList = options.BlockList,
+            BlockListRaw = string.Join(Environment.NewLine, options.BlockList ?? Array.Empty<string>()),
             Hash = PasswordHashSettingsViewModel.FromOptions(options.Hash)
         };
+
+    public PasswordPolicyOptions ToOptions()
+    {
+        var blockList = ParseBlockList(BlockListRaw);
+        BlockList = blockList;
+
+        return new PasswordPolicyOptions
+        {
+            Version = Version,
+            MinLength = MinLength,
+            MaxLength = MaxLength,
+            RequireUpper = RequireUpper,
+            RequireLower = RequireLower,
+            RequireDigit = RequireDigit,
+            RequireSymbol = RequireSymbol,
+            AllowedSymbols = AllowedSymbols ?? string.Empty,
+            MinDistinctChars = MinDistinctChars,
+            MaxRepeatedSequence = MaxRepeatedSequence,
+            BlockList = blockList,
+            HistoryCount = HistoryCount,
+            LockoutThreshold = LockoutThreshold,
+            LockoutSeconds = LockoutSeconds,
+            MaxPasswordAgeDays = MaxPasswordAgeDays,
+            Hash = Hash.ToOptions()
+        };
+    }
+
+    private static string[] ParseBlockList(string raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+            return Array.Empty<string>();
+
+        return raw
+            .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(word => word.Trim())
+            .Where(word => !string.IsNullOrWhiteSpace(word))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+    }
 }
 
 public sealed class PasswordHashSettingsViewModel
@@ -102,6 +150,18 @@ public sealed class PasswordHashSettingsViewModel
             PepperEnabled = hash.PepperEnabled,
             Fallback = PasswordHashFallbackSettingsViewModel.FromOptions(hash.Fallback)
         };
+
+    public PasswordHashOptions ToOptions() => new()
+    {
+        Algorithm = Algorithm,
+        MemoryKb = MemoryKb,
+        Parallelism = Parallelism,
+        Iterations = Iterations,
+        SaltLength = SaltLength,
+        HashLength = HashLength,
+        PepperEnabled = PepperEnabled,
+        Fallback = Fallback.ToOptions()
+    };
 }
 
 public sealed class PasswordHashFallbackSettingsViewModel
@@ -118,4 +178,10 @@ public sealed class PasswordHashFallbackSettingsViewModel
             Algorithm = fallback.Algorithm,
             Iterations = fallback.Iterations
         };
+
+    public PasswordHashFallbackOptions ToOptions() => new()
+    {
+        Algorithm = Algorithm,
+        Iterations = Iterations
+    };
 }

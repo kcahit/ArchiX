@@ -1,0 +1,183 @@
+@page
+@model ArchiX.Library.Web.Pages.Admin.Security.PolicySettingsModel
+@{
+    ViewData["Title"] = "Policy Settings";
+}
+
+<div class="container-fluid py-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+            <h2 class="mb-0">Policy Settings</h2>
+            <small class="text-muted">Application ID: @Model.ApplicationId</small>
+        </div>
+        <div class="btn-group" role="group">
+            <a asp-page="/Admin/Security/Index" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary">Dashboard</a>
+            <a asp-page="/Admin/Security/Blacklist" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary">Blacklist</a>
+            <a asp-page="/Admin/Security/PolicyTest" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary">Policy Test</a>
+            <a asp-page="/Admin/Security/PasswordPolicy" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary">JSON Editörü</a>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+    {
+        <div class="alert alert-success" role="alert">@Model.StatusMessage</div>
+    }
+
+    <form method="post" class="needs-validation" novalidate>
+        <input type="hidden" asp-for="ApplicationId" />
+        <input type="hidden" asp-for="Form.Version" />
+
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+        <div class="row g-3">
+            <div class="col-xl-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header">Uzunluk &amp; Karmaþýklýk</div>
+                    <div class="card-body row g-3">
+                        <div class="col-sm-6">
+                            <label asp-for="Form.MinLength" class="form-label"></label>
+                            <input asp-for="Form.MinLength" class="form-control" type="number" />
+                            <span asp-validation-for="Form.MinLength" class="text-danger"></span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label asp-for="Form.MaxLength" class="form-label"></label>
+                            <input asp-for="Form.MaxLength" class="form-control" type="number" />
+                            <span asp-validation-for="Form.MaxLength" class="text-danger"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Form.AllowedSymbols" class="form-label"></label>
+                            <input asp-for="Form.AllowedSymbols" class="form-control" />
+                            <span asp-validation-for="Form.AllowedSymbols" class="text-danger"></span>
+                            <small class="text-muted">Sadece RequireSymbol iþaretliyse kullanýlýr.</small>
+                        </div>
+                        <div class="col-sm-6">
+                            <label asp-for="Form.MinDistinctChars" class="form-label"></label>
+                            <input asp-for="Form.MinDistinctChars" class="form-control" type="number" />
+                            <span asp-validation-for="Form.MinDistinctChars" class="text-danger"></span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label asp-for="Form.MaxRepeatedSequence" class="form-label"></label>
+                            <input asp-for="Form.MaxRepeatedSequence" class="form-control" type="number" />
+                            <span asp-validation-for="Form.MaxRepeatedSequence" class="text-danger"></span>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" asp-for="Form.RequireUpper" />
+                                <label class="form-check-label" asp-for="Form.RequireUpper"></label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" asp-for="Form.RequireLower" />
+                                <label class="form-check-label" asp-for="Form.RequireLower"></label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" asp-for="Form.RequireDigit" />
+                                <label class="form-check-label" asp-for="Form.RequireDigit"></label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" asp-for="Form.RequireSymbol" />
+                                <label class="form-check-label" asp-for="Form.RequireSymbol"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header">Güvenlik Parametreleri</div>
+                    <div class="card-body row g-3">
+                        <div class="col-sm-6">
+                            <label asp-for="Form.HistoryCount" class="form-label"></label>
+                            <input asp-for="Form.HistoryCount" class="form-control" type="number" />
+                            <span asp-validation-for="Form.HistoryCount" class="text-danger"></span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label asp-for="Form.MaxPasswordAgeDays" class="form-label"></label>
+                            <input asp-for="Form.MaxPasswordAgeDays" class="form-control" type="number" />
+                            <span asp-validation-for="Form.MaxPasswordAgeDays" class="text-danger"></span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label asp-for="Form.LockoutThreshold" class="form-label"></label>
+                            <input asp-for="Form.LockoutThreshold" class="form-control" type="number" />
+                            <span asp-validation-for="Form.LockoutThreshold" class="text-danger"></span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label asp-for="Form.LockoutSeconds" class="form-label"></label>
+                            <input asp-for="Form.LockoutSeconds" class="form-control" type="number" />
+                            <span asp-validation-for="Form.LockoutSeconds" class="text-danger"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Form.BlockListRaw" class="form-label"></label>
+                            <textarea asp-for="Form.BlockListRaw" rows="6" class="form-control"></textarea>
+                            <span asp-validation-for="Form.BlockListRaw" class="text-danger"></span>
+                            <small class="text-muted">Her satýra bir kelime ekleyin. Dinamik blacklist ile birlikte çalýþýr.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-2">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header">Hash Ayarlarý</div>
+                    <div class="card-body row g-3">
+                        <div class="col-md-4">
+                            <label asp-for="Form.Hash.MemoryKb" class="form-label"></label>
+                            <input asp-for="Form.Hash.MemoryKb" class="form-control" type="number" />
+                            <span asp-validation-for="Form.Hash.MemoryKb" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Form.Hash.Iterations" class="form-label"></label>
+                            <input asp-for="Form.Hash.Iterations" class="form-control" type="number" />
+                            <span asp-validation-for="Form.Hash.Iterations" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Form.Hash.Parallelism" class="form-label"></label>
+                            <input asp-for="Form.Hash.Parallelism" class="form-control" type="number" />
+                            <span asp-validation-for="Form.Hash.Parallelism" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Form.Hash.SaltLength" class="form-label"></label>
+                            <input asp-for="Form.Hash.SaltLength" class="form-control" type="number" />
+                            <span asp-validation-for="Form.Hash.SaltLength" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Form.Hash.HashLength" class="form-label"></label>
+                            <input asp-for="Form.Hash.HashLength" class="form-control" type="number" />
+                            <span asp-validation-for="Form.Hash.HashLength" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-center">
+                            <div class="form-check mt-3">
+                                <input class="form-check-input" asp-for="Form.Hash.PepperEnabled" />
+                                <label class="form-check-label" asp-for="Form.Hash.PepperEnabled"></label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <h6>Fallback</h6>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Form.Hash.Fallback.Algorithm" class="form-label"></label>
+                            <input asp-for="Form.Hash.Fallback.Algorithm" class="form-control" />
+                            <span asp-validation-for="Form.Hash.Fallback.Algorithm" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Form.Hash.Fallback.Iterations" class="form-label"></label>
+                            <input asp-for="Form.Hash.Fallback.Iterations" class="form-control" type="number" />
+                            <span asp-validation-for="Form.Hash.Fallback.Iterations" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 d-flex justify-content-end gap-2">
+            <a asp-page="/Admin/Security/PasswordPolicy" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary">JSON Görüntüle</a>
+            <button type="submit" class="btn btn-primary">Kaydet</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

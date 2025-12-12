@@ -11,6 +11,7 @@
             <small class="text-muted">Application ID: @Model.ApplicationId</small>
         </div>
         <div class="btn-group" role="group">
+            <a asp-page="/Admin/Security/PolicySettings" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary">Policy Settings</a>
             <a asp-page="/Admin/Security/Blacklist" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary">Blacklist</a>
             <a asp-page="/Admin/Security/PolicyTest" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary">Policy Test</a>
             <a asp-page="/Admin/Security/PasswordPolicy" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary">JSON Editörü</a>
