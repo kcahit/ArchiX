@@ -2,6 +2,7 @@
 @model ArchiX.Library.Web.Pages.Admin.Security.IndexModel
 @{
     ViewData["Title"] = "Security Dashboard";
+    Layout = "_AdminLayout";
 }
 
 <div class="container-fluid py-3">
@@ -22,29 +23,50 @@
 
     <div class="row g-3 mb-4">
         <div class="col-md-4">
-            <div class="card shadow-sm h-100">
+            <div class="card dashboard-card h-100">
                 <div class="card-body">
-                    <div class="text-uppercase text-muted small">Blacklist Entries</div>
-                    <div class="display-6 fw-semibold">@Model.Dashboard.BlacklistWordCount</div>
-                    <div class="text-muted">Dinamik blacklist'teki toplam kelime</div>
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon text-primary me-3">
+                            <i class="fas fa-ban"></i>
+                        </div>
+                        <div>
+                            <div class="text-uppercase text-muted small">Blacklist Entries</div>
+                            <div class="display-6 fw-semibold">@Model.Dashboard.BlacklistWordCount</div>
+                            <div class="text-muted small">Dinamik blacklist'teki toplam kelime</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card shadow-sm h-100">
+            <div class="card dashboard-card h-100">
                 <div class="card-body">
-                    <div class="text-uppercase text-muted small">Expired Passwords</div>
-                    <div class="display-6 fw-semibold">@Model.Dashboard.ExpiredPasswordCount</div>
-                    <div class="text-muted">Þu an için süresi dolmuþ kullanýcý parolasý</div>
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon text-danger me-3">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div>
+                            <div class="text-uppercase text-muted small">Expired Passwords</div>
+                            <div class="display-6 fw-semibold">@Model.Dashboard.ExpiredPasswordCount</div>
+                            <div class="text-muted small">Þu an için süresi dolmuþ kullanýcý parolasý</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card shadow-sm h-100">
+            <div class="card dashboard-card h-100">
                 <div class="card-body">
-                    <div class="text-uppercase text-muted small">Policy Window</div>
-                    <div class="display-6 fw-semibold">@Model.Dashboard.ActivePolicy.MinLength - @Model.Dashboard.ActivePolicy.MaxLength</div>
-                    <div class="text-muted">Ýzin verilen parola uzunluðu aralýðý</div>
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon text-success me-3">
+                            <i class="fas fa-ruler"></i>
+                        </div>
+                        <div>
+                            <div class="text-uppercase text-muted small">Policy Window</div>
+                            <div class="display-6 fw-semibold">@Model.Dashboard.ActivePolicy.MinLength - @Model.Dashboard.ActivePolicy.MaxLength</div>
+                            <div class="text-muted small">Ýzin verilen parola uzunluðu aralýðý</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -53,30 +75,35 @@
     <div class="row g-3 mb-4">
         <div class="col-lg-6">
             <div class="card shadow-sm h-100">
-                <div class="card-header">Son 30 Gün Hata Daðýlýmý</div>
+                <div class="card-header bg-light">
+                    <i class="fas fa-chart-bar me-2"></i>Son 30 Gün Hata Daðýlýmý
+                </div>
                 <div class="card-body p-0">
                     @if (Model.Dashboard.Last30DaysErrors.Count == 0)
                     {
-                        <div class="p-4 text-muted">Henüz kayýtlý doðrulama hatasý yok.</div>
+                        <div class="p-4 text-muted text-center">
+                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                            <p>Henüz kayýtlý doðrulama hatasý yok.</p>
+                        </div>
                     }
                     else
                     {
                         <div class="table-responsive">
-                            <table class="table table-sm table-striped mb-0">
-                                <thead>
+                            <table class="table table-sm table-hover mb-0">
+                                <thead class="table-light">
                                     <tr>
                                         <th style="width:70%">Hata Kodu</th>
                                         <th class="text-end">Adet</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                @foreach (var pair in Model.Dashboard.Last30DaysErrors.OrderByDescending(x => x.Value))
-                                {
-                                    <tr>
-                                        <td>@pair.Key</td>
-                                        <td class="text-end">@pair.Value</td>
-                                    </tr>
-                                }
+                                    @foreach (var pair in Model.Dashboard.Last30DaysErrors.OrderByDescending(x => x.Value))
+                                    {
+                                        <tr>
+                                            <td><code>@pair.Key</code></td>
+                                            <td class="text-end"><span class="badge bg-danger">@pair.Value</span></td>
+                                        </tr>
+                                    }
                                 </tbody>
                             </table>
                         </div>
@@ -86,17 +113,22 @@
         </div>
         <div class="col-lg-6">
             <div class="card shadow-sm h-100">
-                <div class="card-header">Son Deðiþiklikler</div>
+                <div class="card-header bg-light">
+                    <i class="fas fa-history me-2"></i>Son Deðiþiklikler
+                </div>
                 <div class="card-body p-0">
                     @if (!Model.Dashboard.RecentChanges.Any())
                     {
-                        <div class="p-4 text-muted">Policy deðiþikliði kaydý bulunamadý.</div>
+                        <div class="p-4 text-muted text-center">
+                            <i class="fas fa-info-circle fa-3x text-info mb-3"></i>
+                            <p>Policy deðiþikliði kaydý bulunamadý.</p>
+                        </div>
                     }
                     else
                     {
                         <div class="table-responsive">
                             <table class="table table-sm table-hover mb-0">
-                                <thead>
+                                <thead class="table-light">
                                     <tr>
                                         <th>Özet</th>
                                         <th>Kullanýcý</th>
@@ -104,14 +136,14 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                @foreach (var audit in Model.Dashboard.RecentChanges)
-                                {
-                                    <tr>
-                                        <td>@audit.Summary</td>
-                                        <td>@audit.UserDisplayName</td>
-                                        <td class="text-end">@audit.ChangedAt.ToLocalTime().ToString("g")</td>
-                                    </tr>
-                                }
+                                    @foreach (var audit in Model.Dashboard.RecentChanges)
+                                    {
+                                        <tr>
+                                            <td>@audit.Summary</td>
+                                            <td><i class="fas fa-user me-1"></i>@audit.UserDisplayName</td>
+                                            <td class="text-end">@audit.ChangedAt.ToLocalTime().ToString("g")</td>
+                                        </tr>
+                                    }
                                 </tbody>
                             </table>
                         </div>
@@ -122,42 +154,44 @@
     </div>
 
     <div class="card shadow-sm">
-        <div class="card-header">Aktif Policy Özeti</div>
+        <div class="card-header bg-light">
+            <i class="fas fa-cog me-2"></i>Aktif Policy Özeti
+        </div>
         <div class="card-body">
             <div class="row g-3">
                 <div class="col-md-3">
-                    <div class="fw-semibold">Kategori Kurallarý</div>
+                    <div class="fw-semibold mb-2"><i class="fas fa-font me-1"></i> Kategori Kurallarý</div>
                     <ul class="list-unstyled mb-0">
-                        <li>Üst karakter: @(Model.Dashboard.ActivePolicy.RequireUpper ? "Evet" : "Hayýr")</li>
-                        <li>Alt karakter: @(Model.Dashboard.ActivePolicy.RequireLower ? "Evet" : "Hayýr")</li>
-                        <li>Rakam: @(Model.Dashboard.ActivePolicy.RequireDigit ? "Evet" : "Hayýr")</li>
-                        <li>Sembol: @(Model.Dashboard.ActivePolicy.RequireSymbol ? "Evet" : "Hayýr")</li>
+                        <li><i class="fas fa-check-circle text-@(Model.Dashboard.ActivePolicy.RequireUpper ? "success" : "secondary") me-1"></i> Üst karakter</li>
+                        <li><i class="fas fa-check-circle text-@(Model.Dashboard.ActivePolicy.RequireLower ? "success" : "secondary") me-1"></i> Alt karakter</li>
+                        <li><i class="fas fa-check-circle text-@(Model.Dashboard.ActivePolicy.RequireDigit ? "success" : "secondary") me-1"></i> Rakam</li>
+                        <li><i class="fas fa-check-circle text-@(Model.Dashboard.ActivePolicy.RequireSymbol ? "success" : "secondary") me-1"></i> Sembol</li>
                     </ul>
                 </div>
                 <div class="col-md-3">
-                    <div class="fw-semibold">Karmaþýklýk</div>
+                    <div class="fw-semibold mb-2"><i class="fas fa-sliders-h me-1"></i> Karmaþýklýk</div>
                     <ul class="list-unstyled mb-0">
-                        <li>Min. farklý karakter: @Model.Dashboard.ActivePolicy.MinDistinctChars</li>
-                        <li>Maks. tekrar: @Model.Dashboard.ActivePolicy.MaxRepeatedSequence</li>
-                        <li>History sayýsý: @Model.Dashboard.ActivePolicy.HistoryCount</li>
-                        <li>Blacklist kelimeleri: @Model.Dashboard.ActivePolicy.BlockList.Length</li>
+                        <li>Min. farklý karakter: <strong>@Model.Dashboard.ActivePolicy.MinDistinctChars</strong></li>
+                        <li>Maks. tekrar: <strong>@Model.Dashboard.ActivePolicy.MaxRepeatedSequence</strong></li>
+                        <li>History sayýsý: <strong>@Model.Dashboard.ActivePolicy.HistoryCount</strong></li>
+                        <li>Blacklist kelimeleri: <strong>@Model.Dashboard.ActivePolicy.BlockList.Length</strong></li>
                     </ul>
                 </div>
                 <div class="col-md-3">
-                    <div class="fw-semibold">Güvenlik</div>
+                    <div class="fw-semibold mb-2"><i class="fas fa-shield-alt me-1"></i> Güvenlik</div>
                     <ul class="list-unstyled mb-0">
-                        <li>Lockout eþik: @Model.Dashboard.ActivePolicy.LockoutThreshold</li>
-                        <li>Lockout süresi: @Model.Dashboard.ActivePolicy.LockoutSeconds s</li>
-                        <li>Max yaþ (gün): @(Model.Dashboard.ActivePolicy.MaxPasswordAgeDays?.ToString() ?? "Sýnýrsýz")</li>
+                        <li>Lockout eþik: <strong>@Model.Dashboard.ActivePolicy.LockoutThreshold</strong></li>
+                        <li>Lockout süresi: <strong>@Model.Dashboard.ActivePolicy.LockoutSeconds s</strong></li>
+                        <li>Max yaþ (gün): <strong>@(Model.Dashboard.ActivePolicy.MaxPasswordAgeDays?.ToString() ?? "Sýnýrsýz")</strong></li>
                     </ul>
                 </div>
                 <div class="col-md-3">
-                    <div class="fw-semibold">Hash Ayarlarý</div>
+                    <div class="fw-semibold mb-2"><i class="fas fa-lock me-1"></i> Hash Ayarlarý</div>
                     <ul class="list-unstyled mb-0">
-                        <li>Algoritma: @Model.Dashboard.ActivePolicy.Hash.Algorithm</li>
-                        <li>Memory (KB): @Model.Dashboard.ActivePolicy.Hash.MemoryKb</li>
-                        <li>Iterations: @Model.Dashboard.ActivePolicy.Hash.Iterations</li>
-                        <li>Pepper: @(Model.Dashboard.ActivePolicy.Hash.PepperEnabled ? "Açýk" : "Kapalý")</li>
+                        <li>Algoritma: <code>@Model.Dashboard.ActivePolicy.Hash.Algorithm</code></li>
+                        <li>Memory (KB): <strong>@Model.Dashboard.ActivePolicy.Hash.MemoryKb</strong></li>
+                        <li>Iterations: <strong>@Model.Dashboard.ActivePolicy.Hash.Iterations</strong></li>
+                        <li>Pepper: <span class="badge bg-@(Model.Dashboard.ActivePolicy.Hash.PepperEnabled ? "success" : "secondary")">@(Model.Dashboard.ActivePolicy.Hash.PepperEnabled ? "Açýk" : "Kapalý")</span></li>
                     </ul>
                 </div>
             </div>

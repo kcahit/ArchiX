@@ -2,6 +2,7 @@
 @model ArchiX.Library.Web.Pages.Admin.Security.PolicySettingsModel
 @{
     ViewData["Title"] = "Policy Settings";
+    Layout = "_AdminLayout";
 }
 
 <div class="container-fluid py-3">
@@ -20,11 +21,6 @@
         </div>
     </div>
 
-    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
-    {
-        <div class="alert alert-success" role="alert">@Model.StatusMessage</div>
-    }
-
     <form method="post" class="needs-validation" novalidate>
         <input type="hidden" asp-for="ApplicationId" />
         <input type="hidden" asp-for="Form.Version" />
@@ -33,8 +29,10 @@
 
         <div class="row g-3">
             <div class="col-xl-6">
-                <div class="card shadow-sm h-100">
-                    <div class="card-header">Uzunluk &amp; Karmaþýklýk</div>
+                <div class="card form-section h-100">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-sliders-h me-2"></i>Uzunluk &amp; Karmaþýklýk</h5>
+                    </div>
                     <div class="card-body row g-3">
                         <div class="col-sm-6">
                             <label asp-for="Form.MinLength" class="form-label"></label>
@@ -85,8 +83,10 @@
             </div>
 
             <div class="col-xl-6">
-                <div class="card shadow-sm h-100">
-                    <div class="card-header">Güvenlik Parametreleri</div>
+                <div class="card form-section h-100">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Güvenlik Parametreleri</h5>
+                    </div>
                     <div class="card-body row g-3">
                         <div class="col-sm-6">
                             <label asp-for="Form.HistoryCount" class="form-label"></label>
@@ -121,8 +121,10 @@
 
         <div class="row g-3 mt-2">
             <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-header">Hash Ayarlarý</div>
+                <div class="card form-section">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="fas fa-lock me-2"></i>Hash Ayarlarý</h5>
+                    </div>
                     <div class="card-body row g-3">
                         <div class="col-md-4">
                             <label asp-for="Form.Hash.MemoryKb" class="form-label"></label>
@@ -155,8 +157,8 @@
                                 <label class="form-check-label" asp-for="Form.Hash.PepperEnabled"></label>
                             </div>
                         </div>
-                        <div class="col-12">
-                            <h6>Fallback</h6>
+                        <div class="col-12 mt-3">
+                            <h6><i class="fas fa-redo me-1"></i> Fallback</h6>
                         </div>
                         <div class="col-md-6">
                             <label asp-for="Form.Hash.Fallback.Algorithm" class="form-label"></label>
@@ -174,8 +176,12 @@
         </div>
 
         <div class="mt-4 d-flex justify-content-end gap-2">
-            <a asp-page="/Admin/Security/PasswordPolicy" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary">JSON Görüntüle</a>
-            <button type="submit" class="btn btn-primary">Kaydet</button>
+            <a asp-page="/Admin/Security/PasswordPolicy" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary">
+                <i class="fas fa-code me-1"></i> JSON Görüntüle
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-1"></i> Kaydet
+            </button>
         </div>
     </form>
 </div>
