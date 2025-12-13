@@ -1,0 +1,174 @@
+/* ============================================
+   CSS RESET - Browser Normalize
+   ============================================ */
+
+/* Box sizing */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* HTML ve Body */
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-normal);
+    line-height: var(--line-height-normal);
+    color: var(--text-primary);
+    /* REMOVED: background-color: var(--bg-white); */
+    /* Background her sayfada kendi belirleyecek */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings Reset */
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    font-weight: inherit;
+    line-height: inherit;
+}
+
+/* List Reset */
+ul, ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* Link Reset */
+a {
+    color: inherit;
+    text-decoration: none;
+    background-color: transparent;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+/* Image Reset */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-style: none;
+}
+
+/* Table Reset */
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+/* Form Elements Reset */
+button,
+input,
+optgroup,
+select,
+textarea {
+    margin: 0;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+button,
+input {
+    overflow: visible;
+}
+
+button,
+select {
+    text-transform: none;
+}
+
+button,
+[type="button"],
+[type="reset"],
+[type="submit"] {
+    -webkit-appearance: button;
+    cursor: pointer;
+}
+
+button::-moz-focus-inner,
+[type="button"]::-moz-focus-inner,
+[type="reset"]::-moz-focus-inner,
+[type="submit"]::-moz-focus-inner {
+    padding: 0;
+    border-style: none;
+}
+
+textarea {
+    overflow: auto;
+    resize: vertical;
+}
+
+[type="search"] {
+    -webkit-appearance: textfield;
+    outline-offset: -2px;
+}
+
+[type="search"]::-webkit-search-decoration {
+    -webkit-appearance: none;
+}
+
+::-webkit-file-upload-button {
+    font: inherit;
+    -webkit-appearance: button;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-light);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: var(--border-radius-md);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* Selection */
+::selection {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+::-moz-selection {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+/* Focus Visible */
+:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* Disabled Elements */
+[disabled] {
+    cursor: not-allowed;
+}
+
+/* Hidden */
+[hidden] {
+    display: none !important;
+}

@@ -1,0 +1,15 @@
+﻿@* Security Management Dropdown Menu *@
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle text-dark" href="#" id="securityDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fas fa-shield-alt"></i> Security Management
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="securityDropdown">
+        <li><a class="dropdown-item" asp-page="/Admin/Security/Index"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+        <li><a class="dropdown-item" asp-page="/Admin/Security/PolicySettings"><i class="fas fa-cog"></i> Policy Settings</a></li>
+        <li><a class="dropdown-item" asp-page="/Admin/Security/Blacklist"><i class="fas fa-ban"></i> Blacklist</a></li>
+        <li><a class="dropdown-item" asp-page="/Admin/Security/AuditTrail"><i class="fas fa-history"></i> Audit Trail</a></li>
+        <li><a class="dropdown-item" asp-page="/Admin/Security/PasswordHistory"><i class="fas fa-clock"></i> Password History</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" asp-page="/Admin/Security/PolicyTest"><i class="fas fa-flask"></i> Policy Test</a></li>
+    </ul>
+</li>
