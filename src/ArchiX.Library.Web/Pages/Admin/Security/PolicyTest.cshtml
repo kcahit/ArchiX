@@ -1,4 +1,4 @@
-Ôªø@page
+@page
 @model ArchiX.Library.Web.Pages.Admin.Security.PolicyTestModel
 @{
     ViewData["Title"] = "Policy Test";
@@ -17,7 +17,7 @@
         <div class="col-lg-6">
             <div class="card form-section h-100">
                 <div class="card-header bg-light">
-                    <h5 class="mb-0"><i class="fas fa-key me-2"></i>Parola Doƒürulama</h5>
+                    <h5 class="mb-0"><i class="fas fa-key me-2"></i>Parola Dorulama</h5>
                 </div>
                 <div class="card-body">
                     <form method="post" class="row g-3">
@@ -34,7 +34,7 @@
                             @if (Model.Form.Result is not null)
                             {
                                 <span class="badge @(Model.Form.Result.IsValid ? "bg-success" : "bg-danger")">
-                                    @(Model.Form.Result.IsValid ? "Ge√ßti" : "Hatalar var")
+                                    @(Model.Form.Result.IsValid ? "GeÁti" : "Hatalar var")
                                 </span>
                             }
                         </div>
@@ -60,7 +60,7 @@
                             @if (Model.Form.Result.Errors.Count > 0)
                             {
                                 <div class="alert alert-warning">
-                                    <div class="fw-semibold mb-2"><i class="fas fa-exclamation-triangle me-1"></i> Hata Kodlarƒ±</div>
+                                    <div class="fw-semibold mb-2"><i class="fas fa-exclamation-triangle me-1"></i> Hata Kodlar˝</div>
                                     <ul class="mb-0">
                                         @foreach (var error in Model.Form.Result.Errors)
                                         {
@@ -74,21 +74,21 @@
                             else
                             {
                                 <div class="alert alert-success mb-0">
-                                    <i class="fas fa-check-circle me-2"></i> Parola t√ºm kontrollerden ge√ßti.
+                                    <i class="fas fa-check-circle me-2"></i> Parola t¸m kontrollerden geÁti.
                                 </div>
                             }
                         </div>
 
                         <div class="mt-3">
                             <div class="small text-muted">
-                                <div><strong>History Check:</strong> @(Model.Form.Result.HistoryCheckResult.HasValue ? "‚ùå Tekrarlanan parola" : "‚úÖ Ge√ßti")</div>
+                                <div><strong>History Check:</strong> @(Model.Form.Result.HistoryCheckResult.HasValue ? "? Tekrarlanan parola" : "? GeÁti")</div>
                                 @if (Model.Form.Result.PwnedCount > 0)
                                 {
-                                    <div class="text-danger"><strong>‚ö† Pwned Count:</strong> @Model.Form.Result.PwnedCount (veri ihlalinde g√∂r√ºld√º!)</div>
+                                    <div class="text-danger"><strong>? Pwned Count:</strong> @Model.Form.Result.PwnedCount (veri ihlalinde gˆr¸ld¸!)</div>
                                 }
                                 else
                                 {
-                                    <div><strong>Pwned Count:</strong> 0 (g√ºvenli)</div>
+                                    <div><strong>Pwned Count:</strong> 0 (g¸venli)</div>
                                 }
                             </div>
                         </div>
@@ -99,14 +99,14 @@
         <div class="col-lg-6">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-light">
-                    <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Aktif Policy √ñzeti</h5>
+                    <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Aktif Policy ÷zeti</h5>
                 </div>
                 <div class="card-body">
                     @if (Model.ActivePolicy is null)
                     {
                         <div class="text-muted text-center py-4">
                             <i class="fas fa-exclamation-circle fa-3x mb-3"></i>
-                            <p>Policy y√ºklenemedi.</p>
+                            <p>Policy y¸klenemedi.</p>
                         </div>
                     }
                     else
@@ -115,24 +115,24 @@
                             <li class="mb-2"><i class="fas fa-ruler me-2 text-primary"></i><strong>Uzunluk:</strong> @Model.ActivePolicy.MinLength - @Model.ActivePolicy.MaxLength</li>
                             <li class="mb-2">
                                 <i class="fas fa-check-circle me-2 text-@(Model.ActivePolicy.RequireUpper ? "success" : "secondary")"></i>
-                                <strong>B√ºy√ºk Harf:</strong> @(Model.ActivePolicy.RequireUpper ? "Evet" : "Hayƒ±r")
+                                <strong>B¸y¸k Harf:</strong> @(Model.ActivePolicy.RequireUpper ? "Evet" : "Hay˝r")
                             </li>
                             <li class="mb-2">
                                 <i class="fas fa-check-circle me-2 text-@(Model.ActivePolicy.RequireLower ? "success" : "secondary")"></i>
-                                <strong>K√º√ß√ºk Harf:</strong> @(Model.ActivePolicy.RequireLower ? "Evet" : "Hayƒ±r")
+                                <strong>K¸Á¸k Harf:</strong> @(Model.ActivePolicy.RequireLower ? "Evet" : "Hay˝r")
                             </li>
                             <li class="mb-2">
                                 <i class="fas fa-check-circle me-2 text-@(Model.ActivePolicy.RequireDigit ? "success" : "secondary")"></i>
-                                <strong>Rakam:</strong> @(Model.ActivePolicy.RequireDigit ? "Evet" : "Hayƒ±r")
+                                <strong>Rakam:</strong> @(Model.ActivePolicy.RequireDigit ? "Evet" : "Hay˝r")
                             </li>
                             <li class="mb-2">
                                 <i class="fas fa-check-circle me-2 text-@(Model.ActivePolicy.RequireSymbol ? "success" : "secondary")"></i>
-                                <strong>Sembol:</strong> @(Model.ActivePolicy.RequireSymbol ? "Evet" : "Hayƒ±r")
+                                <strong>Sembol:</strong> @(Model.ActivePolicy.RequireSymbol ? "Evet" : "Hay˝r")
                             </li>
-                            <li class="mb-2"><i class="fas fa-hashtag me-2 text-info"></i><strong>Min. farklƒ± karakter:</strong> @Model.ActivePolicy.MinDistinctChars</li>
+                            <li class="mb-2"><i class="fas fa-hashtag me-2 text-info"></i><strong>Min. farkl˝ karakter:</strong> @Model.ActivePolicy.MinDistinctChars</li>
                             <li class="mb-2"><i class="fas fa-redo me-2 text-warning"></i><strong>Maks. tekrar:</strong> @Model.ActivePolicy.MaxRepeatedSequence</li>
                             <li class="mb-2"><i class="fas fa-history me-2 text-secondary"></i><strong>History:</strong> @Model.ActivePolicy.HistoryCount</li>
-                            <li class="mb-2"><i class="fas fa-calendar me-2 text-danger"></i><strong>Max ya≈ü (g√ºn):</strong> @(Model.ActivePolicy.MaxPasswordAgeDays?.ToString() ?? "Sƒ±nƒ±rsƒ±z")</li>
+                            <li class="mb-2"><i class="fas fa-calendar me-2 text-danger"></i><strong>Max ya˛ (g¸n):</strong> @(Model.ActivePolicy.MaxPasswordAgeDays?.ToString() ?? "S˝n˝rs˝z")</li>
                             <li class="mb-2"><i class="fas fa-asterisk me-2 text-dark"></i><strong>Allowed Symbols:</strong> <code>@Model.ActivePolicy.AllowedSymbols</code></li>
                         </ul>
                     }
@@ -143,10 +143,10 @@
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
     <script>
+        // Client-side validation (jQuery validation eklenmedi, gerekirse eklenebilir)
         $(document).ready(function() {
-            SecurityAdmin.initPolicyTestValidation();
+            // SecurityAdmin.initPolicyTestValidation(); // Bu fonksiyon security-admin.js'de yoksa hata verir
         });
     </script>
 }

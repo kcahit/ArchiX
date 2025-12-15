@@ -86,6 +86,7 @@
 	<ItemGroup>
 		<Folder Include="Abstractions\Entities\" />
 		<Folder Include="DomainEvents\Contracts\" />
+		<Folder Include="Migrations\" />
 		<Folder Include="src\ArchiX.Library\Migrations\" />
 	</ItemGroup>
 

@@ -26,7 +26,6 @@ namespace ArchiX.Library.Entities
         [Required, MaxLength(500)]
         public string Description { get; set; } = string.Empty;
 
-        // Concurrency kontrolü (PK-06)
         [Timestamp]
         public byte[]? RowVersion { get; set; }
     }

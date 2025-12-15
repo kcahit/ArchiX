@@ -83,7 +83,6 @@ namespace ArchiX.Library.Migrations
                     Result = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
                     ReasonCode = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     CorrelationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: true),
                     RawConnectionMasked = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: false),
                     RowId = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()"),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset(4)", precision: 4, nullable: false, defaultValueSql: "SYSDATETIMEOFFSET()"),
@@ -93,7 +92,8 @@ namespace ArchiX.Library.Migrations
                     StatusId = table.Column<int>(type: "int", nullable: false),
                     LastStatusAt = table.Column<DateTimeOffset>(type: "datetimeoffset(4)", precision: 4, nullable: true, defaultValueSql: "SYSDATETIMEOFFSET()"),
                     LastStatusBy = table.Column<int>(type: "int", nullable: false),
-                    IsProtected = table.Column<bool>(type: "bit", nullable: false)
+                    IsProtected = table.Column<bool>(type: "bit", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -114,7 +114,6 @@ namespace ArchiX.Library.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ServerName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     Cidr = table.Column<string>(type: "nvarchar(43)", maxLength: 43, nullable: true),
-                    Port = table.Column<int>(type: "int", nullable: true),
                     EnvScope = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     RowId = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()"),
@@ -125,7 +124,8 @@ namespace ArchiX.Library.Migrations
                     StatusId = table.Column<int>(type: "int", nullable: false),
                     LastStatusAt = table.Column<DateTimeOffset>(type: "datetimeoffset(4)", precision: 4, nullable: true, defaultValueSql: "SYSDATETIMEOFFSET()"),
                     LastStatusBy = table.Column<int>(type: "int", nullable: false),
-                    IsProtected = table.Column<bool>(type: "bit", nullable: false)
+                    IsProtected = table.Column<bool>(type: "bit", nullable: false),
+                    Port = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -309,8 +309,6 @@ namespace ArchiX.Library.Migrations
                     NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
                     IsAdmin = table.Column<bool>(type: "bit", nullable: false),
-                    PasswordChangedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    MaxPasswordAgeDays = table.Column<int>(type: "int", nullable: true),
                     RowId = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()"),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset(4)", precision: 4, nullable: false, defaultValueSql: "SYSDATETIMEOFFSET()"),
                     CreatedBy = table.Column<int>(type: "int", nullable: false),
@@ -319,7 +317,9 @@ namespace ArchiX.Library.Migrations
                     StatusId = table.Column<int>(type: "int", nullable: false),
                     LastStatusAt = table.Column<DateTimeOffset>(type: "datetimeoffset(4)", precision: 4, nullable: true, defaultValueSql: "SYSDATETIMEOFFSET()"),
                     LastStatusBy = table.Column<int>(type: "int", nullable: false),
-                    IsProtected = table.Column<bool>(type: "bit", nullable: false)
+                    IsProtected = table.Column<bool>(type: "bit", nullable: false),
+                    PasswordChangedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    MaxPasswordAgeDays = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -380,6 +380,7 @@ namespace ArchiX.Library.Migrations
                     Value = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Template = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true),
                     RowId = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()"),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset(4)", precision: 4, nullable: false, defaultValueSql: "SYSDATETIMEOFFSET()"),
                     CreatedBy = table.Column<int>(type: "int", nullable: false),
@@ -388,8 +389,7 @@ namespace ArchiX.Library.Migrations
                     StatusId = table.Column<int>(type: "int", nullable: false),
                     LastStatusAt = table.Column<DateTimeOffset>(type: "datetimeoffset(4)", precision: 4, nullable: true, defaultValueSql: "SYSDATETIMEOFFSET()"),
                     LastStatusBy = table.Column<int>(type: "int", nullable: false),
-                    IsProtected = table.Column<bool>(type: "bit", nullable: false),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
+                    IsProtected = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {

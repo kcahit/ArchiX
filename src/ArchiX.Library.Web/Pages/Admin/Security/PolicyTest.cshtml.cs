@@ -1,7 +1,5 @@
-using System.Security.Claims;
-
 using ArchiX.Library.Abstractions.Security;
-using ArchiX.Library.Web.ViewModels.Security;
+using ArchiX.Library.Runtime.Security;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,14 +11,14 @@ namespace ArchiX.Library.Web.Pages.Admin.Security;
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public sealed class PolicyTestModel : PageModel
 {
-    private readonly IPasswordPolicyAdminService _adminService;
+    private readonly PasswordValidationService _validationService;
     private readonly IPasswordPolicyProvider _policyProvider;
 
     public PolicyTestModel(
-        IPasswordPolicyAdminService adminService,
+        PasswordValidationService validationService,
         IPasswordPolicyProvider policyProvider)
     {
-        _adminService = adminService;
+        _validationService = validationService;
         _policyProvider = policyProvider;
     }
 
@@ -28,54 +26,71 @@ public sealed class PolicyTestModel : PageModel
     public int ApplicationId { get; set; } = 1;
 
     [BindProperty]
-    public PolicyTestViewModel Form { get; set; } = new();
+    public PolicyTestForm Form { get; set; } = new();
 
     public PasswordPolicyOptions? ActivePolicy { get; private set; }
 
     public async Task<IActionResult> OnGetAsync(CancellationToken ct)
     {
-        ApplicationId = NormalizeAppId(ApplicationId);
+        ApplicationId = NormalizeApplicationId(ApplicationId);
         ActivePolicy = await _policyProvider.GetAsync(ApplicationId, ct).ConfigureAwait(false);
         return Page();
     }
 
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> OnPostAsync(CancellationToken ct)
     {
-        ApplicationId = NormalizeAppId(ApplicationId);
+        ApplicationId = NormalizeApplicationId(ApplicationId);
         ActivePolicy = await _policyProvider.GetAsync(ApplicationId, ct).ConfigureAwait(false);
 
         if (string.IsNullOrWhiteSpace(Form.Password))
         {
-            ModelState.AddModelError("Form.Password", "Parola boþ olamaz.");
+            ModelState.AddModelError(nameof(Form.Password), "Parola boþ olamaz.");
             return Page();
         }
 
-        var result = await _adminService.ValidatePasswordAsync(Form.Password, GetUserId(), ApplicationId, ct).ConfigureAwait(false);
+        var result = await _validationService.ValidateAsync(Form.Password, 0, ApplicationId, ct).ConfigureAwait(false);
 
-        Form.Result = new PolicyTestResponseViewModel
+        Form.Result = new PolicyTestResult
         {
             IsValid = result.IsValid,
             Errors = result.Errors,
-            StrengthScore = result.StrengthScore,
-            HistoryCheckResult = result.HistoryCheckResult,
-            PwnedCount = result.PwnedCount
+            StrengthScore = CalculateStrengthScore(Form.Password),
+            HistoryCheckResult = result.Errors.Contains("HISTORY") ? 1 : null,
+            PwnedCount = result.Errors.Contains("PWNED") ? 1 : 0
         };
 
         return Page();
     }
 
-    private static int NormalizeAppId(int value) => value > 0 ? value : 1;
+    private static int NormalizeApplicationId(int value) => value > 0 ? value : 1;
 
-    private int GetUserId()
+    private static int CalculateStrengthScore(string password)
     {
-        if (User?.Identity?.IsAuthenticated == true)
-        {
-            var claim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("sub");
-            if (claim != null && int.TryParse(claim.Value, out var id))
-                return id;
-        }
+        if (string.IsNullOrEmpty(password))
+            return 0;
 
-        return 0;
+        var score = Math.Min(40, password.Length * 2);
+
+        if (password.Any(char.IsLower)) score += 15;
+        if (password.Any(char.IsUpper)) score += 15;
+        if (password.Any(char.IsDigit)) score += 15;
+        if (password.Any(ch => !char.IsLetterOrDigit(ch))) score += 15;
+
+        return Math.Clamp(score, 0, 100);
     }
+}
+
+public sealed class PolicyTestForm
+{
+    public string Password { get; set; } = string.Empty;
+    public PolicyTestResult? Result { get; set; }
+}
+
+public sealed class PolicyTestResult
+{
+    public bool IsValid { get; set; }
+    public IReadOnlyList<string> Errors { get; set; } = [];
+    public int StrengthScore { get; set; }
+    public int? HistoryCheckResult { get; set; }
+    public int? PwnedCount { get; set; }
 }

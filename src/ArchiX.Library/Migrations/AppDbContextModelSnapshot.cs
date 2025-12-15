@@ -201,7 +201,7 @@ namespace ArchiX.Library.Migrations
                         .IsRequired()
                         .HasMaxLength(1024)
                         .HasColumnType("nvarchar(1024)")
-                        .HasColumnOrder(8);
+                        .HasColumnOrder(7);
 
                     b.Property<string>("ReasonCode")
                         .HasMaxLength(50)
@@ -234,8 +234,7 @@ namespace ArchiX.Library.Migrations
                         .HasColumnOrder(1004);
 
                     b.Property<int?>("UserId")
-                        .HasColumnType("int")
-                        .HasColumnOrder(7);
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -278,11 +277,11 @@ namespace ArchiX.Library.Migrations
                     b.Property<string>("EnvScope")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
-                        .HasColumnOrder(4);
+                        .HasColumnOrder(3);
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit")
-                        .HasColumnOrder(5);
+                        .HasColumnOrder(4);
 
                     b.Property<bool>("IsProtected")
                         .HasColumnType("bit")
@@ -300,8 +299,7 @@ namespace ArchiX.Library.Migrations
                         .HasColumnOrder(1007);
 
                     b.Property<int?>("Port")
-                        .HasColumnType("int")
-                        .HasColumnOrder(3);
+                        .HasColumnType("int");
 
                     b.Property<Guid>("RowId")
                         .ValueGeneratedOnAdd()
@@ -874,7 +872,8 @@ namespace ArchiX.Library.Migrations
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+                        .HasColumnType("rowversion")
+                        .HasColumnOrder(8);
 
                     b.Property<int>("StatusId")
                         .HasColumnType("int")
@@ -1869,8 +1868,7 @@ namespace ArchiX.Library.Migrations
                         .HasColumnOrder(1007);
 
                     b.Property<int?>("MaxPasswordAgeDays")
-                        .HasColumnType("int")
-                        .HasColumnOrder(9);
+                        .HasColumnType("int");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -1884,8 +1882,7 @@ namespace ArchiX.Library.Migrations
                         .HasColumnOrder(2);
 
                     b.Property<DateTimeOffset?>("PasswordChangedAtUtc")
-                        .HasColumnType("datetimeoffset")
-                        .HasColumnOrder(8);
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Phone")
                         .HasMaxLength(20)

@@ -47,8 +47,11 @@ namespace ArchiX.Library.Context
                         .GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
                         .Where(p => p.DeclaringType == et.ClrType
                                  && p.Name != nameof(BaseEntity.Id)
-                                 && (p.PropertyType.IsValueType || p.PropertyType == typeof(string)))
+                                 && !typeof(BaseEntity).IsAssignableFrom(p.PropertyType)
+                                 && !p.PropertyType.IsGenericType
+                                 && (!p.PropertyType.IsClass || p.PropertyType == typeof(string) || p.PropertyType == typeof(byte[])))
                         .ToList();
+
 
                     int order = 1;
                     foreach (var prop in entityProps)

@@ -137,17 +137,14 @@ internal sealed class PasswordPolicyAdminService : IPasswordPolicyAdminService
             }
             else
             {
-                // *** MANUEL CONCURRENCY KONTROLÜ ***
                 if (clientRowVersion is not null)
                 {
-                    // DB'deki mevcut RowVersion ile istemcinin gördüğü RowVersion eşleşmiyorsa → çakışma
                     if (parameter.RowVersion is not null &&
                         !parameter.RowVersion.AsSpan().SequenceEqual(clientRowVersion))
                     {
                         throw new InvalidOperationException("Parola politikası başka bir kullanıcı tarafından güncellenmiştir. Lütfen sayfayı yenileyin.");
                     }
 
-                    // Relational provider için yine de OriginalValue ayarla (SQL tarafında DbUpdateConcurrencyException için)
                     db.Entry(parameter)
                         .Property(p => p.RowVersion)
                         .OriginalValue = clientRowVersion;
@@ -196,6 +193,7 @@ internal sealed class PasswordPolicyAdminService : IPasswordPolicyAdminService
             _metrics.RecordUpdate(appId, success);
         }
     }
+
     public async Task<SecurityDashboardData> GetDashboardDataAsync(int applicationId, CancellationToken ct = default)
     {
         var appId = NormalizeApplicationId(applicationId);
@@ -241,20 +239,24 @@ internal sealed class PasswordPolicyAdminService : IPasswordPolicyAdminService
         await using var db = await _dbFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
         var approvedStatusId = ResolveApprovedStatusId(db);
 
-        var query = from word in db.PasswordBlacklists.AsNoTracking()
-                    where word.ApplicationId == appId
-                    join creator in db.Users.AsNoTracking()
-                        on word.CreatedBy equals creator.Id into creatorJoin
-                    from creator in creatorJoin.DefaultIfEmpty()
-                    orderby word.CreatedAt descending
-                    select new PasswordBlacklistWordDto(
-                        word.Id,
-                        word.Word,
-                        BuildUserDisplayName(creator, word.CreatedBy),
-                        word.CreatedAt,
-                        word.StatusId == approvedStatusId);
+        var rawQuery = from word in db.PasswordBlacklists.AsNoTracking()
+                       where word.ApplicationId == appId
+                       join creator in db.Users.AsNoTracking()
+                           on word.CreatedBy equals creator.Id into creatorJoin
+                       from creator in creatorJoin.DefaultIfEmpty()
+                       orderby word.CreatedAt descending
+                       select new { word, creator };
 
-        var result = await query.ToArrayAsync(ct).ConfigureAwait(false);
+        var rawData = await rawQuery.ToListAsync(ct).ConfigureAwait(false);
+
+        var result = rawData.Select(x => new PasswordBlacklistWordDto(
+            x.word.Id,
+            x.word.Word,
+            BuildUserDisplayName(x.creator, x.word.CreatedBy),
+            x.word.CreatedAt,
+            x.word.StatusId == approvedStatusId))
+            .ToArray();
+
         _memoryCache.Set(cacheKey, result, BlacklistCacheDuration);
 
         return result;
@@ -349,18 +351,27 @@ internal sealed class PasswordPolicyAdminService : IPasswordPolicyAdminService
         if (to.HasValue)
             query = query.Where(x => x.ChangedAtUtc <= to.Value);
 
-        var resultQuery =
+        var rawQuery =
             from audit in query
             join user in db.Users.AsNoTracking() on audit.UserId equals user.Id into userJoin
             from user in userJoin.DefaultIfEmpty()
             orderby audit.ChangedAtUtc descending
-            select new PasswordPolicyAuditDto(
-                audit.Id,
-                audit.ChangedAtUtc,
-                BuildUserDisplayName(user, audit.UserId),
-                BuildAuditSummarySafe(audit.OldJson, audit.NewJson));
+            select new { audit, user };
 
-        return await resultQuery.ToArrayAsync(ct).ConfigureAwait(false);
+        var rawData = await rawQuery.ToListAsync(ct).ConfigureAwait(false);
+
+        var result = new List<PasswordPolicyAuditDto>(rawData.Count);
+
+        foreach (var item in rawData)
+        {
+            result.Add(new PasswordPolicyAuditDto(
+                item.audit.Id,
+                item.audit.ChangedAtUtc,
+                BuildUserDisplayName(item.user, item.audit.UserId),
+                BuildAuditSummarySafe(item.audit.OldJson, item.audit.NewJson)));
+        }
+
+        return result;
     }
 
     public async Task<AuditDiffDto?> GetAuditDiffAsync(int auditId, CancellationToken ct = default)
@@ -667,5 +678,4 @@ internal sealed class PasswordPolicyAdminService : IPasswordPolicyAdminService
 
         return Math.Clamp(score, 0, 100);
     }
-
 }
