@@ -17,6 +17,7 @@ public static class PasswordSecurityServiceCollectionExtensions
         services.AddSingleton<IPasswordAttemptRateLimiter, PasswordAttemptRateLimiter>();
         services.AddSingleton<IPasswordDictionaryChecker, PasswordDictionaryChecker>();
         services.AddSingleton<IPasswordEntropyCalculator, PasswordEntropyCalculator>();
+        services.AddSingleton<IPasswordValidationMessageProvider, PasswordValidationMessageProvider>();
 
         services.AddHttpClient<IPasswordPwnedChecker, PasswordPwnedChecker>();
 

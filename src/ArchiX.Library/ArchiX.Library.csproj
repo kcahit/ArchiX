@@ -15,6 +15,17 @@
 		<EmbeddedResource Include="Resources\common-passwords.txt" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<EmbeddedResource Update="Resources\*.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>%(Filename).Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+		<Compile Update="Resources\*.Designer.cs">
+			<AutoGen>True</AutoGen>
+			<DependentUpon>%(Filename).resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
 	<!-- ASP.NET Core HTTP türleri için şart -->
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
