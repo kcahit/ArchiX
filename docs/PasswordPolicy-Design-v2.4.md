@@ -1160,3 +1160,15 @@ yapılan Plan
 3.	Sayfa bazlı sertifikasyon – Dashboard/Policy Settings/Blacklist/Audit/History/Policy Test PageModel’lerinin backend çağrılarını bu servise bağlayıp, ModelState doğrulamaları, Ajax endpoint’leri ve export akışlarını tamamlamak.
 
 --- Tarih/Saat: 2025-12-12 19:20 (TR)
+--- 
+✅ TAMAMLANAN:Tarih/Saat: 2025-12-15 10:53 (TR)
+1.	Backend servisler (IPasswordPolicyAdminService + impl)
+2.	ViewModels
+3.	Frontend (_AdminLayout, _SecurityNav, security-admin.js, site.css)
+4.	6 Razor Page (Layout + scripts)
+5.	DI kayıtları
+6.	Authorization Policy (zaten var)
+7.	Duplicate metod düzeltmesi
+❌ KALAN:
+•	Doküman güncelleme (RL-05 bittiğini işaretle)
+--- Tarih/Saat: 2025-12-15 10:53 (TR)

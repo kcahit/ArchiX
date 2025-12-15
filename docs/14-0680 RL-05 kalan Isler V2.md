@@ -236,15 +236,20 @@ src/ArchiX.WebHost/
 BİTİŞ TARİHİ: 2025-12-13 15:30 (TR)
 
 
----14-0680 yapılanlar notu  2025-12-13 16:10 (türkiye) ---
+---14-0680 RL-05 yapılanlar notu  2025-12-13 16:10 (türkiye) ---
 
 RL-05 Frontend Sprint 2-3 tamamlandı!
+
 Yapılanlar:
 1.	✅ _AdminLayout.cshtml (CDN + Toast container + Security menü)
 2.	✅ _SecurityNav.cshtml (Dropdown menü partial)
 3.	✅ security-admin.js (10 fonksiyon)
 4.	✅ site.css Security bölümü
 5.	✅ 6 Razor Page'e Layout + icon + entegrasyon eklendi
-Kalan: Backend servisleri kontrol (IPasswordPolicyAdminService metodları eksik olabilir)
+
+Kalanlar: 
+•	Backend servis kontrolleri  (IPasswordPolicyAdminService metodları eksik olabilir)
+•	Authorization policy (Program.cs)
+•	Test & doğrulama
 
 ---14-0680 yapılanlar notu  2025-12-14 16:10 (türkiye) ---

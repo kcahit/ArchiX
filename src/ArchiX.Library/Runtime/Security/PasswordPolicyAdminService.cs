@@ -668,8 +668,4 @@ internal sealed class PasswordPolicyAdminService : IPasswordPolicyAdminService
         return Math.Clamp(score, 0, 100);
     }
 
-    public Task UpdateAsync(string json, int applicationId = 1, CancellationToken ct = default)
-    {
-        throw new NotImplementedException();
-    }
 }
