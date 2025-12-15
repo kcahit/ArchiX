@@ -14,8 +14,8 @@ public static class PasswordSecurityServiceCollectionExtensions
         services.AddSingleton<IPasswordHasher, Argon2PasswordHasher>();
         services.AddSingleton<IPasswordPolicyAdminService, PasswordPolicyAdminService>();
 
-        // ✅ YENİ: Rate Limiter (RL-09)
         services.AddSingleton<IPasswordAttemptRateLimiter, PasswordAttemptRateLimiter>();
+        services.AddSingleton<IPasswordDictionaryChecker, PasswordDictionaryChecker>();
 
         services.AddHttpClient<IPasswordPwnedChecker, PasswordPwnedChecker>();
 

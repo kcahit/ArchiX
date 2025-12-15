@@ -30,10 +30,11 @@ public sealed record PasswordPolicyOptions
     public string AllowedSymbols { get; init; } = "!@#$%^&*_-+=:?.,;";
     public int MinDistinctChars { get; init; } = 5;
     public int MaxRepeatedSequence { get; init; } = 3;
-    public string[] BlockList { get; init; } = new[] {"password","123456","qwerty","admin"};
+    public string[] BlockList { get; init; } = new[] { "password", "123456", "qwerty", "admin" };
     public int HistoryCount { get; init; } = 10;
     public int LockoutThreshold { get; init; } = 5;
     public int LockoutSeconds { get; init; } = 900;
     public int? MaxPasswordAgeDays { get; init; } = null;
+    public bool EnableDictionaryCheck { get; init; } = true;
     public PasswordHashOptions Hash { get; init; } = new();
 }

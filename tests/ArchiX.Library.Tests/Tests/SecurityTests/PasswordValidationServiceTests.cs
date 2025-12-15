@@ -2,8 +2,11 @@ using ArchiX.Library.Abstractions.Security;
 using ArchiX.Library.Context;
 using ArchiX.Library.Entities;
 using ArchiX.Library.Runtime.Security;
+
 using Microsoft.EntityFrameworkCore;
+
 using Moq;
+
 using Xunit;
 
 namespace ArchiX.Library.Tests.Tests.SecurityTests;
@@ -14,6 +17,7 @@ public sealed class PasswordValidationServiceTests
     private readonly Mock<IPasswordPwnedChecker> _pwnedChecker = new();
     private readonly Mock<IPasswordHistoryService> _historyService = new();
     private readonly Mock<IPasswordBlacklistService> _blacklistService = new();
+    private readonly Mock<IPasswordDictionaryChecker> _dictionaryChecker = new();
     private readonly Mock<IPasswordHasher> _hasher = new();
     private readonly Mock<IPasswordExpirationService> _expirationService = new();
     private readonly Mock<IDbContextFactory<AppDbContext>> _dbContextFactory = new();
@@ -33,8 +37,9 @@ public sealed class PasswordValidationServiceTests
             AllowedSymbols = "!@#$%^&*_-+=:?.,;",
             MinDistinctChars = 5,
             MaxRepeatedSequence = 3,
-            BlockList = new[] { "password", "123456", "qwerty", "admin" },
+            BlockList = [],
             HistoryCount = 10,
+            EnableDictionaryCheck = true,
             Hash = new PasswordHashOptions
             {
                 Algorithm = "Argon2id",
@@ -50,6 +55,10 @@ public sealed class PasswordValidationServiceTests
 
         _blacklistService
             .Setup(x => x.IsWordBlockedAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        _dictionaryChecker
+            .Setup(x => x.IsCommonPasswordAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
         _pwnedChecker
@@ -70,6 +79,7 @@ public sealed class PasswordValidationServiceTests
         _pwnedChecker.Object,
         _historyService.Object,
         _blacklistService.Object,
+        _dictionaryChecker.Object,
         _hasher.Object,
         _expirationService.Object,
         _dbContextFactory.Object);
@@ -106,7 +116,38 @@ public sealed class PasswordValidationServiceTests
 
         Assert.False(result.IsValid);
         Assert.Contains("DYNAMIC_BLOCK", result.Errors);
+        _dictionaryChecker.Verify(x => x.IsCommonPasswordAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
         _pwnedChecker.Verify(x => x.IsPwnedAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ValidateAsync_DictionaryWord_ReturnsDictionaryWordError()
+    {
+        _dictionaryChecker
+            .Setup(x => x.IsCommonPasswordAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        var service = CreateService();
+        var result = await service.ValidateAsync("Password123!", userId: 1);
+
+        Assert.False(result.IsValid);
+        Assert.Contains("DICTIONARY_WORD", result.Errors);
+        _pwnedChecker.Verify(x => x.IsPwnedAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ValidateAsync_DictionaryCheckDisabled_SkipsDictionaryCheck()
+    {
+        _policy = _policy with { EnableDictionaryCheck = false };
+        _dictionaryChecker
+            .Setup(x => x.IsCommonPasswordAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        var service = CreateService();
+        var result = await service.ValidateAsync("GoodP@ssw0rd!123", userId: 1);
+
+        Assert.True(result.IsValid);
+        _dictionaryChecker.Verify(x => x.IsCommonPasswordAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]

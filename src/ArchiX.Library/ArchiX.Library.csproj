@@ -1,5 +1,4 @@
-﻿<!-- File: src/ArchiX.Library/ArchiX.Library.csproj -->
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net9.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -7,9 +6,13 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	</PropertyGroup>
 	<ItemGroup>
-	  <Compile Remove="Infrastructure\Others\**" />
-	  <EmbeddedResource Remove="Infrastructure\Others\**" />
-	  <None Remove="Infrastructure\Others\**" />
+		<Compile Remove="Infrastructure\Others\**" />
+		<EmbeddedResource Remove="Infrastructure\Others\**" />
+		<None Remove="Infrastructure\Others\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="Resources\common-passwords.txt" />
 	</ItemGroup>
 
 	<!-- ASP.NET Core HTTP türleri için şart -->
@@ -70,10 +73,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Abstractions\Entities\" />
-	  <Folder Include="DomainEvents\Contracts\" />
-	  <Folder Include="src\ArchiX.Library\Migrations\" />
+		<Folder Include="Abstractions\Entities\" />
+		<Folder Include="DomainEvents\Contracts\" />
+		<Folder Include="src\ArchiX.Library\Migrations\" />
 	</ItemGroup>
 
-	
+
 </Project>

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace ArchiX.Library.Runtime.Security;
 
 /// <summary>
-/// Tam parola doðrulama servisi (policy + expiration + dynamic blacklist + pwned + history).
+/// Tam parola doðrulama servisi (policy + expiration + dynamic blacklist + dictionary + pwned + history).
 /// </summary>
 public sealed class PasswordValidationService
 {
@@ -14,6 +14,7 @@ public sealed class PasswordValidationService
     private readonly IPasswordPwnedChecker _pwnedChecker;
     private readonly IPasswordHistoryService _historyService;
     private readonly IPasswordBlacklistService _blacklistService;
+    private readonly IPasswordDictionaryChecker _dictionaryChecker;
     private readonly IPasswordHasher _hasher;
     private readonly IPasswordExpirationService _expirationService;
     private readonly IDbContextFactory<AppDbContext> _dbContextFactory;
@@ -23,6 +24,7 @@ public sealed class PasswordValidationService
         IPasswordPwnedChecker pwnedChecker,
         IPasswordHistoryService historyService,
         IPasswordBlacklistService blacklistService,
+        IPasswordDictionaryChecker dictionaryChecker,
         IPasswordHasher hasher,
         IPasswordExpirationService expirationService,
         IDbContextFactory<AppDbContext> dbContextFactory)
@@ -31,6 +33,7 @@ public sealed class PasswordValidationService
         _pwnedChecker = pwnedChecker;
         _historyService = historyService;
         _blacklistService = blacklistService;
+        _dictionaryChecker = dictionaryChecker;
         _hasher = hasher;
         _expirationService = expirationService;
         _dbContextFactory = dbContextFactory;
@@ -65,6 +68,16 @@ public sealed class PasswordValidationService
         {
             errors.Add("DYNAMIC_BLOCK");
             return new PasswordValidationResult(false, errors);
+        }
+
+        if (policy.EnableDictionaryCheck)
+        {
+            var isCommon = await _dictionaryChecker.IsCommonPasswordAsync(password, ct).ConfigureAwait(false);
+            if (isCommon)
+            {
+                errors.Add("DICTIONARY_WORD");
+                return new PasswordValidationResult(false, errors);
+            }
         }
 
         var isPwned = await _pwnedChecker.IsPwnedAsync(password, ct).ConfigureAwait(false);

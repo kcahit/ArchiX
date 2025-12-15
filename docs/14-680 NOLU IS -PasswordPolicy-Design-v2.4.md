@@ -1,4 +1,4 @@
-﻿# Parola Politikası Tasarım Dokümanı (PasswordPolicy)
+﻿ Parola Politikası Tasarım Dokümanı (PasswordPolicy)
 
 Revizyon: v2.4 (2025-12-05)
 Önceki sürüm: v2.3 (2025-11-29)
@@ -1384,3 +1384,34 @@ if (loginSuccess)
     await _rateLimiter.ResetAsync($"user:{userId}");
 
 --- RL-09 TAMAMLANDI - 2025-12-15 11:40 (Türkiye Saati)
+
+✅ RL-08 TAMAMLANDI - -- 2025-12-16 12:15 (Türkiye Saati)
+Yapılan işler:
+1.	✅ IPasswordDictionaryChecker interface
+2.	✅ PasswordDictionaryChecker implementasyonu
+3.	✅ common-passwords.txt embedded resource (150+ kelime)
+4.	✅ ArchiX.Library.csproj güncellendi (EmbeddedResource)
+5.	✅ PasswordPolicyOptions → EnableDictionaryCheck property eklendi
+6.	✅ PasswordValidationService → Dictionary kontrolü entegrasyonu
+7.	✅ DI kaydı (PasswordSecurityServiceCollectionExtensions)
+8.	✅ PasswordValidationServiceTests → 2 yeni test (dictionary)
+9.	✅ PasswordDictionaryCheckerTests → 8 test
+Test kapsamı (8 adet):
+•	IsCommonPasswordAsync_ReturnsTrue_WhenPasswordIsCommon
+•	IsCommonPasswordAsync_ReturnsFalse_WhenPasswordIsNotCommon
+•	IsCommonPasswordAsync_CaseInsensitive_ReturnsTrue
+•	IsCommonPasswordAsync_ReturnsFalse_WhenPasswordIsEmpty
+•	IsCommonPasswordAsync_UsesCacheOnSecondCall
+•	GetDictionaryWordCount_ReturnsPositiveNumber
+•	IsCommonPasswordAsync_MultipleCommonPasswords_ReturnsTrue
+•	IsCommonPasswordAsync_StrongPasswords_ReturnsFalse
+Özellikler:
+•	Lazy loading (ilk çağrıda yüklenir)
+•	IMemoryCache (1 saat TTL)
+•	Case-insensitive kontrol
+•	HashSet O(1) lookup
+•	Embedded resource (150+ yaygın parola)
+Hata kodu: DICTIONARY_WORD
+
+--- RL-08 TAMAMLANDI - 2025-12-16 12:15 (Türkiye Saati)
+
