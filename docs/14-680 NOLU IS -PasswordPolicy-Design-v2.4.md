@@ -1172,3 +1172,215 @@ yapılan Plan
 ❌ KALAN:
 •	Doküman güncelleme (RL-05 bittiğini işaretle)
 --- Tarih/Saat: 2025-12-15 10:53 (TR)
+
+---- 14.680 NOLU İŞİN KALANLARININ  YENİDEN TASARIMI 2025-12-15 11:03 (TÜRKİYE) ----
+
+📊 MEVCUT DURUM (2025-12-15)
+✅ TAMAMLANAN İŞLER:
+•	PK-01 → PK-12 (Parametre Kayıtları) ✅
+•	RL-01 (Pwned Passwords - HIBP) ✅
+•	RL-02 (UserPasswordHistory) ✅
+•	RL-03 (PasswordBlacklist - Dinamik) ✅
+•	RL-04 (Password Expiration) ✅
+•	RL-05 (Yönetim UI) ✅
+❌ KALAN 5 İŞ:
+ID	İş	Öncelik	Süre	Bağımlılık	Açıklama
+RL-06	History temizleme job'ı	🟢 Düşük	0.5 gün	RL-02 ✅	Eski history kayıtlarını otomatik temizleme
+RL-07	Entropy kontrolü	🟢 Düşük	1 gün	Yok	Parola karmaşıklığı skoru hesaplama
+RL-08	Dictionary attack koruması	🟢 Düşük	1 gün	RL-03 ✅	Yaygın kelime sözlüğü kontrolü
+RL-09	Rate limiting	🟡 Orta	1 gün	Yok	Parola değişim/deneme hız sınırlama
+RL-10	Çoklu dil desteği	⚪ En Düşük	0.5 gün	Yok	Hata mesajları i18n
+---
+🎯 ÖNERİLEN SIRA (Teknik Bağımlılık + Değer Bazlı)
+PLAN A: Güvenlik Öncelikli (Önerilen)
+1. RL-09 (Rate Limiting)           [1 gün]   - 🔴 KRİTİK GÜVENLİK
+2. RL-08 (Dictionary Attack)       [1 gün]   - 🟡 GÜVENLİK + RL-03 kullanır
+3. RL-07 (Entropy)                 [1 gün]   - 🟡 GÜVENLİK İYİLEŞTİRME
+4. RL-06 (History Cleanup Job)     [0.5 gün] - 🟢 PERFORMANS + RL-02 kullanır
+5. RL-10 (i18n)                    [0.5 gün] - ⚪ KULLANICILIK
+─────────────────────────────────────────
+TOPLAM: 4 gün
+
+PLANB: 
+1. RL-06 (History Cleanup)         [0.5 gün] - Basit, DB temizliği
+2. RL-10 (i18n)                    [0.5 gün] - Basit, error message wrapper
+3. RL-07 (Entropy)                 [1 gün]   - Orta, bağımsız
+4. RL-08 (Dictionary)              [1 gün]   - RL-03 kullanır
+5. RL-09 (Rate Limiting)           [1 gün]   - Karmaşık, IMemoryCache + middleware
+─────────────────────────────────────────
+TOPLAM: 4 gün
+
+
+📋 DETAYLI ANALİZ
+RL-06: History Temizleme Job'ı 🟢
+Amaç: UserPasswordHistories tablosunda eski kayıtları temizle
+Bağımlılık:
+•	✅ RL-02 (UserPasswordHistory entity + service)
+Yapılacaklar:
+1.	IPasswordHistoryCleanupService interface
+2.	PasswordHistoryCleanupService implementasyonu
+3.	Background service / Hosted service (IHostedService)
+4.	Ayarlar: appsettings.json → HistoryCleanup:IntervalMinutes
+5.	Test: PasswordHistoryCleanupServiceTests.cs
+Teknik Detay:
+// Her N dakikada bir
+// Her kullanıcı için HistoryCount'tan fazla kayıt varsa
+// En eski (CreatedAtUtc) kayıtları sil
+Risk: YOK (RL-02 zaten var)
+---
+RL-07: Entropy Kontrolü 🟢
+Amaç: Parola karmaşıklığı skoru (Shannon Entropy)
+Bağımlılık: YOK
+Yapılacaklar:
+1.	IPasswordEntropyCalculator interface
+2.	PasswordEntropyCalculator implementasyonu
+3.	PasswordValidationService entegrasyonu (opsiyonel error code: LOW_ENTROPY)
+4.	Policy'ye MinEntropyBits ekle (opsiyonel)
+5.	Test: PasswordEntropyCalculatorTests.cs
+
+// Shannon Entropy = -Σ(p(xi) * log2(p(xi)))
+// Örn: "password" → ~2.75 bits/char (zayıf)
+//      "A1!xY9#z" → ~3.5 bits/char (güçlü)
+Risk: YOK (bağımsız)
+---
+RL-08: Dictionary Attack Koruması 🟢
+Amaç: Yaygın kelime sözlüğü kontrolü (10K+ kelime)
+Bağımlılık:
+•	✅ RL-03 (IPasswordBlacklistService - dinamik liste)
+Yapılacaklar:
+1.	common-passwords.txt dosyası (embedded resource)
+2.	IPasswordDictionaryChecker interface
+3.	PasswordDictionaryChecker implementasyonu (lazy load + cache)
+4.	PasswordValidationService entegrasyonu (error code: DICTIONARY_WORD)
+5.	Policy'ye EnableDictionaryCheck bool ekle
+6.	Test: PasswordDictionaryCheckerTests.cs
+Teknik Detay:
+// RockyYou, SecLists vb. kaynaklardan 10K kelime
+// Normalize (lowercase, trim)
+// HashSet<string> (O(1) lookup)
+// IMemoryCache (1 saat TTL)
+
+Risk: DÜŞÜK (RL-03'ü kullanır, benzer yapı)
+---
+RL-09: Rate Limiting 🟡
+Amaç: Parola değişim/deneme hız sınırlama
+Bağımlılık: YOK
+Yapılacaklar:
+1.	IPasswordAttemptRateLimiter interface
+2.	PasswordAttemptRateLimiter implementasyonu (sliding window)
+3.	Middleware: PasswordRateLimitMiddleware
+4.	Policy ayarları: MaxAttemptsPerMinute, WindowSeconds
+5.	IMemoryCache + DistributedCache desteği
+6.	Test: PasswordAttemptRateLimiterTests.cs
+
+Teknik Detay:
+// Key: "pwd:attempt:{userId}" veya "pwd:attempt:{ipAddress}"
+// Sliding window: Son N saniyedeki denemeler
+// Threshold aşılırsa → 429 Too Many Requests
+// DISTRIBUTED (Redis) desteği (multi-instance)
+
+Risk: ORTA (distributed cache gerekebilir)
+---
+RL-10: Çoklu Dil Desteği ⚪
+Amaç: Error mesajları i18n (tr-TR, en-US)
+Bağımlılık: YOK
+Yapılacaklar:
+1.	IPasswordValidationMessageProvider interface
+2.	PasswordValidationMessageProvider implementasyonu
+3.	Resource files: PasswordValidation.tr-TR.resx, PasswordValidation.en-US.resx
+4.	Error code → Localized message mapping
+5.	Test: PasswordValidationMessageProviderTests.cs
+Teknik Detay:
+// Error code: "MIN_LENGTH"
+// tr-TR: "Parola en az {0} karakter olmalıdır."
+// en-US: "Password must be at least {0} characters."
+
+Risk: YOK (basit)
+---
+🔥 ÖNERİLEN SIRA: PLAN A (Güvenlik Öncelikli)
+GÜN 1: RL-09 (Rate Limiting) ⚡
+•	Neden İLK: Brute-force saldırılarını engeller (KRİTİK)
+•	Çıktı: Parola deneme limiti aktif
+GÜN 2: RL-08 (Dictionary Attack) 🛡️
+•	Neden İKİNCİ: Yaygın parolaları engeller + RL-03'ü kullanır
+•	Çıktı: 10K+ kelime koruması
+GÜN 3: RL-07 (Entropy) 📊
+•	Neden ÜÇÜNCÜ: Parola gücü objektif ölçümü
+•	Çıktı: Entropy skoru hesaplama
+GÜN 4 (Yarım): RL-06 (History Cleanup) 🧹
+•	Neden DÖRDÜNCÜ: Performans optimizasyonu
+•	Çıktı: Otomatik DB temizliği
+GÜN 4 (Yarım): RL-10 (i18n) 🌍
+•	Neden SON: Kullanıcı deneyimi iyileştirmesi
+•	Çıktı: Türkçe/İngilizce error mesajları
+---
+⚠️ TEKRAR YAPILMAMASI İÇİN KURALLAR
+1.	Her iş için ÖNCE interface tanımla (IPasswordXxxService)
+2.	DI kaydını HEMEN ekle (PasswordSecurityServiceCollectionExtensions)
+3.	Test dosyasını KOD YAZMADAN ÖNCE oluştur (TDD)
+4.	Duplicate metod kontrolü yap (RL-05'teki gibi hata olmasın)
+5.	run_build her iş sonrası (warning'siz tamamla)
+6.	Doküman güncelle (her iş bittiğinde v2.5, v2.6 vb.)
+---
+✅ SONUÇ
+ÖNERİLEN PLAN: PLAN A (Güvenlik Öncelikli)
+TOPLAM SÜRE: 4 gün
+İLK ADIM: RL-09 (Rate Limiting) - HEMEN BAŞLA
+
+--- Tasarım Tarihi: 2025-12-15 11:10 (Türkiye Saati) ---
+
+
+
+✅ RL-09 TAMAMLANDI - ÖZET -- 025-12-15 11:40 (Türkiye Saati)
+Yapılan İşler:
+1.	✅ Interface → IPasswordAttemptRateLimiter.cs (4 metot)
+2.	✅ Implementation → IPasswordAttemptRateLimiter.cs (Sliding window, IMemoryCache)
+3.	✅ DI Kaydı → PasswordSecurityServiceCollectionExtensions.cs (Singleton)
+4.	✅ Unit Tests → PasswordAttemptRateLimiterTests.cs (15 test)
+---
+📊 Test Kapsamı (15 Adet)
+IsRateLimitExceededAsync Tests (6)
+1.	IsRateLimitExceededAsync_NoAttempts_ReturnsFalse()
+2.	IsRateLimitExceededAsync_BelowThreshold_ReturnsFalse()
+3.	IsRateLimitExceededAsync_AtThreshold_ReturnsTrue()
+4.	IsRateLimitExceededAsync_ExceedsThreshold_ReturnsTrue()
+5.	SlidingWindow_ExpiredAttemptsIgnored()
+6.	CustomPolicy_UsesCorrectThreshold()
+RecordAttemptAsync Tests (3)
+7.	RecordAttemptAsync_StoresTimestamp()
+8.	RecordAttemptAsync_MultipleUsers_Isolated()
+9.	ResetAsync_ClearsAttempts()
+GetStatusAsync Tests (3)
+10.	GetStatusAsync_NoAttempts_ReturnsMaxRemaining()
+11.	GetStatusAsync_SomeAttempts_ReturnsCorrectRemaining()
+12.	GetStatusAsync_ExceededLimit_ReturnsRetryAfter()
+Edge Cases (3)
+13.	ZeroThreshold_UsesFallbackDefault()
+14.	EmptyKey_ThrowsException()
+15.	NullKey_ThrowsException()
+---
+🔑 Özellikler
+•	Sliding Window: Belirli süre içindeki denemeleri izler
+•	Policy-Driven: LockoutThreshold ve LockoutSeconds kullanır
+•	Multi-User: Her kullanıcı/IP için ayrı sayaç
+•	Fallback: Policy yoksa varsayılan değerler (5 deneme, 5 dakika)
+•	Cache: IMemoryCache (distributed cache desteği eklenebilir)
+
+ kod kullanım örneği:
+ // Login/PasswordChange işleminde
+
+var isBlocked = await _rateLimiter.IsRateLimitExceededAsync($"user:{userId}");
+if (isBlocked)
+{
+    var (_, retryAfter) = await _rateLimiter.GetStatusAsync($"user:{userId}");
+    return StatusCode(429, $"Çok fazla deneme. {retryAfter} saniye sonra tekrar deneyin.");
+}
+
+// Denemeyi kaydet
+await _rateLimiter.RecordAttemptAsync($"user:{userId}");
+
+// Başarılı işlem sonrası sıfırla
+if (loginSuccess)
+    await _rateLimiter.ResetAsync($"user:{userId}");
+
+--- RL-09 TAMAMLANDI - 2025-12-15 11:40 (Türkiye Saati)

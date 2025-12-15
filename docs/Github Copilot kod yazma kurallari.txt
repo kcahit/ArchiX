@@ -1,5 +1,4 @@
 1. KODLARI HİÇ BİR ZAMAN YAZIŞMA EDİTÖRÜ ŞEKLİNDE VERME.  BU KOPYALA YAPIŞTIRMADA HATAYA SEBEP OLUYOR. KOD EDİTÖRÜNDE İNDENTLİ VE RENKLİ OLAN FORMATTA VERİRSEN SORUN OLMUYOR. 
-
 2. KOD VERECEĞİN ZAMAN DAİMA 1 TANE TAM KOD VERECEKSİN. BEN ONU ÇAŞILTIRACAĞIM. BENİM DONÜŞÜME GÖFE SONRAKİ KODA GEÇECEKSİN
 3. BENİMLE MUHAKKAK TÜRKÇE YAZIŞ LÜTFEN. ÇÜNKÜ BEN İNGİLİZCE BİLMİYORUM. LÜTFEN...
 4. bir kodu verdikten sonra sadece bu koda ait bir test olacaksa sonraki adım test kodunu yazıp ver .
@@ -9,10 +8,11 @@
 8. Eğer migration olacak ise . migration kodu yazma APPDbConext içine ekleyeceksin. 
 8.1  public DbSet<PasswordBlacklist> PasswordBlacklists => Set<PasswordBlacklist>(); öneiindeki gibi ekleme yapacaksın
 8.2 Hasdata ile data ekleme yapacaksın.
-9. migration dosyalarında değişiklik istemiyorum. Çünkü tüm migration dosyalarını silsem ve her şeyi sıfordan yapsam ne olacak. Birde projesine library referans ekleyen na yapacak? her zaman kaynak dosyada düeltme olacak.
+9. migration dosyalarında değişiklik istemiyorum. Çünkü tüm migration dosyalarını silsem ve her şeyi sıfırdan yapsam ne olacak. Birde projesine library referans ekleyen na yapacak? her zaman kaynak dosyada düeltme olacak.
 10. run_build sonrasında Warning/Message tipinde uyarı kalmamalıdır. buna her zaman dikkat et.
 11. Dönüşlerinde maçıklama yaz. gereksiz açıklama yapma. olabildiğince sadece kod.
 12. KOd verirken ilk önce yeni mi yoksa değişiklik mi var onu yaz sonra kod ver.
 13. Kodun Başına değişiklik mi yok yeni mi onu yaz. dosya adını dizinle birlikte yaz.
-tek kod vermeyi sakın unutmaa
-tek kod vermeyi sakın unutmaa. daima dönüşümü bekle
+14. Projenin klasör yapısını ve mevcut kodlarını incele öyle karar ver
+
+tek kod ve tam dosya kodu  vermeyi sakın unutma. daima dönüşümü bekle
