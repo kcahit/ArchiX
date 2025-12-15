@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace ArchiX.Library.Runtime.Security;
 
 /// <summary>
-/// Tam parola doðrulama servisi (policy + expiration + dynamic blacklist + dictionary + pwned + history).
+/// Tam parola doðrulama servisi (policy + expiration + entropy + dynamic blacklist + dictionary + pwned + history).
 /// </summary>
 public sealed class PasswordValidationService
 {
@@ -17,6 +17,7 @@ public sealed class PasswordValidationService
     private readonly IPasswordDictionaryChecker _dictionaryChecker;
     private readonly IPasswordHasher _hasher;
     private readonly IPasswordExpirationService _expirationService;
+    private readonly IPasswordEntropyCalculator _entropyCalculator;
     private readonly IDbContextFactory<AppDbContext> _dbContextFactory;
 
     public PasswordValidationService(
@@ -27,6 +28,7 @@ public sealed class PasswordValidationService
         IPasswordDictionaryChecker dictionaryChecker,
         IPasswordHasher hasher,
         IPasswordExpirationService expirationService,
+        IPasswordEntropyCalculator entropyCalculator,
         IDbContextFactory<AppDbContext> dbContextFactory)
     {
         _policyProvider = policyProvider;
@@ -36,6 +38,7 @@ public sealed class PasswordValidationService
         _dictionaryChecker = dictionaryChecker;
         _hasher = hasher;
         _expirationService = expirationService;
+        _entropyCalculator = entropyCalculator;
         _dbContextFactory = dbContextFactory;
     }
 
@@ -48,11 +51,23 @@ public sealed class PasswordValidationService
         var policy = await _policyProvider.GetAsync(applicationId, ct).ConfigureAwait(false);
         var errors = new List<string>();
 
+        // 1. Policy kurallarý (senkron)
         var policyErrors = ValidatePolicy(password, policy);
         errors.AddRange(policyErrors);
         if (errors.Count > 0)
             return new PasswordValidationResult(false, errors);
 
+        // 2. Entropy kontrolü (senkron)
+        if (policy.MinEntropyBits.HasValue && policy.MinEntropyBits.Value > 0)
+        {
+            if (!_entropyCalculator.MeetsMinimumEntropy(password, policy.MinEntropyBits.Value))
+            {
+                errors.Add("LOW_ENTROPY");
+                return new PasswordValidationResult(false, errors);
+            }
+        }
+
+        // 3. Parola yaþlandýrma (senkron)
         if (RequiresExpirationCheck(policy))
         {
             var user = await LoadUserAsync(userId, ct).ConfigureAwait(false);
@@ -63,6 +78,7 @@ public sealed class PasswordValidationService
             }
         }
 
+        // 4. Dinamik blacklist (async)
         var dynamicBlocked = await _blacklistService.IsWordBlockedAsync(password, applicationId, ct).ConfigureAwait(false);
         if (dynamicBlocked)
         {
@@ -70,6 +86,7 @@ public sealed class PasswordValidationService
             return new PasswordValidationResult(false, errors);
         }
 
+        // 5. Dictionary kontrolü (async)
         if (policy.EnableDictionaryCheck)
         {
             var isCommon = await _dictionaryChecker.IsCommonPasswordAsync(password, ct).ConfigureAwait(false);
@@ -80,10 +97,12 @@ public sealed class PasswordValidationService
             }
         }
 
+        // 6. Pwned kontrolü (async)
         var isPwned = await _pwnedChecker.IsPwnedAsync(password, ct).ConfigureAwait(false);
         if (isPwned)
             errors.Add("PWNED");
 
+        // 7. History kontrolü (async)
         if (policy.HistoryCount > 0)
         {
             var hash = await _hasher.HashAsync(password, policy, ct).ConfigureAwait(false);

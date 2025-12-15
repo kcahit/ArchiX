@@ -36,5 +36,12 @@ public sealed record PasswordPolicyOptions
     public int LockoutSeconds { get; init; } = 900;
     public int? MaxPasswordAgeDays { get; init; } = null;
     public bool EnableDictionaryCheck { get; init; } = true;
+
+    /// <summary>
+    /// Minimum gerekli parola entropy deðeri (bits).
+    /// null = entropy kontrolü devre dýþý
+    /// </summary>
+    public double? MinEntropyBits { get; init; }
+
     public PasswordHashOptions Hash { get; init; } = new();
 }

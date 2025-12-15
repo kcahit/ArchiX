@@ -20,6 +20,7 @@ public sealed class PasswordValidationServiceTests
     private readonly Mock<IPasswordDictionaryChecker> _dictionaryChecker = new();
     private readonly Mock<IPasswordHasher> _hasher = new();
     private readonly Mock<IPasswordExpirationService> _expirationService = new();
+    private readonly Mock<IPasswordEntropyCalculator> _entropyCalculator = new();
     private readonly Mock<IDbContextFactory<AppDbContext>> _dbContextFactory = new();
     private PasswordPolicyOptions _policy;
 
@@ -72,6 +73,10 @@ public sealed class PasswordValidationServiceTests
         _hasher
             .Setup(x => x.HashAsync(It.IsAny<string>(), It.IsAny<PasswordPolicyOptions>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((string pwd, PasswordPolicyOptions _, CancellationToken _) => $"HASHED_{pwd}");
+
+        _entropyCalculator
+            .Setup(x => x.MeetsMinimumEntropy(It.IsAny<string>(), It.IsAny<double>()))
+            .Returns(true);
     }
 
     private PasswordValidationService CreateService() => new(
@@ -82,6 +87,7 @@ public sealed class PasswordValidationServiceTests
         _dictionaryChecker.Object,
         _hasher.Object,
         _expirationService.Object,
+        _entropyCalculator.Object,
         _dbContextFactory.Object);
 
     [Fact]
@@ -208,6 +214,21 @@ public sealed class PasswordValidationServiceTests
         Assert.False(result.IsValid);
         Assert.Contains("EXPIRED", result.Errors);
         _blacklistService.Verify(x => x.IsWordBlockedAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ValidateAsync_LowEntropy_ReturnsLowEntropyError()
+    {
+        _policy = _policy with { MinEntropyBits = 50.0 };
+        _entropyCalculator
+            .Setup(x => x.MeetsMinimumEntropy(It.IsAny<string>(), 50.0))
+            .Returns(false);
+
+        var service = CreateService();
+        var result = await service.ValidateAsync("GoodP@ssw0rd!123", userId: 1);
+
+        Assert.False(result.IsValid);
+        Assert.Contains("LOW_ENTROPY", result.Errors);
     }
 
     private static (AppDbContext Context, int UserId) CreateContextWithUser(DateTimeOffset? passwordChangedAt)

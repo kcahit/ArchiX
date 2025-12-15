@@ -13,6 +13,8 @@
 11. Dönüşlerinde maçıklama yaz. gereksiz açıklama yapma. olabildiğince sadece kod.
 12. KOd verirken ilk önce yeni mi yoksa değişiklik mi var onu yaz sonra kod ver.
 13. Kodun Başına değişiklik mi yok yeni mi onu yaz. dosya adını dizinle birlikte yaz.
-14. Projenin klasör yapısını ve mevcut kodlarını incele öyle karar ver
+14. Projenin klasör yapısını ve mevcut kodlarını incele öyle karar ver.
+15. zoeunlu kalırsan kısa açıklamalar yaz. thread çabuk şişiyor
 
 tek kod ve tam dosya kodu  vermeyi sakın unutma. daima dönüşümü bekle
+Kod vermeye başla şimdi

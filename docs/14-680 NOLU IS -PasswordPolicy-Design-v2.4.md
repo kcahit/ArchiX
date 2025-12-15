@@ -44,7 +44,8 @@ Tamamlanan işler:
 **Kaynak Kodlar (RL-01):**
 - `IPasswordPwnedChecker.cs` (Abstractions/Security)
 - `PasswordPwnedChecker.cs` (Runtime/Security)
-- `PasswordValidationService.cs` (Runtime/Security)
+- `
+- PasswordValidationService.cs` (Runtime/Security)
 - `PasswordSecurityServiceCollectionExtensions.cs` (güncellendi - DI kaydı)
 
 **Kaynak Kodlar (RL-02):**
@@ -1385,7 +1386,7 @@ if (loginSuccess)
 
 --- RL-09 TAMAMLANDI - 2025-12-15 11:40 (Türkiye Saati)
 
-✅ RL-08 TAMAMLANDI - -- 2025-12-16 12:15 (Türkiye Saati)
+✅ RL-08 TAMAMLANDI - -- 2025-12-15 12:15 (Türkiye Saati)
 Yapılan işler:
 1.	✅ IPasswordDictionaryChecker interface
 2.	✅ PasswordDictionaryChecker implementasyonu
@@ -1413,5 +1414,74 @@ Test kapsamı (8 adet):
 •	Embedded resource (150+ yaygın parola)
 Hata kodu: DICTIONARY_WORD
 
---- RL-08 TAMAMLANDI - 2025-12-16 12:15 (Türkiye Saati)
+--- RL-08 TAMAMLANDI - 2025-12-15 12:15 (Türkiye Saati)
 
+
+--- RL-08 TAMAMLANDI - 2025-12-15 13:33 (Türkiye Saati)
+
+✅ RL-07: Entropy Kontrolü - ÖZET
+Tarih: 2025-12-16 (Türkiye Saati)
+Yapılan İşler:
+1.	✅ Interface → IPasswordEntropyCalculator.cs (3 metot)
+2.	✅ Implementation → IPasswordEntropyCalculator.cs (Shannon Entropy)
+3.	✅ PasswordPolicyOptions → MinEntropyBits property eklendi
+4.	✅ PasswordValidationService → Entropy kontrolü entegrasyonu (LOW_ENTROPY error)
+5.	✅ DI Kaydı → PasswordSecurityServiceCollectionExtensions.cs (Singleton)
+6.	✅ Unit Tests → PasswordEntropyCalculatorTests.cs (13 test)
+7.	✅ Integration Test → PasswordValidationServiceTests.cs (LOW_ENTROPY testi)
+---
+📊 Özellikler:
+•	Shannon Entropy Formula: -Σ(p(xi) * log2(p(xi)))
+•	Çıktı: Bits per character + Total bits
+•	Policy-Driven: MinEntropyBits null/0 ise devre dışı
+•	Lightweight: Stateless, thread-safe
+•	Performans: O(n) - karakter frekans analizi
+---
+🔑 Kullanım Örneği:
+// Policy JSON
+{
+  "minEntropyBits": 40.0  // null = devre dışı
+}
+
+// Validation akışı
+// 1. Policy kuralları (MIN_LENGTH, REQ_UPPER, ...)
+// 2. ✅ Entropy kontrolü → LOW_ENTROPY
+// 3. Expiration kontrolü
+// 4. Dictionary/Pwned/History kontrolleri
+
+---
+📈 Entropi Örnekleri:
+Parola	Entropy/Char	Total Bits	Sonuç
+aaaa	0.0	0.0	❌ Çok zayıf
+Password	~2.75	~22.0	❌ Zayıf
+A1!xY9#z	~2.9	~23.2	✅ Orta
+A1!xY9#zK2@wQ5$	~3.2	~51.2	✅ Güçlü
+---
+📋 KALAN İŞLER (2025-12-15 13:34)
+ID	İş	Öncelik	Durum	Süre
+RL-06	History temizleme job'ı	🟢 Düşük	⏳ TODO	0.5 gün
+RL-07	Entropy kontrolü	🟢 Düşük	✅ DONE	~~1 gün~~
+RL-10	Çoklu dil desteği	⚪ En Düşük	⏳ TODO	0.5 gün
+
+✅ RL-06 TAMAMLANDI! (2025-12-15 14:48 (Türkiye Saati))
+---
+Özet
+Yapılan İşler:
+1.	✅ IPasswordHistoryCleanupService interface
+2.	✅ PasswordHistoryCleanupService implementasyonu
+3.	✅ DI kaydı (PasswordSecurityServiceCollectionExtensions)
+4.	✅ Unit tests (9 test - tüm senaryolar)
+Test Kapsamı:
+•	CleanupUserHistoryAsync_KeepCountZero_ReturnsZero()
+•	CleanupUserHistoryAsync_NoHistory_ReturnsZero()
+•	CleanupUserHistoryAsync_LessThanKeepCount_ReturnsZero()
+•	CleanupUserHistoryAsync_RemovesOldest_KeepsMostRecent()
+•	CleanupUserHistoryAsync_MultipleUsers_IsolatesCorrectly()
+•	CleanupAllUsersHistoryAsync_HistoryCountZero_ReturnsZero()
+•	CleanupAllUsersHistoryAsync_CleansAllUsers()
+•	CleanupAllUsersHistoryAsync_NoHistoryRecords_ReturnsZero()
+Özellikler:
+•	Kullanıcı bazında history temizleme
+•	Policy.HistoryCount parametresi ile otomatik limit
+•	Çoklu kullanıcı desteği
+•	En eski kayıtları siler, en yenileri korur
