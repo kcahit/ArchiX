@@ -281,3 +281,13 @@ src/ArchiX.WebHost/wwwroot/css/shared/
 - `grid-filtre-baslikta.html` → `Grid.cshtml`
 - DataTables.js entegrasyonu
 - Gelişmiş filtreler, slicer paneli
+
+==> 16-12-2025 19:35 
+1. olmadı alert yine açık mavi yapamadın.
+2. login ekranı giitikçe büyüyor.
+3. tüm hakları saklıdı yazısı hatalı yerde.
+4. login ekrana dikey olarak sığmıyor ve scroll çıkıyor.
+
+
+yarın devam edeceğiz. bu notlar dursun
+

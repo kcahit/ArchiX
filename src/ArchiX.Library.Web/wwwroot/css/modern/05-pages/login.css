@@ -1,17 +1,13 @@
 /* ========================================
-   LOGIN PAGE - Modern Tasarım
+   LOGIN PAGE - Çalışan Tasarım
    ======================================== */
 
-/* Login Page Layout - Her iki sınıf için de geçerli */
-body.login-page,
-body.auth-body {
+/* Login Page Layout */
+body.login-page {
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
-    padding: 20px;
-    background: var(--primary-gradient);
+    padding: 40px 0;
 }
 
 /* Login Container */
@@ -20,34 +16,8 @@ body.auth-body {
     border-radius: 20px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     overflow: hidden;
-    max-width: 420px;
+    max-width: 900px;
     width: 100%;
-}
-
-/* Login Card */
-.login-card {
-    padding: 40px 35px;
-}
-
-/* Login Logo */
-.login-logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 15px;
-}
-
-    .login-logo i {
-        font-size: 60px;
-        color: #667eea;
-    }
-
-/* Login Title */
-.login-title {
-    font-size: 1.75rem;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 8px;
 }
 
 /* Sol Panel - Image/Info Side */
@@ -235,19 +205,6 @@ body.auth-body {
 
 /* Responsive */
 @media (max-width: 768px) {
-    body.login-page,
-    body.auth-body {
-        padding: 15px;
-    }
-
-    .login-container {
-        max-width: 100%;
-    }
-
-    .login-card {
-        padding: 30px 25px;
-    }
-
     .login-image {
         padding: 40px 20px;
     }
@@ -261,21 +218,6 @@ body.auth-body {
     }
 
     .login-image h2 {
-        font-size: 1.5rem;
-    }
-}
-
-@media (max-width: 576px) {
-    body.login-page,
-    body.auth-body {
-        padding: 10px;
-    }
-
-    .login-card {
-        padding: 25px 20px;
-    }
-
-    .login-title {
         font-size: 1.5rem;
     }
 }

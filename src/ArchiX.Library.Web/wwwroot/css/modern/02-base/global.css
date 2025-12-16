@@ -59,11 +59,11 @@ body {
     min-height: 100vh;
 }
 
-/* Login ve Grid sayfaları için mor gradient */
-body.login-page,
-body.grid-page {
-    background: var(--primary-gradient);
-}
+    /* Login ve Grid sayfaları için mor gradient */
+    body.login-page,
+    body.grid-page {
+        background: var(--primary-gradient);
+    }
 
 /* Container */
 .container {
@@ -187,9 +187,9 @@ body.grid-page {
     display: none;
 }
 
-.overlay.active {
-    display: block;
-}
+    .overlay.active {
+        display: block;
+    }
 
 /* Divider */
 .divider {
@@ -203,6 +203,47 @@ body.grid-page {
     height: 100%;
     background-color: var(--border-color);
     margin: 0 var(--spacing-md);
+}
+
+/* ============================================
+   VALIDATION & ALERTS - Açık Mavi Override
+   Bootstrap CSS'i override etmek için çok spesifik seçici
+   ============================================ */
+
+/* DAHA SPESİFİK - Bootstrap'tan öncelikli */
+html body .alert.alert-danger,
+body .alert.alert-danger,
+.login-form .alert-danger,
+form .alert-danger {
+    background-color: rgba(102, 126, 234, 0.1) !important;
+    color: #667eea !important;
+    border-color: #667eea !important;
+}
+
+/* Tüm validation text'leri açık mavi */
+html body .text-danger,
+body .text-danger {
+    color: #667eea !important;
+}
+
+html body .validation-summary-errors,
+.validation-summary-errors,
+.validation-summary-errors ul,
+.validation-summary-errors ul li {
+    color: #667eea !important;
+}
+
+html body .field-validation-error,
+.field-validation-error {
+    color: #667eea !important;
+}
+
+/* Input validation error border */
+html body input.input-validation-error,
+input.input-validation-error,
+select.input-validation-error,
+textarea.input-validation-error {
+    border-color: #667eea !important;
 }
 
 /* Responsive helpers */

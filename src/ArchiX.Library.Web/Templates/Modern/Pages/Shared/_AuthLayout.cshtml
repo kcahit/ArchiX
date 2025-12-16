@@ -24,11 +24,12 @@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="login-page">
-    <!-- Auth Container -->
-    <div class="auth-container">
-        @RenderBody()
-    </div>
+    <!-- Auth Container
+        <div class="auth-container">
 
+        </div>
+    -->
+    @RenderBody()
     <!-- Footer (minimal for auth pages) -->
     <footer class="auth-footer">
         <div class="container text-center">
