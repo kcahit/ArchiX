@@ -1,0 +1,143 @@
+/* ========================================
+   FORMS
+   ======================================== */
+
+/* Form Controls */
+.form-control,
+.form-select {
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-2) var(--spacing-3);
+    transition: var(--transition-base);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 0.25rem rgba(var(--color-primary-rgb), 0.1);
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: var(--spacing-4);
+}
+
+.form-label {
+    font-weight: var(--font-weight-medium);
+    margin-bottom: var(--spacing-2);
+    color: var(--text-color);
+    font-size: var(--font-size-sm);
+}
+
+/* Input Groups */
+.input-group-custom {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-group-custom .form-control {
+    padding-right: 40px;
+}
+
+.input-group-custom .input-icon {
+    position: absolute;
+    right: 12px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--transition-base);
+}
+
+.input-group-custom .input-icon:hover {
+    color: var(--color-primary);
+}
+
+/* Password Toggle */
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: var(--transition-base);
+}
+
+.password-toggle:hover {
+    color: var(--color-primary);
+}
+
+/* Form Validation */
+.form-control.is-valid {
+    border-color: var(--color-success);
+}
+
+.form-control.is-invalid {
+    border-color: var(--color-danger);
+}
+
+.valid-feedback,
+.invalid-feedback {
+    display: block;
+    margin-top: var(--spacing-1);
+    font-size: var(--font-size-sm);
+}
+
+/* Checkboxes & Radio */
+.form-check {
+    padding-left: 1.5em;
+}
+
+.form-check-input {
+    width: 1.2em;
+    height: 1.2em;
+    border: 2px solid var(--border-color);
+    cursor: pointer;
+}
+
+.form-check-input:checked {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.form-check-label {
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Search Forms */
+.search-box {
+    position: relative;
+}
+
+.search-box .form-control {
+    padding-left: 40px;
+    border-radius: var(--border-radius-pill);
+}
+
+.search-box .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+/* Form Layouts */
+.form-inline {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+}
+
+.form-horizontal .form-group {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+}
+
+.form-horizontal .form-label {
+    margin-bottom: 0;
+    min-width: 120px;
+}

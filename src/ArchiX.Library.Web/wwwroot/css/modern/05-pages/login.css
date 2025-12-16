@@ -1,0 +1,215 @@
+/* ========================================
+   LOGIN PAGE - Eski Tasarım
+   ======================================== */
+
+/* Login Page Layout */
+body.login-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+}
+
+/* Login Container */
+.login-container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    max-width: 900px;
+    width: 100%;
+}
+
+/* Sol Panel - Image/Info Side */
+.login-image {
+    background: var(--primary-gradient);
+    padding: 60px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    text-align: center;
+}
+
+.login-image i {
+    font-size: 80px;
+    margin-bottom: 20px;
+    opacity: 0.9;
+}
+
+.login-image h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.login-image p {
+    opacity: 0.9;
+    font-size: 1.1rem;
+}
+
+/* Sağ Panel - Form Side */
+.login-form {
+    padding: 60px 50px;
+}
+
+.login-form h3 {
+    color: #333;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.login-form p {
+    color: #666;
+    margin-bottom: 30px;
+}
+
+/* Form Controls */
+.login-form .form-control {
+    padding: 12px 15px;
+    border-radius: 10px;
+    border: 2px solid #e0e0e0;
+    transition: all 0.3s;
+}
+
+.login-form .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* Input Group with Icon */
+.login-form .input-group-text {
+    background-color: transparent;
+    border: 2px solid #e0e0e0;
+    border-right: none;
+    border-radius: 10px 0 0 10px;
+}
+
+.login-form .input-group .form-control {
+    border-left: none;
+    border-radius: 0 10px 10px 0;
+}
+
+.login-form .input-group:focus-within .input-group-text {
+    border-color: #667eea;
+}
+
+/* Password Toggle Button */
+.login-form .btn-outline-secondary {
+    border: 2px solid #e0e0e0;
+    border-left: none;
+    border-radius: 0 10px 10px 0;
+}
+
+.login-form .input-group:focus-within .btn-outline-secondary {
+    border-color: #667eea;
+}
+
+/* Login Button */
+.btn-login {
+    background: var(--primary-gradient);
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: bold;
+    color: white;
+    width: 100%;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+/* Divider */
+.divider {
+    text-align: center;
+    margin: 25px 0;
+    position: relative;
+}
+
+.divider::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    height: 1px;
+    background-color: #e0e0e0;
+}
+
+.divider span {
+    background-color: white;
+    padding: 0 15px;
+    position: relative;
+    color: #999;
+    font-size: 0.9rem;
+}
+
+/* Social Login */
+.social-login {
+    display: flex;
+    gap: 10px;
+}
+
+.social-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    border: 2px solid #e0e0e0;
+    background-color: white;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.social-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.social-btn i {
+    font-size: 1.5rem;
+}
+
+.google { color: #DB4437; }
+.facebook { color: #4267B2; }
+.twitter { color: #1DA1F2; }
+
+/* Checkbox */
+.login-form .form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+/* Links */
+.login-form a {
+    color: #667eea;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.login-form a:hover {
+    color: #764ba2;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .login-image {
+        padding: 40px 20px;
+    }
+    
+    .login-form {
+        padding: 40px 30px;
+    }
+    
+    .login-image i {
+        font-size: 60px;
+    }
+    
+    .login-image h2 {
+        font-size: 1.5rem;
+    }
+}

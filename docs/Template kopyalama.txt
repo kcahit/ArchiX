@@ -1,0 +1,44 @@
+  sıfır yaparsan kopyalama işlemi devre dışı bırakılır.
+  
+  <!-- ✅ Default: Her build'de kopyala (CopyTemplates=0 yaparak devre dışı bırakılabilir) -->
+  <PropertyGroup>
+    <CopyTemplates Condition="'$(CopyTemplates)' == ''">1</CopyTemplates>
+  </PropertyGroup>
+
+  <Target Name="CopyFromLibraryWeb" BeforeTargets="BeforeBuild" Condition="'$(CopyTemplates)' == '1'">
+    
+    <!-- 1. Templates klasörünü kopyala -->
+    <ItemGroup>
+      <LibTemplates Include="..\ArchiX.Library.Web\Templates\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(LibTemplates)" 
+          DestinationFolder="Pages\Templates\%(RecursiveDir)" 
+          SkipUnchangedFiles="true" />
+    
+    <!-- 2. CSS klasörünü kopyala -->
+    <ItemGroup>
+      <LibCss Include="..\ArchiX.Library.Web\wwwroot\css\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(LibCss)" 
+          DestinationFolder="wwwroot\css\%(RecursiveDir)" 
+          SkipUnchangedFiles="true" />
+    
+    <!-- 3. Login.cshtml'i gerçek Pages/ klasörüne kopyala -->
+    <Copy SourceFiles="..\ArchiX.Library.Web\Templates\Modern\Pages\Login.cshtml" 
+          DestinationFiles="Pages\Login.cshtml" 
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="..\ArchiX.Library.Web\Templates\Modern\Pages\Login.cshtml.cs" 
+          DestinationFiles="Pages\Login.cshtml.cs" 
+          SkipUnchangedFiles="true" />
+    
+    <!-- 4. Dashboard.cshtml'i gerçek Pages/ klasörüne kopyala -->
+    <Copy SourceFiles="..\ArchiX.Library.Web\Templates\Modern\Pages\Dashboard.cshtml" 
+          DestinationFiles="Pages\Dashboard.cshtml" 
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="..\ArchiX.Library.Web\Templates\Modern\Pages\Dashboard.cshtml.cs" 
+          DestinationFiles="Pages\Dashboard.cshtml.cs" 
+          SkipUnchangedFiles="true" />
+    
+    <Message Importance="high" Text="✅ Templates + Login + Dashboard copied from Library.Web" />
+  </Target>
+</Project>

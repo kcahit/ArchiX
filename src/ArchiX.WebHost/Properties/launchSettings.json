@@ -3,7 +3,7 @@
     "ArchiX.WebHost": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "Admin/Security/PasswordPolicy?applicationId=1",
+      "launchUrl": "Login",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ARCHIX_PEPPER": "change-this-in-dev"

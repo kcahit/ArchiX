@@ -1,0 +1,130 @@
+<nav id="sidebar" class="col-md-3 col-lg-2 d-md-block sidebar">
+    <div class="sidebar-header">
+        <h3><i class="bi bi-grid-fill"></i> Menü</h3>
+    </div>
+    <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["page"]?.ToString() == "/Dashboard" ? "active" : "")" 
+                   asp-page="/Dashboard">
+                    <i class="bi bi-house-door-fill"></i>
+                    Ana Sayfa
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-person-fill"></i>
+                    Kullanýcýlar
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link position-relative" href="#">
+                    <i class="bi bi-envelope-fill"></i>
+                    Mesajlar
+                    <span class="badge bg-danger rounded-pill float-end">5</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-graph-up"></i>
+                    Raporlar
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-gear-fill"></i>
+                    Ayarlar
+                </a>
+            </li>
+
+            <!-- Divider -->
+            <li class="nav-item mt-3">
+                <hr class="text-white-50">
+            </li>
+
+            <!-- Security Menu -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" data-bs-toggle="collapse" href="#securityMenu" 
+                   role="button" aria-expanded="false" aria-controls="securityMenu">
+                    <i class="bi bi-shield-lock-fill"></i>
+                    Güvenlik
+                    <i class="bi bi-chevron-down float-end"></i>
+                </a>
+                <div class="collapse" id="securityMenu">
+                    <ul class="nav flex-column ms-3">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-page="/Admin/Security/Index">
+                                <i class="bi bi-speedometer2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-page="/Admin/Security/PasswordPolicy">
+                                <i class="bi bi-key-fill"></i>
+                                Þifre Politikasý
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-page="/Admin/Security/AuditTrail">
+                                <i class="bi bi-clock-history"></i>
+                                Denetim Kaydý
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-page="/Admin/Security/Blacklist">
+                                <i class="bi bi-ban"></i>
+                                Kara Liste
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
+            <!-- Admin Menu -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" data-bs-toggle="collapse" href="#adminMenu" 
+                   role="button" aria-expanded="false" aria-controls="adminMenu">
+                    <i class="bi bi-tools"></i>
+                    Yönetim
+                    <i class="bi bi-chevron-down float-end"></i>
+                </a>
+                <div class="collapse" id="adminMenu">
+                    <ul class="nav flex-column ms-3">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="bi bi-people-fill"></i>
+                                Kullanýcý Yönetimi
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="bi bi-shield-check"></i>
+                                Rol Yönetimi
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="bi bi-file-earmark-text"></i>
+                                Log Yönetimi
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<script>
+    // Sidebar toggle for mobile
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        
+        if (sidebarToggle && sidebar) {
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('show');
+            });
+        }
+    });
+</script>

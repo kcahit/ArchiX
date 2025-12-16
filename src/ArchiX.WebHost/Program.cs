@@ -40,13 +40,18 @@ builder.Services.AddScoped(sp =>
 
 builder.Services.AddArchiXWebDefaults();
 
+// ✅ Symbolic Link: Basit Razor Pages yapılandırması
 builder.Services.AddRazorPages(opts =>
 {
     if (builder.Environment.IsDevelopment())
     {
         opts.Conventions.AllowAnonymousToFolder("/Admin");
+        opts.Conventions.AllowAnonymousToFolder("/Templates");
+        opts.Conventions.AllowAnonymousToPage("/Login");
+        opts.Conventions.AllowAnonymousToPage("/Dashboard");
     }
-});
+})
+.AddRazorRuntimeCompilation();
 
 builder.Services.AddApplicationMappings();
 builder.Services.AddConnectionPolicyEvaluator();
@@ -100,12 +105,15 @@ var forceProvision = string.Equals(
 await AdminProvisionerRunner.EnsureDatabaseProvisionedAsync(app.Services, force: forceProvision);
 await PasswordPolicyStartup.EnsureSeedAndWarningsAsync(app.Services, 1);
 
+// ✅ Static Files (Symbolic link sayesinde css/ erişilebilir)
 app.UseStaticFiles();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
+// ✅ Root Redirect to Login
 app.MapGet("/", (HttpContext ctx) =>
-    Results.Redirect("/Admin/Security/Index?applicationId=1"));
+    Results.Redirect("/Login"));
 
 app.MapGet("/ping/status", async (ArchiX.Library.Abstractions.External.IPingAdapter ping, CancellationToken ct) =>
 {

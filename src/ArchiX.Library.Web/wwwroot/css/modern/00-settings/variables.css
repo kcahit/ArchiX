@@ -1,0 +1,117 @@
+/* ============================================
+   CSS VARIABLES - Tüm Projede Kullanılacak
+   ============================================ */
+
+:root {
+    /* ===== RENKLER ===== */
+    --primary-color: #667eea;
+    --secondary-color: #764ba2;
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    
+    /* Arka Plan Renkleri */
+    --bg-white: #ffffff;
+    --bg-light: #f8f9fa;
+    --bg-gray: #e0e0e0;
+    --bg-dark: #333333;
+    
+    /* Metin Renkleri */
+    --text-primary: #333333;
+    --text-secondary: #666666;
+    --text-muted: #999999;
+    --text-white: #ffffff;
+    --text-light: #ecf0f1;
+    
+    /* Status Renkleri */
+    --status-active-bg: #d4edda;
+    --status-active-text: #155724;
+    --status-inactive-bg: #f8d7da;
+    --status-inactive-text: #721c24;
+    --status-pending-bg: #fff3cd;
+    --status-pending-text: #856404;
+    
+    /* Border Renkleri */
+    --border-color: #e0e0e0;
+    --border-color-light: #f0f0f0;
+    --border-color-dark: #cccccc;
+    
+    /* ===== TİPOGRAFİ ===== */
+    --font-family-primary: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-family-secondary: Arial, sans-serif;
+    --font-family-mono: 'Courier New', monospace;
+    
+    /* Font Boyutları */
+    --font-size-xs: 0.7rem;      /* 11.2px */
+    --font-size-sm: 0.85rem;     /* 13.6px */
+    --font-size-base: 1rem;      /* 16px */
+    --font-size-md: 1.1rem;      /* 17.6px */
+    --font-size-lg: 1.25rem;     /* 20px */
+    --font-size-xl: 1.5rem;      /* 24px */
+    --font-size-2xl: 2rem;       /* 32px */
+    --font-size-3xl: 2.5rem;     /* 40px */
+    
+    /* Font Kalınlıkları */
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --font-weight-extrabold: 800;
+    
+    /* Satır Yükseklikleri */
+    --line-height-tight: 1.2;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.75;
+    --line-height-loose: 2;
+    
+    /* ===== BOŞLUKLAR ===== */
+    --spacing-xs: 5px;
+    --spacing-sm: 10px;
+    --spacing-md: 15px;
+    --spacing-lg: 20px;
+    --spacing-xl: 30px;
+    --spacing-2xl: 40px;
+    --spacing-3xl: 60px;
+    
+    /* ===== BORDER RADIUS ===== */
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-2xl: 20px;
+    --radius-full: 50%;
+    --radius-circle: 9999px;
+    
+    /* ===== GÖLGELER ===== */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 5px 15px rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.2);
+    --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.3);
+    
+    /* ===== GEÇİŞ SÜRELERİ ===== */
+    --transition-fast: 0.15s;
+    --transition-normal: 0.3s;
+    --transition-slow: 0.5s;
+    
+    /* ===== Z-INDEX ===== */
+    --z-dropdown: 1000;
+    --z-sticky: 1020;
+    --z-fixed: 1030;
+    --z-modal-backdrop: 1040;
+    --z-modal: 1050;
+    --z-popover: 1060;
+    --z-tooltip: 1070;
+    
+    /* ===== BREAKPOINTS (Referans için) ===== */
+    /* xs: 0px */
+    /* sm: 576px */
+    /* md: 768px */
+    /* lg: 992px */
+    /* xl: 1200px */
+    /* xxl: 1400px */
+}

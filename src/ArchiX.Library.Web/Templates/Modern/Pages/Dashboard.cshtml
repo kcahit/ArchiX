@@ -1,0 +1,199 @@
+@page "/Dashboard"
+@model ArchiX.Library.Web.Templates.Modern.Pages.DashboardModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="dashboard-header mb-4">
+    <h1 class="page-title">Dashboard</h1>
+    <p class="text-muted">Modern Template - Ana Sayfa</p>
+</div>
+
+<!-- Stats Cards Row -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-primary">
+                <i class="bi bi-people-fill"></i>
+            </div>
+            <div class="stat-details">
+                <h3 class="stat-value">1,234</h3>
+                <p class="stat-label">Toplam Kullanýcý</p>
+            </div>
+            <div class="stat-trend positive">
+                <i class="bi bi-arrow-up"></i> 12%
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-success">
+                <i class="bi bi-graph-up"></i>
+            </div>
+            <div class="stat-details">
+                <h3 class="stat-value">567</h3>
+                <p class="stat-label">Aktif Projeler</p>
+            </div>
+            <div class="stat-trend positive">
+                <i class="bi bi-arrow-up"></i> 8%
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-warning">
+                <i class="bi bi-envelope-fill"></i>
+            </div>
+            <div class="stat-details">
+                <h3 class="stat-value">89</h3>
+                <p class="stat-label">Yeni Mesajlar</p>
+            </div>
+            <div class="stat-trend positive">
+                <i class="bi bi-arrow-up"></i> 23%
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-danger">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <div class="stat-details">
+                <h3 class="stat-value">12</h3>
+                <p class="stat-label">Bekleyen Ýþler</p>
+            </div>
+            <div class="stat-trend negative">
+                <i class="bi bi-arrow-down"></i> 5%
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-3 mb-4">
+    <div class="col-md-8">
+        <div class="card modern-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Aylýk Ýstatistikler</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="monthlyStatsChart" height="80"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card modern-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Kullanýcý Daðýlýmý</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="userDistributionChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activities -->
+<div class="row">
+    <div class="col-12">
+        <div class="card modern-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Son Aktiviteler</h5>
+            </div>
+            <div class="card-body">
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-icon bg-primary">
+                            <i class="bi bi-person-plus"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p class="activity-text"><strong>Yeni kullanýcý</strong> eklendi</p>
+                            <span class="activity-time">5 dakika önce</span>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon bg-success">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p class="activity-text"><strong>Proje tamamlandý</strong></p>
+                            <span class="activity-time">1 saat önce</span>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon bg-warning">
+                            <i class="bi bi-exclamation-circle"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p class="activity-text"><strong>Sistem güncellemesi</strong> gerekli</p>
+                            <span class="activity-time">2 saat önce</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Monthly Stats Chart
+        const monthlyCtx = document.getElementById('monthlyStatsChart');
+        if (monthlyCtx) {
+            new Chart(monthlyCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Oca', 'Þub', 'Mar', 'Nis', 'May', 'Haz'],
+                    datasets: [{
+                        label: 'Kullanýcýlar',
+                        data: [65, 78, 90, 81, 95, 105],
+                        borderColor: 'rgb(102, 126, 234)',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // User Distribution Chart
+        const distributionCtx = document.getElementById('userDistributionChart');
+        if (distributionCtx) {
+            new Chart(distributionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Aktif', 'Pasif', 'Beklemede'],
+                    datasets: [{
+                        data: [70, 20, 10],
+                        backgroundColor: [
+                            'rgb(102, 126, 234)',
+                            'rgb(118, 75, 162)',
+                            'rgb(255, 193, 7)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+}
