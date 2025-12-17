@@ -1,4 +1,5 @@
 @page "/Login"
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @model ArchiX.Library.Web.Templates.Modern.Pages.LoginModel
 @{
     Layout = "Shared/_AuthLayout";
@@ -21,6 +22,7 @@
                 @* <p class="text-muted small mb-0">Hesabýnýza giriþ yapmak için bilgilerinizi girin</p> *@
 
                 <form id="loginForm" method="post">
+                    <input name="__RequestVerificationToken" type="hidden" value="@Antiforgery.GetAndStoreTokens(HttpContext).RequestToken" />
                     @* <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div> *@
 
                     <div class="mb-3">
