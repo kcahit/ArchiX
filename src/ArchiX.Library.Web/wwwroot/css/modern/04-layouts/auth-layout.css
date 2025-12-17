@@ -1,14 +1,16 @@
-/* ========================================
+﻿/* ========================================
    AUTHENTICATION LAYOUT
    ======================================== */
 
 /* Auth Container - Full page centering */
 .auth-container {
     min-height: 100vh;
+    max-height: 100vh; /* EKLE */
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--spacing-4);
+    padding: 20px; /* var(--spacing-4) → 20px */
+    overflow-y: auto; /* EKLE */
 }
 
 /* Auth Card - Main container */

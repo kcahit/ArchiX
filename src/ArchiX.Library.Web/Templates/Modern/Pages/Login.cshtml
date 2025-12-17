@@ -5,80 +5,102 @@
     ViewData["Title"] = "GÝRÝÞ";
 }
 
-<div class="login-container">
-    <div class="row g-0">
-        <div class="col-md-5 login-image d-none d-md-flex">
-            <i class="bi bi-shield-lock-fill"></i>
-            <h2>Hoþ Geldiniz!</h2>
-            <p>Hesabýnýza giriþ yaparak tüm özelliklere eriþebilirsiniz.</p>
-        </div>
+<div class="container">
+    <div class="login-container">
+        <div class="row g-0">
+            <div class="col-md-7 login-image d-md-flex">
+                @* <i class="bi bi-shield-lock-fill"></i> *@
+             @*    <img src="~/images/login.jpg" alt="ArchiX Logo" class="login-logo" /> *@
+                <img src="~/images/login.jpg" alt="ArchiX Logo" class="login-logo" style="max-width: 500px !important; width: 100%;" />
+                <h4>Hoþ Geldiniz!</h4>
+                <p>Hesabýnýza giriþ yaparak tüm özelliklere eriþebilirsiniz.</p>
+            </div>
 
-        <div class="col-md-7 login-form">
-            <h3>Giriþ Yap</h3>
-            <p>Hesabýnýza giriþ yapmak için bilgilerinizi girin</p>
+            <div class="col-md-5 login-form">
+             @*    <h3>Giriþ Yap</h3> *@
+                @* <p class="text-muted small mb-0">Hesabýnýza giriþ yapmak için bilgilerinizi girin</p> *@
 
-            <form id="loginForm" method="post">
-                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                <form id="loginForm" method="post">
+                    @* <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div> *@
 
-                <div class="mb-3">
-                    <label asp-for="Input.Email" class="form-label">E-posta</label>
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="bi bi-envelope-fill"></i>
-                        </span>
-                        <input asp-for="Input.Email" class="form-control" placeholder="ornek@email.com" autocomplete="username" />
+                    <div class="mb-3">
+                        <label asp-for="Input.Email" class="form-label">E-posta</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-envelope-fill"></i>
+                            </span>
+                            <input asp-for="Input.Email" class="form-control" placeholder="ornek@email.com" autocomplete="username" />
+                        </div>
+                        <span asp-validation-for="Input.Email" class="text-danger small"></span>
                     </div>
-                    <span asp-validation-for="Input.Email" class="text-danger small"></span>
-                </div>
 
-                <div class="mb-3">
-                    <label asp-for="Input.Password" class="form-label">Þifre</label>
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="bi bi-lock-fill"></i>
-                        </span>
-                        <input asp-for="Input.Password" type="password" class="form-control" id="password"
-                               placeholder="••••••••" autocomplete="current-password" />
-                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                            <i class="bi bi-eye"></i>
+                    <div class="mb-3">
+                        <label asp-for="Input.Password" class="form-label">Þifre</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-lock-fill"></i>
+                            </span>
+                            <input asp-for="Input.Password" type="password" class="form-control" id="password"
+                                   placeholder="••••••••" autocomplete="current-password" />
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="form-check">
+                            <input asp-for="Input.RememberMe" class="form-check-input" type="checkbox" />
+                            <label asp-for="Input.RememberMe" class="form-check-label">
+                                Beni hatýrla
+                            </label>
+                        </div>
+                        <a href="#" class="text-end">Þifremi unuttum?</a>
+                    </div>
+
+                    <button type="submit" class="btn btn-login w-100">
+                        <i class="bi bi-shield-lock-fill"></i>
+                        @* <i class="bi bi-box-arrow-in-right me-2"></i> *@
+                        Giriþ Yap
+                        
+                    </button>
+                </form>
+               
+                <!-- SOSYAL MEDYA GÝRÝÞÝ kapattým.
+                        
+                   <div class="divider">
+                    <span>veya</span>
+                   </div>
+
+                  <div class="social-login">
+                        @* mb-1 *@
+                        <button class="social-btn" type="button" title="Google ile giriþ">
+                            <i class="bi bi-google google"></i>
+                        </button>
+                        <button class="social-btn" type="button" title="Facebook ile giriþ">
+                            <i class="bi bi-facebook facebook"></i>
+                        </button>
+                        <button class="social-btn" type="button" title="Twitter ile giriþ">
+                            <i class="bi bi-twitter twitter"></i>
                         </button>
                     </div>
-                    <span asp-validation-for="Input.Password" class="text-danger small"></span>
-                </div>
 
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div class="form-check">
-                        <input asp-for="Input.RememberMe" class="form-check-input" type="checkbox" />
-                        <label asp-for="Input.RememberMe" class="form-check-label">
-                            Beni hatýrla
-                        </label>
+
+                     @* ÞÝfre deðiþikliði yapýlýyor *@
+                    <div class="text-center">
+                        <p class="mb-0">Þifreyi Deðiþtir  <a href="#" class="fw-bold">Kayýt Ol</a></p>
+                        <@* a href="#" class="fw-bold">Þifreyi Deðiþtir</a> *@
                     </div>
-                    <a href="#" class="text-end">Þifremi unuttum?</a>
+
+                -->
+            
+                
+
+                <!-- Footer inside card -->
+                <div class="text-center mt-4 pt-3 border-top">
+                    <p class="text-muted small mb-0">&copy; @DateTime.Now.Year ArchiX - Tüm haklarý saklýdýr.</p>
                 </div>
-
-                <button type="submit" class="btn btn-login w-100">
-                    <i class="bi bi-box-arrow-in-right me-2"></i>Giriþ Yap
-                </button>
-            </form>
-
-            <div class="divider">
-                <span>veya</span>
-            </div>
-
-            <div class="social-login mb-4">
-                <button class="social-btn" type="button" title="Google ile giriþ">
-                    <i class="bi bi-google google"></i>
-                </button>
-                <button class="social-btn" type="button" title="Facebook ile giriþ">
-                    <i class="bi bi-facebook facebook"></i>
-                </button>
-                <button class="social-btn" type="button" title="Twitter ile giriþ">
-                    <i class="bi bi-twitter twitter"></i>
-                </button>
-            </div>
-
-            <div class="text-center">
-                <p class="mb-0">Hesabýnýz yok mu? <a href="#" class="fw-bold">Kayýt Ol</a></p>
             </div>
         </div>
     </div>

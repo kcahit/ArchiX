@@ -22,5 +22,6 @@
 
   <ItemGroup>
     <Folder Include="Abstractions\Security\" />
+    <Folder Include="wwwroot\images\" />
   </ItemGroup>
 </Project>

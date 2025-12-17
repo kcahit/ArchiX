@@ -282,12 +282,22 @@ src/ArchiX.WebHost/wwwroot/css/shared/
 - DataTables.js entegrasyonu
 - Gelişmiş filtreler, slicer paneli
 
-==> 16-12-2025 19:35 
-1. olmadı alert yine açık mavi yapamadın.
-2. login ekranı giitikçe büyüyor.
-3. tüm hakları saklıdı yazısı hatalı yerde.
-4. login ekrana dikey olarak sığmıyor ve scroll çıkıyor.
-
-
-yarın devam edeceğiz. bu notlar dursun
-
+---
+SORUN LİSTESİ - ÇÖZÜLECEK:
+1. ALERT RENGİ (Pembe → Açık Mavi) ❌
+•	Sorun: Bootstrap CSS override edilemiyor
+•	Dosya: global.css - Validation kuralları çalışmıyor
+•	Çözüm: CSS specificity artırılmalı veya Bootstrap CSS yükleme sırası değiştirilmeli
+2. LOGIN EKRANI GİTTİKÇE BÜYÜYOR 📏
+•	Sorun: .login-container boyutu kontrolsüz
+•	Dosya: login.css veya auth-layout.css
+•	Çözüm: max-width ve overflow kontrol edilmeli
+3. FOOTER HATALI YERDE (Sağda) 🔻
+•	Sorun: .auth-footer → position: fixed ama login kartının içinde görünüyor
+•	Dosya: auth-layout.css + _AuthLayout.cshtml
+•	Çözüm: Footer pozisyonu düzeltilmeli (sol alt köşe)
+4. DİKEY SCROLL SORUNU (Sayfa Taşması) 📜
+•	Sorun: Login ekranı viewport'a sığmıyor
+•	Dosya: body.login-page CSS kuralları
+•	Çözüm: min-height: 100vh yerine height: 100vh + overflow: hidden
+---

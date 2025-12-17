@@ -4,12 +4,13 @@
 
 /* Login Page Layout */
 body.login-page {
+    min-height: 100vh;
+    padding: 40px 0; /* Üst/alt boşluk */
     display: flex;
-    align-items: center;
+    align-items: flex-start; /* center → flex-start */
     justify-content: center;
-    padding: 40px 0;
+    overflow-y: auto;
 }
-
 /* Login Container */
 .login-container {
     background: white;
@@ -18,6 +19,7 @@ body.login-page {
     overflow: hidden;
     max-width: 900px;
     width: 100%;
+    margin: auto 0; /* EKLE - Dikey merkezleme için */
 }
 
 /* Sol Panel - Image/Info Side */
@@ -32,26 +34,40 @@ body.login-page {
     text-align: center;
 }
 
+    .login-image .login-logo {
+        max-width: 250px !important;
+        width: 250px;
+        height: auto;
+        margin-bottom: 30px;
+        background: white;
+        padding: 15px;
+        border-radius: 15px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
     .login-image i {
         font-size: 80px;
         margin-bottom: 20px;
         opacity: 0.9;
     }
 
-    .login-image h2 {
-        font-size: 2rem;
+
+    .login-image h2,h3,h4,h5 {
+       /* font-size: 2rem;*/
         font-weight: bold;
         margin-bottom: 15px;
+        color: white;
     }
 
     .login-image p {
         opacity: 0.9;
         font-size: 1.1rem;
+        color: white;
     }
 
 /* Sağ Panel - Form Side */
 .login-form {
-    padding: 60px 50px;
+    padding: 40px 50px; /* 60px → 40px (üst/alt azaltıldı) */
 }
 
     .login-form h3 {
@@ -205,19 +221,29 @@ body.login-page {
 
 /* Responsive */
 @media (max-width: 768px) {
+    body.login-page {
+        padding: 20px 0; /* 10px → 20px */
+        align-items: center; /* Mobilde yine ortala */
+    }
+
+    .login-container {
+        max-height: 100vh; /* EKLE - Tam ekran */
+        border-radius: 0; /* EKLE - Mobilde köşe yok */
+    }
+
     .login-image {
-        padding: 40px 20px;
+        padding: 30px 20px; /* 40px → 30px */
     }
 
     .login-form {
-        padding: 40px 30px;
+        padding: 30px 20px; /* 40px 30px → 30px 20px */
     }
 
     .login-image i {
-        font-size: 60px;
+        font-size: 50px; /* 60px → 50px */
     }
 
     .login-image h2 {
-        font-size: 1.5rem;
+        font-size: 1.3rem; /* 1.5rem → 1.3rem */
     }
 }
