@@ -1,75 +1,50 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-
-
 	<!-- *** PROJE AYARLARI *** -->
-
 	<PropertyGroup>
-
 		<TargetFramework>net9.0</TargetFramework>
-
 		<ImplicitUsings>enable</ImplicitUsings>
-
 		<Nullable>enable</Nullable>
-
 		<CopyTemplates Condition="'$(CopyTemplates)' == ''">1</CopyTemplates>
-
 	</PropertyGroup>
 
-
-
 	<!-- ***  PROJE REFERANSLARI *** -->
-
 	<ItemGroup>
 		<ProjectReference Include="..\ArchiX.Library\ArchiX.Library.csproj" />
 		<ProjectReference Include="..\ArchiX.Library.Web\ArchiX.Library.Web.csproj" />
 	</ItemGroup>
 
-	<!-- ***  NUGET PAKETLER�  *** -->
+	<!-- ***  NUGET PAKETLERI  *** -->
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="9.0.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.*" PrivateAssets="all" />
 	</ItemGroup>
 
-	<!-- ********************* ARCH�X WEBHOST �ZEL YAPILANDIRMA ********************* -->
-	<!-- *** DOSYA *** -->
+	<!-- ********************* ARCHIX WEBHOST ÖZEL YAPILANDIRMA ********************* -->
 	<ItemGroup>
 		<EditorConfigFiles Remove="C:\_git\ArchiX\Dev\ArchiX\src\ArchiX.WebHost\.editorconfig" />
 		<Content Include="Properties\launchSettings.json" />
 		<None Include="C:\_git\ArchiX\Dev\ArchiX\src\ArchiX.WebHost\.editorconfig" />
 	</ItemGroup>
+	<ItemGroup>
+		<Folder Include="Templates\" />
+	</ItemGroup>
 
-
-	<!-- *** BUILD: CLEAN ��LEM� *** -->
-
+	<!-- *** BUILD: CLEAN İŞLEMİ *** -->
 	<Target Name="CleanCopiedFiles" BeforeTargets="Clean">
-
 		<RemoveDir Directories="Pages\Templates;Pages\Shared;wwwroot\css\modern;wwwroot\css\shared;wwwroot\images" />
-
-		<Delete Files="Pages\Login.cshtml;Pages\Login.cshtml.cs;Pages\Dashboard.cshtml;Pages\Dashboard.cshtml.cs;Pages\Error.cshtml;Pages\Error.cshtml.cs" />
-
+		<Delete Files="Pages\Login.cshtml;Pages\Login.cshtml.cs;Pages\Dashboard.cshtml;Pages\Dashboard.cshtml.cs;Pages\Error.cshtml;Pages\Error.cshtml.cs;Pages\grid-template-filtreli.cshtml;Pages\grid-template-filtreli.cshtml.cs" />
 	</Target>
 
-
-
 	<!-- *** BUILD: TEMPLATE KOPYALAMA *** -->
-
 	<Target Name="CopyFromLibraryWeb" BeforeTargets="BeforeBuild" Condition="'$(CopyTemplates)' == '1'">
-
-
 
 		<RemoveDir Directories="Pages\Templates" />
 
-
-
 		<!-- CSS -->
-
 		<ItemGroup>
-
 			<LibCss Include="..\ArchiX.Library.Web\wwwroot\css\**\*" />
-
 		</ItemGroup>
-
 		<Copy SourceFiles="@(LibCss)" DestinationFolder="wwwroot\css\%(RecursiveDir)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
 
 		<!-- Images -->
@@ -78,74 +53,47 @@
 		</ItemGroup>
 		<Copy SourceFiles="@(LibImages)" DestinationFolder="wwwroot\images\%(RecursiveDir)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
 
-
-
 		<!-- Shared -->
-
 		<ItemGroup>
-
 			<LibShared Include="..\ArchiX.Library.Web\Templates\Modern\Pages\Shared\**\*" />
-
 		</ItemGroup>
-
 		<Copy SourceFiles="@(LibShared)" DestinationFolder="Pages\Shared\%(RecursiveDir)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
 
-
-
 		<!-- Login -->
-
 		<Copy SourceFiles="..\ArchiX.Library.Web\Templates\Modern\Pages\Login.cshtml" DestinationFiles="Pages\Login.cshtml" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
-
 		<PropertyGroup>
-
 			<LoginCsContent>$([System.IO.File]::ReadAllText('..\ArchiX.Library.Web\Templates\Modern\Pages\Login.cshtml.cs'))</LoginCsContent>
-
 			<LoginCsContent>$(LoginCsContent.Replace('namespace ArchiX.Library.Web.Templates.Modern.Pages', 'namespace ArchiX.WebHost.Pages'))</LoginCsContent>
-
 		</PropertyGroup>
-
 		<WriteLinesToFile File="Pages\Login.cshtml.cs" Lines="$(LoginCsContent)" Overwrite="true" Encoding="UTF-8" />
 
-
-
 		<!-- Dashboard -->
-
 		<Copy SourceFiles="..\ArchiX.Library.Web\Templates\Modern\Pages\Dashboard.cshtml" DestinationFiles="Pages\Dashboard.cshtml" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
-
 		<PropertyGroup>
-
 			<DashboardCsContent>$([System.IO.File]::ReadAllText('..\ArchiX.Library.Web\Templates\Modern\Pages\Dashboard.cshtml.cs'))</DashboardCsContent>
-
 			<DashboardCsContent>$(DashboardCsContent.Replace('namespace ArchiX.Library.Web.Templates.Modern.Pages', 'namespace ArchiX.WebHost.Pages'))</DashboardCsContent>
-
 		</PropertyGroup>
-
 		<WriteLinesToFile File="Pages\Dashboard.cshtml.cs" Lines="$(DashboardCsContent)" Overwrite="true" Encoding="UTF-8" />
 
-
-
 		<!-- Error -->
-
 		<Copy SourceFiles="..\ArchiX.Library.Web\Templates\Modern\Pages\Error.cshtml" DestinationFiles="Pages\Error.cshtml" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
-
 		<PropertyGroup>
-
 			<ErrorCsContent>$([System.IO.File]::ReadAllText('..\ArchiX.Library.Web\Templates\Modern\Pages\Error.cshtml.cs'))</ErrorCsContent>
-
 			<ErrorCsContent>$(ErrorCsContent.Replace('namespace ArchiX.Library.Web.Templates.Modern.Pages', 'namespace ArchiX.WebHost.Pages'))</ErrorCsContent>
-
 		</PropertyGroup>
-
 		<WriteLinesToFile File="Pages\Error.cshtml.cs" Lines="$(ErrorCsContent)" Overwrite="true" Encoding="UTF-8" />
 
+		<!-- Grid Template Filtreli (RAPORLAR) -->
+		<Copy SourceFiles="..\ArchiX.Library.Web\Templates\Modern\Pages\grid-template-filtreli.cshtml" DestinationFiles="Pages\grid-template-filtreli.cshtml" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+		<PropertyGroup>
+			<GridTemplateCsContent>$([System.IO.File]::ReadAllText('..\ArchiX.Library.Web\Templates\Modern\Pages\GridTemplateFiltreli.cs'))</GridTemplateCsContent>
+			<GridTemplateCsContent>$(GridTemplateCsContent.Replace('namespace ArchiX.Library.Web.Templates.Modern.Pages', 'namespace ArchiX.WebHost.Pages'))</GridTemplateCsContent>
+		</PropertyGroup>
+		<WriteLinesToFile File="Pages\grid-template-filtreli.cshtml.cs" Lines="$(GridTemplateCsContent)" Overwrite="true" Encoding="UTF-8" />
 
-
-		<Message Importance="high" Text="? Templates copied: CSS + Images + Shared + Login + Dashboard + Error (namespace: ArchiX.WebHost.Pages)" />
-
+		<Message Importance="high" Text="✓ Templates copied: CSS + Images + Shared + Login + Dashboard + Error + GridTemplateFiltreli (namespace: ArchiX.WebHost.Pages)" />
 	</Target>
 
-	<!-- ********************* ARCH�X WEBHOST �ZEL YAPILANDIRMA SONU ********************* -->
-
-     
+	<!-- ********************* ARCHIX WEBHOST ÖZEL YAPILANDIRMA SONU ********************* -->
 
 </Project>

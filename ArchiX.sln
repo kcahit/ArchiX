@@ -7,14 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiX.Library", "src\Archi
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_NOTLAR", "_NOTLAR", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
-		.editorconfig = .editorconfig
-		.gitignore = .gitignore
 		docs\ASP.NET-Core-Teknoloji-Secimi-ve-Mimari-Kararlari.md = docs\ASP.NET-Core-Teknoloji-Secimi-ve-Mimari-Kararlari.md
-		.github\workflows\ci_main.yml = .github\workflows\ci_main.yml
 		docs\Github Copilot kod yazma kurallari.txt = docs\Github Copilot kod yazma kurallari.txt
 		docs\Layout-Tema-Tercihleri-V2.md = docs\Layout-Tema-Tercihleri-V2.md
-		docs\Login Örnegi.png = docs\Login Örnegi.png
 		docs\Template kopyalama.txt = docs\Template kopyalama.txt
+		docs\Yetki-Yonetimi.md = docs\Yetki-Yonetimi.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiX.Library.Tests", "tests\ArchiX.Library.Tests\ArchiX.Library.Tests.csproj", "{72F1692E-9433-1DDE-9678-61F44BE17909}"

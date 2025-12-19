@@ -18,3 +18,22 @@
 
 tek kod ve tam dosya kodu  vermeyi sakın unutma. daima dönüşümü bekle
 Kod vermeye başla şimdi
+
+
+✅ 5. Strateji Önerisi
+
+Kod tamam ama test bekliyor → sadece #17 yaz (kapanmaz).
+Tamamlandı ve merge edilecek → Fixes #17 yaz (kapanır).
+PR açıklamasında kapatma → daha temiz yöntem.
+Benzer anahtar kelimeler:
+
+Fixes #17 → Hata düzeltildi.
+Closes #17 → Issue kapatıldı.
+Resolves #17 → Sorun çözüldü.
+
+Hepsi aynı işlevi görür: Merge sonrası issue kapanır.
+Fark sadece anlam tonunda:
+
+Fixes → genelde bug için.
+Resolves → problem veya görev için.
+Closes → genel kapatma.
