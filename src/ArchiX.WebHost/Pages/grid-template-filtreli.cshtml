@@ -1,4 +1,4 @@
-﻿@page "/Raporlar"
+@page "/Raporlar"
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @model ArchiX.Library.Web.Templates.Modern.Pages.GridTemplateFiltreli
 @{
@@ -28,7 +28,6 @@
                 <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
                     <!-- Sol: Başlık + Kayıt Sayısı -->
                     <div class="d-flex align-items-center gap-2">
-                        <h2 class="mb-0"><i class="bi bi-table me-2"></i>Kullanıcı Yönetimi</h2>
                         <span class="text-muted grid-record-count">(<strong><span id="totalRecords">0</span></strong> Kayıt)</span>
                     </div>
 
@@ -55,7 +54,7 @@
                         <!-- Export Dropdown -->
                         <div class="dropdown">
                             <button class="btn btn-primary btn-sm dropdown-toggle grid-btn-export" type="button" id="exportDropdown" data-bs-toggle="dropdown">
-                                <i class="bi bi-download me-1"></i> Export
+                                <i class="bi bi-download me-1"></i> Aktar
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" href="#" onclick="exportData('excel')"><i class="bi bi-file-earmark-excel me-2"></i>Excel</a></li>
@@ -145,7 +144,7 @@
                                     <span class="header-text" onclick="sortTable('id')">
                                         ID <i class="bi bi-arrow-down-up sort-icon"></i>
                                     </span>
-                                    <span class="filter-icon" onclick="toggleFilter('id', e)">
+                                    <span class="filter-icon" onclick="toggleFilter('id', arguments[0])">
                                         <i class="bi bi-funnel"></i>
                                         <span class="filter-count" id="count-id">0</span>
                                     </span>
@@ -157,7 +156,7 @@
                                     <span class="header-text" onclick="sortTable('name')">
                                         İsim <i class="bi bi-arrow-down-up sort-icon"></i>
                                     </span>
-                                    <span class="filter-icon" onclick="toggleFilter('name', e)">
+                                    <span class="filter-icon" onclick="toggleFilter('name', arguments[0])">
                                         <i class="bi bi-funnel"></i>
                                         <span class="filter-count" id="count-name">0</span>
                                     </span>
@@ -169,7 +168,7 @@
                                     <span class="header-text" onclick="sortTable('email')">
                                         Email <i class="bi bi-arrow-down-up sort-icon"></i>
                                     </span>
-                                    <span class="filter-icon" onclick="toggleFilter('email', e)">
+                                    <span class="filter-icon" onclick="toggleFilter('email', arguments[0])">
                                         <i class="bi bi-funnel"></i>
                                         <span class="filter-count" id="count-email">0</span>
                                     </span>
@@ -181,7 +180,7 @@
                                     <span class="header-text" onclick="sortTable('phone')">
                                         Telefon <i class="bi bi-arrow-down-up sort-icon"></i>
                                     </span>
-                                    <span class="filter-icon" onclick="toggleFilter('phone', e)">
+                                    <span class="filter-icon" onclick="toggleFilter('phone', arguments[0])">
                                         <i class="bi bi-funnel"></i>
                                         <span class="filter-count" id="count-phone">0</span>
                                     </span>
@@ -193,7 +192,7 @@
                                     <span class="header-text" onclick="sortTable('department')">
                                         Departman <i class="bi bi-arrow-down-up sort-icon"></i>
                                     </span>
-                                    <span class="filter-icon" onclick="toggleFilter('department', e)">
+                                    <span class="filter-icon" onclick="toggleFilter('department', arguments[0])">
                                         <i class="bi bi-funnel"></i>
                                         <span class="filter-count" id="count-department">0</span>
                                     </span>
@@ -205,7 +204,7 @@
                                     <span class="header-text" onclick="sortTable('salary')">
                                         Maaş <i class="bi bi-arrow-down-up sort-icon"></i>
                                     </span>
-                                    <span class="filter-icon" onclick="toggleFilter('salary', e)">
+                                    <span class="filter-icon" onclick="toggleFilter('salary', arguments[0])">
                                         <i class="bi bi-funnel"></i>
                                         <span class="filter-count" id="count-salary">0</span>
                                     </span>
@@ -217,7 +216,7 @@
                                     <span class="header-text" onclick="sortTable('experience')">
                                         Tecrübe <i class="bi bi-arrow-down-up sort-icon"></i>
                                     </span>
-                                    <span class="filter-icon" onclick="toggleFilter('experience', e)">
+                                    <span class="filter-icon" onclick="toggleFilter('experience', arguments[0])">
                                         <i class="bi bi-funnel"></i>
                                         <span class="filter-count" id="count-experience">0</span>
                                     </span>
@@ -229,7 +228,7 @@
                                     <span class="header-text" onclick="sortTable('city')">
                                         Şehir <i class="bi bi-arrow-down-up sort-icon"></i>
                                     </span>
-                                    <span class="filter-icon" onclick="toggleFilter('city', e)">
+                                    <span class="filter-icon" onclick="toggleFilter('city', arguments[0])">
                                         <i class="bi bi-funnel"></i>
                                         <span class="filter-count" id="count-city">0</span>
                                     </span>
@@ -241,7 +240,7 @@
                                     <span class="header-text" onclick="sortTable('position')">
                                         Pozisyon <i class="bi bi-arrow-down-up sort-icon"></i>
                                     </span>
-                                    <span class="filter-icon" onclick="toggleFilter('position', e)">
+                                    <span class="filter-icon" onclick="toggleFilter('position', arguments[0])">
                                         <i class="bi bi-funnel"></i>
                                         <span class="filter-count" id="count-position">0</span>
                                     </span>
@@ -253,7 +252,7 @@
                                     <span class="header-text" onclick="sortTable('startDate')">
                                         Başlangıç <i class="bi bi-arrow-down-up sort-icon"></i>
                                     </span>
-                                    <span class="filter-icon" onclick="toggleFilter('startDate', e)">
+                                    <span class="filter-icon" onclick="toggleFilter('startDate', arguments[0])">
                                         <i class="bi bi-funnel"></i>
                                         <span class="filter-count" id="count-startDate">0</span>
                                     </span>
@@ -265,7 +264,7 @@
                                     <span class="header-text" onclick="sortTable('status')">
                                         Durum <i class="bi bi-arrow-down-up sort-icon"></i>
                                     </span>
-                                    <span class="filter-icon" onclick="toggleFilter('status', e)">
+                                    <span class="filter-icon" onclick="toggleFilter('status', arguments[0])">
                                         <i class="bi bi-funnel"></i>
                                         <span class="filter-count" id="count-status">0</span>
                                     </span>

@@ -1,0 +1,112 @@
+/* ========================================
+   GRID/TABLE PAGE
+   ======================================== */
+
+/* Grid Page Layout */
+body.grid-page {
+    padding: 5px 0;
+}
+
+/* Table Container */
+.table-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    margin-top: 5px;
+}
+
+.grid-shell {
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.grid-record-count {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.grid-search-input {
+    height: 32px;
+    font-size: 0.75rem;
+}
+
+.grid-btn-reset,
+.grid-btn-reset:focus {
+    height: 32px;
+    padding: 0 10px;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+.grid-btn-advanced {
+    height: 32px;
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+/* AKTAR BUTONU - CRITICAL FIX */
+.grid-btn-export {
+    height: 36px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    color: white;
+}
+
+.grid-btn-export:hover {
+    opacity: 0.9 !important;
+}
+
+/* ... (rest of the CSS remains the same) ... *//* AKTAR BUTONU - FIX */
+.grid-btn-export {
+    height: 36px !important;
+    padding: 6px 12px !important;
+    font-size: 0.8rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+    color: white !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    white-space: nowrap !important;
+}
+/* AKTAR BUTONU - ULTIMATE FIX - En sona ekleyin */
+.table-header .ms-auto .dropdown .grid-btn-export,
+.ms-auto .grid-btn-export,
+button.grid-btn-export,
+.btn.grid-btn-export,
+#exportDropdown {
+    height: 36px !important;
+    padding: 6px 12px !important;
+    font-size: 0.8rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+    color: white !important;
+    background-color: #0d6efd !important;
+    border-color: #0d6efd !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    white-space: nowrap !important;
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* Hover state */
+.table-header .ms-auto .dropdown .grid-btn-export:hover,
+.grid-btn-export:hover {
+    background-color: #0b5ed7 !important;
+    opacity: 1 !important;
+}
+
+/* Parent container fix */
+.table-header .ms-auto,
+.table-header .ms-auto .dropdown {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
