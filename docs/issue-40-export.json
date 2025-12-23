@@ -1,0 +1,147 @@
+{
+  "issue": {
+    "number": 40,
+    "title": "Grafik Template - Extension kararı ve template çalışması",
+    "status": "open",
+    "description": "No:40",
+    "created_date": "2025-12-23",
+    "labels": [
+      "template",
+      "reporting",
+      "pivot",
+      "map",
+      "filters"
+    ],
+    "comments": [
+      {
+        "author": "@kcahit",
+        "date": "2025-12-23",
+        "content": "### 1. Pivot / tablo tarafı\n• Tercih: PivotTable.js\n• Neden:\n• MIT lisanslı, tamamen ücretsiz, ticari kullanım serbest.\n• Sunucu bağımsız JS; Razor Pages'e sadece"
+      },
+      {
+        "author": "@kcahit",
+        "date": "2025-12-23",
+        "content": "Tüm Raporlarda çalışan filtre yapısı olacak. map, pivot olacak.\nbir sayfa ortak filtre ile çalışacak.\nElimdebir tane ilk anda veri seti olmalı. \nCliser'lar olmalı. cliser olonlardan dinamik oluşacak. kolon tipine göre cliser tipi belirlecek. Tutar için başka tarih için başla gibi. GRip rapor için zaten template hazır.\ngeriye pivot ve map ve card template'leri olacak"
+      },
+      {
+        "author": "@kcahit",
+        "date": "2025-12-23",
+        "content": "Kısaca özetleyeyim:\n• Mevcut grid-template-filtreli.cshtml içindeki filter + slicer altyapısı,\nsenin istediğin \"ortak filtre\" yapısını zaten sağlıyor.\n• Pivot ve map için seçeceğimiz kütüphaneler de kendi içlerinde filtre/slicer benzeri mekanizmalar sunuyor.\n• Yani:\n• cliser mantığını sıfırdan bir kez yazman yeterli (zaten yazılmış),\n• Pivot ve map tarafında sadece bu ortak filtreyi veri kaynağı olarak kullanacağız.\nAyrıntılı bakalım.\n---\n1. Grid tarafı (şu an var olan)\n• Tek veri seti: const data = [...]\n• Ortak filtre durumu: filteredData, columnFilters, textFilters, slicerSelections\n• Slicer'lar:\n• activeSlicerColumns, createColumnCheckList, rebuildSlicers, updateSlicerItems vb. ile\n• Kolon tipini ve distinct değerleri otomatik kullanıyor.\n• Kolon tipine göre filtre tipi:\n• Number/text ayrımı, operator seçimi (between, greaterThan, contains vs.) zaten var.\nBu mekanizma:\n• \"Bütün raporların kullandığı ortak filtre motoru\" olabilir.\n• Başka bir template (pivot, map, cards) aynı JS dosyasını kullanarak aynı filteredData'yı kullanabilir.\nBurada ekstra cliser çalışmasına gerek yok; sadece:\n• Bu JS kodunu ortak bir script dosyasına (/js/archix.report.core.js gibi) ayırmak,\n• Farklı Razor template'lerde bu script'i include etmek yeterli.\n---\n2. Pivot tarafı\nSeçtiğimiz ürün: PivotTable.js (veya benzeri).\n• Bu kütüphane kendi içinde:\n• Satır / sütun / değer alanlarını sürükle-bırak,\n• Basit filtreler sağlıyor ama senin gibi çok detaylı slicer mantığını zorlamaya gerek yok.\nYapı şu olabilir:\n• applyAllFilters() çalışır → filteredData güncel.\n• Pivot template'inde:\n• pivotContainer içinde:\n\n$(\"#pivotContainer\").pivotUI(filteredData, { /* default rows/cols/vals */ });\n\n• Yani pivot, kendi iç filtrelerine ek olarak senin ortak slicer filtrenin çıktısını kullanıyor.\nSonuç:\nPivot için ekstra cliser mekanizması yazmana gerek yok;\nmevcut ortak filtreyi kullanıp pivotu sadece filteredData üzerinden yeniden oluşturacağız.\n---\n3. Map (dünya haritası) tarafı\nSeçtiğimiz ürün:\n• Ya Chart.js + chartjs-chart-geo,\n• Ya da Leaflet.js (daha interaktif harita istersen).\nİki durumda da mantık aynı:\n• Ortak grid filtresi/slicer çalışır → filteredData güncel.\n• Map template'inde:\n• Ülke bazında satış toplarız:\nconst countryAgg = aggregateByCountry(filteredData);\n\n• Sonucu Chart.js Geo veya Leaflet layer'ına basarız.\n• Filtre değiştiğinde:\n• Aynı countryAgg fonksiyonu yeniden çalışır,\n• Map dataset'i / layer'ları güncellenir.\nMap kütüphaneleri kendi slicer mekanizmasını sağlamıyor;\nama buna ihtiyaç da yok: senin ortak slicer engine zaten işin göbeğinde.\n---\n4. Card / KPI template'leri\n• Ortak filtre çıktılarını (filteredData) kullanıp:\n• Toplam satış,\n• Ortalama tutar,\n• Adet,\n• Seçili ülke sayısı vs. hesaplayıp card'larda göstereceğiz.\n• Yine ek bir slicer koduna ihtiyaç yok; sadece:\n• recalculateCards(filteredData); fonksiyonu yazacağız.\n---\n5. Sonuç – cliser için ekstra ürün gerekli mi?\n• Hayır, seçtiğimiz ürünler (Chart.js, PivotTable.js, Leaflet/Chart.js Geo):\n• Kendi içlerinde basit filtreler sunsalar da,\n• Senin Excel-benzeri, kolon-türüne-duyarlı, çok güçlü slicer yapını yerine geçmez;\n• Ama ekstra \"slicer engine\" gerektirmez, çünkü:\n• Tüm görünümler (grid, pivot, map, cards) için ortak veri kaynağı olarak filteredData kullanacağız.\n• Yapman gereken:\n1. Mevcut grid filtresi + slicer JS'ini ortak bir JS modulüne taşımak.\n2. Yeni Razor template'lerde (pivot, map, cards) bu script'i referanslayıp:\n• applyAllFilters sonrasında\n• Pivot / Map / Card güncelleme fonksiyonları çağırmak.\nİstersen bir sonraki adımda:\n1. Bu ortak filtre/slicer kodunu grid-template-filtreli.cshtml içinde ayrı bir wwwroot/js/archix.report.core.js dosyasına çıkarmak için değişiklikleri,\nve\n2. Bunun üzerinde çalışan örnek bir pivot template (Razor + JS) iskeletini\nsenin projene uygun şekilde yazabilirim.\n\nBenim mesajım ==> pivotta slicer mantığını kullnıcı için iistiyorum. kendisi gösel rahatlıkl filre yapsın Power bi gibi\nullanıcının Power BI'daki gibi, pivot ekranı içinde görsel slicer'larla rahat filtre yapmasını istiyorsan, evet, pivot tarafında da slicer mantığını kullanabiliriz. Bunu iki katmanda düşünebiliriz:\n1. Senin mevcut \"ortak slicer engine\" (grid-template-filtreli'deki)\n2. Pivot kütüphanesinin kendi içindeki görsel alan seçimi / filtreleri\nİyi bir deneyim için ikisini birleştirmek mantıklı.\n---\n1. Ortak slicer engine'i pivot için de kullanmak\nElimizdezaten çok güçlü bir yapı var:\n• Tek veri seti: Data\n• Ortak filtre sonucu: filteredData\n• Slicer state: slicerSelections, activeSlicerColumns\n• Kolon tipine göre:\n• Sayı için between, >, < vs.\n• Metin için contains, startsWith vs.\nBu motoru:\n• Ortak bir JS dosyasına taşıyacağız (ör: wwwroot/js/archix.reports.core.js),\n• Hem grid template'inde hem pivot template'inde kullanacağız.\nPivot sayfasında mantık:\napplyAllFilters(); // senin mevcut fonksiyon\nbuildPivotFrom(filteredData); // sadece pivot kütüphanesini çağıran fonksiyon\n\nSlicer'lar grid'deki gibi:\n• Kolon listesinden seçiliyor,\n• Kolon tipine göre slicer UI'si dinamik,\n• Kullanıcı sadece slicer'larla oynayarak pivotu da, grid'i de filtreleyebiliyor.\nBu kısım Power BI'daki \"rapor seviyesinde ortak slicer\" gibi davranır.\n---\n2. Pivot içindeki görsel slicer / alan seçimi\nSeçtiğimiz pivot kütüphanesi (ör. PivotTable.js):\n• Satır / Sütun / Değer alanlarını sürükle-bırak sunar.\n• Bazı renderer'lar (heatmap, bar) da var.\n• Ancak:\n• Power BI'deki gibi \"ayrı slicer görselleri\" çok sınırlı.\n• Yani pivot kütüphanesi tek başına Power BI slicer UX'ini tam vermez.\nBu yüzden en iyi yaklaşım:\n• Görsel slicer'ı senin engine sağlıyor (sol panel / üst panel).\n• Pivot kütüphanesi ise:\n• \"Hangi alan satır, hangi alan sütun, hangi alan değer\" sorusunu çözüyor,\n• Gerekirse hücre bazlı basit filtreyi de ek filtre olarak kullanabiliyor.\nKullanıcı açısından akış:\n1. Ortak slicer panelinden:\n• Yıl, Firma, Durum, Ülke vs. tıklar.\n2. Grid ve pivot ikisi birden aynı filteredData ile güncellenir.\n3. Pivot içinde alanları sürükleyip farklı pivot görünümlerini dener.\nBu, Power BI'ye oldukça yakın bir his verir:\n• Rapor seviyesinde slicer (senin JS motoru),\n• Görünüm seviyesinde yapılandırma (pivot UI).\n---\n3. Sonuç – ekstra slicer geliştirmesi gerekir mi?\n• Sıfırdan yeni bir slicer motoru yazmaya gerek yok.\nGrid için yazdığın motoru:\n• Ortak JS haline getirip,\n• Pivot + map + card template'lerinde de kullanacağız.\n• Pivot kütüphanesi:\n• Kendi hafif filtreleri var ama Power BI slicer kadar değil.\n• O yüzden asıl slicer deneyimini bizim ortak engine verecek.\n---\nİstersen bir sonraki adımda şunu yapabilirim:\n1. grid-template-filtreli.cshtml içinde yeni bir pivot-template.cshtml Razor Page taslağı,\n2. Bu sayfada:\n• Ortak slicer JS'ini include eden,\n• filteredData'yı kullanan,\n• PivotTable.js ile çalışır basit bir pivot örneği\n3. Ve ArchiX.WebHost.csproj içine, bu pivot template'i de kopyalayan MSBuild adımını ekleyen değişiklikler.\nDilersen doğrudan bu implementasyonu yapalım; sadece \"pivot için kullanacağın ana veri kolonlarını\" (ör. Firma, Ülke, Yıl, Tutar) söylemen yeterli, ona göre default pivot konfigürasyonunu kurarım.\n\n\n\n\nfunction refreshPivot() {\n $(\"#pivotContainer\").pivotUI(filteredData, /* options */, true);\n}"
+      }
+    ],
+    "technical_decisions": {
+      "pivot_library": {
+        "chosen": "PivotTable.js",
+        "reason": "MIT lisanslı, tamamen ücretsiz, ticari kullanım serbest, sunucu bağımsız JS",
+        "license": "MIT"
+      },
+      "map_library": {
+        "options": [
+          "Chart.js + chartjs-chart-geo",
+          "Leaflet.js"
+        ],
+        "note": "Leaflet.js daha interaktif harita için tercih edilebilir"
+      },
+      "filter_architecture": {
+        "approach": "Ortak filtre motoru",
+        "description": "Mevcut grid-template-filtreli.cshtml içindeki filter + slicer altyapısı tüm raporlar için kullanılacak",
+        "shared_components": [
+          "filteredData",
+          "columnFilters",
+          "textFilters",
+          "slicerSelections",
+          "activeSlicerColumns",
+          "createColumnCheckList",
+          "rebuildSlicers",
+          "updateSlicerItems"
+        ],
+        "extract_to": "/js/archix.report.core.js"
+      },
+      "template_types": {
+        "grid": {
+          "status": "completed",
+          "file": "grid-template-filtreli.cshtml",
+          "description": "Grid rapor için template hazır"
+        },
+        "pivot": {
+          "status": "planned",
+          "file": "pivot-template.cshtml",
+          "description": "Pivot template oluşturulacak, ortak slicer engine kullanacak",
+          "function": "buildPivotFrom(filteredData)"
+        },
+        "map": {
+          "status": "planned",
+          "file": "map-template.cshtml",
+          "description": "Map template oluşturulacak, ülke bazında aggregation yapacak",
+          "function": "aggregateByCountry(filteredData)"
+        },
+        "cards": {
+          "status": "planned",
+          "file": "card-template.cshtml",
+          "description": "KPI card template'leri oluşturulacak",
+          "function": "recalculateCards(filteredData)",
+          "metrics": [
+            "Toplam satış",
+            "Ortalama tutar",
+            "Adet",
+            "Seçili ülke sayısı"
+          ]
+        }
+      },
+      "slicer_requirements": {
+        "power_bi_like_experience": true,
+        "description": "Kullanıcının Power BI'daki gibi, pivot ekranı içinde görsel slicer'larla rahat filtre yapması",
+        "approach": "İki katmanlı yapı",
+        "layers": [
+          {
+            "layer": "Rapor seviyesi slicer",
+            "provider": "Ortak slicer engine (grid-template-filtreli'deki)",
+            "features": [
+              "Kolon tipine göre dinamik slicer UI",
+              "Sayı için between, >, < operatörleri",
+              "Metin için contains, startsWith operatörleri"
+            ]
+          },
+          {
+            "layer": "Görünüm seviyesi yapılandırma",
+            "provider": "Pivot kütüphanesi (PivotTable.js)",
+            "features": [
+              "Satır / Sütun / Değer alanlarını sürükle-bırak",
+              "Renderer seçenekleri (heatmap, bar)",
+              "Hücre bazlı basit filtreler"
+            ]
+          }
+        ]
+      },
+      "user_workflow": {
+        "steps": [
+          "Kullanıcı ortak slicer panelinden Yıl, Firma, Durum, Ülke vs. seçer",
+          "Grid ve pivot aynı filteredData ile güncellenir",
+          "Kullanıcı pivot içinde alanları sürükleyip farklı görünümler dener"
+        ]
+      },
+      "implementation_plan": {
+        "step_1": "Mevcut grid filtresi + slicer JS'ini ortak bir JS modulüne taşımak (archix.report.core.js)",
+        "step_2": "Yeni Razor template'ler oluşturmak (pivot, map, cards)",
+        "step_3": "Template'lerde ortak script'i referanslamak",
+        "step_4": "applyAllFilters sonrasında görünüm güncelleme fonksiyonları çağırmak",
+        "step_5": "ArchiX.WebHost.csproj içine MSBuild adımlarını eklemek"
+      }
+    },
+    "data_structure": {
+      "single_dataset": "const data = [...]",
+      "filtered_output": "filteredData",
+      "filter_states": {
+        "column_filters": "columnFilters",
+        "text_filters": "textFilters",
+        "slicer_selections": "slicerSelections"
+      },
+      "column_type_detection": "Kolon tipine göre cliser tipi belirlecek (Tutar için başka, tarih için başka)"
+    },
+    "integration_notes": {
+      "pivot_refresh": "function refreshPivot() { $('#pivotContainer').pivotUI(filteredData, /* options */, true); }",
+      "no_additional_slicer_library": "Seçtiğimiz ürünler ekstra slicer engine gerektirmez, ortak filteredData kullanacak",
+      "common_filter_usage": "Tüm görünümler (grid, pivot, map, cards) ortak veri kaynağı filteredData kullanacak"
+    }
+  }
+}
