@@ -1,0 +1,357 @@
+/**
+ * ArchiX Reports - Table Header Filters CSS
+ * Grid ve Pivot template'leri için ortak tablo header stilleri
+ * Filtre ikonlarý, dropdown'lar, sayý badge'leri
+ */
+
+/* ========================================
+   TABLO HEADER - Genel
+   ======================================== */
+
+.custom-table thead tr th {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+    padding: 12px 8px;
+    border: 1px solid #ddd;
+    position: relative;
+    vertical-align: middle;
+}
+
+/* ========================================
+   HEADER CONTENT - Flex Layout
+   ======================================== */
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ========================================
+   HEADER TEXT - Sýralama
+   ======================================== */
+
+.header-text {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+}
+
+.header-text:hover {
+    opacity: 0.9;
+}
+
+.header-text.sorted {
+    font-weight: 700;
+}
+
+/* Sort Icon */
+.sort-icon {
+    font-size: 0.85rem;
+    opacity: 0.7;
+    transition: all 0.2s;
+}
+
+.header-text:hover .sort-icon {
+    opacity: 1;
+}
+
+/* ========================================
+   FILTER ICON - Badge ile
+   ======================================== */
+
+.filter-icon {
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+}
+
+.filter-icon:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Active state - Filtre uygulandýðýnda */
+.filter-icon.active {
+    background: #ffc107;
+    color: #333;
+}
+
+/* Filter Count Badge */
+.filter-count {
+    display: none;
+    background: #dc3545;
+    color: white;
+    border-radius: 10px;
+    padding: 2px 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    min-width: 18px;
+    text-align: center;
+}
+
+.filter-icon.active .filter-count {
+    display: inline-block;
+}
+
+/* ========================================
+   FILTER DROPDOWN - Popup
+   ======================================== */
+
+.filter-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    background: white;
+    border: 2px solid #667eea;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    min-width: 280px;
+    max-width: 350px;
+    padding: 12px;
+    margin-top: 4px;
+}
+
+.filter-dropdown.show {
+    display: block;
+}
+
+/* ========================================
+   FILTER TYPE SELECTOR - Liste/Sayý Toggle
+   ======================================== */
+
+.filter-type-selector {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 8px;
+}
+
+.filter-type-btn {
+    flex: 1;
+    padding: 6px 12px;
+    border: 1px solid #ddd;
+    background: white;
+    color: #666;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.filter-type-btn:hover {
+    background: #f0f0f0;
+}
+
+.filter-type-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: #667eea;
+    font-weight: 600;
+}
+
+/* ========================================
+   TEXT FILTER SECTION - Sayý/Metin Filtresi
+   ======================================== */
+
+.text-filter-section {
+    margin-bottom: 12px;
+}
+
+.text-filter-row {
+    margin-bottom: 8px;
+}
+
+.text-filter-operator {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.text-filter-operator:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.text-filter-input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.text-filter-input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.text-filter-input.mb-2 {
+    margin-bottom: 8px;
+}
+
+/* ========================================
+   FILTER SEARCH - Liste içinde arama
+   ======================================== */
+
+.filter-search {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+}
+
+.filter-search:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+/* ========================================
+   FILTER OPTIONS - Liste
+   ======================================== */
+
+.filter-options {
+    max-height: 250px;
+    overflow-y: auto;
+    margin-bottom: 12px;
+}
+
+.filter-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.2s;
+    font-size: 0.85rem;
+}
+
+.filter-option:hover {
+    background: #f0f0f0;
+}
+
+.filter-option input[type="checkbox"] {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+}
+
+.filter-option span {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ========================================
+   FILTER ACTIONS - Uygula/Temizle Butonlarý
+   ======================================== */
+
+.filter-actions {
+    display: flex;
+    gap: 8px;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 12px;
+}
+
+.btn-apply-filter,
+.btn-clear-filter {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.btn-apply-filter {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-apply-filter:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-clear-filter {
+    background: #f8f9fa;
+    color: #666;
+    border: 1px solid #ddd;
+}
+
+.btn-clear-filter:hover {
+    background: #e9ecef;
+}
+
+/* ========================================
+   SCROLLBAR - Filter Options için
+   ======================================== */
+
+.filter-options::-webkit-scrollbar {
+    width: 6px;
+}
+
+.filter-options::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.filter-options::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 3px;
+}
+
+.filter-options::-webkit-scrollbar-thumb:hover {
+    background: #5568d3;
+}
+
+/* ========================================
+   RESPONSIVE - Mobile
+   ======================================== */
+
+@media (max-width: 768px) {
+    .filter-dropdown {
+        min-width: 250px;
+        max-width: 300px;
+    }
+    
+    .filter-type-btn {
+        font-size: 0.75rem;
+        padding: 5px 8px;
+    }
+    
+    .filter-option {
+        font-size: 0.8rem;
+        padding: 5px 6px;
+    }
+}

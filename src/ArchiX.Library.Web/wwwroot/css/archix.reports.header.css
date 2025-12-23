@@ -1,0 +1,233 @@
+/**
+ * ArchiX Reports - Filter Dropdown CSS
+ * SADECE tablo header'daki filtre DROPDOWN icerigi icin
+ * (Header stillerine DOKUNMAZ - onlar main.css'te kalir)
+ */
+
+/* Filter Dropdown - Popup Content */
+.filter-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    background: white;
+    border: 2px solid #667eea;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    min-width: 280px;
+    max-width: 350px;
+    padding: 12px;
+    margin-top: 4px;
+}
+
+.filter-dropdown.show {
+    display: block;
+}
+
+/* Filter Type Selector - Liste/Sayi Toggle */
+.filter-type-selector {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 8px;
+}
+
+.filter-type-btn {
+    flex: 1;
+    padding: 6px 12px;
+    border: 1px solid #ddd;
+    background: white;
+    color: #666;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.filter-type-btn:hover {
+    background: #f0f0f0;
+}
+
+.filter-type-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: #667eea;
+    font-weight: 600;
+}
+
+/* Text Filter Section - Sayi/Metin Filtresi */
+.text-filter-section {
+    margin-bottom: 12px;
+}
+
+.text-filter-row {
+    margin-bottom: 8px;
+}
+
+.text-filter-operator {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.text-filter-operator:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.text-filter-input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.text-filter-input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.text-filter-input.mb-2 {
+    margin-bottom: 8px;
+}
+
+/* Filter Search - Liste icinde arama */
+.filter-search {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+}
+
+.filter-search:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+/* Filter Options - Liste */
+.filter-options {
+    max-height: 250px;
+    overflow-y: auto;
+    margin-bottom: 12px;
+}
+
+.filter-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.2s;
+    font-size: 0.85rem;
+}
+
+.filter-option:hover {
+    background: #f0f0f0;
+}
+
+.filter-option input[type="checkbox"] {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+}
+
+.filter-option span {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Filter Actions - Uygula/Temizle Butonlari */
+.filter-actions {
+    display: flex;
+    gap: 8px;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 12px;
+}
+
+.btn-apply-filter,
+.btn-clear-filter {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.btn-apply-filter {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-apply-filter:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-clear-filter {
+    background: #f8f9fa;
+    color: #666;
+    border: 1px solid #ddd;
+}
+
+.btn-clear-filter:hover {
+    background: #e9ecef;
+}
+
+/* Scrollbar - Filter Options icin */
+.filter-options::-webkit-scrollbar {
+    width: 6px;
+}
+
+.filter-options::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.filter-options::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 3px;
+}
+
+.filter-options::-webkit-scrollbar-thumb:hover {
+    background: #5568d3;
+}
+
+/* Responsive - Mobile */
+@media (max-width: 768px) {
+    .filter-dropdown {
+        min-width: 250px;
+        max-width: 300px;
+    }
+    
+    .filter-type-btn {
+        font-size: 0.75rem;
+        padding: 5px 8px;
+    }
+    
+    .filter-option {
+        font-size: 0.8rem;
+        padding: 5px 6px;
+    }
+}

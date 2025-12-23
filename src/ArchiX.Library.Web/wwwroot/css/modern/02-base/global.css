@@ -1,13 +1,13 @@
 /* ============================================
-   GLOBAL STYLES - Genel YapÄ±
+   GLOBAL STYLES - Genel Yapý (Modern Template)
    ============================================ */
 
-/* Responsive Font System - Otomatik ekran boyutu algÄ±lama */
+/* Responsive Font System - Otomatik ekran boyutu algýlama */
 html {
     font-size: 16px; /* Base font size */
 }
 
-/* BÃ¼yÃ¼k ekranlar (Desktop 1920px+) */
+/* Büyük ekranlar (Desktop 1920px+) */
 @media (min-width: 1920px) {
     html {
         font-size: 17px;
@@ -35,7 +35,7 @@ html {
     }
 }
 
-/* Text Selection - TÃ¼m sayfalarda seÃ§ili metin gÃ¶rÃ¼nÃ¼r olsun */
+/* Text Selection - Tüm sayfalarda seçili metin görünür olsun */
 *::selection {
     background-color: #667eea !important;
     color: #ffffff !important;
@@ -48,22 +48,52 @@ html {
     text-shadow: none !important;
 }
 
-/* Body - Default background */
+/* ============================================
+   BODY - YATAY SCROLL (TÜM MODERN TEMPLATE SAYFALARI)
+   - overflow-x: auto ? Ýçerik geniþ ise scroll, deðilse gizli
+   - Çözünürlük deðiþikliðine otomatik uyum
+   ============================================ */
 body {
     font-family: var(--font-family-primary);
     font-size: var(--font-size-base);
     line-height: var(--line-height-normal);
     color: var(--text-primary);
-    overflow-x: hidden;
+    
+    /* YATAY SCROLL - Otomatik (Ýçerik geniþ ise göster) */
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch; /* iOS smooth scroll */
+    
     background: #f5f6fa;
     min-height: 100vh;
 }
 
-    /* Login ve Grid sayfalarÄ± iÃ§in mor gradient */
-    body.login-page,
-    body.grid-page {
-        background: var(--primary-gradient);
-    }
+/* Modern Scroll Bar - Body için (Tüm Modern Template Sayfalarý) */
+body::-webkit-scrollbar {
+    height: 12px;
+    width: 12px;
+}
+
+body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+body::-webkit-scrollbar-thumb {
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 10px;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+    background: #5568d3;
+}
+
+/* Login, Grid ve Pivot sayfalarý için mor gradient background */
+body.login-page,
+body.grid-page,
+body.pivot-page {
+    background: var(--primary-gradient);
+}
 
 /* Container */
 .container {
@@ -206,11 +236,11 @@ body {
 }
 
 /* ============================================
-   VALIDATION & ALERTS - AÃ§Ä±k Mavi Override
-   Bootstrap CSS'i override etmek iÃ§in Ã§ok spesifik seÃ§ici
+   VALIDATION & ALERTS - Açýk Mavi Override
+   Bootstrap CSS'i override etmek için çok spesifik seçici
    ============================================ */
 
-/* DAHA SPESÄ°FÄ°K - Bootstrap'tan Ã¶ncelikli */
+/* DAHA SPESÝFÝK - Bootstrap'tan öncelikli */
 html body .alert.alert-danger,
 body .alert.alert-danger,
 .login-form .alert-danger,
@@ -220,7 +250,7 @@ form .alert-danger {
     border-color: #667eea !important;
 }
 
-/* TÃ¼m validation text'leri aÃ§Ä±k mavi */
+/* Tüm validation text'leri açýk mavi */
 html body .text-danger,
 body .text-danger {
     color: #667eea !important;

@@ -1,0 +1,10 @@
+using Microsoft.AspNetCore.Mvc.RazorPages;
+
+namespace ArchiX.Library.Web.Templates.Modern.Pages;
+
+public class PivotTemplate : PageModel
+{
+#pragma warning disable CA1822 // Mark members as static
+    public void OnGet() { }
+#pragma warning restore CA1822 // Mark members as static
+}
