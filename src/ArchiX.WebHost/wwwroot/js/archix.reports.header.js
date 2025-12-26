@@ -1,6 +1,6 @@
-/**
+ï»¿/**
  * ArchiX Reports Header Component
- * Grid ve Pivot template'leri için ortak header yapýsý
+ * Grid ve Pivot template'leri iÃ§in ortak header yapÄ±sÄ±
  */
 
 (function(window) {
@@ -47,23 +47,23 @@
 
             headerContainer.innerHTML = `
                 <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
-                    <!-- Sol: Baþlýk + Kayýt Sayýsý -->
+                    <!-- Sol: BaÅŸlÄ±k + KayÄ±t SayÄ±sÄ± -->
                     <div class="d-flex align-items-center gap-3">
                         <h1 class="pivot-title" style="font-size: 1.5rem; font-weight: 600; color: #667eea; margin: 0;">
                             <i class="${this.config.icon} me-2"></i>${this.config.title}
                         </h1>
                         <span class="record-count-badge" style="background: #667eea; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
-                            <strong><span id="totalRecords">0</span></strong> Kayýt
+                            <strong><span id="totalRecords">0</span></strong> KayÄ±t
                         </span>
                     </div>
 
-                    <!-- Orta: Arama + Sýfýrla -->
+                    <!-- Orta: Arama + SÄ±fÄ±rla -->
                     <div class="d-flex align-items-center gap-2 flex-grow-1">
                         <div class="search-box flex-grow-1" style="position: relative; max-width: 400px;">
                             <i class="bi bi-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #999;"></i>
                             <input type="text" class="form-control form-control-sm grid-search-input" id="searchInput" placeholder="Genel arama..." style="padding-left: 35px;">
                         </div>
-                        <button class="btn btn-primary btn-sm grid-btn-reset" onclick="ArchiXReportsHeader.handleReset()" title="Sýfýrla">
+                        <button class="btn btn-primary btn-sm grid-btn-reset" onclick="ArchiXReportsHeader.handleReset()" title="SÄ±fÄ±rla">
                             <i class="bi bi-arrow-clockwise text-white"></i>
                         </button>
                     </div>
@@ -135,7 +135,7 @@
             if (this.config.onExport) {
                 this.config.onExport(format);
             } else {
-                alert(`${format.toUpperCase()} formatýnda dýþa aktarýlýyor...`);
+                alert(`${format.toUpperCase()} formatÄ±nda dÄ±ÅŸa aktarÄ±lÄ±yor...`);
             }
         },
 
