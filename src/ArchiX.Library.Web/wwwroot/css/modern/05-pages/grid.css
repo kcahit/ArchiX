@@ -48,10 +48,21 @@ body.grid-page {
 .grid-btn-reset:focus {
     height: 32px;
     padding: 0 10px;
-    display: inline-flex;
+    display: inline-flex !important;
     align-items: center;
     justify-content: center;
+    background-color: #667eea !important;
+    border-color: #667eea !important;
+    color: #fff !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    min-width: 32px;
 }
+
+    .grid-btn-reset:hover {
+        background-color: #5563d6 !important;
+        color: #fff !important;
+    }
 
 .grid-btn-advanced {
     height: 32px;
