@@ -1,4 +1,4 @@
-ï»¿@page "/Raporlar/Pivot"
+@page "/Raporlar/Pivot"
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @model ArchiX.Library.Web.Templates.Modern.Pages.PivotTemplate
 @{
@@ -20,18 +20,19 @@
     <!-- PivotTable.js CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pivottable@2.23.0/dist/pivot.min.css">
 
-    <!-- ArchiX CSS (BODY SCROLL + GRADIENT global.css'de tanï¿½mlï¿½) -->
-    <link rel="stylesheet" href="~/css/modern/main.css">`n    <link rel="stylesheet" href="~/css/archix.reports.header.css">
+    <!-- ArchiX CSS (BODY SCROLL + GRADIENT global.css'de tanýmlý) -->
+    <link rel="stylesheet" href="~/css/modern/main.css">
+    <link rel="stylesheet" href="~/css/archix.reports.header.css">
     
     <style>
         /* PIVOT PAGE - Gradient arka plan + minimal padding */
         body.pivot-page {
-            padding: 15px !important; /* Daha az padding - card yukarï¿½da */
+            padding: 15px !important; /* Daha az padding - card yukarýda */
         }
         
-        /* SHELL - Card iï¿½in container */
+        /* SHELL - Card için container */
         .pivot-shell {
-            min-width: max-content; /* ï¿½ï¿½eriï¿½e gï¿½re geniï¿½le */
+            min-width: max-content; /* Ýçeriðe göre geniþle */
             margin: 0 auto;
         }
         
@@ -44,14 +45,14 @@
             margin-bottom: 20px;
         }
         
-        /* HEADER - Card iï¿½inde */
+        /* HEADER - Card içinde */
         .pivot-header {
             margin-bottom: 20px;
             padding-bottom: 15px;
-            border-border: 2px solid #667eea;
+            border-bottom: 2px solid #667eea;
         }
         
-        /* SLICER CARD - Ayrï¿½ kart */
+        /* SLICER CARD - Ayrý kart */
         .advanced-search-card {
             background: white;
             border-radius: 12px;
@@ -62,8 +63,8 @@
         #pivotContainer {
             margin-top: 20px;
             min-height: 400px;
-            min-width: 800px; /* Minimum geniï¿½lik */
-            width: max-content; /* ï¿½ï¿½eriï¿½e gï¿½re geniï¿½le */
+            min-width: 800px; /* Minimum geniþlik */
+            width: max-content; /* Ýçeriðe göre geniþle */
         }
         
         /* PivotTable.js Customization */
@@ -95,7 +96,7 @@
             cursor: move;
         }
         
-        /* Pivot Tablo Baï¿½lï¿½klarï¿½ */
+        /* Pivot Tablo Baþlýklarý */
         table.pvtTable {
             font-size: 0.85rem;
         }
@@ -109,7 +110,7 @@
             padding: 8px !important;
         }
         
-        /* Pivot Tablo Hï¿½creleri */
+        /* Pivot Tablo Hücreleri */
         table.pvtTable tbody tr td {
             background-color: white !important;
             color: #333 !important;
@@ -129,7 +130,7 @@
             font-size: 0.9rem !important;
         }
         
-        /* Barchart iï¿½in ï¿½ubuklar */
+        /* Barchart için çubuklar */
         table.pvtTable .pvtVal {
             text-align: center !important;
         }
@@ -143,7 +144,7 @@
             border-radius: 3px;
         }
         
-        /* Row Label Hï¿½creleri */
+        /* Row Label Hücreleri */
         table.pvtTable .pvtRowLabel,
         table.pvtTable .pvtColLabel {
             background-color: #667eea !important;
@@ -173,7 +174,7 @@
             <div id="pivotContainer"></div>
         </div>
 
-        <!-- Geliï¿½miï¿½ Arama - Slicer Paneli (Ayrï¿½ Card) -->
+        <!-- Geliþmiþ Arama - Slicer Paneli (Ayrý Card) -->
         <div class="collapse mb-3" id="advancedSearch">
             <div class="card advanced-search-card">
                 <div class="card-body">
@@ -182,10 +183,10 @@
                             <div class="column-selector-panel">
                                 <h6 class="column-selector-title">
                                     <span class="column-selector-title-group">
-                                        <input type="checkbox" class="column-selector-toggle" id="toggleAllColumns" onchange="toggleAllColumns()" title="Hepsi/Hiï¿½biri">
+                                        <input type="checkbox" class="column-selector-toggle" id="toggleAllColumns" onchange="toggleAllColumns()" title="Hepsi/Hiçbiri">
                                         Kolonlar
                                     </span>
-                                    <button onclick="clearAdvancedFilters()" class="btn-advanced-clear" title="Geliï¿½miï¿½ Filtreleri Temizle">
+                                    <button onclick="clearAdvancedFilters()" class="btn-advanced-clear" title="Geliþmiþ Filtreleri Temizle">
                                         Temizle
                                     </button>
                                 </h6>
@@ -195,7 +196,7 @@
                         <div class="col-md-10">
                             <div id="slicerContainer" style="display: flex; flex-wrap: wrap;">
                                 <div id="noSlicerMsg" class="grid-no-slicer">
-                                    <i class="bi bi-arrow-left"></i> Soldaki listeden kolon seï¿½in
+                                    <i class="bi bi-arrow-left"></i> Soldaki listeden kolon seçin
                                 </div>
                             </div>
                         </div>
@@ -225,73 +226,73 @@
     
     <script>
         const data = [
-            { id: 1, name: "Ahmet Yï¿½lmaz", email: "ahmet@example.com", phone: "0532 123 4567", department: "IT", salary: 15000, experience: 5, city: "Istanbul", position: "Yazï¿½lï¿½m Geliï¿½tirici", startDate: "2019-03-15", status: "Aktif" },
-            { id: 2, name: "Ayï¿½e Demir", email: "ayse@example.com", phone: "0533 234 5678", department: "Satï¿½ï¿½", salary: 12000, experience: 3, city: "Ankara", position: "Satï¿½ï¿½ Temsilcisi", startDate: "2021-06-20", status: "Aktif" },
-            { id: 3, name: "Mehmet Kaya", email: "mehmet@example.com", phone: "0534 345 6789", department: "ï¿½nsan Kaynaklarï¿½", salary: 18000, experience: 8, city: "Izmir", position: "ï¿½K Mï¿½dï¿½rï¿½", startDate: "2016-01-10", status: "Pasif" },
-            { id: 4, name: "Fatma ï¿½elik", email: "fatma@example.com", phone: "0535 456 7890", department: "Pazarlama", salary: 14000, experience: 4, city: "Bursa", position: "Pazarlama Uzmanï¿½", startDate: "2020-09-05", status: "Beklemede" },
-            { id: 5, name: "Ali ï¿½z", email: "ali@example.com", phone: "0536 567 8901", department: "IT", salary: 16500, experience: 6, city: "Istanbul", position: "Sistem Yï¿½neticisi", startDate: "2018-11-12", status: "Aktif" },
-            { id: 6, name: "Zeynep ï¿½ahin", email: "zeynep@example.com", phone: "0537 678 9012", department: "Satï¿½ï¿½", salary: 11000, experience: 2, city: "Antalya", position: "Satï¿½ï¿½ Danï¿½ï¿½manï¿½", startDate: "2022-02-28", status: "Aktif" },
-            { id: 7, name: "Can Arslan", email: "can@example.com", phone: "0538 789 0123", department: "IT", salary: 17000, experience: 7, city: "Ankara", position: "Kï¿½demli Geliï¿½tirici", startDate: "2017-05-18", status: "Pasif" },
+            { id: 1, name: "Ahmet Yýlmaz", email: "ahmet@example.com", phone: "0532 123 4567", department: "IT", salary: 15000, experience: 5, city: "Istanbul", position: "Yazýlým Geliþtirici", startDate: "2019-03-15", status: "Aktif" },
+            { id: 2, name: "Ayþe Demir", email: "ayse@example.com", phone: "0533 234 5678", department: "Satýþ", salary: 12000, experience: 3, city: "Ankara", position: "Satýþ Temsilcisi", startDate: "2021-06-20", status: "Aktif" },
+            { id: 3, name: "Mehmet Kaya", email: "mehmet@example.com", phone: "0534 345 6789", department: "Ýnsan Kaynaklarý", salary: 18000, experience: 8, city: "Izmir", position: "ÝK Müdürü", startDate: "2016-01-10", status: "Pasif" },
+            { id: 4, name: "Fatma Çelik", email: "fatma@example.com", phone: "0535 456 7890", department: "Pazarlama", salary: 14000, experience: 4, city: "Bursa", position: "Pazarlama Uzmaný", startDate: "2020-09-05", status: "Beklemede" },
+            { id: 5, name: "Ali Öz", email: "ali@example.com", phone: "0536 567 8901", department: "IT", salary: 16500, experience: 6, city: "Istanbul", position: "Sistem Yöneticisi", startDate: "2018-11-12", status: "Aktif" },
+            { id: 6, name: "Zeynep Þahin", email: "zeynep@example.com", phone: "0537 678 9012", department: "Satýþ", salary: 11000, experience: 2, city: "Antalya", position: "Satýþ Danýþmaný", startDate: "2022-02-28", status: "Aktif" },
+            { id: 7, name: "Can Arslan", email: "can@example.com", phone: "0538 789 0123", department: "IT", salary: 17000, experience: 7, city: "Ankara", position: "Kýdemli Geliþtirici", startDate: "2017-05-18", status: "Pasif" },
             { id: 8, name: "Elif Kurt", email: "elif@example.com", phone: "0539 890 1234", department: "Pazarlama", salary: 13500, experience: 4, city: "Istanbul", position: "Dijital Pazarlama", startDate: "2020-07-22", status: "Aktif" },
-            { id: 9, name: "Burak Aydï¿½n", email: "burak@example.com", phone: "0540 901 2345", department: "ï¿½nsan Kaynaklarï¿½", salary: 12500, experience: 3, city: "Izmir", position: "ï¿½K Uzmanï¿½", startDate: "2021-04-14", status: "Beklemede" },
-            { id: 10, name: "Selin Tï¿½rk", email: "selin@example.com", phone: "0541 012 3456", department: "Satï¿½ï¿½", salary: 13000, experience: 5, city: "Bursa", position: "Bï¿½lge Mï¿½dï¿½rï¿½", startDate: "2019-08-30", status: "Aktif" },
-            { id: 11, name: "Deniz Yï¿½ldï¿½z", email: "deniz@example.com", phone: "0542 111 2222", department: "IT", salary: 19000, experience: 10, city: "Istanbul", position: "IT Mï¿½dï¿½rï¿½", startDate: "2014-12-01", status: "Aktif" },
-            { id: 12, name: "Ece Kartal", email: "ece@example.com", phone: "0543 222 3333", department: "Pazarlama", salary: 12000, experience: 2, city: "Ankara", position: "Sosyal Medya Uzmanï¿½", startDate: "2022-05-17", status: "Pasif" },
-            { id: 13, name: "Emre Koï¿½", email: "emre@example.com", phone: "0544 333 4444", department: "IT", salary: 15500, experience: 5, city: "Izmir", position: "Veri Analisti", startDate: "2019-10-08", status: "Aktif" },
-            { id: 14, name: "Gizem Acar", email: "gizem@example.com", phone: "0545 444 5555", department: "Satï¿½ï¿½", salary: 11500, experience: 3, city: "Antalya", position: "Satï¿½ï¿½ Uzmanï¿½", startDate: "2021-03-25", status: "Aktif" },
-            { id: 15, name: "Hakan Demir", email: "hakan@example.com", phone: "0546 555 6666", department: "Pazarlama", salary: 16000, experience: 7, city: "Istanbul", position: "Marka Mï¿½dï¿½rï¿½", startDate: "2017-07-19", status: "Aktif" },
-            { id: 16, name: "ï¿½rem Yalï¿½ï¿½n", email: "irem@example.com", phone: "0547 666 7777", department: "ï¿½nsan Kaynaklarï¿½", salary: 14500, experience: 6, city: "Bursa", position: "ï¿½K Koordinatï¿½rï¿½", startDate: "2018-09-11", status: "Aktif" },
-            { id: 17, name: "Kerem ï¿½zkan", email: "kerem@example.com", phone: "0548 777 8888", department: "IT", salary: 18500, experience: 9, city: "Ankara", position: "Yazï¿½lï¿½m Mimarï¿½", startDate: "2015-02-03", status: "Pasif" },
-            { id: 18, name: "Lale Kara", email: "lale@example.com", phone: "0549 888 9999", department: "Satï¿½ï¿½", salary: 13500, experience: 4, city: "Istanbul", position: "Kurumsal Satï¿½ï¿½", startDate: "2020-11-27", status: "Aktif" },
-            { id: 19, name: "Mert ï¿½etin", email: "mert@example.com", phone: "0530 999 0000", department: "Pazarlama", salary: 12500, experience: 3, city: "Izmir", position: "ï¿½ï¿½erik ï¿½reticisi", startDate: "2021-08-16", status: "Beklemede" },
-            { id: 20, name: "Nil ï¿½en", email: "nil@example.com", phone: "0531 000 1111", department: "IT", salary: 17500, experience: 8, city: "Ankara", position: "DevOps Mï¿½hendisi", startDate: "2016-06-22", status: "Aktif" },
-            { id: 21, name: "Oï¿½uz Taï¿½", email: "oguz@example.com", phone: "0532 111 2222", department: "Satï¿½ï¿½", salary: 14000, experience: 5, city: "Bursa", position: "Satï¿½ï¿½ Mï¿½dï¿½rï¿½", startDate: "2019-04-09", status: "Aktif" },
-            { id: 22, name: "Pelin Ay", email: "pelin@example.com", phone: "0533 222 3333", department: "ï¿½nsan Kaynaklarï¿½", salary: 13000, experience: 4, city: "Istanbul", position: "ï¿½ï¿½e Alï¿½m Uzmanï¿½", startDate: "2020-12-14", status: "Aktif" },
-            { id: 23, name: "Rï¿½za Ulu", email: "riza@example.com", phone: "0534 333 4444", department: "Pazarlama", salary: 15500, experience: 6, city: "Antalya", position: "Pazarlama Mï¿½dï¿½rï¿½", startDate: "2018-03-07", status: "Pasif" },
-            { id: 24, name: "Seda Akï¿½n", email: "seda@example.com", phone: "0535 444 5555", department: "IT", salary: 16000, experience: 6, city: "Izmir", position: "Test Uzmanï¿½", startDate: "2018-08-21", status: "Aktif" },
-            { id: 25, name: "Tolga Yurt", email: "tolga@example.com", phone: "0536 555 6666", department: "Satï¿½ï¿½", salary: 12000, experience: 2, city: "Ankara", position: "Satï¿½ï¿½ Elemanï¿½", startDate: "2022-01-11", status: "Aktif" },
-            { id: 26, name: "Ufuk Aydï¿½n", email: "ufuk@example.com", phone: "0537 666 7777", department: "Pazarlama", salary: 14500, experience: 5, city: "Istanbul", position: "SEO Uzmanï¿½", startDate: "2019-09-26", status: "Aktif" },
-            { id: 27, name: "Vildan Er", email: "vildan@example.com", phone: "0538 777 8888", department: "ï¿½nsan Kaynaklarï¿½", salary: 11500, experience: 2, city: "Bursa", position: "ï¿½K Asistanï¿½", startDate: "2022-07-04", status: "Beklemede" },
-            { id: 28, name: "Yaï¿½mur Kï¿½lï¿½ï¿½", email: "yagmur@example.com", phone: "0539 888 9999", department: "IT", salary: 20000, experience: 12, city: "Istanbul", position: "CTO", startDate: "2012-10-15", status: "Aktif" },
-            { id: 29, name: "Zafer Gï¿½neï¿½", email: "zafer@example.com", phone: "0540 999 0000", department: "Satï¿½ï¿½", salary: 15000, experience: 7, city: "Ankara", position: "Satï¿½ï¿½ Direktï¿½rï¿½", startDate: "2017-11-30", status: "Aktif" },
-            { id: 30, name: "Aslï¿½ ï¿½ztï¿½rk", email: "asli@example.com", phone: "0541 000 1111", department: "Pazarlama", salary: 13000, experience: 4, city: "Izmir", position: "Reklam Uzmanï¿½", startDate: "2020-05-13", status: "Pasif" },
-            { id: 31, name: "Baran ï¿½akï¿½r", email: "baran@example.com", phone: "0542 111 2222", department: "IT", salary: 17000, experience: 7, city: "Bursa", position: "Gï¿½venlik Uzmanï¿½", startDate: "2017-02-28", status: "Aktif" },
-            { id: 32, name: "Canan Tekin", email: "canan@example.com", phone: "0543 222 3333", department: "ï¿½nsan Kaynaklarï¿½", salary: 16500, experience: 8, city: "Istanbul", position: "ï¿½K Direktï¿½rï¿½", startDate: "2016-08-08", status: "Aktif" },
-            { id: 33, name: "Deniz Arslan", email: "deniz2@example.com", phone: "0544 333 4444", department: "Satï¿½ï¿½", salary: 11000, experience: 1, city: "Antalya", position: "Stajyer", startDate: "2023-03-01", status: "Aktif" },
-            { id: 34, name: "Eda Polat", email: "eda@example.com", phone: "0545 444 5555", department: "Pazarlama", salary: 12500, experience: 3, city: "Ankara", position: "Grafik Tasarï¿½mcï¿½", startDate: "2021-09-20", status: "Beklemede" },
-            { id: 35, name: "Fikret Yï¿½ldï¿½rï¿½m", email: "fikret@example.com", phone: "0546 555 6666", department: "IT", salary: 16500, experience: 6, city: "Izmir", position: "Network Uzmanï¿½", startDate: "2018-04-17", status: "Aktif" },
-            { id: 36, name: "Gï¿½l Taï¿½kï¿½n", email: "gul@example.com", phone: "0547 666 7777", department: "Satï¿½ï¿½", salary: 14500, experience: 6, city: "Istanbul", position: "ï¿½hracat Mï¿½dï¿½rï¿½", startDate: "2018-10-23", status: "Aktif" },
+            { id: 9, name: "Burak Aydýn", email: "burak@example.com", phone: "0540 901 2345", department: "Ýnsan Kaynaklarý", salary: 12500, experience: 3, city: "Izmir", position: "ÝK Uzmaný", startDate: "2021-04-14", status: "Beklemede" },
+            { id: 10, name: "Selin Türk", email: "selin@example.com", phone: "0541 012 3456", department: "Satýþ", salary: 13000, experience: 5, city: "Bursa", position: "Bölge Müdürü", startDate: "2019-08-30", status: "Aktif" },
+            { id: 11, name: "Deniz Yýldýz", email: "deniz@example.com", phone: "0542 111 2222", department: "IT", salary: 19000, experience: 10, city: "Istanbul", position: "IT Müdürü", startDate: "2014-12-01", status: "Aktif" },
+            { id: 12, name: "Ece Kartal", email: "ece@example.com", phone: "0543 222 3333", department: "Pazarlama", salary: 12000, experience: 2, city: "Ankara", position: "Sosyal Medya Uzmaný", startDate: "2022-05-17", status: "Pasif" },
+            { id: 13, name: "Emre Koç", email: "emre@example.com", phone: "0544 333 4444", department: "IT", salary: 15500, experience: 5, city: "Izmir", position: "Veri Analisti", startDate: "2019-10-08", status: "Aktif" },
+            { id: 14, name: "Gizem Acar", email: "gizem@example.com", phone: "0545 444 5555", department: "Satýþ", salary: 11500, experience: 3, city: "Antalya", position: "Satýþ Uzmaný", startDate: "2021-03-25", status: "Aktif" },
+            { id: 15, name: "Hakan Demir", email: "hakan@example.com", phone: "0546 555 6666", department: "Pazarlama", salary: 16000, experience: 7, city: "Istanbul", position: "Marka Müdürü", startDate: "2017-07-19", status: "Aktif" },
+            { id: 16, name: "Ýrem Yalçýn", email: "irem@example.com", phone: "0547 666 7777", department: "Ýnsan Kaynaklarý", salary: 14500, experience: 6, city: "Bursa", position: "ÝK Koordinatörü", startDate: "2018-09-11", status: "Aktif" },
+            { id: 17, name: "Kerem Özkan", email: "kerem@example.com", phone: "0548 777 8888", department: "IT", salary: 18500, experience: 9, city: "Ankara", position: "Yazýlým Mimarý", startDate: "2015-02-03", status: "Pasif" },
+            { id: 18, name: "Lale Kara", email: "lale@example.com", phone: "0549 888 9999", department: "Satýþ", salary: 13500, experience: 4, city: "Istanbul", position: "Kurumsal Satýþ", startDate: "2020-11-27", status: "Aktif" },
+            { id: 19, name: "Mert Çetin", email: "mert@example.com", phone: "0530 999 0000", department: "Pazarlama", salary: 12500, experience: 3, city: "Izmir", position: "Ýçerik Üreticisi", startDate: "2021-08-16", status: "Beklemede" },
+            { id: 20, name: "Nil Þen", email: "nil@example.com", phone: "0531 000 1111", department: "IT", salary: 17500, experience: 8, city: "Ankara", position: "DevOps Mühendisi", startDate: "2016-06-22", status: "Aktif" },
+            { id: 21, name: "Oðuz Taþ", email: "oguz@example.com", phone: "0532 111 2222", department: "Satýþ", salary: 14000, experience: 5, city: "Bursa", position: "Satýþ Müdürü", startDate: "2019-04-09", status: "Aktif" },
+            { id: 22, name: "Pelin Ay", email: "pelin@example.com", phone: "0533 222 3333", department: "Ýnsan Kaynaklarý", salary: 13000, experience: 4, city: "Istanbul", position: "Ýþe Alým Uzmaný", startDate: "2020-12-14", status: "Aktif" },
+            { id: 23, name: "Rýza Ulu", email: "riza@example.com", phone: "0534 333 4444", department: "Pazarlama", salary: 15500, experience: 6, city: "Antalya", position: "Pazarlama Müdürü", startDate: "2018-03-07", status: "Pasif" },
+            { id: 24, name: "Seda Akýn", email: "seda@example.com", phone: "0535 444 5555", department: "IT", salary: 16000, experience: 6, city: "Izmir", position: "Test Uzmaný", startDate: "2018-08-21", status: "Aktif" },
+            { id: 25, name: "Tolga Yurt", email: "tolga@example.com", phone: "0536 555 6666", department: "Satýþ", salary: 12000, experience: 2, city: "Ankara", position: "Satýþ Elemaný", startDate: "2022-01-11", status: "Aktif" },
+            { id: 26, name: "Ufuk Aydýn", email: "ufuk@example.com", phone: "0537 666 7777", department: "Pazarlama", salary: 14500, experience: 5, city: "Istanbul", position: "SEO Uzmaný", startDate: "2019-09-26", status: "Aktif" },
+            { id: 27, name: "Vildan Er", email: "vildan@example.com", phone: "0538 777 8888", department: "Ýnsan Kaynaklarý", salary: 11500, experience: 2, city: "Bursa", position: "ÝK Asistaný", startDate: "2022-07-04", status: "Beklemede" },
+            { id: 28, name: "Yaðmur Kýlýç", email: "yagmur@example.com", phone: "0539 888 9999", department: "IT", salary: 20000, experience: 12, city: "Istanbul", position: "CTO", startDate: "2012-10-15", status: "Aktif" },
+            { id: 29, name: "Zafer Güneþ", email: "zafer@example.com", phone: "0540 999 0000", department: "Satýþ", salary: 15000, experience: 7, city: "Ankara", position: "Satýþ Direktörü", startDate: "2017-11-30", status: "Aktif" },
+            { id: 30, name: "Aslý Öztürk", email: "asli@example.com", phone: "0541 000 1111", department: "Pazarlama", salary: 13000, experience: 4, city: "Izmir", position: "Reklam Uzmaný", startDate: "2020-05-13", status: "Pasif" },
+            { id: 31, name: "Baran Çakýr", email: "baran@example.com", phone: "0542 111 2222", department: "IT", salary: 17000, experience: 7, city: "Bursa", position: "Güvenlik Uzmaný", startDate: "2017-02-28", status: "Aktif" },
+            { id: 32, name: "Canan Tekin", email: "canan@example.com", phone: "0543 222 3333", department: "Ýnsan Kaynaklarý", salary: 16500, experience: 8, city: "Istanbul", position: "ÝK Direktörü", startDate: "2016-08-08", status: "Aktif" },
+            { id: 33, name: "Deniz Arslan", email: "deniz2@example.com", phone: "0544 333 4444", department: "Satýþ", salary: 11000, experience: 1, city: "Antalya", position: "Stajyer", startDate: "2023-03-01", status: "Aktif" },
+            { id: 34, name: "Eda Polat", email: "eda@example.com", phone: "0545 444 5555", department: "Pazarlama", salary: 12500, experience: 3, city: "Ankara", position: "Grafik Tasarýmcý", startDate: "2021-09-20", status: "Beklemede" },
+            { id: 35, name: "Fikret Yýldýrým", email: "fikret@example.com", phone: "0546 555 6666", department: "IT", salary: 16500, experience: 6, city: "Izmir", position: "Network Uzmaný", startDate: "2018-04-17", status: "Aktif" },
+            { id: 36, name: "Gül Taþkýn", email: "gul@example.com", phone: "0547 666 7777", department: "Satýþ", salary: 14500, experience: 6, city: "Istanbul", position: "Ýhracat Müdürü", startDate: "2018-10-23", status: "Aktif" },
             { id: 37, name: "Halil Kurt", email: "halil@example.com", phone: "0548 777 8888", department: "Pazarlama", salary: 18000, experience: 9, city: "Bursa", position: "CMO", startDate: "2015-12-05", status: "Aktif" },
-            { id: 38, name: "ï¿½pek ï¿½alï¿½ï¿½kan", email: "ipek@example.com", phone: "0549 888 9999", department: "ï¿½nsan Kaynaklarï¿½", salary: 12000, experience: 3, city: "Ankara", position: "Eï¿½itim Uzmanï¿½", startDate: "2021-07-14", status: "Pasif" },
-            { id: 39, name: "Kaan Durmuï¿½", email: "kaan@example.com", phone: "0530 999 0000", department: "IT", salary: 15000, experience: 5, city: "Izmir", position: "Mobil Geliï¿½tirici", startDate: "2019-05-29", status: "Aktif" },
-            { id: 40, name: "Leyla Berk", email: "leyla@example.com", phone: "0531 000 1111", department: "Satï¿½ï¿½", salary: 13500, experience: 4, city: "Istanbul", position: "E-ticaret Uzmanï¿½", startDate: "2020-08-11", status: "Aktif" },
-            { id: 41, name: "Mustafa Eren", email: "mustafa@example.com", phone: "0532 111 2222", department: "Pazarlama", salary: 14000, experience: 5, city: "Antalya", position: "Etkinlik Yï¿½neticisi", startDate: "2019-06-18", status: "Beklemede" },
-            { id: 42, name: "Nalan Kaya", email: "nalan@example.com", phone: "0533 222 3333", department: "IT", salary: 19500, experience: 11, city: "Ankara", position: "Proje Mï¿½dï¿½rï¿½", startDate: "2013-09-10", status: "Aktif" },
-            { id: 43, name: "Onur Aydï¿½n", email: "onur@example.com", phone: "0534 333 4444", department: "Satï¿½ï¿½", salary: 12500, experience: 3, city: "Bursa", position: "Mï¿½ï¿½teri ï¿½liï¿½kileri", startDate: "2021-11-22", status: "Aktif" },
-            { id: 44, name: "Pï¿½nar Yï¿½ksel", email: "pinar@example.com", phone: "0535 444 5555", department: "ï¿½nsan Kaynaklarï¿½", salary: 13500, experience: 4, city: "Istanbul", position: "Performans Uzmanï¿½", startDate: "2020-10-06", status: "Aktif" },
-            { id: 45, name: "Recep ï¿½imï¿½ek", email: "recep@example.com", phone: "0536 555 6666", department: "Pazarlama", salary: 11500, experience: 2, city: "Izmir", position: "Video Editï¿½rï¿½", startDate: "2022-04-19", status: "Pasif" },
-            { id: 46, name: "Selin ï¿½zer", email: "selin2@example.com", phone: "0537 666 7777", department: "IT", salary: 16000, experience: 6, city: "Ankara", position: "Veri Bilimci", startDate: "2018-07-12", status: "Aktif" },
-            { id: 47, name: "Taner Aslan", email: "taner@example.com", phone: "0538 777 8888", department: "Satï¿½ï¿½", salary: 17000, experience: 9, city: "Istanbul", position: "Anahtar Mï¿½ï¿½teri", startDate: "2015-05-25", status: "Aktif" },
-            { id: 48, name: "ï¿½mit Karaca", email: "umit@example.com", phone: "0539 888 9999", department: "Pazarlama", salary: 13000, experience: 3, city: "Bursa", position: "PR Uzmanï¿½", startDate: "2021-12-08", status: "Aktif" },
-            { id: 49, name: "Volkan ï¿½zdemir", email: "volkan@example.com", phone: "0540 999 0000", department: "ï¿½nsan Kaynaklarï¿½", salary: 19000, experience: 10, city: "Antalya", position: "ï¿½K Genel Mï¿½dï¿½rï¿½", startDate: "2014-03-20", status: "Aktif" },
-            { id: 50, name: "Yasemin Tan", email: "yasemin@example.com", phone: "0541 000 1111", department: "IT", salary: 18000, experience: 8, city: "Izmir", position: "UX/UI Tasarï¿½mcï¿½", startDate: "2016-11-14", status: "Beklemede" },
-            { id: 51, name: "Zeki Bulut", email: "zeki@example.com", phone: "0542 111 2222", department: "Satï¿½ï¿½", salary: 14500, experience: 5, city: "Ankara", position: "Teknik Satï¿½ï¿½", startDate: "2019-02-07", status: "Aktif" },
-            { id: 52, name: "Aylin Erdoï¿½an", email: "aylin@example.com", phone: "0543 222 3333", department: "Pazarlama", salary: 15000, experience: 6, city: "Istanbul", position: "Marka Stratejisti", startDate: "2018-06-30", status: "Aktif" },
-            { id: 53, name: "Barï¿½ï¿½ Yaman", email: "baris@example.com", phone: "0544 333 4444", department: "IT", salary: 21000, experience: 13, city: "Bursa", position: "Baï¿½kan Yardï¿½mcï¿½sï¿½", startDate: "2011-08-16", status: "Aktif" },
-            { id: 54, name: "Ceyda Koï¿½ak", email: "ceyda@example.com", phone: "0545 444 5555", department: "Satï¿½ï¿½", salary: 13000, experience: 4, city: "Antalya", position: "Bayi Yï¿½neticisi", startDate: "2020-03-24", status: "Pasif" },
-            { id: 55, name: "Doï¿½an ï¿½ener", email: "dogan@example.com", phone: "0546 555 6666", department: "ï¿½nsan Kaynaklarï¿½", salary: 15500, experience: 7, city: "Izmir", position: "Bordro Uzmanï¿½", startDate: "2017-09-02", status: "Aktif" }
+            { id: 38, name: "Ýpek Çalýþkan", email: "ipek@example.com", phone: "0549 888 9999", department: "Ýnsan Kaynaklarý", salary: 12000, experience: 3, city: "Ankara", position: "Eðitim Uzmaný", startDate: "2021-07-14", status: "Pasif" },
+            { id: 39, name: "Kaan Durmuþ", email: "kaan@example.com", phone: "0530 999 0000", department: "IT", salary: 15000, experience: 5, city: "Izmir", position: "Mobil Geliþtirici", startDate: "2019-05-29", status: "Aktif" },
+            { id: 40, name: "Leyla Berk", email: "leyla@example.com", phone: "0531 000 1111", department: "Satýþ", salary: 13500, experience: 4, city: "Istanbul", position: "E-ticaret Uzmaný", startDate: "2020-08-11", status: "Aktif" },
+            { id: 41, name: "Mustafa Eren", email: "mustafa@example.com", phone: "0532 111 2222", department: "Pazarlama", salary: 14000, experience: 5, city: "Antalya", position: "Etkinlik Yöneticisi", startDate: "2019-06-18", status: "Beklemede" },
+            { id: 42, name: "Nalan Kaya", email: "nalan@example.com", phone: "0533 222 3333", department: "IT", salary: 19500, experience: 11, city: "Ankara", position: "Proje Müdürü", startDate: "2013-09-10", status: "Aktif" },
+            { id: 43, name: "Onur Aydýn", email: "onur@example.com", phone: "0534 333 4444", department: "Satýþ", salary: 12500, experience: 3, city: "Bursa", position: "Müþteri Ýliþkileri", startDate: "2021-11-22", status: "Aktif" },
+            { id: 44, name: "Pýnar Yüksel", email: "pinar@example.com", phone: "0535 444 5555", department: "Ýnsan Kaynaklarý", salary: 13500, experience: 4, city: "Istanbul", position: "Performans Uzmaný", startDate: "2020-10-06", status: "Aktif" },
+            { id: 45, name: "Recep Þimþek", email: "recep@example.com", phone: "0536 555 6666", department: "Pazarlama", salary: 11500, experience: 2, city: "Izmir", position: "Video Editörü", startDate: "2022-04-19", status: "Pasif" },
+            { id: 46, name: "Selin Özer", email: "selin2@example.com", phone: "0537 666 7777", department: "IT", salary: 16000, experience: 6, city: "Ankara", position: "Veri Bilimci", startDate: "2018-07-12", status: "Aktif" },
+            { id: 47, name: "Taner Aslan", email: "taner@example.com", phone: "0538 777 8888", department: "Satýþ", salary: 17000, experience: 9, city: "Istanbul", position: "Anahtar Müþteri", startDate: "2015-05-25", status: "Aktif" },
+            { id: 48, name: "Ümit Karaca", email: "umit@example.com", phone: "0539 888 9999", department: "Pazarlama", salary: 13000, experience: 3, city: "Bursa", position: "PR Uzmaný", startDate: "2021-12-08", status: "Aktif" },
+            { id: 49, name: "Volkan Özdemir", email: "volkan@example.com", phone: "0540 999 0000", department: "Ýnsan Kaynaklarý", salary: 19000, experience: 10, city: "Antalya", position: "ÝK Genel Müdürü", startDate: "2014-03-20", status: "Aktif" },
+            { id: 50, name: "Yasemin Tan", email: "yasemin@example.com", phone: "0541 000 1111", department: "IT", salary: 18000, experience: 8, city: "Izmir", position: "UX/UI Tasarýmcý", startDate: "2016-11-14", status: "Beklemede" },
+            { id: 51, name: "Zeki Bulut", email: "zeki@example.com", phone: "0542 111 2222", department: "Satýþ", salary: 14500, experience: 5, city: "Ankara", position: "Teknik Satýþ", startDate: "2019-02-07", status: "Aktif" },
+            { id: 52, name: "Aylin Erdoðan", email: "aylin@example.com", phone: "0543 222 3333", department: "Pazarlama", salary: 15000, experience: 6, city: "Istanbul", position: "Marka Stratejisti", startDate: "2018-06-30", status: "Aktif" },
+            { id: 53, name: "Barýþ Yaman", email: "baris@example.com", phone: "0544 333 4444", department: "IT", salary: 21000, experience: 13, city: "Bursa", position: "Baþkan Yardýmcýsý", startDate: "2011-08-16", status: "Aktif" },
+            { id: 54, name: "Ceyda Koçak", email: "ceyda@example.com", phone: "0545 444 5555", department: "Satýþ", salary: 13000, experience: 4, city: "Antalya", position: "Bayi Yöneticisi", startDate: "2020-03-24", status: "Pasif" },
+            { id: 55, name: "Doðan Þener", email: "dogan@example.com", phone: "0546 555 6666", department: "Ýnsan Kaynaklarý", salary: 15500, experience: 7, city: "Izmir", position: "Bordro Uzmaný", startDate: "2017-09-02", status: "Aktif" }
         ];
 
         const fieldNames = {
-            name: "ï¿½sim",
+            name: "Ýsim",
             email: "Email",
             phone: "Telefon",
             department: "Departman",
-            salary: "Maaï¿½",
-            experience: "Tecrï¿½be",
-            city: "ï¿½ehir",
+            salary: "Maaþ",
+            experience: "Tecrübe",
+            city: "Þehir",
             position: "Pozisyon",
-            startDate: "Baï¿½langï¿½ï¿½",
+            startDate: "Baþlangýç",
             status: "Durum"
         };
 
@@ -313,7 +314,7 @@
             refreshPivot();
         });
 
-        // TABLE BARCHART RENDERER - ï¿½ubuk grafikli gï¿½rï¿½nï¿½m
+        // TABLE BARCHART RENDERER - Çubuk grafikli görünüm
         function initPivot() {
             $("#pivotContainer").pivotUI(
                 ArchiXReportsSlicer.filteredData,
@@ -352,4 +353,3 @@
     </script>
 </body>
 </html>
-

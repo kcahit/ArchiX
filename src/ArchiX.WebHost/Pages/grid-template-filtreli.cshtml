@@ -891,7 +891,7 @@
                         tagsHtml += `
                             <span class="filter-tag d-inline-block mb-1 me-1">
                                 ${value}
-                                <i class="bi bi-x-circle" onclick="(e) => { e.stopPropagation(); removeIndividualFilter('${column}', '${value}'); }"></i>
+                                 <i class="bi bi-x-circle" onclick="removeIndividualFilter('${column}', '${value}', event)"></i>
                             </span>
                         `;
                     });
