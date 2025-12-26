@@ -1,0 +1,186 @@
+﻿/**
+ * ArchiX Reports - PivotTable.js Filter Override
+ * PivotTable.js'in varsayılan filter popup'ını ArchiX modern tasarımına çevirir
+ */
+
+/* === PivotTable.js FILTER POPUP - Modern ArchiX Style === */
+
+/* Filter Dialog Container */
+.pvtFilterBox {
+    border: 2px solid #667eea !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+    background: white !important;
+    padding: 12px !important;
+    min-width: 320px !important;
+    max-width: 380px !important;
+    z-index: 10000 !important;
+}
+
+/* Filter Header */
+.pvtFilterBox h4 {
+    display: none !important; /* Başlığı gizle - gereksiz */
+}
+
+/* Filter Search Input */
+.pvtFilterBox input[type="text"] {
+    width: 100% !important;
+    padding: 6px 10px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 4px !important;
+    font-size: 0.85rem !important;
+    margin-bottom: 8px !important;
+}
+
+.pvtFilterBox input[type="text"]:focus {
+    outline: none !important;
+    border-color: #667eea !important;
+}
+
+/* Filter Type Buttons (Select All / Select None) */
+.pvtFilterBox button {
+    padding: 6px 12px !important;
+    border: 1px solid #667eea !important;
+    background: white !important;
+    color: #667eea !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    font-size: 0.8rem !important;
+    margin-right: 4px !important;
+    font-weight: 600 !important;
+    transition: all 0.2s !important;
+}
+
+.pvtFilterBox button:hover {
+    background: #667eea !important;
+    color: white !important;
+}
+
+/* Checkbox List Container */
+.pvtCheckContainer {
+    max-height: 180px !important;
+    overflow-y: auto !important;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 4px !important;
+    padding: 4px !important;
+    margin: 8px 0 12px 0 !important;
+    background: white !important;
+}
+
+/* Checkbox Items */
+.pvtCheckContainer p {
+    margin: 0 !important;
+    padding: 6px 8px !important;
+    border-radius: 4px !important;
+    transition: background 0.2s !important;
+    cursor: pointer !important;
+    font-size: 0.85rem !important;
+}
+
+.pvtCheckContainer p:hover {
+    background: #f0f0f0 !important;
+}
+
+.pvtCheckContainer p label {
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    font-size: 0.85rem !important;
+}
+
+.pvtCheckContainer p input[type="checkbox"] {
+    cursor: pointer !important;
+    width: 16px !important;
+    height: 16px !important;
+    margin: 0 !important;
+}
+
+/* Action Buttons Container - Apply/Cancel butonları için */
+.pvtFilterBox > p:last-child {
+    display: flex !important;
+    gap: 8px !important;
+    border-top: 1px solid #e0e0e0 !important;
+    padding-top: 12px !important;
+    margin: 0 !important;
+}
+
+/* OK/Apply Button - İlk buton (genelde OK/Apply) */
+.pvtFilterBox > p:last-child > button:first-child {
+    flex: 1 !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    border: none !important;
+    padding: 8px 12px !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+}
+
+.pvtFilterBox > p:last-child > button:first-child:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+}
+
+/* Cancel Button - Son buton */
+.pvtFilterBox > p:last-child > button:last-child {
+    flex: 1 !important;
+    background: #f8f9fa !important;
+    color: #666 !important;
+    border: 1px solid #ddd !important;
+    padding: 8px 12px !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+}
+
+.pvtFilterBox > p:last-child > button:last-child:hover {
+    background: #e9ecef !important;
+}
+
+/* Scrollbar */
+.pvtCheckContainer::-webkit-scrollbar {
+    width: 6px !important;
+}
+
+.pvtCheckContainer::-webkit-scrollbar-track {
+    background: #f1f1f1 !important;
+    border-radius: 3px !important;
+}
+
+.pvtCheckContainer::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border-radius: 3px !important;
+}
+
+.pvtCheckContainer::-webkit-scrollbar-thumb:hover {
+    background: #5568d3 !important;
+}
+
+/* Button Row için özel stil - İlk iki buton (Select All/None) */
+.pvtFilterBox > p:first-of-type {
+    display: flex !important;
+    gap: 4px !important;
+    margin-bottom: 8px !important;
+    border-bottom: 1px solid #e0e0e0 !important;
+    padding-bottom: 8px !important;
+}
+
+/* Responsive - Mobile */
+@media (max-width: 768px) {
+    .pvtFilterBox {
+        min-width: 280px !important;
+        max-width: 320px !important;
+    }
+    
+    .pvtCheckContainer {
+        max-height: 150px !important;
+    }
+    
+    .pvtFilterBox button,
+    .pvtCheckContainer p {
+        font-size: 0.8rem !important;
+        padding: 5px 8px !important;
+    }
+}

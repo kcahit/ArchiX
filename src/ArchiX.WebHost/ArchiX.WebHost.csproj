@@ -20,17 +20,18 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.*" PrivateAssets="all" />
 	</ItemGroup>
 
-	<!-- ********************* ARCHIX WEBHOST ÖZEL YAPILANDIRMA ********************* -->
+	<!-- ********************* ARCHIX WEBHOST ï¿½ZEL YAPILANDIRMA ********************* -->
 	<ItemGroup>
 		<EditorConfigFiles Remove="C:\_git\ArchiX\Dev\ArchiX\src\ArchiX.WebHost\.editorconfig" />
 		<Content Include="Properties\launchSettings.json" />
 		<None Include="C:\_git\ArchiX\Dev\ArchiX\src\ArchiX.WebHost\.editorconfig" />
 	</ItemGroup>
 	<ItemGroup>
+		<Folder Include="Pages\Raporlar\" />
 		<Folder Include="Templates\" />
 	</ItemGroup>
 
-	<!-- *** BUILD: CLEAN ÝÞLEMÝ *** -->
+	<!-- *** BUILD: CLEAN ï¿½ï¿½LEMï¿½ *** -->
 	<Target Name="CleanCopiedFiles" BeforeTargets="Clean">
 		<RemoveDir Directories="Pages\Templates;Pages\Shared;wwwroot\css\modern;wwwroot\css\shared;wwwroot\images;wwwroot\js" />
 		<Delete Files="Pages\Login.cshtml;Pages\Login.cshtml.cs;Pages\Dashboard.cshtml;Pages\Dashboard.cshtml.cs;Pages\Error.cshtml;Pages\Error.cshtml.cs;Pages\grid-template-filtreli.cshtml;Pages\grid-template-filtreli.cshtml.cs;Pages\pivot-template.cshtml;Pages\pivot-template.cshtml.cs" />
@@ -108,6 +109,6 @@
 		<Message Importance="high" Text="? Templates copied: CSS + JS + Images + Shared + Login + Dashboard + Error + GridTemplateFiltreli + PivotTemplate (namespace: ArchiX.WebHost.Pages)" />
 	</Target>
 
-	<!-- ********************* ARCHIX WEBHOST ÖZEL YAPILANDIRMA SONU ********************* -->
+	<!-- ********************* ARCHIX WEBHOST ï¿½ZEL YAPILANDIRMA SONU ********************* -->
 
 </Project>

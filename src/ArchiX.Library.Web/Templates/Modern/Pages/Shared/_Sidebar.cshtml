@@ -24,15 +24,34 @@
                     <span class="badge bg-danger rounded-pill float-end">5</span>
                 </a>
             </li>
+            
+            <!-- Raporlar Menu (Collapsible) -->
             <li class="nav-item">
-                <a class="nav-link"
-                   href="/Raporlar"
-                   target="_blank">
+                <a class="nav-link collapsed" data-bs-toggle="collapse" href="#raporlarMenu" 
+                   role="button" aria-expanded="false" aria-controls="raporlarMenu">
                     <i class="bi bi-graph-up"></i>
                     Raporlar
-                    <i class="bi bi-box-arrow-up-right ms-1" style="font-size: 0.8em;"></i>
+                    <i class="bi bi-chevron-down float-end"></i>
                 </a>
+                <div class="collapse" id="raporlarMenu">
+                    <ul class="nav flex-column ms-3">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Raporlar/pivot">
+                                <i class="bi bi-table"></i>
+                                Pivot Rapor
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Raporlar" target="_blank">
+                                <i class="bi bi-file-earmark-bar-graph"></i>
+                                Genel Raporlar
+                                <i class="bi bi-box-arrow-up-right ms-1" style="font-size: 0.8em;"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </li>
+            
             <li class="nav-item">
                 <a class="nav-link" href="#">
                     <i class="bi bi-gear-fill"></i>
