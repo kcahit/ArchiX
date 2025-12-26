@@ -25,20 +25,21 @@
                 </a>
             </li>
             
-            <!-- Raporlar Menu (Collapsible) -->
+            <!-- Raporlar Menu (Collapsible - AÇIK) -->
             <li class="nav-item">
-                <a class="nav-link collapsed" data-bs-toggle="collapse" href="#raporlarMenu" 
-                   role="button" aria-expanded="false" aria-controls="raporlarMenu">
+                <a class="nav-link" data-bs-toggle="collapse" href="#raporlarMenu" 
+                   role="button" aria-expanded="true" aria-controls="raporlarMenu">
                     <i class="bi bi-graph-up"></i>
                     Raporlar
                     <i class="bi bi-chevron-down float-end"></i>
                 </a>
-                <div class="collapse" id="raporlarMenu">
+                <div class="collapse show" id="raporlarMenu">
                     <ul class="nav flex-column ms-3">
                         <li class="nav-item">
-                            <a class="nav-link" href="/Raporlar/pivot">
+                            <a class="nav-link" href="/Raporlar/pivot" target="_blank">
                                 <i class="bi bi-table"></i>
                                 Pivot Rapor
+                                <i class="bi bi-box-arrow-up-right ms-1" style="font-size: 0.8em;"></i>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -64,15 +65,15 @@
                 <hr class="text-white-50">
             </li>
 
-            <!-- Security Menu -->
+            <!-- Security Menu (Alt menüler var - AÇIK) -->
             <li class="nav-item">
-                <a class="nav-link collapsed" data-bs-toggle="collapse" href="#securityMenu" 
-                   role="button" aria-expanded="false" aria-controls="securityMenu">
+                <a class="nav-link" data-bs-toggle="collapse" href="#securityMenu" 
+                   role="button" aria-expanded="true" aria-controls="securityMenu">
                     <i class="bi bi-shield-lock-fill"></i>
                     Güvenlik
                     <i class="bi bi-chevron-down float-end"></i>
                 </a>
-                <div class="collapse" id="securityMenu">
+                <div class="collapse show" id="securityMenu">
                     <ul class="nav flex-column ms-3">
                         <li class="nav-item">
                             <a class="nav-link" asp-page="/Admin/Security/Index">
@@ -102,15 +103,15 @@
                 </div>
             </li>
 
-            <!-- Admin Menu -->
+            <!-- Admin Menu (Alt menüler var - AÇIK) -->
             <li class="nav-item">
-                <a class="nav-link collapsed" data-bs-toggle="collapse" href="#adminMenu" 
-                   role="button" aria-expanded="false" aria-controls="adminMenu">
+                <a class="nav-link" data-bs-toggle="collapse" href="#adminMenu" 
+                   role="button" aria-expanded="true" aria-controls="adminMenu">
                     <i class="bi bi-tools"></i>
                     Yönetim
                     <i class="bi bi-chevron-down float-end"></i>
                 </a>
-                <div class="collapse" id="adminMenu">
+                <div class="collapse show" id="adminMenu">
                     <ul class="nav flex-column ms-3">
                         <li class="nav-item">
                             <a class="nav-link" href="#">
