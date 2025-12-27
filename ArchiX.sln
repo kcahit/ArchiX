@@ -34,6 +34,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiX.Library.Web.Tests", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Applications", "Applications", "{BFCA1F79-2A0E-4A83-AFB0-0E8E258E0063}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DataSets", "DataSets", "{25FC9540-A87B-42FF-A7E1-BEDA41660E2F}"
+	ProjectSection(SolutionItems) = preProject
+		docs\DataSets\Arsanmak_KarZarar.ndjson = docs\DataSets\Arsanmak_KarZarar.ndjson
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -140,6 +145,7 @@ Global
 		{1A449A20-AD8F-6A40-2800-2D8298F3FDD0} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{2CA0E5F6-2AB1-449F-8340-07DACC063CB7} = {BFCA1F79-2A0E-4A83-AFB0-0E8E258E0063}
 		{A5EC1A76-804E-41D7-9561-B3EE7AF9B032} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{25FC9540-A87B-42FF-A7E1-BEDA41660E2F} = {8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9D88D58C-C42B-40AC-80B1-026D2370BB00}

@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace ArchiX.WebHost.Pages;
+namespace ArchiX.Library.Web.Templates.Modern.Pages.Raporlar;
 
-public class PivotTemplate : PageModel
+public class GridListeModel : PageModel
 {
 #pragma warning disable CA1822 // Mark members as static
     public void OnGet() { }

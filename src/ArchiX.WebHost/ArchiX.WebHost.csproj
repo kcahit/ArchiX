@@ -26,15 +26,11 @@
 		<Content Include="Properties\launchSettings.json" />
 		<None Include="C:\_git\ArchiX\Dev\ArchiX\src\ArchiX.WebHost\.editorconfig" />
 	</ItemGroup>
-	<ItemGroup>
-		<Folder Include="Pages\Raporlar\" />
-		<Folder Include="Templates\" />
-	</ItemGroup>
 
 	<!-- *** BUILD: CLEAN ��LEM� *** -->
 	<Target Name="CleanCopiedFiles" BeforeTargets="Clean">
-		<RemoveDir Directories="Pages\Templates;Pages\Shared;wwwroot\css\modern;wwwroot\css\shared;wwwroot\images;wwwroot\js" />
-		<Delete Files="Pages\Login.cshtml;Pages\Login.cshtml.cs;Pages\Dashboard.cshtml;Pages\Dashboard.cshtml.cs;Pages\Error.cshtml;Pages\Error.cshtml.cs;Pages\grid-template-filtreli.cshtml;Pages\grid-template-filtreli.cshtml.cs;Pages\pivot-template.cshtml;Pages\pivot-template.cshtml.cs" />
+		<RemoveDir Directories="Pages\Templates;Pages\Shared;Pages\Raporlar;wwwroot\css\modern;wwwroot\css\shared;wwwroot\images;wwwroot\js" />
+		<Delete Files="Pages\Login.cshtml;Pages\Login.cshtml.cs;Pages\Dashboard.cshtml;Pages\Dashboard.cshtml.cs;Pages\Error.cshtml;Pages\Error.cshtml.cs" />
 	</Target>
 
 	<!-- *** BUILD: TEMPLATE KOPYALAMA *** -->
@@ -90,23 +86,32 @@
 		</PropertyGroup>
 		<WriteLinesToFile File="Pages\Error.cshtml.cs" Lines="$(ErrorCsContent)" Overwrite="true" Encoding="UTF-8" />
 
-		<!-- Grid Template Filtreli (RAPORLAR) -->
-		<Copy SourceFiles="..\ArchiX.Library.Web\Templates\Modern\Pages\grid-template-filtreli.cshtml" DestinationFiles="Pages\grid-template-filtreli.cshtml" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
-		<PropertyGroup>
-			<GridTemplateCsContent>$([System.IO.File]::ReadAllText('..\ArchiX.Library.Web\Templates\Modern\Pages\GridTemplateFiltreli.cs'))</GridTemplateCsContent>
-			<GridTemplateCsContent>$(GridTemplateCsContent.Replace('namespace ArchiX.Library.Web.Templates.Modern.Pages', 'namespace ArchiX.WebHost.Pages'))</GridTemplateCsContent>
-		</PropertyGroup>
-		<WriteLinesToFile File="Pages\grid-template-filtreli.cshtml.cs" Lines="$(GridTemplateCsContent)" Overwrite="true" Encoding="UTF-8" />
+		<!-- Raporlar Klas�r� (CSHTML dosyalar�n� kopyala) -->
+		<ItemGroup>
+			<LibRaporlar Include="..\ArchiX.Library.Web\Templates\Modern\Pages\Raporlar\**\*.cshtml" />
+		</ItemGroup>
+		<Copy SourceFiles="@(LibRaporlar)" DestinationFolder="Pages\Raporlar\%(RecursiveDir)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
 
-		<!-- Pivot Template -->
-		<Copy SourceFiles="..\ArchiX.Library.Web\Templates\Modern\Pages\pivot-template.cshtml" DestinationFiles="Pages\pivot-template.cshtml" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+		<!-- Raporlar CS dosyalar�n� namespace de�i�tirerek kopyala -->
 		<PropertyGroup>
-			<PivotTemplateCsContent>$([System.IO.File]::ReadAllText('..\ArchiX.Library.Web\Templates\Modern\Pages\PivotTemplate.cs'))</PivotTemplateCsContent>
-			<PivotTemplateCsContent>$(PivotTemplateCsContent.Replace('namespace ArchiX.Library.Web.Templates.Modern.Pages', 'namespace ArchiX.WebHost.Pages'))</PivotTemplateCsContent>
+			<GridListeCsContent>$([System.IO.File]::ReadAllText('..\ArchiX.Library.Web\Templates\Modern\Pages\Raporlar\GridListe.cshtml.cs'))</GridListeCsContent>
+			<GridListeCsContent>$(GridListeCsContent.Replace('namespace ArchiX.Library.Web.Templates.Modern.Pages.Raporlar', 'namespace ArchiX.WebHost.Pages.Raporlar'))</GridListeCsContent>
 		</PropertyGroup>
-		<WriteLinesToFile File="Pages\pivot-template.cshtml.cs" Lines="$(PivotTemplateCsContent)" Overwrite="true" Encoding="UTF-8" />
+		<WriteLinesToFile File="Pages\Raporlar\GridListe.cshtml.cs" Lines="$(GridListeCsContent)" Overwrite="true" Encoding="UTF-8" />
 
-		<Message Importance="high" Text="? Templates copied: CSS + JS + Images + Shared + Login + Dashboard + Error + GridTemplateFiltreli + PivotTemplate (namespace: ArchiX.WebHost.Pages)" />
+		<PropertyGroup>
+			<PivotCsContent>$([System.IO.File]::ReadAllText('..\ArchiX.Library.Web\Templates\Modern\Pages\Raporlar\Pivot.cshtml.cs'))</PivotCsContent>
+			<PivotCsContent>$(PivotCsContent.Replace('namespace ArchiX.Library.Web.Templates.Modern.Pages.Raporlar', 'namespace ArchiX.WebHost.Pages.Raporlar'))</PivotCsContent>
+		</PropertyGroup>
+		<WriteLinesToFile File="Pages\Raporlar\Pivot.cshtml.cs" Lines="$(PivotCsContent)" Overwrite="true" Encoding="UTF-8" />
+
+		<PropertyGroup>
+			<KombineCsContent>$([System.IO.File]::ReadAllText('..\ArchiX.Library.Web\Templates\Modern\Pages\Raporlar\Kombine.cshtml.cs'))</KombineCsContent>
+			<KombineCsContent>$(KombineCsContent.Replace('namespace ArchiX.Library.Web.Templates.Modern.Pages.Raporlar', 'namespace ArchiX.WebHost.Pages.Raporlar'))</KombineCsContent>
+		</PropertyGroup>
+		<WriteLinesToFile File="Pages\Raporlar\Kombine.cshtml.cs" Lines="$(KombineCsContent)" Overwrite="true" Encoding="UTF-8" />
+
+		<Message Importance="high" Text="? Templates copied: CSS + JS + Images + Shared + Login + Dashboard + Error + Raporlar (GridListe, Pivot, Kombine)" />
 	</Target>
 
 	<!-- ********************* ARCHIX WEBHOST �ZEL YAPILANDIRMA SONU ********************* -->

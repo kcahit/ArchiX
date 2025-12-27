@@ -78,9 +78,9 @@ body.grid-page {
     border-radius: 8px;
 }
 
-.advanced-search-card .card-body {
-    padding: 15px;
-}
+    .advanced-search-card .card-body {
+        padding: 15px;
+    }
 
 .column-selector-panel {
     border: 1px solid #ddd;
@@ -160,6 +160,7 @@ body.grid-page {
     padding: 8px 16px;
     border-radius: 6px;
 }
+
 /* Grid template filter styles */
 .filter-count {
     background: #ffc107;
@@ -173,6 +174,7 @@ body.grid-page {
     text-align: center;
     margin-left: 4px;
 }
+
 .grid-record-count-line {
     margin: 0 0 10px 0;
     font-size: 0.9rem;
@@ -202,17 +204,17 @@ body.grid-page {
     padding-left: 5px;
 }
 
-.table-header h2 {
-    color: #333;
-    font-weight: bold;
-    margin-bottom: 0;
-    font-size: 1.1rem;
-}
+    .table-header h2 {
+        color: #333;
+        font-weight: bold;
+        margin-bottom: 0;
+        font-size: 1.1rem;
+    }
 
-.table-header .text-muted {
-    font-size: 0.75rem;
-    white-space: nowrap;
-}
+    .table-header .text-muted {
+        font-size: 0.75rem;
+        white-space: nowrap;
+    }
 
 .filter-section {
     background: #f8f9fa;
@@ -225,21 +227,21 @@ body.grid-page {
     position: relative;
 }
 
-.search-box input {
-    padding: 8px 8px 8px 35px;
-    border-radius: 6px;
-    border: 2px solid #e0e0e0;
-    font-size: 0.9rem;
-}
+    .search-box input {
+        padding: 8px 8px 8px 35px;
+        border-radius: 6px;
+        border: 2px solid #e0e0e0;
+        font-size: 0.9rem;
+    }
 
-.search-box i {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #999;
-    font-size: 0.9rem;
-}
+    .search-box i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #999;
+        font-size: 0.9rem;
+    }
 
 .btn-outline-secondary {
     border: 2px solid #667eea;
@@ -249,13 +251,13 @@ body.grid-page {
     transition: all 0.2s;
 }
 
-.btn-outline-secondary:hover {
-    background: #667eea;
-    color: white;
-    border-color: #667eea;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
-}
+    .btn-outline-secondary:hover {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+    }
 
 .table-responsive {
     border-radius: 8px;
@@ -288,21 +290,21 @@ body.grid-page {
     min-width: 1400px;
 }
 
-.custom-table thead {
-    background: var(--primary-gradient);
-    color: white;
-}
+    .custom-table thead {
+        background: var(--primary-gradient);
+        color: white;
+    }
 
-.custom-table thead th {
-    padding: 12px;
-    font-weight: bold;
-    border: none;
-    user-select: none;
-    position: relative;
-    white-space: nowrap;
-    color: white;
-    font-size: 0.9rem;
-}
+        .custom-table thead th {
+            padding: 12px;
+            font-weight: bold;
+            border: none;
+            user-select: none;
+            position: relative;
+            white-space: nowrap;
+            color: white;
+            font-size: 0.9rem;
+        }
 
 .header-content {
     display: flex;
@@ -317,9 +319,9 @@ body.grid-page {
     cursor: pointer;
 }
 
-.header-text:hover {
-    opacity: 0.8;
-}
+    .header-text:hover {
+        opacity: 0.8;
+    }
 
 .sort-icon {
     font-size: 0.75rem;
@@ -339,14 +341,14 @@ body.grid-page {
     font-size: 0.85rem;
 }
 
-.filter-icon:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
+    .filter-icon:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
 
-.filter-icon.active {
-    background: rgba(255, 255, 255, 0.3);
-    color: #ffd700;
-}
+    .filter-icon.active {
+        background: rgba(255, 255, 255, 0.3);
+        color: #ffd700;
+    }
 
 .filter-dropdown {
     position: absolute;
@@ -365,9 +367,9 @@ body.grid-page {
     font-size: 0.85rem;
 }
 
-.filter-dropdown.show {
-    display: block;
-}
+    .filter-dropdown.show {
+        display: block;
+    }
 
 .filter-type-selector {
     display: flex;
@@ -390,15 +392,15 @@ body.grid-page {
     font-weight: 500;
 }
 
-.filter-type-btn:hover {
-    background: #e9ecef;
-}
+    .filter-type-btn:hover {
+        background: #e9ecef;
+    }
 
-.filter-type-btn.active {
-    background: var(--primary-gradient);
-    color: white;
-    border-color: #667eea;
-}
+    .filter-type-btn.active {
+        background: var(--primary-gradient);
+        color: white;
+        border-color: #667eea;
+    }
 
 .text-filter-section {
     margin-bottom: 12px;
@@ -457,15 +459,15 @@ body.grid-page {
     margin-bottom: 2px;
 }
 
-.filter-option:hover {
-    background: #f8f9fa;
-}
+    .filter-option:hover {
+        background: #f8f9fa;
+    }
 
-.filter-option input[type="checkbox"] {
-    cursor: pointer;
-    width: 16px;
-    height: 16px;
-}
+    .filter-option input[type="checkbox"] {
+        cursor: pointer;
+        width: 16px;
+        height: 16px;
+    }
 
 .filter-actions {
     margin-top: 12px;
@@ -475,16 +477,16 @@ body.grid-page {
     padding-top: 12px;
 }
 
-.filter-actions button {
-    flex: 1;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: 600;
-    transition: all 0.2s;
-}
+    .filter-actions button {
+        flex: 1;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
 
 .btn-apply-filter {
     background: var(--primary-gradient);
@@ -495,10 +497,10 @@ body.grid-page {
     gap: 6px;
 }
 
-.btn-apply-filter:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
-}
+    .btn-apply-filter:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+    }
 
 .btn-clear-filter {
     background: #f0f0f0;
@@ -510,19 +512,19 @@ body.grid-page {
     gap: 6px;
 }
 
-.btn-clear-filter:hover {
-    background: #e8e8e8;
-    transform: translateY(-1px);
-}
+    .btn-clear-filter:hover {
+        background: #e8e8e8;
+        transform: translateY(-1px);
+    }
 
 .custom-table tbody tr {
     transition: all 0.3s;
 }
 
-.custom-table tbody tr:hover {
-    background-color: #f8f9fa;
-    transform: scale(1.01);
-}
+    .custom-table tbody tr:hover {
+        background-color: #f8f9fa;
+        transform: scale(1.01);
+    }
 
 .custom-table tbody td {
     padding: 10px;
@@ -555,16 +557,16 @@ body.grid-page {
     white-space: nowrap;
 }
 
-.action-buttons .btn {
-    padding: 6px 10px;
-    margin: 0 3px;
-    border-radius: 4px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.9rem;
-    min-width: 32px;
-}
+    .action-buttons .btn {
+        padding: 6px 10px;
+        margin: 0 3px;
+        border-radius: 4px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        min-width: 32px;
+    }
 
 .pagination-container {
     display: flex;
@@ -588,10 +590,10 @@ body.grid-page {
     line-height: 1.2;
 }
 
-.filter-tag i {
-    cursor: pointer;
-    font-size: 0.75rem;
-}
+    .filter-tag i {
+        cursor: pointer;
+        font-size: 0.75rem;
+    }
 
 .grid-pagination-container {
     margin-top: 15px;
@@ -641,3 +643,117 @@ button.grid-btn-export,
     align-items: center !important;
 }
 
+/* Pivot filtre popup override */
+.pvtFilterBox {
+    border: 2px solid #667eea;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    padding: 12px;
+    min-width: 320px;
+    font-size: 0.9rem;
+}
+
+    .pvtFilterBox h4 {
+        display: none;
+    }
+
+.pvtSearch {
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 0.9rem;
+}
+
+.pvtCheckContainer {
+    max-height: 320px !important;
+    padding: 4px 0;
+}
+
+    .pvtCheckContainer label {
+        padding: 6px 10px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+    }
+
+    .pvtCheckContainer input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+    }
+
+.pvtFilterBox .btn {
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-weight: 600;
+}
+
+.pvtFilterBox .pvtButton {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: #fff !important;
+    border: none !important;
+}
+
+.pvtFilterBox .pvtClose {
+    background: #f0f0f0 !important;
+    color: #333 !important;
+    border: 1px solid #ddd !important;
+}
+/* Pivot filtre popup override */
+.pvtFilterBox {
+    border: 2px solid #667eea;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    padding: 12px;
+    min-width: 320px;
+    font-size: 0.9rem;
+}
+
+    .pvtFilterBox h4 {
+        display: none;
+    }
+
+.pvtSearch {
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 0.9rem;
+}
+
+.pvtCheckContainer {
+    max-height: 320px !important;
+    padding: 4px 0;
+}
+
+    .pvtCheckContainer label {
+        padding: 6px 10px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+    }
+
+    .pvtCheckContainer input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+    }
+
+.pvtFilterBox .btn {
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-weight: 600;
+}
+
+.pvtFilterBox .pvtButton {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: #fff !important;
+    border: none !important;
+}
+
+.pvtFilterBox .pvtClose {
+    background: #f0f0f0 !important;
+    color: #333 !important;
+    border: 1px solid #ddd !important;
+}

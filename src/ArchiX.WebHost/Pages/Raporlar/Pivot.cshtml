@@ -1,6 +1,6 @@
 @page "/Raporlar/Pivot"
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
-@model ArchiX.Library.Web.Templates.Modern.Pages.PivotTemplate
+@model ArchiX.Library.Web.Templates.Modern.Pages.Raporlar.PivotModel
 @{
     ViewData["Title"] = "Pivot Rapor";
     Layout = null;
@@ -19,6 +19,24 @@
 
     <!-- PivotTable.js CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pivottable@2.23.0/dist/pivot.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/pivottable@2.23.0/dist/pivot.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pivottable@2.23.0/dist/pivot.tr.js"></script>
+    <script>
+        window.addEventListener('load', function () {
+          if (!window.$ || !$.pivotUtilities?.locales?.tr) return;
+          const tr = $.pivotUtilities.locales.tr;
+          Object.assign(tr.localeStrings, {
+            filter: "Deðerleri filtrele",
+            filterValues: "Deðerleri filtrele",
+            search: "Ara...",
+            selectAll: "Tümünü Seç",
+            selectNone: "Hiçbiri",
+            apply: "Uygula",
+            cancel: "Ýptal"
+          });
+          $.pivotUtilities.locales.tr = tr;
+        });
+    </script>
 
     <!-- ArchiX CSS (BODY SCROLL + GRADIENT global.css'de tanýmlý) -->
     <link rel="stylesheet" href="~/css/modern/main.css">

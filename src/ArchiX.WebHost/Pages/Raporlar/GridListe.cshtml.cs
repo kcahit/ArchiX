@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace ArchiX.WebHost.Pages;
+namespace ArchiX.WebHost.Pages.Raporlar;
 
-public class GridTemplateFiltreli : PageModel
+public class GridListeModel : PageModel
 {
 #pragma warning disable CA1822 // Mark members as static
     public void OnGet() { }

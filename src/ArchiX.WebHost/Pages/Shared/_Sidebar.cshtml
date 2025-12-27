@@ -36,6 +36,13 @@
                 <div class="collapse show" id="raporlarMenu">
                     <ul class="nav flex-column ms-3">
                         <li class="nav-item">
+                            <<a class="nav-link @(ViewContext.RouteData.Values["page"]?.ToString() == "/Raporlar/Kombine" ? "active" : "")"
+                                href="/Raporlar/Kombine">
+                                <i class="bi bi-graph-up-arrow"></i>
+                                Kombine Rapor
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="/Raporlar/pivot" target="_blank">
                                 <i class="bi bi-table"></i>
                                 Pivot Rapor
