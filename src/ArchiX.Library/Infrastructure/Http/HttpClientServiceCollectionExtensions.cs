@@ -1,7 +1,7 @@
 ﻿// File: src/ArchiX.Library/Infrastructure/Http/HttpClientServiceCollectionExtensions.cs
 using System.Text.Json;
-
 using Microsoft.Extensions.DependencyInjection;
+using ArchiX.Library.Abstractions.Http;
 
 namespace ArchiX.Library.Infrastructure.Http
 {

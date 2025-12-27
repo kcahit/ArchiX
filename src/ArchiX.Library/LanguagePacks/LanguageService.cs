@@ -1,14 +1,10 @@
 ﻿using System.Globalization;
-
 using ArchiX.Library.Context;
 using ArchiX.Library.Entities;
 
 namespace ArchiX.Library.LanguagePacks
 {
-    /// <summary>
-    /// Çok dillilik desteği için in-memory sözlük tabanlı dil servisidir.
-    /// </summary>
-    public sealed class LanguageService : ILanguageService
+    public sealed class LanguageService : ArchiX.Library.Abstractions.Localization.ILanguageService
     {
         private readonly Dictionary<string, string> _dict = new(StringComparer.OrdinalIgnoreCase);
 
@@ -39,14 +35,14 @@ namespace ArchiX.Library.LanguagePacks
 
         /// <summary>
         /// AppDbContext tabanlı dil servisidir.
-        /// DB’den aktif (StatusId == 3) kayıtları hem "disp:" hem "list:" olarak yükler.
+        /// DB’den aktif (StatusId ==3) kayıtları hem "disp:" hem "list:" olarak yükler.
         /// </summary>
         public LanguageService(AppDbContext db)
         {
             CurrentCulture = CultureInfo.CurrentCulture;
 
             // Yalnızca aktif kayıtlar
-            var query = db.Set<LanguagePack>().Where(x => x.StatusId == 3);
+            var query = db.Set<LanguagePack>().Where(x => x.StatusId ==3);
 
             foreach (var lp in query)
             {
@@ -55,9 +51,9 @@ namespace ArchiX.Library.LanguagePacks
                 _dict[dispKey] = lp.DisplayName ?? string.Empty;
 
                 // Listeleme anahtarı (liste üretimi için; prefix ile eşleşecek)
-                // Örn: list:Operator:FilterItem:Code:tr-TR:Equals
+                // Örn: list:Operator:FilterItem:Code:tr-TR:123
                 var listPrefix = $"list:{lp.ItemType}:{lp.EntityName}:{lp.FieldName}:{lp.Culture}";
-                var listKey = $"{listPrefix}:{lp.Code}";
+                var listKey = $"{listPrefix}:{lp.Id}";
                 _dict[listKey] = lp.DisplayName ?? string.Empty;
             }
         }
@@ -106,10 +102,7 @@ namespace ArchiX.Library.LanguagePacks
             CancellationToken cancellationToken = default)
         {
             var key = $"disp:{itemType}:{entityName}:{fieldName}:{code}:{culture}";
-            if (_dict.TryGetValue(key, out var value))
-                return Task.FromResult<string?>(value);
-
-            return Task.FromResult<string?>(null);
+            return Task.FromResult(_dict.TryGetValue(key, out var value) ? value : null);
         }
 
         /// <inheritdoc/>
@@ -120,15 +113,19 @@ namespace ArchiX.Library.LanguagePacks
             string culture,
             CancellationToken cancellationToken = default)
         {
-            // "list:{itemType}:{entityName}:{fieldName}:{culture}" ile başlayan tüm kayıtları topla
-            var prefix = $"list:{itemType}:{entityName}:{fieldName}:{culture}";
-
-            var list = _dict
-                .Where(kv => kv.Key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-                .Select((kv, index) => (Id: index + 1, DisplayName: kv.Value))
+            var listPrefix = $"list:{itemType}:{entityName}:{fieldName}:{culture}";
+            var matches = _dict.Where(kv => kv.Key.StartsWith(listPrefix + ":", StringComparison.OrdinalIgnoreCase))
+                .Select(kv => (Id: ExtractId(kv.Key), DisplayName: kv.Value))
                 .ToList();
+            return Task.FromResult(matches);
+        }
 
-            return Task.FromResult(list);
+        private static int ExtractId(string key)
+        {
+            var parts = key.Split(':');
+            if (parts.Length <2) return -1;
+            var last = parts[^1];
+            return int.TryParse(last, out var id) ? id : -1;
         }
     }
 }

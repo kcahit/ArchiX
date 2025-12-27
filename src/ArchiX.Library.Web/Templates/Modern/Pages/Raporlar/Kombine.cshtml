@@ -1,0 +1,219 @@
+@page "/Raporlar/Kombine"
+@model ArchiX.Library.Web.Templates.Modern.Pages.Raporlar.KombineModel
+@{
+    ViewData["Title"] = "Kombine Rapor";
+    Layout = "~/Templates/Modern/Pages/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <!-- PivotTable.js CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pivottable@2.23.0/dist/pivot.min.css">
+    <link rel="stylesheet" href="~/css/archix.reports.header.css">
+}
+
+<div class="combined-report-page" style="padding: 20px 0;">
+    <!-- HEADER -->
+    <div style="background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h1 style="font-size: 1.75rem; font-weight: 700; color: #667eea; margin: 0;">
+                <i class="bi bi-graph-up-arrow"></i> Kombine Rapor
+            </h1>
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px 16px; border-radius: 20px;">
+                <span id="totalRecords">@Model.SampleData.Count</span> Kayýt
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <div style="flex: 1; position: relative;">
+                <i class="bi bi-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #999;"></i>
+                <input type="text" id="searchInput" placeholder="Tüm alanlarda ara..." 
+                       style="width: 100%; padding: 10px 10px 10px 35px; border: 2px solid #e0e0e0; border-radius: 8px;">
+            </div>
+            <button onclick="resetAllFilters()" style="padding: 10px 20px; background: #f8f9fa; color: #667eea; border: 2px solid #667eea; border-radius: 8px;">
+                <i class="bi bi-arrow-clockwise"></i> Sýfýrla
+            </button>
+        </div>
+    </div>
+    
+    <!-- ACCORDION REPORTS -->
+    <div class="accordion" id="reportsAccordion">
+        <!-- PIVOT -->
+        <div class="accordion-item" style="border-radius: 12px; margin-bottom: 15px; overflow: hidden;">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#pivotSection"
+                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <i class="bi bi-grid-3x3-gap-fill me-2"></i> Pivot Analiz
+                </button>
+            </h2>
+            <div id="pivotSection" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                    <div id="pivotContainer"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- GRID -->
+        <div class="accordion-item" style="border-radius: 12px; overflow: hidden;">
+            <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#gridSection"
+                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <i class="bi bi-table me-2"></i> Detaylý Liste
+                </button>
+            </h2>
+            <div id="gridSection" class="accordion-collapse collapse show">
+                <div class="accordion-body">
+                    <table class="table table-hover" id="dataTable">
+                        <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                            <tr>
+                                <th onclick="sortTable('id')">ID <i class="bi bi-arrow-down-up"></i></th>
+                                <th onclick="sortTable('name')">Ýsim <i class="bi bi-arrow-down-up"></i></th>
+                                <th onclick="sortTable('department')">Departman <i class="bi bi-arrow-down-up"></i></th>
+                                <th onclick="sortTable('position')">Pozisyon <i class="bi bi-arrow-down-up"></i></th>
+                                <th onclick="sortTable('city')">Þehir <i class="bi bi-arrow-down-up"></i></th>
+                                <th onclick="sortTable('salary')">Maaþ <i class="bi bi-arrow-down-up"></i></th>
+                                <th onclick="sortTable('status')">Durum <i class="bi bi-arrow-down-up"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                    
+                    <div style="display: flex; justify-content: space-between; padding: 15px;">
+                        <span id="showingInfo">Gösteriliyor: 0-0 / 0</span>
+                        <nav><ul class="pagination pagination-sm mb-0" id="pagination"></ul></nav>
+                        <select class="form-select form-select-sm" id="itemsPerPageSelect" onchange="changeItemsPerPage()" style="width: auto;">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pivottable@2.23.0/dist/pivot.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pivottable@2.23.0/dist/pivot.tr.js"></script>
+    
+    <script>
+        const data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.SampleData));
+        let filteredData = [...data];
+        let currentPage = 1, itemsPerPage = 10, sortColumn = '', sortAscending = true;
+        
+        $(document).ready(function() {
+            updateRecordCount();
+            renderTable();
+            initPivot();
+        });
+        
+        function initPivot() {
+            $("#pivotContainer").pivotUI(filteredData, {
+                rows: ["Department", "City"],
+                cols: ["Status"],
+                vals: ["Salary"],
+                aggregatorName: "Sum",
+                rendererName: "Table Barchart"
+            }, true, "tr");
+        }
+        
+        function updateRecordCount() {
+            document.getElementById('totalRecords').textContent = filteredData.length;
+        }
+        
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            const start = (currentPage - 1) * itemsPerPage;
+            const pageData = filteredData.slice(start, start + itemsPerPage);
+            
+            pageData.forEach(item => {
+                const statusClass = item.Status === 'Aktif' ? 'badge bg-success' : 
+                                   item.Status === 'Pasif' ? 'badge bg-danger' : 'badge bg-warning';
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${item.Id}</td>
+                        <td>${item.Name}</td>
+                        <td>${item.Department}</td>
+                        <td>${item.Position}</td>
+                        <td>${item.City}</td>
+                        <td>${item.Salary}?</td>
+                        <td><span class="${statusClass}">${item.Status}</span></td>
+                    </tr>
+                `;
+            });
+            updatePagination();
+            updateInfo();
+        }
+        
+        function sortTable(column) {
+            const colMap = { id: 'Id', name: 'Name', department: 'Department', position: 'Position', 
+                           city: 'City', salary: 'Salary', status: 'Status' };
+            const col = colMap[column];
+            
+            if (sortColumn === col) sortAscending = !sortAscending;
+            else { sortColumn = col; sortAscending = true; }
+            
+            filteredData.sort((a, b) => {
+                const valA = typeof a[col] === 'string' ? a[col].toLowerCase() : a[col];
+                const valB = typeof b[col] === 'string' ? b[col].toLowerCase() : b[col];
+                return sortAscending ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
+            });
+            renderTable();
+        }
+        
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            
+            for (let i = 1; i <= Math.min(totalPages, 5); i++) {
+                pagination.innerHTML += `
+                    <li class="page-item ${currentPage === i ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="changePage(${i}); return false;">${i}</a>
+                    </li>
+                `;
+            }
+        }
+        
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                renderTable();
+            }
+        }
+        
+        function changeItemsPerPage() {
+            itemsPerPage = parseInt(document.getElementById('itemsPerPageSelect').value);
+            currentPage = 1;
+            renderTable();
+        }
+        
+        function updateInfo() {
+            const start = filteredData.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+            const end = Math.min(currentPage * itemsPerPage, filteredData.length);
+            document.getElementById('showingInfo').textContent = `Gösteriliyor: ${start}-${end} / ${filteredData.length}`;
+        }
+        
+        function resetAllFilters() {
+            document.getElementById('searchInput').value = '';
+            filteredData = [...data];
+            currentPage = 1;
+            renderTable();
+            updateRecordCount();
+            $("#pivotContainer").pivotUI(filteredData, {}, true, "tr");
+        }
+        
+        document.getElementById('searchInput').addEventListener('input', function() {
+            const term = this.value.toLowerCase();
+            filteredData = data.filter(item =>
+                Object.values(item).some(val => String(val).toLowerCase().includes(term))
+            );
+            currentPage = 1;
+            renderTable();
+            updateRecordCount();
+        });
+    </script>
+}
