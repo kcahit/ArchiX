@@ -713,16 +713,30 @@
         const container = document.getElementById(`${tableId}-slicerContainer`);
         if (!container) return;
         container.innerHTML = '';
+        container.style.display = 'block';
+        container.style.overflowX = 'auto';
+        container.style.overflowY = 'hidden';
+
         if (state.activeSlicerColumns.length === 0) {
             container.innerHTML = `<div id="${tableId}-noSlicerMsg" class="grid-no-slicer"><i class="bi bi-arrow-left"></i> Soldaki listeden kolon seçin</div>`;
             return;
         }
-        state.activeSlicerColumns.forEach(column => {
+
+        const total = state.activeSlicerColumns.length;
+        const firstRowCount = total <= 5 ? total : (total <= 10 ? 5 : Math.ceil(total / 2));
+        const secondRowCount = total - firstRowCount;
+
+        const row1 = document.createElement('div');
+        row1.style.cssText = 'display:flex; flex-wrap:nowrap; gap:10px; margin-bottom:10px;';
+        const row2 = document.createElement('div');
+        row2.style.cssText = 'display:flex; flex-wrap:nowrap; gap:10px;';
+
+        const createSlicerCard = (column) => {
             const hasFilter = state.slicerSelections[column] && state.slicerSelections[column].length > 0;
             const headerBgColor = hasFilter ? '#ffc107' : 'transparent';
             const headerTextColor = '#667eea';
             const slicer = document.createElement('div');
-            slicer.style.cssText = 'flex: 0 0 180px; margin-right: 10px; margin-bottom: 10px;';
+            slicer.style.cssText = 'flex: 0 0 180px; margin-right: 0; margin-bottom: 0;';
             slicer.innerHTML = `
                 <div class="slicer-card" style="border: 1px solid #ddd; border-radius: 6px; padding: 8px; background: #f8f9fa; width: 180px;">
                     <h6 style="font-size: 0.7rem; font-weight: bold; margin-bottom: 6px; color: ${headerTextColor}; background: ${headerBgColor}; padding: 2px 4px; border-radius: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${state.fieldNames[column] || column}">
@@ -730,9 +744,21 @@
                     </h6>
                     <div class="slicer-items" id="${tableId}-slicer-${column}" style="max-height: 150px; overflow-y: auto;"></div>
                 </div>`;
-            container.appendChild(slicer);
             updateSlicerItems(tableId, column);
+            return slicer;
+        };
+
+        state.activeSlicerColumns.forEach((column, index) => {
+            const card = createSlicerCard(column);
+            if (index < firstRowCount) {
+                row1.appendChild(card);
+            } else {
+                row2.appendChild(card);
+            }
         });
+
+        container.appendChild(row1);
+        if (secondRowCount > 0) container.appendChild(row2);
     }
 
     function updateSlicerItems(tableId, column) {
