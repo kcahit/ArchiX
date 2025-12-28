@@ -1,0 +1,1272 @@
+// ArchiX Tables Core
+// Grid filtering, sorting, slicer, pagination, export stubs
+
+// Örnek veri
+const data = [
+    { id: 1, name: "Ahmet Yýlmaz", email: "ahmet@example.com", phone: "0532 123 4567", department: "IT", salary: 15000, experience: 5, city: "Istanbul", position: "Yazýlým Geliþtirici", startDate: "2019-03-15", status: "Aktif" },
+    { id: 2, name: "Ayþe Demir", email: "ayse@example.com", phone: "0533 234 5678", department: "Satýþ", salary: 12000, experience: 3, city: "Ankara", position: "Satýþ Temsilcisi", startDate: "2021-06-20", status: "Aktif" },
+    { id: 3, name: "Mehmet Kaya", email: "mehmet@example.com", phone: "0534 345 6789", department: "Ýnsan Kaynaklarý", salary: 18000, experience: 8, city: "Izmir", position: "ÝK Müdürü", startDate: "2016-01-10", status: "Pasif" },
+    { id: 4, name: "Fatma Çelik", email: "fatma@example.com", phone: "0535 456 7890", department: "Pazarlama", salary: 14000, experience: 4, city: "Bursa", position: "Pazarlama Uzmaný", startDate: "2020-09-05", status: "Beklemede" },
+    { id: 5, name: "Ali Öz", email: "ali@example.com", phone: "0536 567 8901", department: "IT", salary: 16500, experience: 6, city: "Istanbul", position: "Sistem Yöneticisi", startDate: "2018-11-12", status: "Aktif" },
+    { id: 6, name: "Zeynep Þahin", email: "zeynep@example.com", phone: "0537 678 9012", department: "Satýþ", salary: 11000, experience: 2, city: "Antalya", position: "Satýþ Danýþmaný", startDate: "2022-02-28", status: "Aktif" },
+    { id: 7, name: "Can Arslan", email: "can@example.com", phone: "0538 789 0123", department: "IT", salary: 17000, experience: 7, city: "Ankara", position: "Kýdemli Geliþtirici", startDate: "2017-05-18", status: "Pasif" },
+    { id: 8, name: "Elif Kurt", email: "elif@example.com", phone: "0539 890 1234", department: "Pazarlama", salary: 13500, experience: 4, city: "Istanbul", position: "Dijital Pazarlama", startDate: "2020-07-22", status: "Aktif" },
+    { id: 9, name: "Burak Aydýn", email: "burak@example.com", phone: "0540 901 2345", department: "Ýnsan Kaynaklarý", salary: 12500, experience: 3, city: "Izmir", position: "ÝK Uzmaný", startDate: "2021-04-14", status: "Beklemede" },
+    { id: 10, name: "Selin Türk", email: "selin@example.com", phone: "0541 012 3456", department: "Satýþ", salary: 13000, experience: 5, city: "Bursa", position: "Bölge Müdürü", startDate: "2019-08-30", status: "Aktif" },
+    { id: 11, name: "Deniz Yýldýz", email: "deniz@example.com", phone: "0542 111 2222", department: "IT", salary: 19000, experience: 10, city: "Istanbul", position: "IT Müdürü", startDate: "2014-12-01", status: "Aktif" },
+    { id: 12, name: "Ece Kartal", email: "ece@example.com", phone: "0543 222 3333", department: "Pazarlama", salary: 12000, experience: 2, city: "Ankara", position: "Sosyal Medya Uzmaný", startDate: "2022-05-17", status: "Pasif" },
+    { id: 13, name: "Emre Koç", email: "emre@example.com", phone: "0544 333 4444", department: "IT", salary: 15500, experience: 5, city: "Izmir", position: "Veri Analisti", startDate: "2019-10-08", status: "Aktif" },
+    { id: 14, name: "Gizem Acar", email: "gizem@example.com", phone: "0545 444 5555", department: "Satýþ", salary: 11500, experience: 3, city: "Antalya", position: "Satýþ Uzmaný", startDate: "2021-03-25", status: "Aktif" },
+    { id: 15, name: "Hakan Demir", email: "hakan@example.com", phone: "0546 555 6666", department: "Pazarlama", salary: 16000, experience: 7, city: "Istanbul", position: "Marka Müdürü", startDate: "2017-07-19", status: "Aktif" },
+    { id: 16, name: "Ýrem Yalçýn", email: "irem@example.com", phone: "0547 666 7777", department: "Ýnsan Kaynaklarý", salary: 14500, experience: 6, city: "Bursa", position: "ÝK Koordinatörü", startDate: "2018-09-11", status: "Aktif" },
+    { id: 17, name: "Kerem Özkan", email: "kerem@example.com", phone: "0548 777 8888", department: "IT", salary: 18500, experience: 9, city: "Ankara", position: "Yazýlým Mimarý", startDate: "2015-02-03", status: "Pasif" },
+    { id: 18, name: "Lale Kara", email: "lale@example.com", phone: "0549 888 9999", department: "Satýþ", salary: 13500, experience: 4, city: "Istanbul", position: "Kurumsal Satýþ", startDate: "2020-11-27", status: "Aktif" },
+    { id: 19, name: "Mert Çetin", email: "mert@example.com", phone: "0530 999 0000", department: "Pazarlama", salary: 12500, experience: 3, city: "Izmir", position: "Ýçerik Üreticisi", startDate: "2021-08-16", status: "Beklemede" },
+    { id: 20, name: "Nil Þen", email: "nil@example.com", phone: "0531 000 1111", department: "IT", salary: 17500, experience: 8, city: "Ankara", position: "DevOps Mühendisi", startDate: "2016-06-22", status: "Aktif" },
+    { id: 21, name: "Oðuz Taþ", email: "oguz@example.com", phone: "0532 111 2222", department: "Satýþ", salary: 14000, experience: 5, city: "Bursa", position: "Satýþ Müdürü", startDate: "2019-04-09", status: "Aktif" },
+    { id: 22, name: "Pelin Ay", email: "pelin@example.com", phone: "0533 222 3333", department: "Ýnsan Kaynaklarý", salary: 13000, experience: 4, city: "Istanbul", position: "Ýþe Alým Uzmaný", startDate: "2020-12-14", status: "Aktif" },
+    { id: 23, name: "Rýza Ulu", email: "riza@example.com", phone: "0534 333 4444", department: "Pazarlama", salary: 15500, experience: 6, city: "Antalya", position: "Pazarlama Müdürü", startDate: "2018-03-07", status: "Pasif" },
+    { id: 24, name: "Seda Akýn", email: "seda@example.com", phone: "0535 444 5555", department: "IT", salary: 16000, experience: 6, city: "Izmir", position: "Test Uzmaný", startDate: "2018-08-21", status: "Aktif" },
+    { id: 25, name: "Tolga Yurt", email: "tolga@example.com", phone: "0536 555 6666", department: "Satýþ", salary: 12000, experience: 2, city: "Ankara", position: "Satýþ Elemaný", startDate: "2022-01-11", status: "Aktif" },
+    { id: 26, name: "Ufuk Aydýn", email: "ufuk@example.com", phone: "0537 666 7777", department: "Pazarlama", salary: 14500, experience: 5, city: "Istanbul", position: "SEO Uzmaný", startDate: "2019-09-26", status: "Aktif" },
+    { id: 27, name: "Vildan Er", email: "vildan@example.com", phone: "0538 777 8888", department: "Ýnsan Kaynaklarý", salary: 11500, experience: 2, city: "Bursa", position: "ÝK Asistaný", startDate: "2022-07-04", status: "Beklemede" },
+    { id: 28, name: "Yaðmur Kýlýç", email: "yagmur@example.com", phone: "0539 888 9999", department: "IT", salary: 20000, experience: 12, city: "Istanbul", position: "CTO", startDate: "2012-10-15", status: "Aktif" },
+    { id: 29, name: "Zafer Güneþ", email: "zafer@example.com", phone: "0540 999 0000", department: "Satýþ", salary: 15000, experience: 7, city: "Ankara", position: "Satýþ Direktörü", startDate: "2017-11-30", status: "Aktif" },
+    { id: 30, name: "Aslý Öztürk", email: "asli@example.com", phone: "0541 000 1111", department: "Pazarlama", salary: 13000, experience: 4, city: "Izmir", position: "Reklam Uzmaný", startDate: "2020-05-13", status: "Pasif" },
+    { id: 31, name: "Baran Çakýr", email: "baran@example.com", phone: "0542 111 2222", department: "IT", salary: 17000, experience: 7, city: "Bursa", position: "Güvenlik Uzmaný", startDate: "2017-02-28", status: "Aktif" },
+    { id: 32, name: "Canan Tekin", email: "canan@example.com", phone: "0543 222 3333", department: "Ýnsan Kaynaklarý", salary: 16500, experience: 8, city: "Istanbul", position: "ÝK Direktörü", startDate: "2016-08-08", status: "Aktif" },
+    { id: 33, name: "Deniz Arslan", email: "deniz2@example.com", phone: "0544 333 4444", department: "Satýþ", salary: 11000, experience: 1, city: "Antalya", position: "Stajyer", startDate: "2023-03-01", status: "Aktif" },
+    { id: 34, name: "Eda Polat", email: "eda@example.com", phone: "0545 444 5555", department: "Pazarlama", salary: 12500, experience: 3, city: "Ankara", position: "Grafik Tasarýmcý", startDate: "2021-09-20", status: "Beklemede" },
+    { id: 35, name: "Fikret Yýldýrým", email: "fikret@example.com", phone: "0546 555 6666", department: "IT", salary: 16500, experience: 6, city: "Izmir", position: "Network Uzmaný", startDate: "2018-04-17", status: "Aktif" },
+    { id: 36, name: "Gül Taþkýn", email: "gul@example.com", phone: "0547 666 7777", department: "Satýþ", salary: 14500, experience: 6, city: "Istanbul", position: "Ýhracat Müdürü", startDate: "2018-10-23", status: "Aktif" },
+    { id: 37, name: "Halil Kurt", email: "halil@example.com", phone: "0548 777 8888", department: "Pazarlama", salary: 18000, experience: 9, city: "Bursa", position: "CMO", startDate: "2015-12-05", status: "Aktif" },
+    { id: 38, name: "Ýpek Çalýþkan", email: "ipek@example.com", phone: "0549 888 9999", department: "Ýnsan Kaynaklarý", salary: 12000, experience: 3, city: "Ankara", position: "Eðitim Uzmaný", startDate: "2021-07-14", status: "Pasif" },
+    { id: 39, name: "Kaan Durmuþ", email: "kaan@example.com", phone: "0530 999 0000", department: "IT", salary: 15000, experience: 5, city: "Izmir", position: "Mobil Geliþtirici", startDate: "2019-05-29", status: "Aktif" },
+    { id: 40, name: "Leyla Berk", email: "leyla@example.com", phone: "0531 000 1111", department: "Satýþ", salary: 13500, experience: 4, city: "Istanbul", position: "E-ticaret Uzmaný", startDate: "2020-08-11", status: "Aktif" },
+    { id: 41, name: "Mustafa Eren", email: "mustafa@example.com", phone: "0532 111 2222", department: "Pazarlama", salary: 14000, experience: 5, city: "Antalya", position: "Etkinlik Yöneticisi", startDate: "2019-06-18", status: "Beklemede" },
+    { id: 42, name: "Nalan Kaya", email: "nalan@example.com", phone: "0533 222 3333", department: "IT", salary: 19500, experience: 11, city: "Ankara", position: "Proje Müdürü", startDate: "2013-09-10", status: "Aktif" },
+    { id: 43, name: "Onur Aydýn", email: "onur@example.com", phone: "0534 333 4444", department: "Satýþ", salary: 12500, experience: 3, city: "Bursa", position: "Müþteri Ýliþkileri", startDate: "2021-11-22", status: "Aktif" },
+    { id: 44, name: "Pýnar Yüksel", email: "pinar@example.com", phone: "0535 444 5555", department: "Ýnsan Kaynaklarý", salary: 13500, experience: 4, city: "Istanbul", position: "Performans Uzmaný", startDate: "2020-10-06", status: "Aktif" },
+    { id: 45, name: "Recep Þimþek", email: "recep@example.com", phone: "0536 555 6666", department: "Pazarlama", salary: 11500, experience: 2, city: "Izmir", position: "Video Editörü", startDate: "2022-04-19", status: "Pasif" },
+    { id: 46, name: "Selin Özer", email: "selin2@example.com", phone: "0537 666 7777", department: "IT", salary: 16000, experience: 6, city: "Ankara", position: "Veri Bilimci", startDate: "2018-07-12", status: "Aktif" },
+    { id: 47, name: "Taner Aslan", email: "taner@example.com", phone: "0538 777 8888", department: "Satýþ", salary: 17000, experience: 9, city: "Istanbul", position: "Anahtar Müþteri", startDate: "2015-05-25", status: "Aktif" },
+    { id: 48, name: "Ümit Karaca", email: "umit@example.com", phone: "0539 888 9999", department: "Pazarlama", salary: 13000, experience: 3, city: "Bursa", position: "PR Uzmaný", startDate: "2021-12-08", status: "Aktif" },
+    { id: 49, name: "Volkan Özdemir", email: "volkan@example.com", phone: "0540 999 0000", department: "Ýnsan Kaynaklarý", salary: 19000, experience: 10, city: "Antalya", position: "ÝK Genel Müdürü", startDate: "2014-03-20", status: "Aktif" },
+    { id: 50, name: "Yasemin Tan", email: "yasemin@example.com", phone: "0541 000 1111", department: "IT", salary: 18000, experience: 8, city: "Izmir", position: "UX/UI Tasarýmcý", startDate: "2016-11-14", status: "Beklemede" },
+    { id: 51, name: "Zeki Bulut", email: "zeki@example.com", phone: "0542 111 2222", department: "Satýþ", salary: 14500, experience: 5, city: "Ankara", position: "Teknik Satýþ", startDate: "2019-02-07", status: "Aktif" },
+    { id: 52, name: "Aylin Erdoðan", email: "aylin@example.com", phone: "0543 222 3333", department: "Pazarlama", salary: 15000, experience: 6, city: "Istanbul", position: "Marka Stratejisti", startDate: "2018-06-30", status: "Aktif" },
+    { id: 53, name: "Barýþ Yaman", email: "baris@example.com", phone: "0544 333 4444", department: "IT", salary: 21000, experience: 13, city: "Bursa", position: "Baþkan Yardýmcýsý", startDate: "2011-08-16", status: "Aktif" },
+    { id: 54, name: "Ceyda Koçak", email: "ceyda@example.com", phone: "0545 444 5555", department: "Satýþ", salary: 13000, experience: 4, city: "Antalya", position: "Bayi Yöneticisi", startDate: "2020-03-24", status: "Pasif" },
+    { id: 55, name: "Doðan Þener", email: "dogan@example.com", phone: "0546 555 6666", department: "Ýnsan Kaynaklarý", salary: 15500, experience: 7, city: "Izmir", position: "Bordro Uzmaný", startDate: "2017-09-02", status: "Aktif" },
+];
+
+let filteredData = [...data];
+let currentPage = 1;
+let itemsPerPage = 10;
+let sortColumn = '';
+let sortAscending = true;
+let columnFilters = {};
+let textFilters = {};
+let currentOpenFilter = null;
+let currentFilterMode = {};
+let slicerSelections = {};
+
+const fieldNames = {
+    id: "ID",
+    name: "Ýsim",
+    email: "Email",
+    phone: "Telefon",
+    department: "Departman",
+    salary: "Maaþ",
+    experience: "Tecrübe",
+    city: "Þehir",
+    position: "Pozisyon",
+    startDate: "Baþlangýç",
+    status: "Durum"
+};
+
+// Filtre dropdown'ýný aç/kapa
+function toggleFilter(column, event) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+
+    const dropdown = document.getElementById(`filter-${column}`);
+    if (!dropdown) return;
+
+    if (currentOpenFilter && currentOpenFilter !== column) {
+        const oldDropdown = document.getElementById(`filter-${currentOpenFilter}`);
+        if (oldDropdown) {
+            oldDropdown.classList.remove('show');
+        }
+    }
+
+    const isShowing = dropdown.classList.contains('show');
+
+    if (isShowing) {
+        dropdown.classList.remove('show');
+        currentOpenFilter = null;
+    } else {
+        buildFilterDropdown(column);
+        dropdown.classList.add('show');
+        currentOpenFilter = column;
+
+        const rect = dropdown.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        if (rect.right > viewportWidth) {
+            dropdown.style.left = 'auto';
+            dropdown.style.right = '0';
+        } else {
+            dropdown.style.left = '0';
+            dropdown.style.right = 'auto';
+        }
+    }
+}
+
+// Filtre dropdown içeriðini oluþtur
+function buildFilterDropdown(column) {
+    const dropdown = document.getElementById(`filter-${column}`);
+    const mode = currentFilterMode[column] || 'list';
+    const distinctValues = [...new Set(filteredData.map(item => item[column]))].sort();
+    const isNumeric = distinctValues.every(val => !isNaN(parseFloat(val)) && isFinite(val));
+
+    let html = `
+        <div class="filter-type-selector">
+            <button class="filter-type-btn ${mode === 'number' ? 'active' : ''}" onclick="switchFilterMode('${column}', 'number', event)">
+                <i class="bi bi-123"></i> ${isNumeric ? 'Sayý' : 'Metin'}
+            </button>
+            <button class="filter-type-btn ${mode === 'list' ? 'active' : ''}" onclick="switchFilterMode('${column}', 'list', event)">
+                <i class="bi bi-list-ul"></i> Liste
+            </button>
+        </div>
+    `;
+
+    if (mode === 'number') {
+        const savedFilter = textFilters[column] || { operator: 'equals', value: '' };
+        let operatorOptions = '';
+        if (isNumeric) {
+            operatorOptions = `
+                <option value="equals" ${savedFilter.operator === 'equals' ? 'selected' : ''}>Eþittir</option>
+                <option value="notEquals" ${savedFilter.operator === 'notEquals' ? 'selected' : ''}>Eþit Deðil</option>
+                <option value="greaterThan" ${savedFilter.operator === 'greaterThan' ? 'selected' : ''}>Büyüktür</option>
+                <option value="greaterOrEqual" ${savedFilter.operator === 'greaterOrEqual' ? 'selected' : ''}>Büyük veya Eþit</option>
+                <option value="lessThan" ${savedFilter.operator === 'lessThan' ? 'selected' : ''}>Küçüktür</option>
+                <option value="lessOrEqual" ${savedFilter.operator === 'lessOrEqual' ? 'selected' : ''}>Küçük veya Eþit</option>
+                <option value="between" ${savedFilter.operator === 'between' ? 'selected' : ''}>Arasýnda</option>
+            `;
+        } else {
+            operatorOptions = `
+                <option value="contains" ${savedFilter.operator === 'contains' ? 'selected' : ''}>Ýçerir</option>
+                <option value="notContains" ${savedFilter.operator === 'notContains' ? 'selected' : ''}>Ýçermez</option>
+                <option value="equals" ${savedFilter.operator === 'equals' ? 'selected' : ''}>Eþittir</option>
+                <option value="notEquals" ${savedFilter.operator === 'notEquals' ? 'selected' : ''}>Eþit Deðil</option>
+                <option value="startsWith" ${savedFilter.operator === 'startsWith' ? 'selected' : ''}>Ýle Baþlar</option>
+                <option value="endsWith" ${savedFilter.operator === 'endsWith' ? 'selected' : ''}>Ýle Biter</option>
+            `;
+        }
+
+        html += `
+            <div class="text-filter-section">
+                <div class="text-filter-row">
+                    <select class="text-filter-operator" id="text-operator-${column}" onchange="handleOperatorChange('${column}')">
+                        ${operatorOptions}
+                    </select>
+                </div>
+                <div id="filter-inputs-${column}">
+                    <input type="${isNumeric ? 'number' : 'text'}" class="text-filter-input" id="text-value-${column}" placeholder="Deðer girin..." value="${savedFilter.value || ''}" onkeypress="if(event.key==='Enter') applyFilter('${column}')">
+                </div>
+            </div>
+        `;
+    } else {
+        html += `
+            <input type="text" class="filter-search" placeholder="Ara..." onkeyup="filterDropdownOptions('${column}', this.value)" onkeypress="if(event.key==='Enter') applyFilter('${column}')">
+            <div class="filter-options" id="options-${column}">
+                <div class="filter-option" onclick="selectAllFilter('${column}', event)">
+                    <input type="checkbox" ${!columnFilters[column] || columnFilters[column].length === 0 ? 'checked' : ''}>
+                    <strong>(Tümünü Seç)</strong>
+                </div>
+        `;
+
+        distinctValues.forEach(value => {
+            const isChecked = !columnFilters[column] || columnFilters[column].includes(value);
+            html += `
+                <div class="filter-option" data-value="${value}" onclick="toggleFilterValue('${column}', '${value}', event)">
+                    <input type="checkbox" ${isChecked ? 'checked' : ''}>
+                    <span>${value}</span>
+                </div>
+            `;
+        });
+
+        html += `</div>`;
+    }
+
+    html += `
+        <div class="filter-actions">
+            <button class="btn-apply-filter" onclick="applyFilter('${column}')">
+                <i class="bi bi-check-circle"></i> Uygula
+            </button>
+            <button class="btn-clear-filter" onclick="clearFilter('${column}')">
+                <i class="bi bi-x-circle"></i> Temizle
+            </button>
+        </div>
+    `;
+
+    dropdown.innerHTML = html;
+}
+
+function switchFilterMode(column, mode, event) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    currentFilterMode[column] = mode;
+    buildFilterDropdown(column);
+}
+
+function handleOperatorChange(column) {
+    const operator = document.getElementById(`text-operator-${column}`).value;
+    const inputContainer = document.getElementById(`filter-inputs-${column}`);
+    const savedFilter = textFilters[column] || {};
+    const distinctValues = [...new Set(data.map(item => item[column]))];
+    const isNumeric = distinctValues.every(val => !isNaN(parseFloat(val)) && isFinite(val));
+
+    if (operator === 'between') {
+        inputContainer.innerHTML = `
+            <input type="${isNumeric ? 'number' : 'text'}" class="text-filter-input mb-2" id="text-value-${column}" placeholder="Baþlangýç..." value="${savedFilter.value || ''}">
+            <input type="${isNumeric ? 'number' : 'text'}" class="text-filter-input" id="text-value2-${column}" placeholder="Bitiþ..." value="${savedFilter.value2 || ''}">
+        `;
+    } else {
+        inputContainer.innerHTML = `
+            <input type="${isNumeric ? 'number' : 'text'}" class="text-filter-input" id="text-value-${column}" placeholder="Deðer girin..." value="${savedFilter.value || ''}">
+        `;
+    }
+}
+
+function filterDropdownOptions(column, searchTerm) {
+    const options = document.querySelectorAll(`#options-${column} .filter-option`);
+    const term = searchTerm.toLowerCase();
+
+    options.forEach(option => {
+        const text = option.textContent.toLowerCase();
+        option.style.display = text.includes(term) ? 'flex' : 'none';
+    });
+}
+
+function selectAllFilter(column, event) {
+    if (event) {
+        event.stopPropagation();
+        if (event.target.type === 'checkbox') {
+            const isChecked = event.target.checked;
+            const options = document.querySelectorAll(`#options-${column} .filter-option input[type="checkbox"]`);
+            options.forEach(checkbox => {
+                checkbox.checked = isChecked;
+            });
+            return;
+        }
+    }
+
+    const options = document.querySelectorAll(`#options-${column} .filter-option input[type="checkbox"]`);
+    const selectAll = options[0];
+    const isChecked = !selectAll.checked;
+
+    options.forEach(checkbox => {
+        checkbox.checked = isChecked;
+    });
+}
+
+function toggleFilterValue(column, value, event) {
+    if (event) {
+        event.stopPropagation();
+        if (event.target.type === 'checkbox') {
+            return;
+        }
+    }
+    const checkbox = event.currentTarget.querySelector('input[type="checkbox"]');
+    if (checkbox) {
+        checkbox.checked = !checkbox.checked;
+    }
+}
+
+function applyFilter(column) {
+    const mode = currentFilterMode[column] || 'list';
+
+    if (mode === 'number') {
+        const operator = document.getElementById(`text-operator-${column}`).value;
+        const value = document.getElementById(`text-value-${column}`).value;
+
+        if (operator === 'between') {
+            const value2 = document.getElementById(`text-value2-${column}`).value;
+            if (value.trim() && value2.trim()) {
+                textFilters[column] = { operator, value, value2 };
+                delete columnFilters[column];
+            } else {
+                delete textFilters[column];
+            }
+        } else {
+            if (value.trim()) {
+                textFilters[column] = { operator, value };
+                delete columnFilters[column];
+            } else {
+                delete textFilters[column];
+            }
+        }
+    } else {
+        const selectedValues = [];
+        const checkboxes = document.querySelectorAll(`#options-${column} .filter-option[data-value] input[type="checkbox"]:checked`);
+
+        checkboxes.forEach((checkbox) => {
+            const value = checkbox.parentElement.dataset.value;
+            if (value !== undefined && value !== null) selectedValues.push(value);
+        });
+
+        const allValues = [...new Set(filteredData.map(item => item[column]))];
+        if (selectedValues.length === 0 || selectedValues.length === allValues.length) {
+            delete columnFilters[column];
+        } else {
+            columnFilters[column] = selectedValues;
+        }
+        delete textFilters[column];
+    }
+
+    updateFilterIcon(column);
+    document.getElementById(`filter-${column}`).classList.remove('show');
+    currentOpenFilter = null;
+    applyAllFilters();
+    displayActiveFilters();
+
+    if (activeSlicerColumns.includes(column)) {
+        updateSlicerItems(column);
+        updateAllSlicers();
+    }
+    createColumnCheckList();
+}
+
+function clearFilter(column) {
+    delete columnFilters[column];
+    delete textFilters[column];
+    updateFilterIcon(column);
+    document.getElementById(`filter-${column}`).classList.remove('show');
+    currentOpenFilter = null;
+    applyAllFilters();
+    displayActiveFilters();
+    updateAllSlicers();
+    createColumnCheckList();
+}
+
+function updateFilterIcon(column) {
+    const icon = document.querySelector(`#filter-${column}`).previousElementSibling;
+    const count = document.getElementById(`count-${column}`);
+    const hasFilter = (columnFilters[column] && columnFilters[column].length > 0) || textFilters[column];
+
+    if (hasFilter) {
+        icon.classList.add('active');
+        count.style.display = 'inline-block';
+        count.textContent = columnFilters[column] ? columnFilters[column].length : '1';
+    } else {
+        icon.classList.remove('active');
+        count.style.display = 'none';
+    }
+}
+
+function applyAllFilters() {
+    const searchTerm = document.getElementById('searchInput').value.toLocaleLowerCase('tr-TR');
+
+    filteredData = data.filter(item => {
+        if (searchTerm) {
+            const matchSearch = Object.values(item).some(val =>
+                String(val).toLocaleLowerCase('tr-TR').includes(searchTerm)
+            );
+            if (!matchSearch) return false;
+        }
+
+        for (let column in columnFilters) {
+            const itemValue = String(item[column]);
+            const filterValues = columnFilters[column].map(v => String(v));
+            if (!filterValues.includes(itemValue)) {
+                return false;
+            }
+        }
+
+        for (let column in textFilters) {
+            const filter = textFilters[column];
+            const itemValue = String(item[column]).toLowerCase();
+            const filterValue = filter.value.toLowerCase();
+
+            let match = false;
+            switch(filter.operator) {
+                case 'contains':
+                    match = itemValue.includes(filterValue);
+                    break;
+                case 'notContains':
+                    match = !itemValue.includes(filterValue);
+                    break;
+                case 'equals':
+                    match = itemValue === filterValue;
+                    break;
+                case 'notEquals':
+                    match = itemValue !== filterValue;
+                    break;
+                case 'startsWith':
+                    match = itemValue.startsWith(filterValue);
+                    break;
+                case 'endsWith':
+                    match = itemValue.endsWith(filterValue);
+                    break;
+                case 'greaterThan':
+                    match = parseFloat(item[column]) > parseFloat(filter.value);
+                    break;
+                case 'greaterOrEqual':
+                    match = parseFloat(item[column]) >= parseFloat(filter.value);
+                    break;
+                case 'lessThan':
+                    match = parseFloat(item[column]) < parseFloat(filter.value);
+                    break;
+                case 'lessOrEqual':
+                    match = parseFloat(item[column]) <= parseFloat(filter.value);
+                    break;
+                case 'between':
+                    const numValue = parseFloat(item[column]);
+                    const min = parseFloat(filter.value);
+                    const max = parseFloat(filter.value2);
+                    match = numValue >= min && numValue <= max;
+                    break;
+            }
+
+            if (!match) return false;
+        }
+
+        for (let column in slicerSelections) {
+            const itemValue = String(item[column]);
+            const filterValues = slicerSelections[column].map(v => String(v));
+            if (!filterValues.includes(itemValue)) {
+                return false;
+            }
+        }
+
+        return true;
+    });
+
+    currentPage = 1;
+    renderTable();
+}
+
+function displayActiveFilters() {
+    const container = document.getElementById('activeFilters');
+    const tagsContainer = document.getElementById('filterTags');
+    const filterCountSpan = document.getElementById('filterCount');
+
+    const openAccordions = new Set();
+    document.querySelectorAll('#filterTags .accordion-collapse.show').forEach(collapse => {
+        openAccordions.add(collapse.id);
+    });
+
+    const activeFilterCount = Object.keys(columnFilters).length + Object.keys(textFilters).length;
+
+    if (activeFilterCount === 0) {
+        container.style.display = 'none';
+        return;
+    }
+
+    container.style.display = 'block';
+    tagsContainer.innerHTML = '';
+
+    let totalFilterItems = 0;
+    for (let column in columnFilters) {
+        totalFilterItems += columnFilters[column].length;
+    }
+    totalFilterItems += Object.keys(textFilters).length;
+    filterCountSpan.textContent = totalFilterItems;
+
+    let accordionIndex = 0;
+    const columnOrder = Object.keys(fieldNames);
+    const allActiveFilters = [];
+
+    for (let column in columnFilters) {
+        allActiveFilters.push({
+            column: column,
+            type: 'list',
+            values: columnFilters[column],
+            order: columnOrder.indexOf(column)
+        });
+    }
+
+    for (let column in textFilters) {
+        allActiveFilters.push({
+            column: column,
+            type: 'text',
+            filter: textFilters[column],
+            order: columnOrder.indexOf(column)
+        });
+    }
+
+    allActiveFilters.sort((a, b) => a.order - b.order);
+
+    allActiveFilters.forEach(filterData => {
+        if (filterData.type === 'list') {
+            const column = filterData.column;
+            const values = filterData.values;
+            const colCollapseId = `colCollapse${accordionIndex}`;
+
+            const columnAccordion = document.createElement('div');
+            columnAccordion.className = 'accordion mb-2 filter-summary-accordion';
+
+            let tagsHtml = '';
+            values.forEach(value => {
+                tagsHtml += `
+                    <span class="filter-tag d-inline-block mb-1 me-1">
+                        ${value}
+                         <i class="bi bi-x-circle" onclick="removeIndividualFilter('${column}', '${value}', event)"></i>
+                    </span>
+                `;
+            });
+
+            columnAccordion.innerHTML = `
+                <div class="accordion-item border-0">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed filter-summary-trigger" type="button" data-bs-toggle="collapse" data-bs-target="#${colCollapseId}">
+                            <strong>${fieldNames[column]}</strong>
+                            <span class="badge bg-primary ms-2 filter-summary-badge">${values.length}</span>
+                        </button>
+                    </h2>
+                    <div id="${colCollapseId}" class="accordion-collapse collapse ${openAccordions.has(colCollapseId) ? 'show' : ''}">
+                        <div class="accordion-body filter-summary-body">
+                            ${tagsHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            tagsContainer.appendChild(columnAccordion);
+            accordionIndex++;
+
+        } else if (filterData.type === 'text') {
+            const column = filterData.column;
+            const filter = filterData.filter;
+            const colCollapseId = `colCollapse${accordionIndex}`;
+
+            const operatorText = {
+                contains: 'Ýçerir',
+                notContains: 'Ýçermez',
+                equals: 'Eþittir',
+                notEquals: 'Eþit Deðil',
+                startsWith: 'Ýle Baþlar',
+                endsWith: 'Ýle Biter',
+                greaterThan: '>',
+                greaterOrEqual: '>=',
+                lessThan: '<',
+                lessOrEqual: '<=',
+                between: 'Arasýnda'
+            }[filter.operator];
+
+            let displayText = '';
+            if (filter.operator === 'between') {
+                displayText = `${operatorText} "${filter.value}"-"${filter.value2}"`;
+            } else {
+                displayText = `${operatorText} "${filter.value}"`;
+            }
+
+            const columnAccordion = document.createElement('div');
+            columnAccordion.className = 'accordion mb-2 filter-summary-accordion';
+
+            columnAccordion.innerHTML = `
+                <div class="accordion-item border-0">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed filter-summary-trigger" type="button" data-bs-toggle="collapse" data-bs-target="#${colCollapseId}">
+                            <strong>${fieldNames[column]}</strong>
+                            <span class="badge bg-primary ms-2 filter-summary-badge">1</span>
+                        </button>
+                    </h2>
+                    <div id="${colCollapseId}" class="accordion-collapse collapse ${openAccordions.has(colCollapseId) ? 'show' : ''}">
+                    <div class="accordion-body filter-summary-body">
+                        <span class="filter-tag">
+                            ${displayText}
+                            <i class="bi bi-x-circle" onclick="removeColumnFilter('${column}')"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+            tagsContainer.appendChild(columnAccordion);
+            accordionIndex++;
+        }
+    });
+}
+
+function removeIndividualFilter(column, value) {
+    event?.stopPropagation();
+
+    if (columnFilters[column]) {
+        const valueStr = String(value);
+        columnFilters[column] = columnFilters[column].filter(v => String(v) !== valueStr);
+        if (columnFilters[column].length === 0) {
+            delete columnFilters[column];
+        }
+    }
+    updateFilterIcon(column);
+    displayActiveFilters();
+    applyAllFilters();
+    updateAllSlicers();
+    createColumnCheckList();
+}
+
+function toggleAllFilterAccordions() {
+    const allCollapses = document.querySelectorAll('#filterTags .accordion-collapse');
+    const btn = document.getElementById('toggleAllBtn');
+    const isAnyOpen = Array.from(allCollapses).some(collapse => collapse.classList.contains('show'));
+
+    if (isAnyOpen) {
+        allCollapses.forEach(collapse => {
+            const bsCollapse = bootstrap.Collapse.getInstance(collapse);
+            if (bsCollapse) {
+                bsCollapse.hide();
+            } else {
+                new bootstrap.Collapse(collapse, { toggle: false }).hide();
+            }
+        });
+        btn.innerHTML = '<i class="bi bi-chevron-down"></i> Hepsini Aç';
+    } else {
+        allCollapses.forEach(collapse => {
+            const bsCollapse = bootstrap.Collapse.getInstance(collapse);
+            if (bsCollapse) {
+                bsCollapse.show();
+            } else {
+                new bootstrap.Collapse(collapse, { toggle: false }).show();
+            }
+        });
+        btn.innerHTML = '<i class="bi bi-chevron-up"></i> Hepsini Kapat';
+    }
+}
+
+function removeColumnFilter(column) {
+    delete columnFilters[column];
+    delete textFilters[column];
+    updateFilterIcon(column);
+    applyAllFilters();
+    displayActiveFilters();
+    updateAllSlicers();
+    createColumnCheckList();
+}
+
+document.getElementById('searchInput').addEventListener('input', function() {
+    applyAllFilters();
+    if (activeSlicerColumns.length > 0) {
+        updateAllSlicers();
+    }
+});
+
+function resetAllFilters() {
+    document.getElementById('searchInput').value = '';
+    columnFilters = {};
+    textFilters = {};
+    currentFilterMode = {};
+    slicerSelections = {};
+    activeSlicerColumns = [];
+
+    Object.keys(fieldNames).forEach(column => {
+        updateFilterIcon(column);
+    });
+
+    createColumnCheckList();
+    rebuildSlicers();
+
+    filteredData = [...data];
+    currentPage = 1;
+    renderTable();
+    displayActiveFilters();
+}
+
+function sortTable(column) {
+    if (sortColumn === column) {
+        sortAscending = !sortAscending;
+    } else {
+        sortColumn = column;
+        sortAscending = true;
+    }
+
+    filteredData.sort((a, b) => {
+        let valA = a[column];
+        let valB = b[column];
+
+        if (typeof valA === 'string') {
+            valA = valA.toLowerCase();
+            valB = valB.toLowerCase();
+        }
+
+        if (sortAscending) {
+            return valA > valB ? 1 : valA < valB ? -1 : 0;
+        } else {
+            return valA < valB ? 1 : valA > valB ? -1 : 0;
+        }
+    });
+
+    document.querySelectorAll('.header-text').forEach(header => {
+        const icon = header.querySelector('.sort-icon');
+        if (icon) {
+            header.classList.remove('sorted');
+            icon.className = 'bi bi-arrow-down-up sort-icon';
+        }
+    });
+
+    const activeHeader = document.querySelector(`[onclick="sortTable('${column}')"]`);
+    if (activeHeader) {
+        const icon = activeHeader.querySelector('.sort-icon');
+        activeHeader.classList.add('sorted');
+        icon.className = sortAscending ? 'bi bi-arrow-up sort-icon' : 'bi bi-arrow-down sort-icon';
+    }
+
+    renderTable();
+}
+
+function renderTable() {
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const pageData = filteredData.slice(start, end);
+
+    if (pageData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="12" class="text-center py-4">Sonuç bulunamadý</td></tr>';
+        updateInfo();
+        return;
+    }
+
+    pageData.forEach(item => {
+        const statusClass = item.status === 'Aktif' ? 'status-active' :
+                          item.status === 'Pasif' ? 'status-inactive' : 'status-pending';
+
+        const row = `
+            <tr>
+                <td>${item.id}</td>
+                <td>${item.name}</td>
+                <td>${item.email}</td>
+                <td>${item.phone}</td>
+                <td>${item.department}</td>
+                <td>${item.salary}?</td>
+                <td>${item.experience} yýl</td>
+                <td>${item.city}</td>
+                <td>${item.position}</td>
+                <td>${item.startDate}</td>
+                <td><span class="status-badge ${statusClass}">${item.status}</span></td>
+                <td class="action-buttons" style="white-space: nowrap !important;">
+                    <button class="btn btn-sm btn-info" onclick="viewItem(${item.id})" title="Görüntüle" style="padding: 6px 10px; margin: 2px 3px; font-size: 0.9rem; min-width: 32px; display: inline-block;">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-warning" onclick="editItem(${item.id})" title="Düzenle" style="padding: 6px 10px; margin: 2px 3px; font-size: 0.9rem; min-width: 32px; display: inline-block;">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteItem(${item.id})" title="Sil" style="padding: 6px 10px; margin: 2px 3px; font-size: 0.9rem; min-width: 32px; display: inline-block;">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
+
+    updatePagination();
+    updateInfo();
+}
+
+function updatePagination() {
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+    const pagination = document.getElementById('pagination');
+    pagination.innerHTML = '';
+
+    pagination.innerHTML += `
+        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}" style="margin-right: 8px;">
+            <a class="page-link" href="#" onclick="changePage(1); return false;"
+               style="font-size: 0.85rem; padding: 6px 12px; border: 2px solid #667eea; color: #667eea; background: white; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; height: 36px; font-weight: 600;">« En Baþa</a>
+        </li>
+    `;
+
+    pagination.innerHTML += `
+        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}" style="margin-right: 8px;">
+            <a class="page-link" href="#" onclick="changePage(${currentPage - 1}); return false;"
+               style="font-size: 0.85rem; padding: 6px 12px; border: 2px solid #667eea; color: #667eea; background: white; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; height: 36px; font-weight: 600;">‹ Önceki</a>
+        </li>
+    `;
+
+    pagination.innerHTML += `
+        <li class="page-item" style="display: flex; align-items: center; margin-right: 4px;">
+            <input type="number"
+                   id="pageNumberInput"
+                   class="form-control form-control-sm"
+                   value="${currentPage}"
+                   min="1"
+                   max="${totalPages}"
+                   onkeypress="if(event.key==='Enter') goToPage()"
+                   onblur="goToPage()"
+                   style="width: 55px; text-align: center; font-size: 0.85rem; padding: 0 8px; border-radius: 6px; height: 36px; border: 2px solid #667eea; color: #667eea; font-weight: 600; box-sizing: border-box;">
+        </li>
+        <li class="page-item" style="display: flex; align-items: center; margin-right: 8px;">
+            <span style="font-size: 0.85rem; color: #666; padding: 0 4px; height: 36px; display: flex; align-items: center; font-weight: 600;">/ ${totalPages}</span>
+        </li>
+    `;
+
+    pagination.innerHTML += `
+        <li class="page-item ${currentPage === totalPages || totalPages === 0 ? 'disabled' : ''}" style="margin-right: 8px;">
+            <a class="page-link" href="#" onclick="changePage(${currentPage + 1}); return false;"
+               style="font-size: 0.85rem; padding: 6px 12px; border: 2px solid #667eea; color: #667eea; background: white; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; height: 36px; font-weight: 600;">Sonraki ›</a>
+        </li>
+    `;
+
+    pagination.innerHTML += `
+        <li class="page-item ${currentPage === totalPages || totalPages === 0 ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="changePage(${totalPages}); return false;"
+               style="font-size: 0.85rem; padding: 6px 12px; border: 2px solid #667eea; color: #667eea; background: white; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; height: 36px; font-weight: 600;">En Son »</a>
+        </li>
+    `;
+}
+
+function goToPage() {
+    const input = document.getElementById('pageNumberInput');
+    let pageNum = parseInt(input.value);
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+    if (isNaN(pageNum) || pageNum < 1) {
+        pageNum = 1;
+    } else if (pageNum > totalPages) {
+        pageNum = totalPages;
+    }
+
+    input.value = pageNum;
+    changePage(pageNum);
+}
+
+function changePage(page) {
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+    if (page >= 1 && page <= totalPages) {
+        currentPage = page;
+        renderTable();
+    }
+    return false;
+}
+
+function changeItemsPerPage() {
+    itemsPerPage = parseInt(document.getElementById('itemsPerPageSelect').value);
+    currentPage = 1;
+    renderTable();
+}
+
+function updateInfo() {
+    const start = filteredData.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+    const end = Math.min(currentPage * itemsPerPage, filteredData.length);
+
+    const hasActiveFilters = Object.keys(columnFilters).length > 0 || Object.keys(textFilters).length > 0 || document.getElementById('searchInput').value.trim() !== '';
+
+    let infoText = '';
+    if (hasActiveFilters && filteredData.length < data.length) {
+        infoText = `${data.length} kayýttan ${filteredData.length} tanesi bulundu`;
+    } else {
+        infoText = `Gösteriliyor: ${start}-${end} / ${filteredData.length}`;
+    }
+
+    document.getElementById('showingInfo').textContent = infoText;
+    document.getElementById('totalRecords').textContent = filteredData.length;
+}
+
+function viewItem(id) {
+    alert(`Görüntüleniyor: ID ${id}`);
+}
+
+function editItem(id) {
+    alert(`Düzenleniyor: ID ${id}`);
+}
+
+function deleteItem(id) {
+    if (confirm(`ID ${id} numaralý kaydý silmek istediðinizden emin misiniz?`)) {
+        const index = data.findIndex(item => item.id === id);
+        if (index > -1) {
+            data.splice(index, 1);
+            applyAllFilters();
+        }
+    }
+}
+
+function addNew() {
+    alert('Yeni kayýt ekleme formu açýlacak...');
+}
+
+function exportData(type) {
+    alert(`${type.toUpperCase()} formatýnda dýþa aktarýlýyor...`);
+}
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.filter-dropdown') && !e.target.closest('.filter-icon')) {
+        document.querySelectorAll('.filter-dropdown').forEach(dropdown => {
+            dropdown.classList.remove('show');
+        });
+        currentOpenFilter = null;
+    }
+});
+
+let activeSlicerColumns = [];
+
+function initSlicers() {
+    createColumnCheckList();
+
+    Object.keys(columnFilters).forEach(column => {
+        if (!activeSlicerColumns.includes(column)) {
+            activeSlicerColumns.push(column);
+        }
+    });
+
+    if (activeSlicerColumns.length > 0) {
+        createColumnCheckList();
+        rebuildSlicers();
+    }
+}
+
+function clearAdvancedFilters() {
+    slicerSelections = {};
+    createColumnCheckList();
+    updateAllSlicers();
+    applySlicerFilters();
+}
+
+function toggleAllColumns() {
+    const toggleCheckbox = document.getElementById('toggleAllColumns');
+    const allColumns = Object.keys(fieldNames).filter(col => col !== 'id');
+
+    if (toggleCheckbox.checked) {
+        activeSlicerColumns = [...allColumns];
+    } else {
+        activeSlicerColumns = [];
+        slicerSelections = {};
+    }
+
+    createColumnCheckList();
+    rebuildSlicers();
+    applySlicerFilters();
+}
+
+function createColumnCheckList() {
+    const checkList = document.getElementById('columnCheckList');
+    const allColumns = Object.keys(fieldNames).filter(col => col !== 'id');
+
+    checkList.innerHTML = '';
+    allColumns.forEach(column => {
+        const isChecked = activeSlicerColumns.includes(column);
+        const hasFilter = slicerSelections[column] && slicerSelections[column].length > 0;
+        const bgColor = hasFilter ? '#ffc107' : (isChecked ? '#667eea' : 'white');
+        const textColor = isChecked && !hasFilter ? 'white' : '#333';
+        const borderColor = hasFilter ? '#ffc107' : (isChecked ? '#667eea' : '#ddd');
+
+        const checkDiv = document.createElement('div');
+        checkDiv.style.cssText = `
+            padding: 3px 6px;
+            margin-bottom: 1px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            background: ${bgColor};
+            color: ${textColor};
+            border: 1px solid ${borderColor};
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        `;
+
+        checkDiv.innerHTML = `
+            <label for="check-${column}" style="cursor: pointer; margin: 0; font-size: 0.7rem; line-height: 1.2; display: flex; align-items: center; width: 100%;">
+                <input type="checkbox" value="${column}" id="check-${column}"
+                       ${isChecked ? 'checked' : ''} onchange="toggleSlicerColumn('${column}')"
+                       style="width: 12px; height: 12px; margin-right: 6px; cursor: pointer; flex-shrink: 0;">
+                ${fieldNames[column]}
+            </label>
+        `;
+
+        checkDiv.onmouseenter = function() {
+            if (!isChecked && !hasFilter) {
+                this.style.background = '#f0f0f0';
+            }
+        };
+        checkDiv.onmouseleave = function() {
+            const currentHasFilter = slicerSelections[column] && slicerSelections[column].length > 0;
+            const currentBgColor = currentHasFilter ? '#ffc107' : (isChecked ? '#667eea' : 'white');
+            this.style.background = currentBgColor;
+        };
+
+        checkList.appendChild(checkDiv);
+    });
+}
+
+function toggleSlicerColumn(column) {
+    const index = activeSlicerColumns.indexOf(column);
+
+    if (index > -1) {
+        activeSlicerColumns.splice(index, 1);
+        delete slicerSelections[column];
+    } else {
+        const allColumns = Object.keys(fieldNames);
+        activeSlicerColumns.push(column);
+        activeSlicerColumns.sort((a, b) => allColumns.indexOf(a) - allColumns.indexOf(b));
+    }
+
+    createColumnCheckList();
+    rebuildSlicers();
+
+    if (Object.keys(slicerSelections).length > 0) {
+        applySlicerFilters();
+    }
+}
+
+function rebuildSlicers() {
+    const slicerContainer = document.getElementById('slicerContainer');
+
+    slicerContainer.innerHTML = '';
+
+    if (activeSlicerColumns.length === 0) {
+        slicerContainer.innerHTML = `
+            <div style="width: 100%; text-align: center; color: #6c757d; padding: 40px; font-size: 0.85rem;">
+                <i class="bi bi-arrow-left"></i> Soldaki listeden kolon seçin
+            </div>
+        `;
+        return;
+    }
+
+    activeSlicerColumns.forEach(column => {
+        const hasFilter = slicerSelections[column] && slicerSelections[column].length > 0;
+        const headerBgColor = hasFilter ? '#ffc107' : 'transparent';
+        const headerTextColor = '#667eea';
+
+        const slicer = document.createElement('div');
+        slicer.style.cssText = 'flex: 0 0 180px; margin-right: 10px; margin-bottom: 10px;';
+        slicer.innerHTML = `
+            <div class="slicer-card" style="border: 1px solid #ddd; border-radius: 6px; padding: 8px; background: #f8f9fa; width: 180px;">
+                <h6 style="font-size: 0.7rem; font-weight: bold; margin-bottom: 6px; color: ${headerTextColor}; background: ${headerBgColor}; padding: 2px 4px; border-radius: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${fieldNames[column]}">
+                    ${fieldNames[column]}
+                </h6>
+                <div class="slicer-items" id="slicer-${column}" style="max-height: 150px; overflow-y: auto;">
+                </div>
+            </div>
+        `;
+        slicerContainer.appendChild(slicer);
+
+        updateSlicerItems(column);
+    });
+}
+
+function updateSlicerItems(column) {
+    const slicerDiv = document.getElementById(`slicer-${column}`);
+    if (!slicerDiv) return;
+
+    let availableData = [...data];
+
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    if (searchTerm) {
+        availableData = availableData.filter(item =>
+            Object.values(item).some(val =>
+                String(val).toLowerCase().includes(searchTerm)
+            )
+        );
+    }
+
+    for (let col in columnFilters) {
+        if (columnFilters[col].length > 0) {
+            availableData = availableData.filter(item =>
+                columnFilters[col].map(v => String(v)).includes(String(item[col]))
+            );
+        }
+    }
+
+    for (let col in textFilters) {
+        const filter = textFilters[col];
+        availableData = availableData.filter(item => {
+            const itemValue = String(item[col]).toLowerCase();
+            const filterValue = filter.value.toLowerCase();
+
+            switch(filter.operator) {
+                case 'contains': return itemValue.includes(filterValue);
+                case 'notContains': return !itemValue.includes(filterValue);
+                case 'equals': return itemValue === filterValue;
+                case 'notEquals': return itemValue !== filterValue;
+                case 'startsWith': return itemValue.startsWith(filterValue);
+                case 'endsWith': return itemValue.endsWith(filterValue);
+                case 'greaterThan': return parseFloat(item[col]) > parseFloat(filter.value);
+                case 'lessThan': return parseFloat(item[col]) < parseFloat(filter.value);
+                case 'between':
+                    const numValue = parseFloat(item[col]);
+                    return numValue >= parseFloat(filter.value) && numValue <= parseFloat(filter.value2);
+                default: return true;
+            }
+        });
+    }
+
+    for (let col in slicerSelections) {
+        if (col !== column && slicerSelections[col].length > 0) {
+            availableData = availableData.filter(item =>
+                slicerSelections[col].includes(String(item[col]))
+            );
+        }
+    }
+
+    const availableValues = [...new Set(availableData.map(item => item[column]))].sort();
+    const selectedValues = slicerSelections[column] || [];
+
+    slicerDiv.innerHTML = '';
+    availableValues.forEach(value => {
+        const isSelected = selectedValues.includes(String(value));
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'slicer-item';
+        itemDiv.style.cssText = `
+            padding: 3px 6px;
+            margin-bottom: 1px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            background: ${isSelected ? '#667eea' : 'white'};
+            color: ${isSelected ? 'white' : '#333'};
+            border: 1px solid ${isSelected ? '#667eea' : '#ddd'};
+            transition: all 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        `;
+        itemDiv.textContent = value;
+        itemDiv.onclick = () => toggleSlicerValue(column, value);
+
+        itemDiv.onmouseenter = function() {
+            if (!isSelected) {
+                this.style.background = '#f0f0f0';
+            }
+        };
+        itemDiv.onmouseleave = function() {
+            if (!isSelected) {
+                this.style.background = 'white';
+            }
+        };
+
+        slicerDiv.appendChild(itemDiv);
+    });
+}
+
+function toggleSlicerValue(column, value) {
+    if (!slicerSelections[column]) {
+        slicerSelections[column] = [];
+    }
+
+    const valueStr = String(value);
+    const index = slicerSelections[column].indexOf(valueStr);
+
+    if (index > -1) {
+        slicerSelections[column].splice(index, 1);
+    } else {
+        slicerSelections[column].push(valueStr);
+    }
+
+    if (slicerSelections[column].length === 0) {
+        delete slicerSelections[column];
+    }
+
+    createColumnCheckList();
+    updateAllSlicers();
+    applySlicerFilters();
+}
+
+function updateAllSlicers() {
+    activeSlicerColumns.forEach(column => {
+        updateSlicerItems(column);
+        const hasFilter = slicerSelections[column] && slicerSelections[column].length > 0;
+        const headerBgColor = hasFilter ? '#ffc107' : 'transparent';
+        const slicerCard = document.querySelector(`#slicer-${column}`)?.closest('.slicer-card');
+        if (slicerCard) {
+            const header = slicerCard.querySelector('h6');
+            if (header) {
+                header.style.background = headerBgColor;
+                header.style.color = '#667eea';
+            }
+        }
+    });
+}
+
+function applySlicerFilters() {
+    applyAllFilters();
+}
+
+function applySlicerFilters_OLD() {
+    filteredData = data.filter(item => {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        if (searchTerm) {
+            const matchSearch = Object.values(item).some(val =>
+                String(val).toLowerCase().includes(searchTerm)
+            );
+            if (!matchSearch) return false;
+        }
+
+        for (let column in columnFilters) {
+            const itemValue = String(item[column]);
+            const filterValues = columnFilters[column].map(v => String(v));
+            if (!filterValues.includes(itemValue)) {
+                return false;
+            }
+        }
+
+        for (let column in textFilters) {
+            const filter = textFilters[column];
+            const itemValue = String(item[column]).toLowerCase();
+            const filterValue = filter.value.toLowerCase();
+
+            let match = false;
+            switch(filter.operator) {
+                case 'contains':
+                    match = itemValue.includes(filterValue);
+                    break;
+                case 'notContains':
+                    match = !itemValue.includes(filterValue);
+                    break;
+                case 'equals':
+                    match = itemValue === filterValue;
+                    break;
+                case 'notEquals':
+                    match = itemValue !== filterValue;
+                    break;
+                case 'startsWith':
+                    match = itemValue.startsWith(filterValue);
+                    break;
+                case 'endsWith':
+                    match = itemValue.endsWith(filterValue);
+                    break;
+                case 'greaterThan':
+                    match = parseFloat(item[column]) > parseFloat(filter.value);
+                    break;
+                case 'greaterOrEqual':
+                    match = parseFloat(item[column]) >= parseFloat(filter.value);
+                    break;
+                case 'lessThan':
+                    match = parseFloat(item[column]) < parseFloat(filter.value);
+                    break;
+                case 'lessOrEqual':
+                    match = parseFloat(item[column]) <= parseFloat(filter.value);
+                    break;
+                case 'between':
+                    const numValue = parseFloat(item[column]);
+                    const min = parseFloat(filter.value);
+                    const max = parseFloat(filter.value2);
+                    match = numValue >= min && numValue <= max;
+                    break;
+            }
+
+            if (!match) return false;
+        }
+
+        for (let column in slicerSelections) {
+            const itemValue = String(item[column]);
+            const filterValues = slicerSelections[column].map(v => String(v));
+            if (!filterValues.includes(itemValue)) {
+                return false;
+            }
+        }
+
+        return true;
+    });
+
+    currentPage = 1;
+    renderTable();
+}
+
+initSlicers();
+renderTable();
