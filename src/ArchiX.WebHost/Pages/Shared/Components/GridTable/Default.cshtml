@@ -9,6 +9,7 @@
     var jsonData = JsonSerializer.Serialize(Model.Rows ?? Enumerable.Empty<IDictionary<string, object?>>(), options);
     var jsonColumns = JsonSerializer.Serialize(Model.Columns ?? Array.Empty<GridColumnDefinition>(), options);
     var tableId = Model.Id ?? "gridTable";
+    var columns = Model.Columns ?? Array.Empty<GridColumnDefinition>();
 }
 
 <link rel="stylesheet" href="~/_content/ArchiX.Library.Web/lib/bootstrap-icons/font/bootstrap-icons.css" />
@@ -91,7 +92,7 @@
                 <table class="table table-hover custom-table" id="@tableId-dataTable">
                     <thead>
                         <tr>
-                            @foreach (var col in Model.Columns)
+                            @foreach (var col in columns)
                             {
                                 var field = col.Field;
                                 var title = col.Title;
