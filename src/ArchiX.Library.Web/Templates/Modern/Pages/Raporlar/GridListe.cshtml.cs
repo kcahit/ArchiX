@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
 using ArchiX.Library.Web.ViewModels.Grid;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -23,32 +21,96 @@ public class GridListeModel : PageModel
             new("experience", "Tecrübe", DataType: "number"),
             new("city", "Þehir"),
             new("position", "Pozisyon"),
+            new("country", "Ülke"),
+            new("team", "Takým"),
+            new("level", "Seviye"),
+            new("manager", "Yönetici"),
+            new("office", "Ofis"),
             new("startDate", "Baþlangýç"),
             new("status", "Durum")
         };
 
-        var data = new[]
+        var baseData = new[]
         {
             new { id = 1, name = "Ahmet Yýlmaz", email = "ahmet@example.com", phone = "0532 123 4567", department = "IT", salary = 15000, experience = 5, city = "Istanbul", position = "Yazýlým Geliþtirici", startDate = "2019-03-15", status = "Aktif" },
             new { id = 2, name = "Ayþe Demir", email = "ayse@example.com", phone = "0533 234 5678", department = "Satýþ", salary = 12000, experience = 3, city = "Ankara", position = "Satýþ Temsilcisi", startDate = "2021-06-20", status = "Aktif" },
             new { id = 3, name = "Mehmet Kaya", email = "mehmet@example.com", phone = "0534 345 6789", department = "Ýnsan Kaynaklarý", salary = 18000, experience = 8, city = "Izmir", position = "ÝK Müdürü", startDate = "2016-01-10", status = "Pasif" },
             new { id = 4, name = "Fatma Çelik", email = "fatma@example.com", phone = "0535 456 7890", department = "Pazarlama", salary = 14000, experience = 4, city = "Bursa", position = "Pazarlama Uzmaný", startDate = "2020-09-05", status = "Beklemede" },
-            new { id = 5, name = "Ali Öz", email = "ali@example.com", phone = "0536 567 8901", department = "IT", salary = 16500, experience = 6, city = "Istanbul", position = "Sistem Yöneticisi", startDate = "2018-11-12", status = "Aktif" }
+            new { id = 5, name = "Ali Öz", email = "ali@example.com", phone = "0536 567 8901", department = "IT", salary = 16500, experience = 6, city = "Istanbul", position = "Sistem Yöneticisi", startDate = "2018-11-12", status = "Aktif" },
+            new { id = 6, name = "Zeynep Þahin", email = "zeynep@example.com", phone = "0537 678 9012", department = "Satýþ", salary = 11000, experience = 2, city = "Antalya", position = "Satýþ Danýþmaný", startDate = "2022-02-28", status = "Aktif" },
+            new { id = 7, name = "Can Arslan", email = "can@example.com", phone = "0538 789 0123", department = "IT", salary = 17000, experience = 7, city = "Ankara", position = "Kýdemli Geliþtirici", startDate = "2017-05-18", status = "Pasif" },
+            new { id = 8, name = "Elif Kurt", email = "elif@example.com", phone = "0539 890 1234", department = "Pazarlama", salary = 13500, experience = 4, city = "Istanbul", position = "Dijital Pazarlama", startDate = "2020-07-22", status = "Aktif" },
+            new { id = 9, name = "Burak Aydýn", email = "burak@example.com", phone = "0540 901 2345", department = "Ýnsan Kaynaklarý", salary = 12500, experience = 3, city = "Izmir", position = "ÝK Uzmaný", startDate = "2021-04-14", status = "Beklemede" },
+            new { id = 10, name = "Selin Türk", email = "selin@example.com", phone = "0541 012 3456", department = "Satýþ", salary = 13000, experience = 5, city = "Bursa", position = "Bölge Müdürü", startDate = "2019-08-30", status = "Aktif" },
+            new { id = 11, name = "Deniz Yýldýz", email = "deniz@example.com", phone = "0542 111 2222", department = "IT", salary = 19000, experience = 10, city = "Istanbul", position = "IT Müdürü", startDate = "2014-12-01", status = "Aktif" },
+            new { id = 12, name = "Ece Kartal", email = "ece@example.com", phone = "0543 222 3333", department = "Pazarlama", salary = 12000, experience = 2, city = "Ankara", position = "Sosyal Medya Uzmaný", startDate = "2022-05-17", status = "Pasif" },
+            new { id = 13, name = "Emre Koç", email = "emre@example.com", phone = "0544 333 4444", department = "IT", salary = 15500, experience = 5, city = "Izmir", position = "Veri Analisti", startDate = "2019-10-08", status = "Aktif" },
+            new { id = 14, name = "Gizem Acar", email = "gizem@example.com", phone = "0545 444 5555", department = "Satýþ", salary = 11500, experience = 3, city = "Antalya", position = "Satýþ Uzmaný", startDate = "2021-03-25", status = "Aktif" },
+            new { id = 15, name = "Hakan Demir", email = "hakan@example.com", phone = "0546 555 6666", department = "Pazarlama", salary = 16000, experience = 7, city = "Istanbul", position = "Marka Müdürü", startDate = "2017-07-19", status = "Aktif" },
+            new { id = 16, name = "Ýrem Yalçýn", email = "irem@example.com", phone = "0547 666 7777", department = "Ýnsan Kaynaklarý", salary = 14500, experience = 6, city = "Bursa", position = "ÝK Koordinatörü", startDate = "2018-09-11", status = "Aktif" },
+            new { id = 17, name = "Kerem Özkan", email = "kerem@example.com", phone = "0548 777 8888", department = "IT", salary = 18500, experience = 9, city = "Ankara", position = "Yazýlým Mimarý", startDate = "2015-02-03", status = "Pasif" },
+            new { id = 18, name = "Lale Kara", email = "lale@example.com", phone = "0549 888 9999", department = "Satýþ", salary = 13500, experience = 4, city = "Istanbul", position = "Kurumsal Satýþ", startDate = "2020-11-27", status = "Aktif" },
+            new { id = 19, name = "Mert Çetin", email = "mert@example.com", phone = "0530 999 0000", department = "Pazarlama", salary = 12500, experience = 3, city = "Izmir", position = "Ýçerik Üreticisi", startDate = "2021-08-16", status = "Beklemede" },
+            new { id = 20, name = "Nil Þen", email = "nil@example.com", phone = "0531 000 1111", department = "IT", salary = 17500, experience = 8, city = "Ankara", position = "DevOps Mühendisi", startDate = "2016-06-22", status = "Aktif" },
+            new { id = 21, name = "Oðuz Taþ", email = "oguz@example.com", phone = "0532 111 2222", department = "Satýþ", salary = 14000, experience = 5, city = "Bursa", position = "Satýþ Müdürü", startDate = "2019-04-09", status = "Aktif" },
+            new { id = 22, name = "Pelin Ay", email = "pelin@example.com", phone = "0533 222 3333", department = "Ýnsan Kaynaklarý", salary = 13000, experience = 4, city = "Istanbul", position = "Ýþe Alým Uzmaný", startDate = "2020-12-14", status = "Aktif" },
+            new { id = 23, name = "Rýza Ulu", email = "riza@example.com", phone = "0534 333 4444", department = "Pazarlama", salary = 15500, experience = 6, city = "Antalya", position = "Pazarlama Müdürü", startDate = "2018-03-07", status = "Pasif" },
+            new { id = 24, name = "Seda Akýn", email = "seda@example.com", phone = "0535 444 5555", department = "IT", salary = 16000, experience = 6, city = "Izmir", position = "Test Uzmaný", startDate = "2018-08-21", status = "Aktif" },
+            new { id = 25, name = "Tolga Yurt", email = "tolga@example.com", phone = "0536 555 6666", department = "Satýþ", salary = 12000, experience = 2, city = "Ankara", position = "Satýþ Elemaný", startDate = "2022-01-11", status = "Aktif" },
+            new { id = 26, name = "Ufuk Aydýn", email = "ufuk@example.com", phone = "0537 666 7777", department = "Pazarlama", salary = 14500, experience = 5, city = "Istanbul", position = "SEO Uzmaný", startDate = "2019-09-26", status = "Aktif" },
+            new { id = 27, name = "Vildan Er", email = "vildan@example.com", phone = "0538 777 8888", department = "Ýnsan Kaynaklarý", salary = 11500, experience = 2, city = "Bursa", position = "ÝK Asistaný", startDate = "2022-07-04", status = "Beklemede" },
+            new { id = 28, name = "Yaðmur Kýlýç", email = "yagmur@example.com", phone = "0539 888 9999", department = "IT", salary = 20000, experience = 12, city = "Istanbul", position = "CTO", startDate = "2012-10-15", status = "Aktif" },
+            new { id = 29, name = "Zafer Güneþ", email = "zafer@example.com", phone = "0540 999 0000", department = "Satýþ", salary = 15000, experience = 7, city = "Ankara", position = "Satýþ Direktörü", startDate = "2017-11-30", status = "Aktif" },
+            new { id = 30, name = "Aslý Öztürk", email = "asli@example.com", phone = "0541 000 1111", department = "Pazarlama", salary = 13000, experience = 4, city = "Izmir", position = "Reklam Uzmaný", startDate = "2020-05-13", status = "Pasif" },
+            new { id = 31, name = "Baran Çakýr", email = "baran@example.com", phone = "0542 111 2222", department = "IT", salary = 17000, experience = 7, city = "Bursa", position = "Güvenlik Uzmaný", startDate = "2017-02-28", status = "Aktif" },
+            new { id = 32, name = "Canan Tekin", email = "canan@example.com", phone = "0543 222 3333", department = "Ýnsan Kaynaklarý", salary = 16500, experience = 8, city = "Istanbul", position = "ÝK Direktörü", startDate = "2016-08-08", status = "Aktif" },
+            new { id = 33, name = "Deniz Arslan", email = "deniz2@example.com", phone = "0544 333 4444", department = "Satýþ", salary = 11000, experience = 1, city = "Antalya", position = "Stajyer", startDate = "2023-03-01", status = "Aktif" },
+            new { id = 34, name = "Eda Polat", email = "eda@example.com", phone = "0545 444 5555", department = "Pazarlama", salary = 12500, experience = 3, city = "Ankara", position = "Grafik Tasarýmcý", startDate = "2021-09-20", status = "Beklemede" },
+            new { id = 35, name = "Fikret Yýldýrým", email = "fikret@example.com", phone = "0546 555 6666", department = "IT", salary = 16500, experience = 6, city = "Izmir", position = "Network Uzmaný", startDate = "2018-04-17", status = "Aktif" },
+            new { id = 36, name = "Gül Taþkýn", email = "gul@example.com", phone = "0547 666 7777", department = "Satýþ", salary = 14500, experience = 6, city = "Istanbul", position = "Ýhracat Müdürü", startDate = "2018-10-23", status = "Aktif" },
+            new { id = 37, name = "Halil Kurt", email = "halil@example.com", phone = "0548 777 8888", department = "Pazarlama", salary = 18000, experience = 9, city = "Bursa", position = "CMO", startDate = "2015-12-05", status = "Aktif" },
+            new { id = 38, name = "Ýpek Çalýþkan", email = "ipek@example.com", phone = "0549 888 9999", department = "Ýnsan Kaynaklarý", salary = 12000, experience = 3, city = "Ankara", position = "Eðitim Uzmaný", startDate = "2021-07-14", status = "Pasif" },
+            new { id = 39, name = "Kaan Durmuþ", email = "kaan@example.com", phone = "0530 999 0000", department = "IT", salary = 15000, experience = 5, city = "Izmir", position = "Mobil Geliþtirici", startDate = "2019-05-29", status = "Aktif" },
+            new { id = 40, name = "Leyla Berk", email = "leyla@example.com", phone = "0531 000 1111", department = "Satýþ", salary = 13500, experience = 4, city = "Istanbul", position = "E-ticaret Uzmaný", startDate = "2020-08-11", status = "Aktif" },
+            new { id = 41, name = "Mustafa Eren", email = "mustafa@example.com", phone = "0532 111 2222", department = "Pazarlama", salary = 14000, experience = 5, city = "Antalya", position = "Etkinlik Yöneticisi", startDate = "2019-06-18", status = "Beklemede" },
+            new { id = 42, name = "Nalan Kaya", email = "nalan@example.com", phone = "0533 222 3333", department = "IT", salary = 19500, experience = 11, city = "Ankara", position = "Proje Müdürü", startDate = "2013-09-10", status = "Aktif" },
+            new { id = 43, name = "Onur Aydýn", email = "onur@example.com", phone = "0534 333 4444", department = "Satýþ", salary = 12500, experience = 3, city = "Bursa", position = "Müþteri Ýliþkileri", startDate = "2021-11-22", status = "Aktif" },
+            new { id = 44, name = "Pýnar Yüksel", email = "pinar@example.com", phone = "0535 444 5555", department = "Ýnsan Kaynaklarý", salary = 13500, experience = 4, city = "Istanbul", position = "Performans Uzmaný", startDate = "2020-10-06", status = "Aktif" },
+            new { id = 45, name = "Recep Þimþek", email = "recep@example.com", phone = "0536 555 6666", department = "Pazarlama", salary = 11500, experience = 2, city = "Izmir", position = "Video Editörü", startDate = "2022-04-19", status = "Pasif" },
+            new { id = 46, name = "Selin Özer", email = "selin2@example.com", phone = "0537 666 7777", department = "IT", salary = 16000, experience = 6, city = "Ankara", position = "Veri Bilimci", startDate = "2018-07-12", status = "Aktif" },
+            new { id = 47, name = "Taner Aslan", email = "taner@example.com", phone = "0538 777 8888", department = "Satýþ", salary = 17000, experience = 9, city = "Istanbul", position = "Anahtar Müþteri", startDate = "2015-05-25", status = "Aktif" },
+            new { id = 48, name = "Ümit Karaca", email = "umit@example.com", phone = "0539 888 9999", department = "Pazarlama", salary = 13000, experience = 3, city = "Bursa", position = "PR Uzmaný", startDate = "2021-12-08", status = "Aktif" },
+            new { id = 49, name = "Volkan Özdemir", email = "volkan@example.com", phone = "0540 999 0000", department = "Ýnsan Kaynaklarý", salary = 19000, experience = 10, city = "Antalya", position = "ÝK Genel Müdürü", startDate = "2014-03-20", status = "Aktif" },
+            new { id = 50, name = "Yasemin Tan", email = "yasemin@example.com", phone = "0541 000 1111", department = "IT", salary = 18000, experience = 8, city = "Izmir", position = "UX/UI Tasarýmcý", startDate = "2016-11-14", status = "Beklemede" },
+            new { id = 51, name = "Zeki Bulut", email = "zeki@example.com", phone = "0542 111 2222", department = "Satýþ", salary = 14500, experience = 5, city = "Ankara", position = "Teknik Satýþ", startDate = "2019-02-07", status = "Aktif" },
+            new { id = 52, name = "Aylin Erdoðan", email = "aylin@example.com", phone = "0543 222 3333", department = "Pazarlama", salary = 15000, experience = 6, city = "Istanbul", position = "Marka Stratejisti", startDate = "2018-06-30", status = "Aktif" },
+            new { id = 53, name = "Barýþ Yaman", email = "baris@example.com", phone = "0544 333 4444", department = "IT", salary = 21000, experience = 13, city = "Bursa", position = "Baþkan Yardýmcýsý", startDate = "2011-08-16", status = "Aktif" },
+            new { id = 54, name = "Ceyda Koçak", email = "ceyda@example.com", phone = "0545 444 5555", department = "Satýþ", salary = 13000, experience = 4, city = "Antalya", position = "Bayi Yöneticisi", startDate = "2020-03-24", status = "Pasif" },
+            new { id = 55, name = "Doðan Þener", email = "dogan@example.com", phone = "0546 555 6666", department = "Ýnsan Kaynaklarý", salary = 15500, experience = 7, city = "Izmir", position = "Bordro Uzmaný", startDate = "2017-09-02", status = "Aktif" }
         };
 
-        Rows = data.Select(d => new Dictionary<string, object?>
-        {
-            ["id"] = d.id,
-            ["name"] = d.name,
-            ["email"] = d.email,
-            ["phone"] = d.phone,
-            ["department"] = d.department,
-            ["salary"] = d.salary,
-            ["experience"] = d.experience,
-            ["city"] = d.city,
-            ["position"] = d.position,
-            ["startDate"] = d.startDate,
-            ["status"] = d.status
-        }).ToList();
+        var levels = new[] { "Junior", "Mid", "Senior" };
+
+        Rows = baseData
+            .Select((d, i) => new Dictionary<string, object?>
+            {
+                ["id"] = d.id,
+                ["name"] = d.name,
+                ["email"] = d.email,
+                ["phone"] = d.phone,
+                ["department"] = d.department,
+                ["salary"] = d.salary,
+                ["experience"] = d.experience,
+                ["city"] = d.city,
+                ["position"] = d.position,
+                ["country"] = "Türkiye",
+                ["team"] = $"Takým {(i % 5) + 1}",
+                ["level"] = levels[i % levels.Length],
+                ["manager"] = $"Yönetici {(i % 8) + 1}",
+                ["office"] = $"Ofis {(i % 4) + 1}",
+                ["startDate"] = d.startDate,
+                ["status"] = d.status
+            })
+            .ToList();
     }
 }

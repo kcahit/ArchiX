@@ -1,68 +1,79 @@
-ï»¿// ArchiX Tables Core
+// ArchiX Tables Core
 // Grid filtering, sorting, slicer, pagination, export stubs
 
-// Ã–rnek veri
-const data = [
-    { id: 1, name: "Ahmet YÄ±lmaz", email: "ahmet@example.com", phone: "0532 123 4567", department: "IT", salary: 15000, experience: 5, city: "Istanbul", position: "YazÄ±lÄ±m GeliÅŸtirici", startDate: "2019-03-15", status: "Aktif" },
-    { id: 2, name: "AyÅŸe Demir", email: "ayse@example.com", phone: "0533 234 5678", department: "SatÄ±ÅŸ", salary: 12000, experience: 3, city: "Ankara", position: "SatÄ±ÅŸ Temsilcisi", startDate: "2021-06-20", status: "Aktif" },
-    { id: 3, name: "Mehmet Kaya", email: "mehmet@example.com", phone: "0534 345 6789", department: "Ä°nsan KaynaklarÄ±", salary: 18000, experience: 8, city: "Izmir", position: "Ä°K MÃ¼dÃ¼rÃ¼", startDate: "2016-01-10", status: "Pasif" },
-    { id: 4, name: "Fatma Ã‡elik", email: "fatma@example.com", phone: "0535 456 7890", department: "Pazarlama", salary: 14000, experience: 4, city: "Bursa", position: "Pazarlama UzmanÄ±", startDate: "2020-09-05", status: "Beklemede" },
-    { id: 5, name: "Ali Ã–z", email: "ali@example.com", phone: "0536 567 8901", department: "IT", salary: 16500, experience: 6, city: "Istanbul", position: "Sistem YÃ¶neticisi", startDate: "2018-11-12", status: "Aktif" },
-    { id: 6, name: "Zeynep Åžahin", email: "zeynep@example.com", phone: "0537 678 9012", department: "SatÄ±ÅŸ", salary: 11000, experience: 2, city: "Antalya", position: "SatÄ±ÅŸ DanÄ±ÅŸmanÄ±", startDate: "2022-02-28", status: "Aktif" },
-    { id: 7, name: "Can Arslan", email: "can@example.com", phone: "0538 789 0123", department: "IT", salary: 17000, experience: 7, city: "Ankara", position: "KÄ±demli GeliÅŸtirici", startDate: "2017-05-18", status: "Pasif" },
+// Örnek veri
+// Örnek veri (55 kayýt, yeni 5 kolon eklenecek)
+const baseData = [
+    { id: 1, name: "Ahmet Yýlmaz", email: "ahmet@example.com", phone: "0532 123 4567", department: "IT", salary: 15000, experience: 5, city: "Istanbul", position: "Yazýlým Geliþtirici", startDate: "2019-03-15", status: "Aktif" },
+    { id: 2, name: "Ayþe Demir", email: "ayse@example.com", phone: "0533 234 5678", department: "Satýþ", salary: 12000, experience: 3, city: "Ankara", position: "Satýþ Temsilcisi", startDate: "2021-06-20", status: "Aktif" },
+    { id: 3, name: "Mehmet Kaya", email: "mehmet@example.com", phone: "0534 345 6789", department: "Ýnsan Kaynaklarý", salary: 18000, experience: 8, city: "Izmir", position: "ÝK Müdürü", startDate: "2016-01-10", status: "Pasif" },
+    { id: 4, name: "Fatma Çelik", email: "fatma@example.com", phone: "0535 456 7890", department: "Pazarlama", salary: 14000, experience: 4, city: "Bursa", position: "Pazarlama Uzmaný", startDate: "2020-09-05", status: "Beklemede" },
+    { id: 5, name: "Ali Öz", email: "ali@example.com", phone: "0536 567 8901", department: "IT", salary: 16500, experience: 6, city: "Istanbul", position: "Sistem Yöneticisi", startDate: "2018-11-12", status: "Aktif" },
+    { id: 6, name: "Zeynep Þahin", email: "zeynep@example.com", phone: "0537 678 9012", department: "Satýþ", salary: 11000, experience: 2, city: "Antalya", position: "Satýþ Danýþmaný", startDate: "2022-02-28", status: "Aktif" },
+    { id: 7, name: "Can Arslan", email: "can@example.com", phone: "0538 789 0123", department: "IT", salary: 17000, experience: 7, city: "Ankara", position: "Kýdemli Geliþtirici", startDate: "2017-05-18", status: "Pasif" },
     { id: 8, name: "Elif Kurt", email: "elif@example.com", phone: "0539 890 1234", department: "Pazarlama", salary: 13500, experience: 4, city: "Istanbul", position: "Dijital Pazarlama", startDate: "2020-07-22", status: "Aktif" },
-    { id: 9, name: "Burak AydÄ±n", email: "burak@example.com", phone: "0540 901 2345", department: "Ä°nsan KaynaklarÄ±", salary: 12500, experience: 3, city: "Izmir", position: "Ä°K UzmanÄ±", startDate: "2021-04-14", status: "Beklemede" },
-    { id: 10, name: "Selin TÃ¼rk", email: "selin@example.com", phone: "0541 012 3456", department: "SatÄ±ÅŸ", salary: 13000, experience: 5, city: "Bursa", position: "BÃ¶lge MÃ¼dÃ¼rÃ¼", startDate: "2019-08-30", status: "Aktif" },
-    { id: 11, name: "Deniz YÄ±ldÄ±z", email: "deniz@example.com", phone: "0542 111 2222", department: "IT", salary: 19000, experience: 10, city: "Istanbul", position: "IT MÃ¼dÃ¼rÃ¼", startDate: "2014-12-01", status: "Aktif" },
-    { id: 12, name: "Ece Kartal", email: "ece@example.com", phone: "0543 222 3333", department: "Pazarlama", salary: 12000, experience: 2, city: "Ankara", position: "Sosyal Medya UzmanÄ±", startDate: "2022-05-17", status: "Pasif" },
-    { id: 13, name: "Emre KoÃ§", email: "emre@example.com", phone: "0544 333 4444", department: "IT", salary: 15500, experience: 5, city: "Izmir", position: "Veri Analisti", startDate: "2019-10-08", status: "Aktif" },
-    { id: 14, name: "Gizem Acar", email: "gizem@example.com", phone: "0545 444 5555", department: "SatÄ±ÅŸ", salary: 11500, experience: 3, city: "Antalya", position: "SatÄ±ÅŸ UzmanÄ±", startDate: "2021-03-25", status: "Aktif" },
-    { id: 15, name: "Hakan Demir", email: "hakan@example.com", phone: "0546 555 6666", department: "Pazarlama", salary: 16000, experience: 7, city: "Istanbul", position: "Marka MÃ¼dÃ¼rÃ¼", startDate: "2017-07-19", status: "Aktif" },
-    { id: 16, name: "Ä°rem YalÃ§Ä±n", email: "irem@example.com", phone: "0547 666 7777", department: "Ä°nsan KaynaklarÄ±", salary: 14500, experience: 6, city: "Bursa", position: "Ä°K KoordinatÃ¶rÃ¼", startDate: "2018-09-11", status: "Aktif" },
-    { id: 17, name: "Kerem Ã–zkan", email: "kerem@example.com", phone: "0548 777 8888", department: "IT", salary: 18500, experience: 9, city: "Ankara", position: "YazÄ±lÄ±m MimarÄ±", startDate: "2015-02-03", status: "Pasif" },
-    { id: 18, name: "Lale Kara", email: "lale@example.com", phone: "0549 888 9999", department: "SatÄ±ÅŸ", salary: 13500, experience: 4, city: "Istanbul", position: "Kurumsal SatÄ±ÅŸ", startDate: "2020-11-27", status: "Aktif" },
-    { id: 19, name: "Mert Ã‡etin", email: "mert@example.com", phone: "0530 999 0000", department: "Pazarlama", salary: 12500, experience: 3, city: "Izmir", position: "Ä°Ã§erik Ãœreticisi", startDate: "2021-08-16", status: "Beklemede" },
-    { id: 20, name: "Nil Åžen", email: "nil@example.com", phone: "0531 000 1111", department: "IT", salary: 17500, experience: 8, city: "Ankara", position: "DevOps MÃ¼hendisi", startDate: "2016-06-22", status: "Aktif" },
-    { id: 21, name: "OÄŸuz TaÅŸ", email: "oguz@example.com", phone: "0532 111 2222", department: "SatÄ±ÅŸ", salary: 14000, experience: 5, city: "Bursa", position: "SatÄ±ÅŸ MÃ¼dÃ¼rÃ¼", startDate: "2019-04-09", status: "Aktif" },
-    { id: 22, name: "Pelin Ay", email: "pelin@example.com", phone: "0533 222 3333", department: "Ä°nsan KaynaklarÄ±", salary: 13000, experience: 4, city: "Istanbul", position: "Ä°ÅŸe AlÄ±m UzmanÄ±", startDate: "2020-12-14", status: "Aktif" },
-    { id: 23, name: "RÄ±za Ulu", email: "riza@example.com", phone: "0534 333 4444", department: "Pazarlama", salary: 15500, experience: 6, city: "Antalya", position: "Pazarlama MÃ¼dÃ¼rÃ¼", startDate: "2018-03-07", status: "Pasif" },
-    { id: 24, name: "Seda AkÄ±n", email: "seda@example.com", phone: "0535 444 5555", department: "IT", salary: 16000, experience: 6, city: "Izmir", position: "Test UzmanÄ±", startDate: "2018-08-21", status: "Aktif" },
-    { id: 25, name: "Tolga Yurt", email: "tolga@example.com", phone: "0536 555 6666", department: "SatÄ±ÅŸ", salary: 12000, experience: 2, city: "Ankara", position: "SatÄ±ÅŸ ElemanÄ±", startDate: "2022-01-11", status: "Aktif" },
-    { id: 26, name: "Ufuk AydÄ±n", email: "ufuk@example.com", phone: "0537 666 7777", department: "Pazarlama", salary: 14500, experience: 5, city: "Istanbul", position: "SEO UzmanÄ±", startDate: "2019-09-26", status: "Aktif" },
-    { id: 27, name: "Vildan Er", email: "vildan@example.com", phone: "0538 777 8888", department: "Ä°nsan KaynaklarÄ±", salary: 11500, experience: 2, city: "Bursa", position: "Ä°K AsistanÄ±", startDate: "2022-07-04", status: "Beklemede" },
-    { id: 28, name: "YaÄŸmur KÄ±lÄ±Ã§", email: "yagmur@example.com", phone: "0539 888 9999", department: "IT", salary: 20000, experience: 12, city: "Istanbul", position: "CTO", startDate: "2012-10-15", status: "Aktif" },
-    { id: 29, name: "Zafer GÃ¼neÅŸ", email: "zafer@example.com", phone: "0540 999 0000", department: "SatÄ±ÅŸ", salary: 15000, experience: 7, city: "Ankara", position: "SatÄ±ÅŸ DirektÃ¶rÃ¼", startDate: "2017-11-30", status: "Aktif" },
-    { id: 30, name: "AslÄ± Ã–ztÃ¼rk", email: "asli@example.com", phone: "0541 000 1111", department: "Pazarlama", salary: 13000, experience: 4, city: "Izmir", position: "Reklam UzmanÄ±", startDate: "2020-05-13", status: "Pasif" },
-    { id: 31, name: "Baran Ã‡akÄ±r", email: "baran@example.com", phone: "0542 111 2222", department: "IT", salary: 17000, experience: 7, city: "Bursa", position: "GÃ¼venlik UzmanÄ±", startDate: "2017-02-28", status: "Aktif" },
-    { id: 32, name: "Canan Tekin", email: "canan@example.com", phone: "0543 222 3333", department: "Ä°nsan KaynaklarÄ±", salary: 16500, experience: 8, city: "Istanbul", position: "Ä°K DirektÃ¶rÃ¼", startDate: "2016-08-08", status: "Aktif" },
-    { id: 33, name: "Deniz Arslan", email: "deniz2@example.com", phone: "0544 333 4444", department: "SatÄ±ÅŸ", salary: 11000, experience: 1, city: "Antalya", position: "Stajyer", startDate: "2023-03-01", status: "Aktif" },
-    { id: 34, name: "Eda Polat", email: "eda@example.com", phone: "0545 444 5555", department: "Pazarlama", salary: 12500, experience: 3, city: "Ankara", position: "Grafik TasarÄ±mcÄ±", startDate: "2021-09-20", status: "Beklemede" },
-    { id: 35, name: "Fikret YÄ±ldÄ±rÄ±m", email: "fikret@example.com", phone: "0546 555 6666", department: "IT", salary: 16500, experience: 6, city: "Izmir", position: "Network UzmanÄ±", startDate: "2018-04-17", status: "Aktif" },
-    { id: 36, name: "GÃ¼l TaÅŸkÄ±n", email: "gul@example.com", phone: "0547 666 7777", department: "SatÄ±ÅŸ", salary: 14500, experience: 6, city: "Istanbul", position: "Ä°hracat MÃ¼dÃ¼rÃ¼", startDate: "2018-10-23", status: "Aktif" },
+    { id: 9, name: "Burak Aydýn", email: "burak@example.com", phone: "0540 901 2345", department: "Ýnsan Kaynaklarý", salary: 12500, experience: 3, city: "Izmir", position: "ÝK Uzmaný", startDate: "2021-04-14", status: "Beklemede" },
+    { id: 10, name: "Selin Türk", email: "selin@example.com", phone: "0541 012 3456", department: "Satýþ", salary: 13000, experience: 5, city: "Bursa", position: "Bölge Müdürü", startDate: "2019-08-30", status: "Aktif" },
+    { id: 11, name: "Deniz Yýldýz", email: "deniz@example.com", phone: "0542 111 2222", department: "IT", salary: 19000, experience: 10, city: "Istanbul", position: "IT Müdürü", startDate: "2014-12-01", status: "Aktif" },
+    { id: 12, name: "Ece Kartal", email: "ece@example.com", phone: "0543 222 3333", department: "Pazarlama", salary: 12000, experience: 2, city: "Ankara", position: "Sosyal Medya Uzmaný", startDate: "2022-05-17", status: "Pasif" },
+    { id: 13, name: "Emre Koç", email: "emre@example.com", phone: "0544 333 4444", department: "IT", salary: 15500, experience: 5, city: "Izmir", position: "Veri Analisti", startDate: "2019-10-08", status: "Aktif" },
+    { id: 14, name: "Gizem Acar", email: "gizem@example.com", phone: "0545 444 5555", department: "Satýþ", salary: 11500, experience: 3, city: "Antalya", position: "Satýþ Uzmaný", startDate: "2021-03-25", status: "Aktif" },
+    { id: 15, name: "Hakan Demir", email: "hakan@example.com", phone: "0546 555 6666", department: "Pazarlama", salary: 16000, experience: 7, city: "Istanbul", position: "Marka Müdürü", startDate: "2017-07-19", status: "Aktif" },
+    { id: 16, name: "Ýrem Yalçýn", email: "irem@example.com", phone: "0547 666 7777", department: "Ýnsan Kaynaklarý", salary: 14500, experience: 6, city: "Bursa", position: "ÝK Koordinatörü", startDate: "2018-09-11", status: "Aktif" },
+    { id: 17, name: "Kerem Özkan", email: "kerem@example.com", phone: "0548 777 8888", department: "IT", salary: 18500, experience: 9, city: "Ankara", position: "Yazýlým Mimarý", startDate: "2015-02-03", status: "Pasif" },
+    { id: 18, name: "Lale Kara", email: "lale@example.com", phone: "0549 888 9999", department: "Satýþ", salary: 13500, experience: 4, city: "Istanbul", position: "Kurumsal Satýþ", startDate: "2020-11-27", status: "Aktif" },
+    { id: 19, name: "Mert Çetin", email: "mert@example.com", phone: "0530 999 0000", department: "Pazarlama", salary: 12500, experience: 3, city: "Izmir", position: "Ýçerik Üreticisi", startDate: "2021-08-16", status: "Beklemede" },
+    { id: 20, name: "Nil Þen", email: "nil@example.com", phone: "0531 000 1111", department: "IT", salary: 17500, experience: 8, city: "Ankara", position: "DevOps Mühendisi", startDate: "2016-06-22", status: "Aktif" },
+    { id: 21, name: "Oðuz Taþ", email: "oguz@example.com", phone: "0532 111 2222", department: "Satýþ", salary: 14000, experience: 5, city: "Bursa", position: "Satýþ Müdürü", startDate: "2019-04-09", status: "Aktif" },
+    { id: 22, name: "Pelin Ay", email: "pelin@example.com", phone: "0533 222 3333", department: "Ýnsan Kaynaklarý", salary: 13000, experience: 4, city: "Istanbul", position: "Ýþe Alým Uzmaný", startDate: "2020-12-14", status: "Aktif" },
+    { id: 23, name: "Rýza Ulu", email: "riza@example.com", phone: "0534 333 4444", department: "Pazarlama", salary: 15500, experience: 6, city: "Antalya", position: "Pazarlama Müdürü", startDate: "2018-03-07", status: "Pasif" },
+    { id: 24, name: "Seda Akýn", email: "seda@example.com", phone: "0535 444 5555", department: "IT", salary: 16000, experience: 6, city: "Izmir", position: "Test Uzmaný", startDate: "2018-08-21", status: "Aktif" },
+    { id: 25, name: "Tolga Yurt", email: "tolga@example.com", phone: "0536 555 6666", department: "Satýþ", salary: 12000, experience: 2, city: "Ankara", position: "Satýþ Elemaný", startDate: "2022-01-11", status: "Aktif" },
+    { id: 26, name: "Ufuk Aydýn", email: "ufuk@example.com", phone: "0537 666 7777", department: "Pazarlama", salary: 14500, experience: 5, city: "Istanbul", position: "SEO Uzmaný", startDate: "2019-09-26", status: "Aktif" },
+    { id: 27, name: "Vildan Er", email: "vildan@example.com", phone: "0538 777 8888", department: "Ýnsan Kaynaklarý", salary: 11500, experience: 2, city: "Bursa", position: "ÝK Asistaný", startDate: "2022-07-04", status: "Beklemede" },
+    { id: 28, name: "Yaðmur Kýlýç", email: "yagmur@example.com", phone: "0539 888 9999", department: "IT", salary: 20000, experience: 12, city: "Istanbul", position: "CTO", startDate: "2012-10-15", status: "Aktif" },
+    { id: 29, name: "Zafer Güneþ", email: "zafer@example.com", phone: "0540 999 0000", department: "Satýþ", salary: 15000, experience: 7, city: "Ankara", position: "Satýþ Direktörü", startDate: "2017-11-30", status: "Aktif" },
+    { id: 30, name: "Aslý Öztürk", email: "asli@example.com", phone: "0541 000 1111", department: "Pazarlama", salary: 13000, experience: 4, city: "Izmir", position: "Reklam Uzmaný", startDate: "2020-05-13", status: "Pasif" },
+    { id: 31, name: "Baran Çakýr", email: "baran@example.com", phone: "0542 111 2222", department: "IT", salary: 17000, experience: 7, city: "Bursa", position: "Güvenlik Uzmaný", startDate: "2017-02-28", status: "Aktif" },
+    { id: 32, name: "Canan Tekin", email: "canan@example.com", phone: "0543 222 3333", department: "Ýnsan Kaynaklarý", salary: 16500, experience: 8, city: "Istanbul", position: "ÝK Direktörü", startDate: "2016-08-08", status: "Aktif" },
+    { id: 33, name: "Deniz Arslan", email: "deniz2@example.com", phone: "0544 333 4444", department: "Satýþ", salary: 11000, experience: 1, city: "Antalya", position: "Stajyer", startDate: "2023-03-01", status: "Aktif" },
+    { id: 34, name: "Eda Polat", email: "eda@example.com", phone: "0545 444 5555", department: "Pazarlama", salary: 12500, experience: 3, city: "Ankara", position: "Grafik Tasarýmcý", startDate: "2021-09-20", status: "Beklemede" },
+    { id: 35, name: "Fikret Yýldýrým", email: "fikret@example.com", phone: "0546 555 6666", department: "IT", salary: 16500, experience: 6, city: "Izmir", position: "Network Uzmaný", startDate: "2018-04-17", status: "Aktif" },
+    { id: 36, name: "Gül Taþkýn", email: "gul@example.com", phone: "0547 666 7777", department: "Satýþ", salary: 14500, experience: 6, city: "Istanbul", position: "Ýhracat Müdürü", startDate: "2018-10-23", status: "Aktif" },
     { id: 37, name: "Halil Kurt", email: "halil@example.com", phone: "0548 777 8888", department: "Pazarlama", salary: 18000, experience: 9, city: "Bursa", position: "CMO", startDate: "2015-12-05", status: "Aktif" },
-    { id: 38, name: "Ä°pek Ã‡alÄ±ÅŸkan", email: "ipek@example.com", phone: "0549 888 9999", department: "Ä°nsan KaynaklarÄ±", salary: 12000, experience: 3, city: "Ankara", position: "EÄŸitim UzmanÄ±", startDate: "2021-07-14", status: "Pasif" },
-    { id: 39, name: "Kaan DurmuÅŸ", email: "kaan@example.com", phone: "0530 999 0000", department: "IT", salary: 15000, experience: 5, city: "Izmir", position: "Mobil GeliÅŸtirici", startDate: "2019-05-29", status: "Aktif" },
-    { id: 40, name: "Leyla Berk", email: "leyla@example.com", phone: "0531 000 1111", department: "SatÄ±ÅŸ", salary: 13500, experience: 4, city: "Istanbul", position: "E-ticaret UzmanÄ±", startDate: "2020-08-11", status: "Aktif" },
-    { id: 41, name: "Mustafa Eren", email: "mustafa@example.com", phone: "0532 111 2222", department: "Pazarlama", salary: 14000, experience: 5, city: "Antalya", position: "Etkinlik YÃ¶neticisi", startDate: "2019-06-18", status: "Beklemede" },
-    { id: 42, name: "Nalan Kaya", email: "nalan@example.com", phone: "0533 222 3333", department: "IT", salary: 19500, experience: 11, city: "Ankara", position: "Proje MÃ¼dÃ¼rÃ¼", startDate: "2013-09-10", status: "Aktif" },
-    { id: 43, name: "Onur AydÄ±n", email: "onur@example.com", phone: "0534 333 4444", department: "SatÄ±ÅŸ", salary: 12500, experience: 3, city: "Bursa", position: "MÃ¼ÅŸteri Ä°liÅŸkileri", startDate: "2021-11-22", status: "Aktif" },
-    { id: 44, name: "PÄ±nar YÃ¼ksel", email: "pinar@example.com", phone: "0535 444 5555", department: "Ä°nsan KaynaklarÄ±", salary: 13500, experience: 4, city: "Istanbul", position: "Performans UzmanÄ±", startDate: "2020-10-06", status: "Aktif" },
-    { id: 45, name: "Recep ÅžimÅŸek", email: "recep@example.com", phone: "0536 555 6666", department: "Pazarlama", salary: 11500, experience: 2, city: "Izmir", position: "Video EditÃ¶rÃ¼", startDate: "2022-04-19", status: "Pasif" },
-    { id: 46, name: "Selin Ã–zer", email: "selin2@example.com", phone: "0537 666 7777", department: "IT", salary: 16000, experience: 6, city: "Ankara", position: "Veri Bilimci", startDate: "2018-07-12", status: "Aktif" },
-    { id: 47, name: "Taner Aslan", email: "taner@example.com", phone: "0538 777 8888", department: "SatÄ±ÅŸ", salary: 17000, experience: 9, city: "Istanbul", position: "Anahtar MÃ¼ÅŸteri", startDate: "2015-05-25", status: "Aktif" },
-    { id: 48, name: "Ãœmit Karaca", email: "umit@example.com", phone: "0539 888 9999", department: "Pazarlama", salary: 13000, experience: 3, city: "Bursa", position: "PR UzmanÄ±", startDate: "2021-12-08", status: "Aktif" },
-    { id: 49, name: "Volkan Ã–zdemir", email: "volkan@example.com", phone: "0540 999 0000", department: "Ä°nsan KaynaklarÄ±", salary: 19000, experience: 10, city: "Antalya", position: "Ä°K Genel MÃ¼dÃ¼rÃ¼", startDate: "2014-03-20", status: "Aktif" },
-    { id: 50, name: "Yasemin Tan", email: "yasemin@example.com", phone: "0541 000 1111", department: "IT", salary: 18000, experience: 8, city: "Izmir", position: "UX/UI TasarÄ±mcÄ±", startDate: "2016-11-14", status: "Beklemede" },
-    { id: 51, name: "Zeki Bulut", email: "zeki@example.com", phone: "0542 111 2222", department: "SatÄ±ÅŸ", salary: 14500, experience: 5, city: "Ankara", position: "Teknik SatÄ±ÅŸ", startDate: "2019-02-07", status: "Aktif" },
-    { id: 52, name: "Aylin ErdoÄŸan", email: "aylin@example.com", phone: "0543 222 3333", department: "Pazarlama", salary: 15000, experience: 6, city: "Istanbul", position: "Marka Stratejisti", startDate: "2018-06-30", status: "Aktif" },
-    { id: 53, name: "BarÄ±ÅŸ Yaman", email: "baris@example.com", phone: "0544 333 4444", department: "IT", salary: 21000, experience: 13, city: "Bursa", position: "BaÅŸkan YardÄ±mcÄ±sÄ±", startDate: "2011-08-16", status: "Aktif" },
-    { id: 54, name: "Ceyda KoÃ§ak", email: "ceyda@example.com", phone: "0545 444 5555", department: "SatÄ±ÅŸ", salary: 13000, experience: 4, city: "Antalya", position: "Bayi YÃ¶neticisi", startDate: "2020-03-24", status: "Pasif" },
-    { id: 55, name: "DoÄŸan Åžener", email: "dogan@example.com", phone: "0546 555 6666", department: "Ä°nsan KaynaklarÄ±", salary: 15500, experience: 7, city: "Izmir", position: "Bordro UzmanÄ±", startDate: "2017-09-02", status: "Aktif" },
+    { id: 38, name: "Ýpek Çalýþkan", email: "ipek@example.com", phone: "0549 888 9999", department: "Ýnsan Kaynaklarý", salary: 12000, experience: 3, city: "Ankara", position: "Eðitim Uzmaný", startDate: "2021-07-14", status: "Pasif" },
+    { id: 39, name: "Kaan Durmuþ", email: "kaan@example.com", phone: "0530 999 0000", department: "IT", salary: 15000, experience: 5, city: "Izmir", position: "Mobil Geliþtirici", startDate: "2019-05-29", status: "Aktif" },
+    { id: 40, name: "Leyla Berk", email: "leyla@example.com", phone: "0531 000 1111", department: "Satýþ", salary: 13500, experience: 4, city: "Istanbul", position: "E-ticaret Uzmaný", startDate: "2020-08-11", status: "Aktif" },
+    { id: 41, name: "Mustafa Eren", email: "mustafa@example.com", phone: "0532 111 2222", department: "Pazarlama", salary: 14000, experience: 5, city: "Antalya", position: "Etkinlik Yöneticisi", startDate: "2019-06-18", status: "Beklemede" },
+    { id: 42, name: "Nalan Kaya", email: "nalan@example.com", phone: "0533 222 3333", department: "IT", salary: 19500, experience: 11, city: "Ankara", position: "Proje Müdürü", startDate: "2013-09-10", status: "Aktif" },
+    { id: 43, name: "Onur Aydýn", email: "onur@example.com", phone: "0534 333 4444", department: "Satýþ", salary: 12500, experience: 3, city: "Bursa", position: "Müþteri Ýliþkileri", startDate: "2021-11-22", status: "Aktif" },
+    { id: 44, name: "Pýnar Yüksel", email: "pinar@example.com", phone: "0535 444 5555", department: "Ýnsan Kaynaklarý", salary: 13500, experience: 4, city: "Istanbul", position: "Performans Uzmaný", startDate: "2020-10-06", status: "Aktif" },
+    { id: 45, name: "Recep Þimþek", email: "recep@example.com", phone: "0536 555 6666", department: "Pazarlama", salary: 11500, experience: 2, city: "Izmir", position: "Video Editörü", startDate: "2022-04-19", status: "Pasif" },
+    { id: 46, name: "Selin Özer", email: "selin2@example.com", phone: "0537 666 7777", department: "IT", salary: 16000, experience: 6, city: "Ankara", position: "Veri Bilimci", startDate: "2018-07-12", status: "Aktif" },
+    { id: 47, name: "Taner Aslan", email: "taner@example.com", phone: "0538 777 8888", department: "Satýþ", salary: 17000, experience: 9, city: "Istanbul", position: "Anahtar Müþteri", startDate: "2015-05-25", status: "Aktif" },
+    { id: 48, name: "Ümit Karaca", email: "umit@example.com", phone: "0539 888 9999", department: "Pazarlama", salary: 13000, experience: 3, city: "Bursa", position: "PR Uzmaný", startDate: "2021-12-08", status: "Aktif" },
+    { id: 49, name: "Volkan Özdemir", email: "volkan@example.com", phone: "0540 999 0000", department: "Ýnsan Kaynaklarý", salary: 19000, experience: 10, city: "Antalya", position: "ÝK Genel Müdürü", startDate: "2014-03-20", status: "Aktif" },
+    { id: 50, name: "Yasemin Tan", email: "yasemin@example.com", phone: "0541 000 1111", department: "IT", salary: 18000, experience: 8, city: "Izmir", position: "UX/UI Tasarýmcý", startDate: "2016-11-14", status: "Beklemede" },
+    { id: 51, name: "Zeki Bulut", email: "zeki@example.com", phone: "0542 111 2222", department: "Satýþ", salary: 14500, experience: 5, city: "Ankara", position: "Teknik Satýþ", startDate: "2019-02-07", status: "Aktif" },
+    { id: 52, name: "Aylin Erdoðan", email: "aylin@example.com", phone: "0543 222 3333", department: "Pazarlama", salary: 15000, experience: 6, city: "Istanbul", position: "Marka Stratejisti", startDate: "2018-06-30", status: "Aktif" },
+    { id: 53, name: "Barýþ Yaman", email: "baris@example.com", phone: "0544 333 4444", department: "IT", salary: 21000, experience: 13, city: "Bursa", position: "Baþkan Yardýmcýsý", startDate: "2011-08-16", status: "Aktif" },
+    { id: 54, name: "Ceyda Koçak", email: "ceyda@example.com", phone: "0545 444 5555", department: "Satýþ", salary: 13000, experience: 4, city: "Antalya", position: "Bayi Yöneticisi", startDate: "2020-03-24", status: "Pasif" },
+    { id: 55, name: "Doðan Þener", email: "dogan@example.com", phone: "0546 555 6666", department: "Ýnsan Kaynaklarý", salary: 15500, experience: 7, city: "Izmir", position: "Bordro Uzmaný", startDate: "2017-09-02", status: "Aktif" },
 ];
+
+// Yeni alanlarla zenginleþtir
+const data = baseData.map((d, i) => ({
+    ...d,
+    country: "Türkiye",
+    team: `Takým ${(i % 5) + 1}`,
+    level: ["Junior", "Mid", "Senior"][i % 3],
+    manager: `Yönetici ${(i % 8) + 1}`,
+    office: `Ofis ${(i % 4) + 1}`
+}));
 
 let filteredData = [...data];
 let currentPage = 1;
-let itemsPerPage = 10;
+let itemsPerPage = 55;
 let sortColumn = '';
 let sortAscending = true;
 let columnFilters = {};
@@ -73,19 +84,24 @@ let slicerSelections = {};
 
 const fieldNames = {
     id: "ID",
-    name: "Ä°sim",
+    name: "Ýsim",
     email: "Email",
     phone: "Telefon",
     department: "Departman",
-    salary: "MaaÅŸ",
-    experience: "TecrÃ¼be",
-    city: "Åžehir",
+    salary: "Maaþ",
+    experience: "Tecrübe",
+    city: "Þehir",
     position: "Pozisyon",
-    startDate: "BaÅŸlangÄ±Ã§",
-    status: "Durum"
+    startDate: "Baþlangýç",
+    status: "Durum",
+    country: "Ülke",
+    team: "Takým",
+    level: "Seviye",
+    manager: "Yönetici",
+    office: "Ofis",
 };
 
-// Filtre dropdown'Ä±nÄ± aÃ§/kapa
+// Filtre dropdown'ýný aç/kapa
 function toggleFilter(column, event) {
     if (event) {
         event.stopPropagation();
@@ -124,7 +140,7 @@ function toggleFilter(column, event) {
     }
 }
 
-// Filtre dropdown iÃ§eriÄŸini oluÅŸtur
+// Filtre dropdown içeriðini oluþtur
 function buildFilterDropdown(column) {
     const dropdown = document.getElementById(`filter-${column}`);
     const mode = currentFilterMode[column] || 'list';
@@ -134,7 +150,7 @@ function buildFilterDropdown(column) {
     let html = `
         <div class="filter-type-selector">
             <button class="filter-type-btn ${mode === 'number' ? 'active' : ''}" onclick="switchFilterMode('${column}', 'number', event)">
-                <i class="bi bi-123"></i> ${isNumeric ? 'SayÄ±' : 'Metin'}
+                <i class="bi bi-123"></i> ${isNumeric ? 'Sayý' : 'Metin'}
             </button>
             <button class="filter-type-btn ${mode === 'list' ? 'active' : ''}" onclick="switchFilterMode('${column}', 'list', event)">
                 <i class="bi bi-list-ul"></i> Liste
@@ -147,22 +163,22 @@ function buildFilterDropdown(column) {
         let operatorOptions = '';
         if (isNumeric) {
             operatorOptions = `
-                <option value="equals" ${savedFilter.operator === 'equals' ? 'selected' : ''}>EÅŸittir</option>
-                <option value="notEquals" ${savedFilter.operator === 'notEquals' ? 'selected' : ''}>EÅŸit DeÄŸil</option>
-                <option value="greaterThan" ${savedFilter.operator === 'greaterThan' ? 'selected' : ''}>BÃ¼yÃ¼ktÃ¼r</option>
-                <option value="greaterOrEqual" ${savedFilter.operator === 'greaterOrEqual' ? 'selected' : ''}>BÃ¼yÃ¼k veya EÅŸit</option>
-                <option value="lessThan" ${savedFilter.operator === 'lessThan' ? 'selected' : ''}>KÃ¼Ã§Ã¼ktÃ¼r</option>
-                <option value="lessOrEqual" ${savedFilter.operator === 'lessOrEqual' ? 'selected' : ''}>KÃ¼Ã§Ã¼k veya EÅŸit</option>
-                <option value="between" ${savedFilter.operator === 'between' ? 'selected' : ''}>ArasÄ±nda</option>
+                <option value="equals" ${savedFilter.operator === 'equals' ? 'selected' : ''}>Eþittir</option>
+                <option value="notEquals" ${savedFilter.operator === 'notEquals' ? 'selected' : ''}>Eþit Deðil</option>
+                <option value="greaterThan" ${savedFilter.operator === 'greaterThan' ? 'selected' : ''}>Büyüktür</option>
+                <option value="greaterOrEqual" ${savedFilter.operator === 'greaterOrEqual' ? 'selected' : ''}>Büyük veya Eþit</option>
+                <option value="lessThan" ${savedFilter.operator === 'lessThan' ? 'selected' : ''}>Küçüktür</option>
+                <option value="lessOrEqual" ${savedFilter.operator === 'lessOrEqual' ? 'selected' : ''}>Küçük veya Eþit</option>
+                <option value="between" ${savedFilter.operator === 'between' ? 'selected' : ''}>Arasýnda</option>
             `;
         } else {
             operatorOptions = `
-                <option value="contains" ${savedFilter.operator === 'contains' ? 'selected' : ''}>Ä°Ã§erir</option>
-                <option value="notContains" ${savedFilter.operator === 'notContains' ? 'selected' : ''}>Ä°Ã§ermez</option>
-                <option value="equals" ${savedFilter.operator === 'equals' ? 'selected' : ''}>EÅŸittir</option>
-                <option value="notEquals" ${savedFilter.operator === 'notEquals' ? 'selected' : ''}>EÅŸit DeÄŸil</option>
-                <option value="startsWith" ${savedFilter.operator === 'startsWith' ? 'selected' : ''}>Ä°le BaÅŸlar</option>
-                <option value="endsWith" ${savedFilter.operator === 'endsWith' ? 'selected' : ''}>Ä°le Biter</option>
+                <option value="contains" ${savedFilter.operator === 'contains' ? 'selected' : ''}>Ýçerir</option>
+                <option value="notContains" ${savedFilter.operator === 'notContains' ? 'selected' : ''}>Ýçermez</option>
+                <option value="equals" ${savedFilter.operator === 'equals' ? 'selected' : ''}>Eþittir</option>
+                <option value="notEquals" ${savedFilter.operator === 'notEquals' ? 'selected' : ''}>Eþit Deðil</option>
+                <option value="startsWith" ${savedFilter.operator === 'startsWith' ? 'selected' : ''}>Ýle Baþlar</option>
+                <option value="endsWith" ${savedFilter.operator === 'endsWith' ? 'selected' : ''}>Ýle Biter</option>
             `;
         }
 
@@ -174,7 +190,7 @@ function buildFilterDropdown(column) {
                     </select>
                 </div>
                 <div id="filter-inputs-${column}">
-                    <input type="${isNumeric ? 'number' : 'text'}" class="text-filter-input" id="text-value-${column}" placeholder="DeÄŸer girin..." value="${savedFilter.value || ''}" onkeypress="if(event.key==='Enter') applyFilter('${column}')">
+                    <input type="${isNumeric ? 'number' : 'text'}" class="text-filter-input" id="text-value-${column}" placeholder="Deðer girin..." value="${savedFilter.value || ''}" onkeypress="if(event.key==='Enter') applyFilter('${column}')">
                 </div>
             </div>
         `;
@@ -184,7 +200,7 @@ function buildFilterDropdown(column) {
             <div class="filter-options" id="options-${column}">
                 <div class="filter-option" onclick="selectAllFilter('${column}', event)">
                     <input type="checkbox" ${!columnFilters[column] || columnFilters[column].length === 0 ? 'checked' : ''}>
-                    <strong>(TÃ¼mÃ¼nÃ¼ SeÃ§)</strong>
+                    <strong>(Tümünü Seç)</strong>
                 </div>
         `;
 
@@ -233,12 +249,12 @@ function handleOperatorChange(column) {
 
     if (operator === 'between') {
         inputContainer.innerHTML = `
-            <input type="${isNumeric ? 'number' : 'text'}" class="text-filter-input mb-2" id="text-value-${column}" placeholder="BaÅŸlangÄ±Ã§..." value="${savedFilter.value || ''}">
-            <input type="${isNumeric ? 'number' : 'text'}" class="text-filter-input" id="text-value2-${column}" placeholder="BitiÅŸ..." value="${savedFilter.value2 || ''}">
+            <input type="${isNumeric ? 'number' : 'text'}" class="text-filter-input mb-2" id="text-value-${column}" placeholder="Baþlangýç..." value="${savedFilter.value || ''}">
+            <input type="${isNumeric ? 'number' : 'text'}" class="text-filter-input" id="text-value2-${column}" placeholder="Bitiþ..." value="${savedFilter.value2 || ''}">
         `;
     } else {
         inputContainer.innerHTML = `
-            <input type="${isNumeric ? 'number' : 'text'}" class="text-filter-input" id="text-value-${column}" placeholder="DeÄŸer girin..." value="${savedFilter.value || ''}">
+            <input type="${isNumeric ? 'number' : 'text'}" class="text-filter-input" id="text-value-${column}" placeholder="Deðer girin..." value="${savedFilter.value || ''}">
         `;
     }
 }
@@ -394,7 +410,7 @@ function applyAllFilters() {
             const filterValue = filter.value.toLowerCase();
 
             let match = false;
-            switch(filter.operator) {
+            switch (filter.operator) {
                 case 'contains':
                     match = itemValue.includes(filterValue);
                     break;
@@ -546,17 +562,17 @@ function displayActiveFilters() {
             const colCollapseId = `colCollapse${accordionIndex}`;
 
             const operatorText = {
-                contains: 'Ä°Ã§erir',
-                notContains: 'Ä°Ã§ermez',
-                equals: 'EÅŸittir',
-                notEquals: 'EÅŸit DeÄŸil',
-                startsWith: 'Ä°le BaÅŸlar',
-                endsWith: 'Ä°le Biter',
+                contains: 'Ýçerir',
+                notContains: 'Ýçermez',
+                equals: 'Eþittir',
+                notEquals: 'Eþit Deðil',
+                startsWith: 'Ýle Baþlar',
+                endsWith: 'Ýle Biter',
                 greaterThan: '>',
                 greaterOrEqual: '>=',
                 lessThan: '<',
                 lessOrEqual: '<=',
-                between: 'ArasÄ±nda'
+                between: 'Arasýnda'
             }[filter.operator];
 
             let displayText = '';
@@ -625,7 +641,7 @@ function toggleAllFilterAccordions() {
                 new bootstrap.Collapse(collapse, { toggle: false }).hide();
             }
         });
-        btn.innerHTML = '<i class="bi bi-chevron-down"></i> Hepsini AÃ§';
+        btn.innerHTML = '<i class="bi bi-chevron-down"></i> Hepsini Aç';
     } else {
         allCollapses.forEach(collapse => {
             const bsCollapse = bootstrap.Collapse.getInstance(collapse);
@@ -649,7 +665,7 @@ function removeColumnFilter(column) {
     createColumnCheckList();
 }
 
-document.getElementById('searchInput').addEventListener('input', function() {
+document.getElementById('searchInput').addEventListener('input', function () {
     applyAllFilters();
     if (activeSlicerColumns.length > 0) {
         updateAllSlicers();
@@ -728,14 +744,14 @@ function renderTable() {
     const pageData = filteredData.slice(start, end);
 
     if (pageData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="12" class="text-center py-4">SonuÃ§ bulunamadÄ±</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="12" class="text-center py-4">Sonuç bulunamadý</td></tr>';
         updateInfo();
         return;
     }
 
     pageData.forEach(item => {
         const statusClass = item.status === 'Aktif' ? 'status-active' :
-                          item.status === 'Pasif' ? 'status-inactive' : 'status-pending';
+            item.status === 'Pasif' ? 'status-inactive' : 'status-pending';
 
         const row = `
             <tr>
@@ -744,17 +760,22 @@ function renderTable() {
                 <td>${item.email}</td>
                 <td>${item.phone}</td>
                 <td>${item.department}</td>
-                <td>${item.salary}?</td>
-                <td>${item.experience} yÄ±l</td>
+                <td>${item.salary}</td>
+                <td>${item.experience} yýl</td>
                 <td>${item.city}</td>
                 <td>${item.position}</td>
+                <td>${item.country}</td>
+                <td>${item.team}</td>
+                <td>${item.level}</td>
+                <td>${item.manager}</td>
+                <td>${item.office}</td>
                 <td>${item.startDate}</td>
                 <td><span class="status-badge ${statusClass}">${item.status}</span></td>
                 <td class="action-buttons" style="white-space: nowrap !important;">
-                    <button class="btn btn-sm btn-info" onclick="viewItem(${item.id})" title="GÃ¶rÃ¼ntÃ¼le" style="padding: 6px 10px; margin: 2px 3px; font-size: 0.9rem; min-width: 32px; display: inline-block;">
+                    <button class="btn btn-sm btn-info" onclick="viewItem(${item.id})" title="Görüntüle" style="padding: 6px 10px; margin: 2px 3px; font-size: 0.9rem; min-width: 32px; display: inline-block;">
                         <i class="bi bi-eye"></i>
                     </button>
-                    <button class="btn btn-sm btn-warning" onclick="editItem(${item.id})" title="DÃ¼zenle" style="padding: 6px 10px; margin: 2px 3px; font-size: 0.9rem; min-width: 32px; display: inline-block;">
+                    <button class="btn btn-sm btn-warning" onclick="editItem(${item.id})" title="Düzenle" style="padding: 6px 10px; margin: 2px 3px; font-size: 0.9rem; min-width: 32px; display: inline-block;">
                         <i class="bi bi-pencil"></i>
                     </button>
                     <button class="btn btn-sm btn-danger" onclick="deleteItem(${item.id})" title="Sil" style="padding: 6px 10px; margin: 2px 3px; font-size: 0.9rem; min-width: 32px; display: inline-block;">
@@ -778,14 +799,14 @@ function updatePagination() {
     pagination.innerHTML += `
         <li class="page-item ${currentPage === 1 ? 'disabled' : ''}" style="margin-right: 8px;">
             <a class="page-link" href="#" onclick="changePage(1); return false;"
-               style="font-size: 0.85rem; padding: 6px 12px; border: 2px solid #667eea; color: #667eea; background: white; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; height: 36px; font-weight: 600;">Â« En BaÅŸa</a>
+               style="font-size: 0.85rem; padding: 6px 12px; border: 2px solid #667eea; color: #667eea; background: white; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; height: 36px; font-weight: 600;">« En Baþa</a>
         </li>
     `;
 
     pagination.innerHTML += `
         <li class="page-item ${currentPage === 1 ? 'disabled' : ''}" style="margin-right: 8px;">
             <a class="page-link" href="#" onclick="changePage(${currentPage - 1}); return false;"
-               style="font-size: 0.85rem; padding: 6px 12px; border: 2px solid #667eea; color: #667eea; background: white; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; height: 36px; font-weight: 600;">â€¹ Ã–nceki</a>
+               style="font-size: 0.85rem; padding: 6px 12px; border: 2px solid #667eea; color: #667eea; background: white; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; height: 36px; font-weight: 600;">‹ Önceki</a>
         </li>
     `;
 
@@ -809,14 +830,14 @@ function updatePagination() {
     pagination.innerHTML += `
         <li class="page-item ${currentPage === totalPages || totalPages === 0 ? 'disabled' : ''}" style="margin-right: 8px;">
             <a class="page-link" href="#" onclick="changePage(${currentPage + 1}); return false;"
-               style="font-size: 0.85rem; padding: 6px 12px; border: 2px solid #667eea; color: #667eea; background: white; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; height: 36px; font-weight: 600;">Sonraki â€º</a>
+               style="font-size: 0.85rem; padding: 6px 12px; border: 2px solid #667eea; color: #667eea; background: white; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; height: 36px; font-weight: 600;">Sonraki ›</a>
         </li>
     `;
 
     pagination.innerHTML += `
         <li class="page-item ${currentPage === totalPages || totalPages === 0 ? 'disabled' : ''}">
             <a class="page-link" href="#" onclick="changePage(${totalPages}); return false;"
-               style="font-size: 0.85rem; padding: 6px 12px; border: 2px solid #667eea; color: #667eea; background: white; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; height: 36px; font-weight: 600;">En Son Â»</a>
+               style="font-size: 0.85rem; padding: 6px 12px; border: 2px solid #667eea; color: #667eea; background: white; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; height: 36px; font-weight: 600;">En Son »</a>
         </li>
     `;
 }
@@ -859,9 +880,9 @@ function updateInfo() {
 
     let infoText = '';
     if (hasActiveFilters && filteredData.length < data.length) {
-        infoText = `${data.length} kayÄ±ttan ${filteredData.length} tanesi bulundu`;
+        infoText = `${data.length} kayýttan ${filteredData.length} tanesi bulundu`;
     } else {
-        infoText = `GÃ¶steriliyor: ${start}-${end} / ${filteredData.length}`;
+        infoText = `Gösteriliyor: ${start}-${end} / ${filteredData.length}`;
     }
 
     document.getElementById('showingInfo').textContent = infoText;
@@ -869,15 +890,15 @@ function updateInfo() {
 }
 
 function viewItem(id) {
-    alert(`GÃ¶rÃ¼ntÃ¼leniyor: ID ${id}`);
+    alert(`Görüntüleniyor: ID ${id}`);
 }
 
 function editItem(id) {
-    alert(`DÃ¼zenleniyor: ID ${id}`);
+    alert(`Düzenleniyor: ID ${id}`);
 }
 
 function deleteItem(id) {
-    if (confirm(`ID ${id} numaralÄ± kaydÄ± silmek istediÄŸinizden emin misiniz?`)) {
+    if (confirm(`ID ${id} numaralý kaydý silmek istediðinizden emin misiniz?`)) {
         const index = data.findIndex(item => item.id === id);
         if (index > -1) {
             data.splice(index, 1);
@@ -887,14 +908,14 @@ function deleteItem(id) {
 }
 
 function addNew() {
-    alert('Yeni kayÄ±t ekleme formu aÃ§Ä±lacak...');
+    alert('Yeni kayýt ekleme formu açýlacak...');
 }
 
 function exportData(type) {
-    alert(`${type.toUpperCase()} formatÄ±nda dÄ±ÅŸa aktarÄ±lÄ±yor...`);
+    alert(`${type.toUpperCase()} formatýnda dýþa aktarýlýyor...`);
 }
 
-document.addEventListener('click', function(e) {
+document.addEventListener('click', function (e) {
     if (!e.target.closest('.filter-dropdown') && !e.target.closest('.filter-icon')) {
         document.querySelectorAll('.filter-dropdown').forEach(dropdown => {
             dropdown.classList.remove('show');
@@ -979,12 +1000,12 @@ function createColumnCheckList() {
             </label>
         `;
 
-        checkDiv.onmouseenter = function() {
+        checkDiv.onmouseenter = function () {
             if (!isChecked && !hasFilter) {
                 this.style.background = '#f0f0f0';
             }
         };
-        checkDiv.onmouseleave = function() {
+        checkDiv.onmouseleave = function () {
             const currentHasFilter = slicerSelections[column] && slicerSelections[column].length > 0;
             const currentBgColor = currentHasFilter ? '#ffc107' : (isChecked ? '#667eea' : 'white');
             this.style.background = currentBgColor;
@@ -1022,7 +1043,7 @@ function rebuildSlicers() {
     if (activeSlicerColumns.length === 0) {
         slicerContainer.innerHTML = `
             <div style="width: 100%; text-align: center; color: #6c757d; padding: 40px; font-size: 0.85rem;">
-                <i class="bi bi-arrow-left"></i> Soldaki listeden kolon seÃ§in
+                <i class="bi bi-arrow-left"></i> Soldaki listeden kolon seçin
             </div>
         `;
         return;
@@ -1079,7 +1100,7 @@ function updateSlicerItems(column) {
             const itemValue = String(item[col]).toLowerCase();
             const filterValue = filter.value.toLowerCase();
 
-            switch(filter.operator) {
+            switch (filter.operator) {
                 case 'contains': return itemValue.includes(filterValue);
                 case 'notContains': return !itemValue.includes(filterValue);
                 case 'equals': return itemValue === filterValue;
@@ -1129,12 +1150,12 @@ function updateSlicerItems(column) {
         itemDiv.textContent = value;
         itemDiv.onclick = () => toggleSlicerValue(column, value);
 
-        itemDiv.onmouseenter = function() {
+        itemDiv.onmouseenter = function () {
             if (!isSelected) {
                 this.style.background = '#f0f0f0';
             }
         };
-        itemDiv.onmouseleave = function() {
+        itemDiv.onmouseleave = function () {
             if (!isSelected) {
                 this.style.background = 'white';
             }
@@ -1211,7 +1232,7 @@ function applySlicerFilters_OLD() {
             const filterValue = filter.value.toLowerCase();
 
             let match = false;
-            switch(filter.operator) {
+            switch (filter.operator) {
                 case 'contains':
                     match = itemValue.includes(filterValue);
                     break;
