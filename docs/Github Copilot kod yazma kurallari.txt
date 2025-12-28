@@ -1,5 +1,5 @@
 1. Değişklikleri Library.Web projesine yapıyorsun. build yapınca ArchiX.WebHost projesine otomatik geliyor.
-
+bu arada kodları ekrana yazma kesinlikle yazma zorunlu ise yapılacak bir şey olacak ise yaz. tread aşırı derecede gereksiz şekilde büyüyor
 
 
 

@@ -1,4 +1,4 @@
-(function (window, $) {
+ï»¿(function (window, $) {
     'use strict';
 
     const rawData = window.kombineDataRaw || [];
@@ -24,11 +24,11 @@
 
     const fieldNames = {
         id: 'ID',
-        name: 'Ýsim',
+        name: 'Ä°sim',
         department: 'Departman',
         position: 'Pozisyon',
-        city: 'Þehir',
-        salary: 'Maaþ',
+        city: 'Åžehir',
+        salary: 'MaaÅŸ',
         status: 'Durum'
     };
 
@@ -97,7 +97,7 @@
         let html = `
             <div class="filter-type-selector">
                 <button class="filter-type-btn ${mode === 'number' ? 'active' : ''}" onclick="switchFilterMode('${column}', 'number', event)">
-                    <i class="bi bi-123"></i> ${isNumeric ? 'Sayý' : 'Metin'}
+                    <i class="bi bi-123"></i> ${isNumeric ? 'SayÄ±' : 'Metin'}
                 </button>
                 <button class="filter-type-btn ${mode === 'list' ? 'active' : ''}" onclick="switchFilterMode('${column}', 'list', event)">
                     <i class="bi bi-list-ul"></i> Liste
@@ -109,21 +109,21 @@
             const savedFilter = textFilters[column] || { operator: 'equals', value: '' };
             const operatorOptions = isNumeric
                 ? `
-                    <option value="equals" ${savedFilter.operator === 'equals' ? 'selected' : ''}>Eþittir</option>
-                    <option value="notEquals" ${savedFilter.operator === 'notEquals' ? 'selected' : ''}>Eþit Deðil</option>
-                    <option value="greaterThan" ${savedFilter.operator === 'greaterThan' ? 'selected' : ''}>Büyüktür</option>
-                    <option value="greaterOrEqual" ${savedFilter.operator === 'greaterOrEqual' ? 'selected' : ''}>Büyük veya Eþit</option>
-                    <option value="lessThan" ${savedFilter.operator === 'lessThan' ? 'selected' : ''}>Küçüktür</option>
-                    <option value="lessOrEqual" ${savedFilter.operator === 'lessOrEqual' ? 'selected' : ''}>Küçük veya Eþit</option>
-                    <option value="between" ${savedFilter.operator === 'between' ? 'selected' : ''}>Arasýnda</option>
+                    <option value="equals" ${savedFilter.operator === 'equals' ? 'selected' : ''}>EÅŸittir</option>
+                    <option value="notEquals" ${savedFilter.operator === 'notEquals' ? 'selected' : ''}>EÅŸit DeÄŸil</option>
+                    <option value="greaterThan" ${savedFilter.operator === 'greaterThan' ? 'selected' : ''}>BÃ¼yÃ¼ktÃ¼r</option>
+                    <option value="greaterOrEqual" ${savedFilter.operator === 'greaterOrEqual' ? 'selected' : ''}>BÃ¼yÃ¼k veya EÅŸit</option>
+                    <option value="lessThan" ${savedFilter.operator === 'lessThan' ? 'selected' : ''}>KÃ¼Ã§Ã¼ktÃ¼r</option>
+                    <option value="lessOrEqual" ${savedFilter.operator === 'lessOrEqual' ? 'selected' : ''}>KÃ¼Ã§Ã¼k veya EÅŸit</option>
+                    <option value="between" ${savedFilter.operator === 'between' ? 'selected' : ''}>ArasÄ±nda</option>
                 `
                 : `
-                    <option value="contains" ${savedFilter.operator === 'contains' ? 'selected' : ''}>Ýçerir</option>
-                    <option value="notContains" ${savedFilter.operator === 'notContains' ? 'selected' : ''}>Ýçermez</option>
-                    <option value="equals" ${savedFilter.operator === 'equals' ? 'selected' : ''}>Eþittir</option>
-                    <option value="notEquals" ${savedFilter.operator === 'notEquals' ? 'selected' : ''}>Eþit Deðil</option>
-                    <option value="startsWith" ${savedFilter.operator === 'startsWith' ? 'selected' : ''}>Ýle Baþlar</option>
-                    <option value="endsWith" ${savedFilter.operator === 'endsWith' ? 'selected' : ''}>Ýle Biter</option>
+                    <option value="contains" ${savedFilter.operator === 'contains' ? 'selected' : ''}>Ä°Ã§erir</option>
+                    <option value="notContains" ${savedFilter.operator === 'notContains' ? 'selected' : ''}>Ä°Ã§ermez</option>
+                    <option value="equals" ${savedFilter.operator === 'equals' ? 'selected' : ''}>EÅŸittir</option>
+                    <option value="notEquals" ${savedFilter.operator === 'notEquals' ? 'selected' : ''}>EÅŸit DeÄŸil</option>
+                    <option value="startsWith" ${savedFilter.operator === 'startsWith' ? 'selected' : ''}>Ä°le BaÅŸlar</option>
+                    <option value="endsWith" ${savedFilter.operator === 'endsWith' ? 'selected' : ''}>Ä°le Biter</option>
                 `;
 
             html += `
@@ -134,7 +134,7 @@
                         </select>
                     </div>
                     <div id="filter-inputs-${column}">
-                        <input type="${isNumeric ? 'number' : 'text'}" class="text-filter-input" id="text-value-${column}" placeholder="Deðer girin..." value="${savedFilter.value || ''}" onkeypress="if(event.key==='Enter') applyFilter('${column}')">
+                        <input type="${isNumeric ? 'number' : 'text'}" class="text-filter-input" id="text-value-${column}" placeholder="DeÄŸer girin..." value="${savedFilter.value || ''}" onkeypress="if(event.key==='Enter') applyFilter('${column}')">
                     </div>
                 </div>
             `;
@@ -144,7 +144,7 @@
                 <div class="filter-options" id="options-${column}">
                     <div class="filter-option" onclick="selectAllFilter('${column}', event)">
                         <input type="checkbox" ${!columnFilters[column] || columnFilters[column].length === 0 ? 'checked' : ''}>
-                        <strong>(Tümünü Seç)</strong>
+                        <strong>(TÃ¼mÃ¼nÃ¼ SeÃ§)</strong>
                     </div>
             `;
 
@@ -193,12 +193,12 @@
 
         if (operator === 'between') {
             inputContainer.innerHTML = `
-                <input type="${isNumeric ? 'number' : 'text'}" class="text-filter-input mb-2" id="text-value-${column}" placeholder="Baþlangýç..." value="${savedFilter.value || ''}">
-                <input type="${isNumeric ? 'number' : 'text'}" class="text-filter-input" id="text-value2-${column}" placeholder="Bitiþ..." value="${savedFilter.value2 || ''}">
+                <input type="${isNumeric ? 'number' : 'text'}" class="text-filter-input mb-2" id="text-value-${column}" placeholder="BaÅŸlangÄ±Ã§..." value="${savedFilter.value || ''}">
+                <input type="${isNumeric ? 'number' : 'text'}" class="text-filter-input" id="text-value2-${column}" placeholder="BitiÅŸ..." value="${savedFilter.value2 || ''}">
             `;
         } else {
             inputContainer.innerHTML = `
-                <input type="${isNumeric ? 'number' : 'text'}" class="text-filter-input" id="text-value-${column}" placeholder="Deðer girin..." value="${savedFilter.value || ''}">
+                <input type="${isNumeric ? 'number' : 'text'}" class="text-filter-input" id="text-value-${column}" placeholder="DeÄŸer girin..." value="${savedFilter.value || ''}">
             `;
         }
     }
@@ -416,7 +416,7 @@
         const pageData = filteredData.slice(start, end);
 
         if (pageData.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4">Sonuç bulunamadý</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4">SonuÃ§ bulunamadÄ±</td></tr>';
             updateInfo();
             return;
         }
@@ -433,10 +433,10 @@
                     <td>${item.salary}?</td>
                     <td><span class="status-badge ${statusClass}">${item.status}</span></td>
                     <td class="action-buttons" style="white-space: nowrap !important;">
-                        <button class="btn btn-sm btn-info" onclick="viewItem(${item.id})" title="Görüntüle" style="padding: 6px 10px; margin: 2px 3px; font-size: 0.9rem; min-width: 32px; display: inline-block;">
+                        <button class="btn btn-sm btn-info" onclick="viewItem(${item.id})" title="GÃ¶rÃ¼ntÃ¼le" style="padding: 6px 10px; margin: 2px 3px; font-size: 0.9rem; min-width: 32px; display: inline-block;">
                             <i class="bi bi-eye"></i>
                         </button>
-                        <button class="btn btn-sm btn-warning" onclick="editItem(${item.id})" title="Düzenle" style="padding: 6px 10px; margin: 2px 3px; font-size: 0.9rem; min-width: 32px; display: inline-block;">
+                        <button class="btn btn-sm btn-warning" onclick="editItem(${item.id})" title="DÃ¼zenle" style="padding: 6px 10px; margin: 2px 3px; font-size: 0.9rem; min-width: 32px; display: inline-block;">
                             <i class="bi bi-pencil"></i>
                         </button>
                         <button class="btn btn-sm btn-danger" onclick="deleteItem(${item.id})" title="Sil" style="padding: 6px 10px; margin: 2px 3px; font-size: 0.9rem; min-width: 32px; display: inline-block;">
@@ -458,13 +458,13 @@
         pagination.innerHTML += `
             <li class="page-item ${currentPage === 1 ? 'disabled' : ''}" style="margin-right: 8px;">
                 <a class="page-link" href="#" onclick="changePage(1); return false;"
-                   style="font-size: 0.85rem; padding: 6px 12px; border: 2px solid #667eea; color: #667eea; background: white; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; height: 36px; font-weight: 600;">« En Baþa</a>
+                   style="font-size: 0.85rem; padding: 6px 12px; border: 2px solid #667eea; color: #667eea; background: white; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; height: 36px; font-weight: 600;">Â« En BaÅŸa</a>
             </li>`;
 
         pagination.innerHTML += `
             <li class="page-item ${currentPage === 1 ? 'disabled' : ''}" style="margin-right: 8px;">
                 <a class="page-link" href="#" onclick="changePage(${currentPage - 1}); return false;"
-                   style="font-size: 0.85rem; padding: 6px 12px; border: 2px solid #667eea; color: #667eea; background: white; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; height: 36px; font-weight: 600;">‹ Önceki</a>
+                   style="font-size: 0.85rem; padding: 6px 12px; border: 2px solid #667eea; color: #667eea; background: white; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; height: 36px; font-weight: 600;">â€¹ Ã–nceki</a>
             </li>`;
 
         pagination.innerHTML += `
@@ -480,13 +480,13 @@
         pagination.innerHTML += `
             <li class="page-item ${currentPage === totalPages || totalPages === 0 ? 'disabled' : ''}" style="margin-right: 8px;">
                 <a class="page-link" href="#" onclick="changePage(${currentPage + 1}); return false;"
-                   style="font-size: 0.85rem; padding: 6px 12px; border: 2px solid #667eea; color: #667eea; background: white; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; height: 36px; font-weight: 600;">Sonraki ›</a>
+                   style="font-size: 0.85rem; padding: 6px 12px; border: 2px solid #667eea; color: #667eea; background: white; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; height: 36px; font-weight: 600;">Sonraki â€º</a>
             </li>`;
 
         pagination.innerHTML += `
             <li class="page-item ${currentPage === totalPages || totalPages === 0 ? 'disabled' : ''}">
                 <a class="page-link" href="#" onclick="changePage(${totalPages}); return false;"
-                   style="font-size: 0.85rem; padding: 6px 12px; border: 2px solid #667eea; color: #667eea; background: white; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; height: 36px; font-weight: 600;">En Son »</a>
+                   style="font-size: 0.85rem; padding: 6px 12px; border: 2px solid #667eea; color: #667eea; background: white; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; height: 36px; font-weight: 600;">En Son Â»</a>
             </li>`;
     }
 
@@ -521,18 +521,18 @@
         const hasActiveFilters = Object.keys(columnFilters).length > 0 || Object.keys(textFilters).length > 0 || document.getElementById('searchInput').value.trim() !== '';
         let infoText = '';
         if (hasActiveFilters && filteredData.length < data.length) {
-            infoText = `${data.length} kayýttan ${filteredData.length} tanesi bulundu`;
+            infoText = `${data.length} kayÄ±ttan ${filteredData.length} tanesi bulundu`;
         } else {
-            infoText = `Gösteriliyor: ${start}-${end} / ${filteredData.length}`;
+            infoText = `GÃ¶steriliyor: ${start}-${end} / ${filteredData.length}`;
         }
         document.getElementById('showingInfo').textContent = infoText;
         document.getElementById('totalRecords').textContent = filteredData.length;
     }
 
-    function viewItem(id) { alert(`Görüntüleniyor: ID ${id}`); }
-    function editItem(id) { alert(`Düzenleniyor: ID ${id}`); }
+    function viewItem(id) { alert(`GÃ¶rÃ¼ntÃ¼leniyor: ID ${id}`); }
+    function editItem(id) { alert(`DÃ¼zenleniyor: ID ${id}`); }
     function deleteItem(id) {
-        if (confirm(`ID ${id} numaralý kaydý silmek istediðinizden emin misiniz?`)) {
+        if (confirm(`ID ${id} numaralÄ± kaydÄ± silmek istediÄŸinizden emin misiniz?`)) {
             const index = data.findIndex(item => item.id === id);
             if (index > -1) {
                 data.splice(index, 1);

@@ -1,4 +1,4 @@
-@page "/Raporlar/Kombine"
+ï»¿@page "/Raporlar/Kombine"
 @model ArchiX.Library.Web.Templates.Modern.Pages.Raporlar.KombineModel
 @{
     ViewData["Title"] = "Kombine Rapor";
@@ -21,18 +21,18 @@
                 <i class="bi bi-graph-up-arrow"></i> Kombine Rapor
             </h1>
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px 16px; border-radius: 20px;">
-                <span id="totalRecords">@Model.SampleData.Count</span> Kayýt
+                <span id="totalRecords">@Model.SampleData.Count</span> KayÄ±t
             </div>
         </div>
         
         <div style="display: flex; gap: 10px; align-items: center;">
             <div style="flex: 1; position: relative;">
                 <i class="bi bi-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #999;"></i>
-                <input type="text" id="searchInput" placeholder="Tüm alanlarda ara..." 
+                <input type="text" id="searchInput" placeholder="TÃ¼m alanlarda ara..." 
                        style="width: 100%; padding: 10px 10px 10px 35px; border: 2px solid #e0e0e0; border-radius: 8px;">
             </div>
             <button onclick="resetAllFilters()" style="padding: 10px 20px; background: #f8f9fa; color: #667eea; border: 2px solid #667eea; border-radius: 8px;">
-                <i class="bi bi-arrow-clockwise"></i> Sýfýrla
+                <i class="bi bi-arrow-clockwise"></i> SÄ±fÄ±rla
             </button>
         </div>
     </div>
@@ -59,7 +59,7 @@
             <h2 class="accordion-header">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#gridSection"
                         style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                    <i class="bi bi-table me-2"></i> Detaylý Liste
+                    <i class="bi bi-table me-2"></i> DetaylÄ± Liste
                 </button>
             </h2>
             <div id="gridSection" class="accordion-collapse collapse show">
@@ -84,7 +84,7 @@
                                         <th>
                                             <div class="header-content">
                                                 <span class="header-text" onclick="sortTable('name')">
-                                                    Ýsim <i class="bi bi-arrow-down-up sort-icon"></i>
+                                                    Ä°sim <i class="bi bi-arrow-down-up sort-icon"></i>
                                                 </span>
                                                 <span class="filter-icon" onclick="toggleFilter('name', arguments[0])">
                                                     <i class="bi bi-funnel"></i>
@@ -120,7 +120,7 @@
                                         <th>
                                             <div class="header-content">
                                                 <span class="header-text" onclick="sortTable('city')">
-                                                    Þehir <i class="bi bi-arrow-down-up sort-icon"></i>
+                                                    Åžehir <i class="bi bi-arrow-down-up sort-icon"></i>
                                                 </span>
                                                 <span class="filter-icon" onclick="toggleFilter('city', arguments[0])">
                                                     <i class="bi bi-funnel"></i>
@@ -132,7 +132,7 @@
                                         <th>
                                             <div class="header-content">
                                                 <span class="header-text" onclick="sortTable('salary')">
-                                                    Maaþ <i class="bi bi-arrow-down-up sort-icon"></i>
+                                                    MaaÅŸ <i class="bi bi-arrow-down-up sort-icon"></i>
                                                 </span>
                                                 <span class="filter-icon" onclick="toggleFilter('salary', arguments[0])">
                                                     <i class="bi bi-funnel"></i>
@@ -153,7 +153,7 @@
                                             </div>
                                             <div class="filter-dropdown" id="filter-status"></div>
                                         </th>
-                                        <th>Ýþlemler</th>
+                                        <th>Ä°ÅŸlemler</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tableBody"></tbody>
@@ -162,13 +162,13 @@
                         <div class="pagination-container grid-pagination-container" style="border-top: 1px solid #e6e9f0;">
                             <div class="d-flex justify-content-between align-items-baseline w-100">
                                 <div class="showing-info">
-                                    <span id="showingInfo" class="grid-showing-info">Gösteriliyor: 0-0 / 0</span>
+                                    <span id="showingInfo" class="grid-showing-info">GÃ¶steriliyor: 0-0 / 0</span>
                                 </div>
                                 <nav class="grid-pagination-nav">
                                     <ul class="pagination pagination-sm mb-0" id="pagination"></ul>
                                 </nav>
                                 <div class="d-flex align-items-center gap-2">
-                                    <label class="mb-0 grid-pagination-label">Sayfa baþýna:</label>
+                                    <label class="mb-0 grid-pagination-label">Sayfa baÅŸÄ±na:</label>
                                     <select class="form-select form-select-sm grid-items-select" id="itemsPerPageSelect" onchange="changeItemsPerPage()">
                                         <option value="10">10</option>
                                         <option value="25">25</option>
