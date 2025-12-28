@@ -11,7 +11,8 @@
     var tableId = Model.Id ?? "gridTable";
 }
 
-<link rel="stylesheet" href="~/css/archix.grid.shared.css" />
+<link rel="stylesheet" href="~/_content/ArchiX.Library.Web/lib/bootstrap-icons/font/bootstrap-icons.css" />
+<link rel="stylesheet" href="~/_content/ArchiX.Library.Web/css/archix.grid.shared.css" />
 
 <div class="grid-page">
     <div class="container grid-shell" id="@tableId-container">
@@ -181,14 +182,15 @@
     </div>
 </div>
 
-<script src="~/js/archix.grid.component.js"></script>
+<script src="~/_content/ArchiX.Library.Web/js/archix.grid.component.js"></script>
 <script>
     window.gridTables = window.gridTables || {};
     window.gridTables['@tableId'] = {
         data: @Html.Raw(jsonData),
-        columns: @Html.Raw(jsonColumns)
+        columns: @Html.Raw(jsonColumns),
+        showActions: @Model.ShowActions.ToString().ToLowerInvariant()
     };
     if (window.initGridTable) {
-        window.initGridTable('@tableId', window.gridTables['@tableId'].data, window.gridTables['@tableId'].columns);
+        window.initGridTable('@tableId', window.gridTables['@tableId'].data, window.gridTables['@tableId'].columns, window.gridTables['@tableId'].showActions);
     }
 </script>
