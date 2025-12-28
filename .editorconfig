@@ -277,5 +277,7 @@ dotnet_diagnostic.CA1859.severity = none
 [*.cs]
 dotnet_diagnostic.IDE0305.severity = none
 
+root = true
 
-
+[*]
+charset = utf-8-bom
