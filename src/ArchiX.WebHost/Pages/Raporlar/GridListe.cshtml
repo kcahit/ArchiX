@@ -1,35 +1,28 @@
-@page "/Raporlar"
-@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+﻿@page "/Raporlar"
 @model ArchiX.Library.Web.Templates.Modern.Pages.Raporlar.GridListeModel
 
 @{
     ViewData["Title"] = "Raporlar";
-    Layout = null;
+    Layout = "~/Templates/Modern/Pages/Shared/_Layout.cshtml";
 }
 
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grid Rapor</title>
-
+@section Styles {
     <link rel="stylesheet" href="~/lib/bootstrap/bootstrap.min.css" />
     <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.css" />
     <link rel="stylesheet" href="~/css/modern/main.css" />
     <link rel="stylesheet" href="~/css/archix.reports.header.css" />
-</head>
-<body class="grid-page">
-    @await Component.InvokeAsync("GridTable", new ArchiX.Library.Web.ViewModels.Grid.GridTableViewModel
-    {
-        Id = "gridListe",
-        Title = "Raporlar",
-        SearchPlaceholder = "Genel arama...",
-        Columns = Model.Columns,
-        Rows = Model.Rows
-    })
+}
 
+@await Component.InvokeAsync("GridTable", new ArchiX.Library.Web.ViewModels.Grid.GridTableViewModel
+{
+    Id = "gridListe",
+    Title = "Raporlar",
+    SearchPlaceholder = "Genel arama...",
+    Columns = Model.Columns,
+    Rows = Model.Rows
+})
+
+@section Scripts {
     <script src="~/lib/jquery/jquery.min.js"></script>
     <script src="~/lib/bootstrap/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+}

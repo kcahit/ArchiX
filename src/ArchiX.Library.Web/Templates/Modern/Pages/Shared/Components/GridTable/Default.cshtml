@@ -18,75 +18,78 @@
 <div class="grid-page">
     <div class="container grid-shell" id="@tableId-container">
         <div class="table-container">
-            @await Component.InvokeAsync("GridToolbar", new GridToolbarViewModel
+            @if (Model.ShowToolbar)
             {
-                Id = tableId,
-                TotalRecords = 0,
-                SearchPlaceholder = Model.SearchPlaceholder,
-                ResetText = Model.ResetText,
-                AdvancedSearchText = Model.AdvancedSearchText,
-                ExportText = Model.ExportText,
-                ShowAdvancedSearch = true,
-                ShowExport = true
-            })
+                @await Component.InvokeAsync("GridToolbar", new GridToolbarViewModel
+                {
+                    Id = tableId,
+                    TotalRecords = 0,
+                    SearchPlaceholder = Model.SearchPlaceholder,
+                    ResetText = Model.ResetText,
+                    AdvancedSearchText = Model.AdvancedSearchText,
+                    ExportText = Model.ExportText,
+                    ShowAdvancedSearch = true,
+                    ShowExport = true
+                })
 
-            <div class="collapse mb-3" id="@tableId-advancedSearch">
-                <div class="card advanced-search-card">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-2">
-                                <div class="column-selector-panel">
-                                    <h6 class="column-selector-title">
-                                        <span class="column-selector-title-group">
-                                            <input type="checkbox" class="column-selector-toggle" id="@tableId-toggleAllColumns" onchange="toggleAllColumns('@tableId')" title="Hepsi/Hiçbiri">
-                                            Kolonlar
-                                        </span>
-                                        <button onclick="clearAdvancedFilters('@tableId')" class="btn-advanced-clear" title="Gelişmiş Filtreleri Temizle">
-                                            Temizle
-                                        </button>
-                                    </h6>
-                                    <div id="@tableId-columnCheckList"></div>
+                <div class="collapse mb-3" id="@tableId-advancedSearch">
+                    <div class="card advanced-search-card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <div class="column-selector-panel">
+                                        <h6 class="column-selector-title">
+                                            <span class="column-selector-title-group">
+                                                <input type="checkbox" class="column-selector-toggle" id="@tableId-toggleAllColumns" onchange="toggleAllColumns('@tableId')" title="Hepsi/Hiçbiri">
+                                                Kolonlar
+                                            </span>
+                                            <button onclick="clearAdvancedFilters('@tableId')" class="btn-advanced-clear" title="Gelişmiş Filtreleri Temizle">
+                                                Temizle
+                                            </button>
+                                        </h6>
+                                        <div id="@tableId-columnCheckList"></div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-10">
-                                <div id="@tableId-slicerContainer">
-                                    <div id="@tableId-noSlicerMsg" class="grid-no-slicer">
-                                        <i class="bi bi-arrow-left"></i> Soldaki listeden kolon seçin
+                                <div class="col-md-10">
+                                    <div id="@tableId-slicerContainer">
+                                        <div id="@tableId-noSlicerMsg" class="grid-no-slicer">
+                                            <i class="bi bi-arrow-left"></i> Soldaki listeden kolon seçin
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div id="@tableId-activeFilters">
-                <div class="accordion mb-3" id="@tableId-filterAccordion">
-                    <div class="accordion-item active-filter-card">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed active-filter-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#@tableId-collapseFilters">
-                                <i class="bi bi-funnel-fill me-2"></i>
-                                <strong>Aktif Filtreler (<span id="@tableId-filterCount">0</span>)</strong>
-                            </button>
-                        </h2>
-                        <div id="@tableId-collapseFilters" class="accordion-collapse collapse">
-                            <div class="accordion-body filter-accordion-body">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div id="@tableId-filterTags"></div>
-                                    <div class="d-flex flex-column gap-2 ms-3">
-                                        <button class="btn btn-sm btn-outline-secondary filter-manage-btn" onclick="resetAllFilters('@tableId')">
-                                            <i class="bi bi-trash"></i> Tümünü Temizle
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-primary filter-manage-btn" onclick="toggleAllFilterAccordions('@tableId')" id="@tableId-toggleAllBtn">
-                                            <i class="bi bi-chevron-down"></i> Hepsini Aç
-                                        </button>
+                <div id="@tableId-activeFilters">
+                    <div class="accordion mb-3" id="@tableId-filterAccordion">
+                        <div class="accordion-item active-filter-card">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed active-filter-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#@tableId-collapseFilters">
+                                    <i class="bi bi-funnel-fill me-2"></i>
+                                    <strong>Aktif Filtreler (<span id="@tableId-filterCount">0</span>)</strong>
+                                </button>
+                            </h2>
+                            <div id="@tableId-collapseFilters" class="accordion-collapse collapse">
+                                <div class="accordion-body filter-accordion-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div id="@tableId-filterTags"></div>
+                                        <div class="d-flex flex-column gap-2 ms-3">
+                                            <button class="btn btn-sm btn-outline-secondary filter-manage-btn" onclick="resetAllFilters('@tableId')">
+                                                <i class="bi bi-trash"></i> Tümünü Temizle
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-primary filter-manage-btn" onclick="toggleAllFilterAccordions('@tableId')" id="@tableId-toggleAllBtn">
+                                                <i class="bi bi-chevron-down"></i> Hepsini Aç
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            }
 
             <div class="table-responsive grid-table-responsive">
                 <table class="table table-hover custom-table" id="@tableId-dataTable">
@@ -119,7 +122,7 @@
                                     </div>
                                     @if (col.Filterable)
                                     {
-                                        <div class="filter-dropdown" id="@tableId-filter-@field"></div>
+                                <div class="filter-dropdown" id="@tableId-filter-@field"></div>
                                     }
                                 </th>
                             }

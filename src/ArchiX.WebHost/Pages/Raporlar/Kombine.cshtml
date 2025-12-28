@@ -1,49 +1,55 @@
 ﻿@page "/Raporlar/Kombine"
 @model ArchiX.Library.Web.Templates.Modern.Pages.Raporlar.KombineModel
+@using ArchiX.Library.Web.ViewModels.Grid
 @{
     ViewData["Title"] = "Kombine Rapor";
     Layout = "~/Templates/Modern/Pages/Shared/_Layout.cshtml";
+
+    var columns = new List<GridColumnDefinition>
+    {
+        new("id", "ID", "number"),
+        new("name", "İsim"),
+        new("department", "Departman"),
+        new("position", "Pozisyon"),
+        new("city", "Şehir"),
+        new("salary", "Maaş", "number"),
+        new("status", "Durum")
+    };
+
+    var rows = Model.SampleData.Select(x => new Dictionary<string, object?>
+    {
+        ["id"] = x.Id,
+        ["name"] = x.Name,
+        ["department"] = x.Department,
+        ["position"] = x.Position,
+        ["city"] = x.City,
+        ["salary"] = x.Salary,
+        ["status"] = x.Status
+    }).ToList();
 }
 
 @section Styles {
-    <!-- PivotTable.js CSS -->
     <link rel="stylesheet" href="~/lib/pivottable/pivot.min.css">
     <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.css">
     <link rel="stylesheet" href="~/css/archix.reports.header.css">
     <link rel="stylesheet" href="~/css/modern/main.css">
 }
 
-<div class="combined-report-page" style="padding: 20px 0;">
-    <!-- HEADER -->
-    <div style="background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; margin-bottom: 20px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h1 style="font-size: 1.75rem; font-weight: 700; color: #667eea; margin: 0;">
-                <i class="bi bi-graph-up-arrow"></i> Kombine Rapor
-            </h1>
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px 16px; border-radius: 20px;">
-                <span id="totalRecords">@Model.SampleData.Count</span> Kayıt
-            </div>
-        </div>
-        
-        <div style="display: flex; gap: 10px; align-items: center;">
-            <div style="flex: 1; position: relative;">
-                <i class="bi bi-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #999;"></i>
-                <input type="text" id="searchInput" placeholder="Tüm alanlarda ara..." 
-                       style="width: 100%; padding: 10px 10px 10px 35px; border: 2px solid #e0e0e0; border-radius: 8px;">
-            </div>
-            <button onclick="resetAllFilters()" style="padding: 10px 20px; background: #f8f9fa; color: #667eea; border: 2px solid #667eea; border-radius: 8px;">
-                <i class="bi bi-arrow-clockwise"></i> Sıfırla
-            </button>
-        </div>
-    </div>
-    
-    <!-- ACCORDION REPORTS -->
+<div class="container py-4">
+    @await Component.InvokeAsync("GridToolbar", new GridToolbarViewModel
+    {
+        Id = "kombineGrid",
+        TotalRecords = Model.SampleData.Count,
+        SearchPlaceholder = "Tüm alanlarda ara...",
+        ResetText = "Sıfırla",
+        ShowAdvancedSearch = true,
+        ShowExport = true
+    })
+
     <div class="accordion" id="reportsAccordion">
-        <!-- PIVOT -->
-        <div class="accordion-item" style="border-radius: 12px; margin-bottom: 15px; overflow: hidden;">
+        <div class="accordion-item mb-3">
             <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#pivotSection"
-                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#pivotSection">
                     <i class="bi bi-grid-3x3-gap-fill me-2"></i> Pivot Analiz
                 </button>
             </h2>
@@ -53,132 +59,25 @@
                 </div>
             </div>
         </div>
-        
-        <!-- GRID -->
-        <div class="accordion-item" style="border-radius: 12px; overflow: hidden;">
+
+        <div class="accordion-item">
             <h2 class="accordion-header">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#gridSection"
-                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#gridSection">
                     <i class="bi bi-table me-2"></i> Detaylı Liste
                 </button>
             </h2>
             <div id="gridSection" class="accordion-collapse collapse show">
                 <div class="accordion-body">
-                    <div class="table-container">
-                        <div class="table-responsive grid-table-responsive">
-                            <table class="table table-hover custom-table" id="dataTable">
-                                <thead>
-                                    <tr>
-                                        <th>
-                                            <div class="header-content">
-                                                <span class="header-text" onclick="sortTable('id')">
-                                                    ID <i class="bi bi-arrow-down-up sort-icon"></i>
-                                                </span>
-                                                <span class="filter-icon" onclick="toggleFilter('id', arguments[0])">
-                                                    <i class="bi bi-funnel"></i>
-                                                    <span class="filter-count" id="count-id">0</span>
-                                                </span>
-                                            </div>
-                                            <div class="filter-dropdown" id="filter-id"></div>
-                                        </th>
-                                        <th>
-                                            <div class="header-content">
-                                                <span class="header-text" onclick="sortTable('name')">
-                                                    İsim <i class="bi bi-arrow-down-up sort-icon"></i>
-                                                </span>
-                                                <span class="filter-icon" onclick="toggleFilter('name', arguments[0])">
-                                                    <i class="bi bi-funnel"></i>
-                                                    <span class="filter-count" id="count-name">0</span>
-                                                </span>
-                                            </div>
-                                            <div class="filter-dropdown" id="filter-name"></div>
-                                        </th>
-                                        <th>
-                                            <div class="header-content">
-                                                <span class="header-text" onclick="sortTable('department')">
-                                                    Departman <i class="bi bi-arrow-down-up sort-icon"></i>
-                                                </span>
-                                                <span class="filter-icon" onclick="toggleFilter('department', arguments[0])">
-                                                    <i class="bi bi-funnel"></i>
-                                                    <span class="filter-count" id="count-department">0</span>
-                                                </span>
-                                            </div>
-                                            <div class="filter-dropdown" id="filter-department"></div>
-                                        </th>
-                                        <th>
-                                            <div class="header-content">
-                                                <span class="header-text" onclick="sortTable('position')">
-                                                    Pozisyon <i class="bi bi-arrow-down-up sort-icon"></i>
-                                                </span>
-                                                <span class="filter-icon" onclick="toggleFilter('position', arguments[0])">
-                                                    <i class="bi bi-funnel"></i>
-                                                    <span class="filter-count" id="count-position">0</span>
-                                                </span>
-                                            </div>
-                                            <div class="filter-dropdown" id="filter-position"></div>
-                                        </th>
-                                        <th>
-                                            <div class="header-content">
-                                                <span class="header-text" onclick="sortTable('city')">
-                                                    Şehir <i class="bi bi-arrow-down-up sort-icon"></i>
-                                                </span>
-                                                <span class="filter-icon" onclick="toggleFilter('city', arguments[0])">
-                                                    <i class="bi bi-funnel"></i>
-                                                    <span class="filter-count" id="count-city">0</span>
-                                                </span>
-                                            </div>
-                                            <div class="filter-dropdown" id="filter-city"></div>
-                                        </th>
-                                        <th>
-                                            <div class="header-content">
-                                                <span class="header-text" onclick="sortTable('salary')">
-                                                    Maaş <i class="bi bi-arrow-down-up sort-icon"></i>
-                                                </span>
-                                                <span class="filter-icon" onclick="toggleFilter('salary', arguments[0])">
-                                                    <i class="bi bi-funnel"></i>
-                                                    <span class="filter-count" id="count-salary">0</span>
-                                                </span>
-                                            </div>
-                                            <div class="filter-dropdown" id="filter-salary"></div>
-                                        </th>
-                                        <th>
-                                            <div class="header-content">
-                                                <span class="header-text" onclick="sortTable('status')">
-                                                    Durum <i class="bi bi-arrow-down-up sort-icon"></i>
-                                                </span>
-                                                <span class="filter-icon" onclick="toggleFilter('status', arguments[0])">
-                                                    <i class="bi bi-funnel"></i>
-                                                    <span class="filter-count" id="count-status">0</span>
-                                                </span>
-                                            </div>
-                                            <div class="filter-dropdown" id="filter-status"></div>
-                                        </th>
-                                        <th>İşlemler</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tableBody"></tbody>
-                            </table>
-                        </div>
-                        <div class="pagination-container grid-pagination-container" style="border-top: 1px solid #e6e9f0;">
-                            <div class="d-flex justify-content-between align-items-baseline w-100">
-                                <div class="showing-info">
-                                    <span id="showingInfo" class="grid-showing-info">Gösteriliyor: 0-0 / 0</span>
-                                </div>
-                                <nav class="grid-pagination-nav">
-                                    <ul class="pagination pagination-sm mb-0" id="pagination"></ul>
-                                </nav>
-                                <div class="d-flex align-items-center gap-2">
-                                    <label class="mb-0 grid-pagination-label">Sayfa başına:</label>
-                                    <select class="form-select form-select-sm grid-items-select" id="itemsPerPageSelect" onchange="changeItemsPerPage()">
-                                        <option value="10">10</option>
-                                        <option value="25">25</option>
-                                        <option value="50">50</option>
-                                        <option value="100">100</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    @await Component.InvokeAsync("GridTable", new GridTableViewModel
+                    {
+                        Id = "kombineGrid",
+                        Title = "Detaylı Liste",
+                        SearchPlaceholder = "Tüm alanlarda ara...",
+                        Columns = columns,
+                        Rows = rows,
+                        ShowActions = false,
+                        ShowToolbar = false
+                    })
                 </div>
             </div>
         </div>
@@ -192,6 +91,16 @@
     <script src="~/lib/pivottable/pivot.tr.js"></script>
     <script>
         window.kombineDataRaw = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.SampleData));
+        $(function () {
+            if (typeof $.fn.pivotUI === 'function' && window.kombineDataRaw) {
+                $('#pivotContainer').pivotUI(window.kombineDataRaw, {
+                    rows: ['Department', 'City'],
+                    cols: ['Status'],
+                    vals: ['Salary'],
+                    aggregatorName: 'Sum',
+                    rendererName: 'Table Barchart'
+                }, true, 'tr');
+            }
+        });
     </script>
-    <script src="~/js/archix.tables.kombine.js"></script>
 }
