@@ -10,7 +10,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_NOTLAR", "_NOTLAR", "{8EC4
 		docs\ASP.NET-Core-Teknoloji-Secimi-ve-Mimari-Kararlari.md = docs\ASP.NET-Core-Teknoloji-Secimi-ve-Mimari-Kararlari.md
 		docs\Github Copilot kod yazma kurallari.txt = docs\Github Copilot kod yazma kurallari.txt
 		docs\Layout-Tema-Tercihleri-V2.md = docs\Layout-Tema-Tercihleri-V2.md
-		docs\Template kopyalama.txt = docs\Template kopyalama.txt
 		docs\Yetki-Yonetimi.md = docs\Yetki-Yonetimi.md
 	EndProjectSection
 EndProject

@@ -301,3 +301,7 @@ SORUN LİSTESİ - ÇÖZÜLECEK:
 •	Dosya: body.login-page CSS kuralları
 •	Çözüm: min-height: 100vh yerine height: 100vh + overflow: hidden
 ---
+
+Table da kullnılan css dosyaları ==> 2025-12-28
+•	Proje CSS: ~/css/archix.reports.header.css
+•	Grid/tablolar için ana stil: ~/css/modern/main.css
