@@ -19,7 +19,7 @@
         @if (Model.ShowAdvancedSearch)
         {
             <div class="mx-3">
-                <button class="btn btn-outline-primary btn-sm grid-btn-advanced" type="button" data-bs-toggle="collapse" data-bs-target="#@Model.Id-advancedSearch">
+                <button class="btn btn-outline-primary btn-sm grid-btn-advanced" type="button" onclick="toggleAdvancedSearch('@Model.Id')">
                     <i class="bi bi-sliders me-1"></i> @Model.AdvancedSearchText
                 </button>
             </div>

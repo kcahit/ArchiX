@@ -2,6 +2,11 @@
 
 (function (window) {
     const states = {};
+    const MAX_BADGE = 99;
+    const formatCount = (n) => {
+        const num = parseInt(n || 0, 10);
+        return num > MAX_BADGE ? `${MAX_BADGE}+` : `${num}`;
+    };
 
     function initGridTable(tableId, data, columns, showActions = false) {
         if (!tableId || !Array.isArray(data) || !Array.isArray(columns)) return;
@@ -271,14 +276,18 @@
     function updateFilterIcon(tableId, column) {
         const state = getState(tableId); if (!state) return;
         const icon = document.querySelector(`#${tableId}-filter-${column}`)?.previousElementSibling;
-        const count = document.getElementById(`${tableId}-count-${column}`);
+        const countEl = document.getElementById(`${tableId}-count-${column}`);
         const hasFilter = (state.columnFilters[column] && state.columnFilters[column].length > 0) || state.textFilters[column] || (state.slicerSelections[column] && state.slicerSelections[column].length > 0);
+        let countVal = 0;
+        if (state.columnFilters[column]) countVal = state.columnFilters[column].length;
+        else if (state.slicerSelections[column]) countVal = state.slicerSelections[column].length;
+        else if (state.textFilters[column]) countVal = 1;
         if (hasFilter) {
             icon?.classList.add('active');
-            if (count) { count.style.display = 'inline-block'; count.textContent = state.columnFilters[column] ? state.columnFilters[column].length : (state.slicerSelections[column] ? state.slicerSelections[column].length : '1'); }
+            if (countEl) { countEl.style.display = 'inline-block'; countEl.textContent = formatCount(countVal); }
         } else {
             icon?.classList.remove('active');
-            if (count) count.style.display = 'none';
+            if (countEl) countEl.style.display = 'none';
         }
     }
 
@@ -356,7 +365,7 @@
         for (let column in state.columnFilters) totalFilterItems += state.columnFilters[column].length;
         totalFilterItems += Object.keys(state.textFilters).length;
         for (let column in state.slicerSelections) totalFilterItems += state.slicerSelections[column].length;
-        filterCountSpan.textContent = totalFilterItems;
+        filterCountSpan.textContent = formatCount(totalFilterItems);
 
         const columnOrder = Object.keys(state.fieldNames);
         const allActiveFilters = [];
@@ -373,24 +382,31 @@
             columnAccordion.className = 'accordion mb-2 filter-summary-accordion';
 
             if (f.type === 'list' || f.type === 'slicer') {
+                const values = f.values || [];
+                const limited = values.slice(0, MAX_BADGE);
                 let tagsHtml = '';
-                f.values.forEach(value => {
+                limited.forEach(value => {
                     tagsHtml += `
                         <span class="filter-tag d-inline-block mb-1 me-1">
                             ${value}
                             <i class="bi bi-x-circle" onclick="removeIndividualFilter('${tableId}','${f.column}','${value}', event)"></i>
                         </span>`;
                 });
+                const remaining = values.length - limited.length;
+                if (remaining > 0) {
+                    tagsHtml += `<span class="filter-tag d-inline-block mb-1 me-1">+${remaining}</span>`;
+                }
+                const badgeCount = formatCount(values.length);
                 columnAccordion.innerHTML = `
                     <div class="accordion-item border-0">
                         <h2 class="accordion-header">
                             <button class="accordion-button collapsed filter-summary-trigger" type="button" data-bs-toggle="collapse" data-bs-target="#${colCollapseId}">
                                 <strong>${columnTitle}</strong>
-                                <span class="badge bg-primary ms-2 filter-summary-badge">${f.values.length}</span>
+                                <span class="badge bg-primary ms-2 filter-summary-badge">${badgeCount}</span>
                             </button>
                         </h2>
                         <div id="${colCollapseId}" class="accordion-collapse collapse ${openAccordions.has(colCollapseId) ? 'show' : ''}">
-                            <div class="accordion-body filter-summary-body">
+                            <div class="accordion-body filter-accordion-body">
                                 ${tagsHtml}
                             </div>
                         </div>
@@ -418,11 +434,11 @@
                         <h2 class="accordion-header">
                             <button class="accordion-button collapsed filter-summary-trigger" type="button" data-bs-toggle="collapse" data-bs-target="#${colCollapseId}">
                                 <strong>${columnTitle}</strong>
-                                <span class="badge bg-primary ms-2 filter-summary-badge">1</span>
+                                <span class="badge bg-primary ms-2 filter-summary-badge">${formatCount(1)}</span>
                             </button>
                         </h2>
                         <div id="${colCollapseId}" class="accordion-collapse collapse ${openAccordions.has(colCollapseId) ? 'show' : ''}">
-                            <div class="accordion-body filter-summary-body">
+                            <div class="accordion-body filter-accordion-body">
                                 <span class="filter-tag">
                                     ${displayText}
                                     <i class="bi bi-x-circle" onclick="removeColumnFilter('${tableId}','${f.column}')"></i>
@@ -433,6 +449,30 @@
             }
             tagsContainer.appendChild(columnAccordion);
             accordionIndex++;
+        });
+
+        wireFilterAccordions(tableId);
+    }
+
+    function wireFilterAccordions(tableId) {
+        const container = document.getElementById(`${tableId}-filterTags`);
+        if (!container) return;
+        const triggers = container.querySelectorAll('.filter-summary-trigger');
+        triggers.forEach(btn => {
+            const target = btn.getAttribute('data-bs-target');
+            if (!target) return;
+            const collapseEl = document.querySelector(target);
+            if (!collapseEl) return;
+            const instance = bootstrap?.Collapse?.getInstance?.(collapseEl) || new bootstrap.Collapse(collapseEl, { toggle: false });
+            btn.onclick = function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (collapseEl.classList.contains('show')) {
+                    instance.hide();
+                } else {
+                    instance.show();
+                }
+            };
         });
     }
 
@@ -488,13 +528,12 @@
         state.textFilters = {};
         state.currentFilterMode = {};
         state.slicerSelections = {};
-        state.activeSlicerColumns = [];
         Object.keys(state.fieldNames).forEach(column => updateFilterIcon(tableId, column));
         state.filteredData = [...state.data];
         state.currentPage = 1;
         render(tableId);
         createColumnCheckList(tableId);
-        rebuildSlicers(tableId);
+        updateAllSlicers(tableId);
         displayActiveFilters(tableId);
     }
 
@@ -595,7 +634,7 @@
     function goToPage(tableId) {
         const state = getState(tableId); if (!state) return;
         const input = document.getElementById(`${tableId}-pageNumberInput`);
-        let pageNum = parseInt(input?.value);
+        let pageNum = parseInt(input?.value, 10);
         const totalPages = Math.ceil(state.filteredData.length / state.itemsPerPage) || 1;
         if (isNaN(pageNum) || pageNum < 1) pageNum = 1;
         else if (pageNum > totalPages) pageNum = totalPages;
@@ -617,7 +656,7 @@
         const state = getState(tableId); if (!state) return;
         const sel = document.getElementById(`${tableId}-itemsPerPageSelect`);
         if (!sel) return;
-        state.itemsPerPage = parseInt(sel.value) || 10;
+        state.itemsPerPage = parseInt(sel.value, 10) || 10;
         state.currentPage = 1;
         render(tableId);
     }
@@ -675,19 +714,24 @@
         state.columns.forEach(col => {
             const column = col.field;
             const isChecked = state.activeSlicerColumns.includes(column);
-            const hasFilter = state.slicerSelections[column] && state.slicerSelections[column].length > 0;
+            const filterCount = (state.columnFilters[column]?.length || 0) + (state.slicerSelections[column]?.length || 0) + (state.textFilters[column] ? 1 : 0);
+            const hasFilter = filterCount > 0;
+            const badge = hasFilter ? `<span style="color:#4b6bfb; font-weight:700; margin-left:6px;">${formatCount(filterCount)}</span>` : '';
             const bgColor = hasFilter ? '#ffc107' : (isChecked ? '#667eea' : 'white');
             const textColor = isChecked && !hasFilter ? 'white' : '#333';
             const borderColor = hasFilter ? '#ffc107' : (isChecked ? '#667eea' : '#ddd');
             const div = document.createElement('div');
             div.style.cssText = `padding: 3px 6px; margin-bottom: 1px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; background: ${bgColor}; color: ${textColor}; border: 1px solid ${borderColor}; transition: all 0.2s; display: flex; align-items: center;`;
             div.innerHTML = `
-                <label for="${tableId}-check-${column}" style="cursor: pointer; margin: 0; font-size: 0.7rem; line-height: 1.2; display: flex; align-items: center; width: 100%;">
-                    <input type="checkbox" value="${column}" id="${tableId}-check-${column}" ${isChecked ? 'checked' : ''} onchange="toggleSlicerColumn('${tableId}','${column}')" style="width: 12px; height: 12px; margin-right: 6px; cursor: pointer; flex-shrink: 0;">
-                    ${state.fieldNames[column] || column}
+                <label for="${tableId}-check-${column}" style="cursor: pointer; margin: 0; font-size: 0.7rem; line-height: 1.2; display: flex; align-items: center; width: 100%; justify-content: space-between;">
+                    <span style="display:flex; align-items:center; gap:6px;">
+                        <input type="checkbox" value="${column}" id="${tableId}-check-${column}" ${isChecked ? 'checked' : ''} onchange="toggleSlicerColumn('${tableId}','${column}')" style="width: 12px; height: 12px; margin-right: 6px; cursor: pointer; flex-shrink: 0;">
+                        ${state.fieldNames[column] || column}
+                    </span>
+                    ${badge}
                 </label>`;
             div.onmouseenter = function () { if (!isChecked && !hasFilter) this.style.background = '#f0f0f0'; };
-            div.onmouseleave = function () { const currentHasFilter = state.slicerSelections[column] && state.slicerSelections[column].length > 0; const currentBg = currentHasFilter ? '#ffc107' : (isChecked ? '#667eea' : 'white'); this.style.background = currentBg; };
+            div.onmouseleave = function () { const currentHasFilter = ((state.slicerSelections[column] && state.slicerSelections[column].length > 0) || (state.columnFilters[column] && state.columnFilters[column].length > 0) || state.textFilters[column]); const currentBg = currentHasFilter ? '#ffc107' : (isChecked ? '#667eea' : 'white'); this.style.background = currentBg; };
             checkList.appendChild(div);
         });
     }
@@ -732,15 +776,18 @@
         row2.style.cssText = 'display:flex; flex-wrap:nowrap; gap:10px;';
 
         const createSlicerCard = (column) => {
-            const hasFilter = state.slicerSelections[column] && state.slicerSelections[column].length > 0;
+            const selectedCount = (state.slicerSelections[column] || []).length;
+            const hasFilter = selectedCount > 0;
             const headerBgColor = hasFilter ? '#ffc107' : 'transparent';
             const headerTextColor = '#667eea';
+            const badgeHtml = `<span class="badge bg-primary ms-1" style="font-size:0.65rem;">${formatCount(selectedCount)}</span>`;
             const slicer = document.createElement('div');
             slicer.style.cssText = 'flex: 0 0 180px; margin-right: 0; margin-bottom: 0;';
             slicer.innerHTML = `
                 <div class="slicer-card" style="border: 1px solid #ddd; border-radius: 6px; padding: 8px; background: #f8f9fa; width: 180px;">
-                    <h6 style="font-size: 0.7rem; font-weight: bold; margin-bottom: 6px; color: ${headerTextColor}; background: ${headerBgColor}; padding: 2px 4px; border-radius: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${state.fieldNames[column] || column}">
-                        ${state.fieldNames[column] || column}
+                    <h6 style="font-size: 0.7rem; font-weight: bold; margin-bottom: 6px; color: ${headerTextColor}; background: ${headerBgColor}; padding: 2px 4px; border-radius: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display:flex; align-items:center; justify-content:space-between;" title="${state.fieldNames[column] || column}">
+                        <span>${state.fieldNames[column] || column}</span>
+                        ${badgeHtml}
                     </h6>
                     <div class="slicer-items" id="${tableId}-slicer-${column}" style="max-height: 150px; overflow-y: auto;"></div>
                 </div>`;
@@ -802,6 +849,15 @@
         const availableValues = [...new Set(availableData.map(item => item[column]))].sort();
         const selectedValues = state.slicerSelections[column] || [];
         slicerDiv.innerHTML = '';
+
+        const allSelected = selectedValues.length === 0 || selectedValues.length === availableValues.length;
+        const selectAllDiv = document.createElement('div');
+        selectAllDiv.className = 'slicer-item';
+        selectAllDiv.style.cssText = 'padding: 3px 6px; margin-bottom: 4px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; background: white; color: #333; border: 1px solid #ddd; display:flex; align-items:center; gap:6px;';
+        selectAllDiv.innerHTML = `<input type="checkbox" ${allSelected ? 'checked' : ''} style="width:12px;height:12px;"> <strong>(Tümünü Seç)</strong>`;
+        selectAllDiv.onclick = () => toggleSlicerSelectAll(tableId, column, availableValues);
+        slicerDiv.appendChild(selectAllDiv);
+
         availableValues.forEach(value => {
             const isSelected = selectedValues.includes(String(value));
             const itemDiv = document.createElement('div');
@@ -813,6 +869,20 @@
             itemDiv.onmouseleave = function () { if (!isSelected) this.style.background = 'white'; };
             slicerDiv.appendChild(itemDiv);
         });
+    }
+
+    function toggleSlicerSelectAll(tableId, column, availableValues) {
+        const state = getState(tableId); if (!state) return;
+        const current = state.slicerSelections[column] || [];
+        const allSelected = current.length === 0 || current.length === availableValues.length;
+        if (allSelected) {
+            delete state.slicerSelections[column];
+        } else {
+            state.slicerSelections[column] = availableValues.map(v => String(v));
+        }
+        createColumnCheckList(tableId);
+        updateAllSlicers(tableId);
+        applySlicerFilters(tableId);
     }
 
     function toggleSlicerValue(tableId, column, value) {
@@ -838,6 +908,14 @@
                 if (header) {
                     header.style.background = hasFilter ? '#ffc107' : 'transparent';
                     header.style.color = '#667eea';
+                    let badge = header.querySelector('.badge');
+                    if (!badge) {
+                        badge = document.createElement('span');
+                        badge.className = 'badge bg-primary ms-1';
+                        badge.style.fontSize = '0.65rem';
+                        header.appendChild(badge);
+                    }
+                    badge.textContent = formatCount((state.slicerSelections[column] || []).length);
                 }
             }
         });
@@ -847,7 +925,13 @@
         applyAllFilters(tableId);
     }
 
-    // Click outside to close filters
+    function toggleAdvancedSearch(tableId) {
+        const el = document.getElementById(`${tableId}-advancedSearch`);
+        if (!el) return;
+        const collapse = bootstrap?.Collapse?.getInstance?.(el) || new bootstrap.Collapse(el, { toggle: false });
+        if (el.classList.contains('show')) collapse.hide(); else collapse.show();
+    }
+
     document.addEventListener('click', function (e) {
         Object.keys(states).forEach(tableId => {
             if (!e.target.closest('.filter-dropdown') && !e.target.closest('.filter-icon')) {
@@ -857,7 +941,6 @@
         });
     });
 
-    // stub action handlers
     function viewItem(id) { alert(`Görüntüleniyor: ID ${id}`); }
     function editItem(id) { alert(`Düzenleniyor: ID ${id}`); }
     function deleteItem(id) {
@@ -870,14 +953,12 @@
         }
     }
 
-    // stub implementations for advanced controls
     function exportData(type, tableId) {
         const safeType = (type || '').toString().toUpperCase();
         console.log(`Export requested (${safeType}) for ${tableId}`);
         alert(`${safeType || 'FORMAT'} export işlemi eklenecek.`);
     }
 
-    // expose globals
     window.initGridTable = initGridTable;
     window.toggleFilter = toggleFilter;
     window.switchFilterMode = switchFilterMode;
@@ -905,4 +986,6 @@
     window.toggleSlicerColumn = toggleSlicerColumn;
     window.applySlicerFilters = applySlicerFilters;
     window.updateAllSlicers = updateAllSlicers;
+    window.toggleAdvancedSearch = toggleAdvancedSearch;
+    window.toggleSlicerSelectAll = toggleSlicerSelectAll;
 })(window);
