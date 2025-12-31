@@ -7,6 +7,60 @@
         const num = parseInt(n || 0, 10);
         return num > MAX_BADGE ? `${MAX_BADGE}+` : `${num}`;
     };
+    const sanitizeId = (key) => String(key || '').replace(/[^a-zA-Z0-9_-]/g, '');
+
+    function ensureActiveFilterStyles() {
+        if (document.getElementById('archix-active-filter-styles')) return;
+        const style = document.createElement('style');
+        style.id = 'archix-active-filter-styles';
+        style.textContent = `
+            .filter-summary-accordion .accordion-button.filter-accordion-btn {
+                background:#ffc107 !important;
+                color:#4b6bfb !important;
+                font-weight:700;
+                font-size:0.9rem;
+                line-height:1.1;
+                box-shadow:none !important;
+                border:1px solid #e6b800;
+                border-radius:6px;
+                padding:6px 10px;
+                gap:8px;
+            }
+            .filter-summary-accordion .accordion-button.filter-accordion-btn:not(.collapsed) {
+                background:#ffc107 !important;
+                color:#4b6bfb !important;
+                box-shadow:none !important;
+            }
+            .filter-summary-accordion .accordion-button.filter-accordion-btn:focus {
+                box-shadow:none !important;
+                color:#4b6bfb !important;
+            }
+            .filter-summary-accordion .accordion-button.filter-accordion-btn::after {
+                filter: invert(34%) sepia(63%) saturate(2175%) hue-rotate(214deg) brightness(94%) contrast(92%);
+            }
+            .filter-summary-accordion .filter-summary-badge {
+                background:#ffc107 !important;
+                color:#4b6bfb !important;
+                font-weight:700;
+                border:1px solid #e6b800;
+            }
+            .filter-summary-accordion .accordion-body .filter-tag {
+                font-size:0.7rem;
+                font-weight:600;
+                background:#4b6bfb;
+                color:#fff;
+                padding:4px 8px;
+                border-radius:4px;
+                display:inline-block;
+            }
+            .filter-summary-accordion .accordion-body .filter-tag.badge-more {
+                background:#ffc107;
+                color:#333;
+                font-weight:700;
+            }
+        `;
+        document.head.appendChild(style);
+    }
 
     function initGridTable(tableId, data, columns, showActions = false) {
         if (!tableId || !Array.isArray(data) || !Array.isArray(columns)) return;
@@ -291,6 +345,11 @@
         }
     }
 
+    function refreshFilterIcons(tableId) {
+        const state = getState(tableId); if (!state) return;
+        Object.keys(state.fieldNames).forEach(column => updateFilterIcon(tableId, column));
+    }
+
     function applyAllFilters(tableId) {
         const state = getState(tableId); if (!state) return;
         const searchTerm = (document.getElementById(`${tableId}-searchInput`)?.value || '').toLocaleLowerCase('tr-TR');
@@ -339,6 +398,8 @@
         state.currentPage = 1;
         render(tableId);
         updateAllSlicers(tableId);
+        refreshFilterIcons(tableId);
+        displayActiveFilters(tableId);
     }
 
     function displayActiveFilters(tableId) {
@@ -348,8 +409,10 @@
         const filterCountSpan = document.getElementById(`${tableId}-filterCount`);
         if (!container || !tagsContainer || !filterCountSpan) return;
 
+        ensureActiveFilterStyles();
+
         const openAccordions = new Set();
-        tagsContainer.querySelectorAll('.accordion-collapse.show').forEach(c => openAccordions.add(c.id));
+        tagsContainer.querySelectorAll('.accordion-collapse.show').forEach(c => openAccordions.add(c.dataset.collapseId || c.id));
 
         const activeFilterCount = Object.keys(state.columnFilters).length + Object.keys(state.textFilters).length + Object.keys(state.slicerSelections).length;
         if (activeFilterCount === 0) {
@@ -374,9 +437,9 @@
         for (let column in state.slicerSelections) allActiveFilters.push({ column, type: 'slicer', values: state.slicerSelections[column], order: columnOrder.indexOf(column) });
         allActiveFilters.sort((a, b) => a.order - b.order);
 
-        let accordionIndex = 0;
         allActiveFilters.forEach(f => {
-            const colCollapseId = `${tableId}-colCollapse${accordionIndex}`;
+            const colCollapseId = `${tableId}-colCollapse-${sanitizeId(f.column)}`;
+            const isOpen = openAccordions.has(colCollapseId);
             const columnTitle = state.fieldNames[f.column] || f.column;
             const columnAccordion = document.createElement('div');
             columnAccordion.className = 'accordion mb-2 filter-summary-accordion';
@@ -389,24 +452,24 @@
                     tagsHtml += `
                         <span class="filter-tag d-inline-block mb-1 me-1">
                             ${value}
-                            <i class="bi bi-x-circle" onclick="removeIndividualFilter('${tableId}','${f.column}','${value}', event)"></i>
+                            <i class="bi bi-x-circle" onclick="removeIndividualFilter('${tableId}','${f.column}','${value}', event)" style="margin-left:6px;cursor:pointer;color:#fff;"></i>
                         </span>`;
                 });
                 const remaining = values.length - limited.length;
                 if (remaining > 0) {
-                    tagsHtml += `<span class="filter-tag d-inline-block mb-1 me-1">+${remaining}</span>`;
+                    tagsHtml += `<span class="filter-tag badge-more d-inline-block mb-1 me-1">+${remaining}</span>`;
                 }
                 const badgeCount = formatCount(values.length);
                 columnAccordion.innerHTML = `
                     <div class="accordion-item border-0">
                         <h2 class="accordion-header">
-                            <button class="accordion-button collapsed filter-summary-trigger" type="button" data-bs-toggle="collapse" data-bs-target="#${colCollapseId}">
-                                <strong>${columnTitle}</strong>
-                                <span class="badge bg-primary ms-2 filter-summary-badge">${badgeCount}</span>
+                            <button class="accordion-button filter-summary-trigger filter-accordion-btn ${isOpen ? '' : 'collapsed'}" type="button" data-target="#${colCollapseId}" aria-expanded="${isOpen ? 'true' : 'false'}" aria-controls="${colCollapseId}">
+                                <span class="filter-accordion-title">${columnTitle}</span>
+                                <span class="badge filter-summary-badge ms-2">${badgeCount}</span>
                             </button>
                         </h2>
-                        <div id="${colCollapseId}" class="accordion-collapse collapse ${openAccordions.has(colCollapseId) ? 'show' : ''}">
-                            <div class="accordion-body filter-accordion-body">
+                        <div id="${colCollapseId}" data-collapse-id="${colCollapseId}" class="accordion-collapse collapse ${isOpen ? 'show' : ''}">
+                            <div class="accordion-body filter-accordion-body" style="font-size:0.7rem;">
                                 ${tagsHtml}
                             </div>
                         </div>
@@ -432,23 +495,22 @@
                 columnAccordion.innerHTML = `
                     <div class="accordion-item border-0">
                         <h2 class="accordion-header">
-                            <button class="accordion-button collapsed filter-summary-trigger" type="button" data-bs-toggle="collapse" data-bs-target="#${colCollapseId}">
-                                <strong>${columnTitle}</strong>
-                                <span class="badge bg-primary ms-2 filter-summary-badge">${formatCount(1)}</span>
+                            <button class="accordion-button filter-summary-trigger filter-accordion-btn ${isOpen ? '' : 'collapsed'}" type="button" data-target="#${colCollapseId}" aria-expanded="${isOpen ? 'true' : 'false'}" aria-controls="${colCollapseId}">
+                                <span class="filter-accordion-title">${columnTitle}</span>
+                                <span class="badge filter-summary-badge ms-2">${formatCount(1)}</span>
                             </button>
                         </h2>
-                        <div id="${colCollapseId}" class="accordion-collapse collapse ${openAccordions.has(colCollapseId) ? 'show' : ''}">
-                            <div class="accordion-body filter-accordion-body">
+                        <div id="${colCollapseId}" data-collapse-id="${colCollapseId}" class="accordion-collapse collapse ${isOpen ? 'show' : ''}">
+                            <div class="accordion-body filter-accordion-body" style="font-size:0.7rem;">
                                 <span class="filter-tag">
                                     ${displayText}
-                                    <i class="bi bi-x-circle" onclick="removeColumnFilter('${tableId}','${f.column}')"></i>
+                                    <i class="bi bi-x-circle" onclick="removeColumnFilter('${tableId}','${f.column}')" style="margin-left:6px;cursor:pointer;color:#fff;"></i>
                                 </span>
                             </div>
                         </div>
                     </div>`;
             }
             tagsContainer.appendChild(columnAccordion);
-            accordionIndex++;
         });
 
         wireFilterAccordions(tableId);
@@ -457,25 +519,32 @@
     function wireFilterAccordions(tableId) {
         const container = document.getElementById(`${tableId}-filterTags`);
         if (!container) return;
-        const triggers = container.querySelectorAll('.filter-summary-trigger');
-        triggers.forEach(btn => {
-            const target = btn.getAttribute('data-bs-target');
-            if (!target) return;
-            const collapseEl = document.querySelector(target);
+
+        container.querySelectorAll('.filter-summary-trigger').forEach(btn => {
+            const targetId = btn.getAttribute('data-target');
+            if (!targetId) return;
+
+            const collapseEl = document.querySelector(targetId);
             if (!collapseEl) return;
-            const instance = bootstrap?.Collapse?.getInstance?.(collapseEl) || new bootstrap.Collapse(collapseEl, { toggle: false });
+
             btn.onclick = function (e) {
                 e.preventDefault();
                 e.stopPropagation();
-                if (collapseEl.classList.contains('show')) {
-                    instance.hide();
+
+                const isCurrentlyOpen = collapseEl.classList.contains('show');
+
+                if (isCurrentlyOpen) {
+                    collapseEl.classList.remove('show');
+                    btn.classList.add('collapsed');
+                    btn.setAttribute('aria-expanded', 'false');
                 } else {
-                    instance.show();
+                    collapseEl.classList.add('show');
+                    btn.classList.remove('collapsed');
+                    btn.setAttribute('aria-expanded', 'true');
                 }
             };
         });
     }
-
     function removeIndividualFilter(tableId, column, value, event) {
         event?.stopPropagation();
         const state = getState(tableId); if (!state) return;
@@ -514,8 +583,16 @@
         const allCollapses = container.querySelectorAll('.accordion-collapse');
         const isAnyOpen = Array.from(allCollapses).some(c => c.classList.contains('show'));
         allCollapses.forEach(collapse => {
-            const bsCollapse = bootstrap?.Collapse?.getInstance?.(collapse) || new bootstrap.Collapse(collapse, { toggle: false });
-            if (isAnyOpen) bsCollapse.hide(); else bsCollapse.show();
+            const headerBtn = collapse.previousElementSibling?.querySelector('.filter-summary-trigger');
+            if (isAnyOpen) {
+                collapse.classList.remove('show');
+                headerBtn?.classList.add('collapsed');
+                headerBtn?.setAttribute('aria-expanded', 'false');
+            } else {
+                collapse.classList.add('show');
+                headerBtn?.classList.remove('collapsed');
+                headerBtn?.setAttribute('aria-expanded', 'true');
+            }
         });
         btn.innerHTML = isAnyOpen ? '<i class="bi bi-chevron-down"></i> Hepsini Aç' : '<i class="bi bi-chevron-up"></i> Hepsini Kapat';
     }
@@ -749,7 +826,7 @@
         }
         createColumnCheckList(tableId);
         rebuildSlicers(tableId);
-        if (Object.keys(state.slicerSelections).length > 0) applySlicerFilters(tableId);
+        applySlicerFilters(tableId);
     }
 
     function rebuildSlicers(tableId) {
@@ -918,6 +995,7 @@
                     badge.textContent = formatCount((state.slicerSelections[column] || []).length);
                 }
             }
+            updateFilterIcon(tableId, column);
         });
     }
 

@@ -1,5 +1,18 @@
-1. Değişklikleri Library.Web projesine yapıyorsun. build yapınca ArchiX.WebHost projesine otomatik geliyor.
-bu arada kodları ekrana yazma kesinlikle yazma zorunlu ise yapılacak bir şey olacak ise yaz. tread aşırı derecede gereksiz şekilde büyüyor
+﻿sen yarıda kestim kod yazman çok uzun sürüyor. Kodu benim koplamamam için bana ver.Aşağıdaki kurallara göre çalışacaksın. 
+
+1. Değişklikleri Library.Web projesine yapıyorsun. build yapınca zaten ArchiX.WebHost projesine otomatik geliyor.
+2. bana yacacağım kody vereceğin zaman
+	a. kodu tam ve tek parça olarak veriyorsun.
+    b. kodu verirken başına yeni mi yoksa değişiklik mi olduğunu yazıyorsun. 
+	c. Dizin: Dosyanın  full dizini.
+	d. Dosya Adı: Dosyanın adı.
+	e. eğer sadece değişecek parçaları veriyorsan yukarıdaki isteklerime ilave olarak,
+		- Tahmini satır sayısı
+		- Hangi kod parçasından sonra yazılcaksa onu belirtiyorsun.
+
+
+Kodu sen güncelleme bana ver bunu asala unutma. Ne anladıysan bana yorumla şimdi
+Yorum yaparken örnek olsn die  kodları ekrana yazma kesinlikle yazma zorunlu ise yapılacak bir şey olacak ise yaz. thread aşırı derecede gereksiz şekilde büyüyor
 
 
 
