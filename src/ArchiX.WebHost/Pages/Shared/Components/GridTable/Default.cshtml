@@ -29,39 +29,43 @@
                     AdvancedSearchText = Model.AdvancedSearchText,
                     ExportText = Model.ExportText,
                     ShowAdvancedSearch = true,
-                    ShowExport = true
+                    ShowExport = true,
+                    IncludeAdvancedSearchPanel = true
                 })
             }
 
-            <div class="collapse mb-3" id="@tableId-advancedSearch">
-                <div class="card advanced-search-card">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-2">
-                                <div class="column-selector-panel">
-                                    <h6 class="column-selector-title">
-                                        <span class="column-selector-title-group">
-                                            <input type="checkbox" class="column-selector-toggle" id="@tableId-toggleAllColumns" onchange="toggleAllColumns('@tableId')" title="Hepsi/Hiçbiri">
-                                            Kolonlar
-                                        </span>
-                                        <button onclick="clearAdvancedFilters('@tableId')" class="btn-advanced-clear" title="Gelişmiş Filtreleri Temizle">
-                                            Temizle
-                                        </button>
-                                    </h6>
-                                    <div id="@tableId-columnCheckList"></div>
+            @if (!Model.ShowToolbar)
+            {
+                <div class="collapse mb-3" id="@tableId-advancedSearch">
+                    <div class="card advanced-search-card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <div class="column-selector-panel">
+                                        <h6 class="column-selector-title">
+                                            <span class="column-selector-title-group">
+                                                <input type="checkbox" class="column-selector-toggle" id="@tableId-toggleAllColumns" onchange="toggleAllColumns('@tableId')" title="Hepsi/Hiçbiri">
+                                                Kolonlar
+                                            </span>
+                                            <button onclick="clearAdvancedFilters('@tableId')" class="btn-advanced-clear" title="Gelişmiş Filtreleri Temizle">
+                                                Temizle
+                                            </button>
+                                        </h6>
+                                        <div id="@tableId-columnCheckList"></div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-10">
-                                <div id="@tableId-slicerContainer">
-                                    <div id="@tableId-noSlicerMsg" class="grid-no-slicer">
-                                        <i class="bi bi-arrow-left"></i> Soldaki listeden kolon seçin
+                                <div class="col-md-10">
+                                    <div id="@tableId-slicerContainer">
+                                        <div id="@tableId-noSlicerMsg" class="grid-no-slicer">
+                                            <i class="bi bi-arrow-left"></i> Soldaki listeden kolon seçin
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            }
 
             <div id="@tableId-activeFilters">
                 <div class="accordion mb-3" id="@tableId-filterAccordion">
@@ -77,7 +81,7 @@
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div id="@tableId-filterTags"></div>
                                     <div class="d-flex flex-column gap-2 ms-3">
-                                    <button class="btn btn-sm btn-outline-secondary filter-manage-btn" onclick="resetAllFilters('@tableId')">
+                                        <button class="btn btn-sm btn-outline-secondary filter-manage-btn" onclick="resetAllFilters('@tableId')">
                                             <i class="bi bi-trash"></i> Tümünü Temizle
                                         </button>
                                         <button class="btn btn-sm btn-outline-primary filter-manage-btn" onclick="toggleAllFilterAccordions('@tableId')" id="@tableId-toggleAllBtn">

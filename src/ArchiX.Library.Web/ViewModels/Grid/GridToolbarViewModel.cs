@@ -10,4 +10,6 @@ public class GridToolbarViewModel
     public string ExportText { get; set; } = "Aktar";
     public bool ShowAdvancedSearch { get; set; } = true;
     public bool ShowExport { get; set; } = true;
+
+    public bool IncludeAdvancedSearchPanel { get; set; } = false;
 }

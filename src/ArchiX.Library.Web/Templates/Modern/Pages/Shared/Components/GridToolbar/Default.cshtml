@@ -43,4 +43,37 @@
             </div>
         }
     </div>
+
+    @if (Model.IncludeAdvancedSearchPanel)
+    {
+        <div class="collapse mb-3" id="@Model.Id-advancedSearch">
+            <div class="card advanced-search-card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="column-selector-panel">
+                                <h6 class="column-selector-title">
+                                    <span class="column-selector-title-group">
+                                        <input type="checkbox" class="column-selector-toggle" id="@Model.Id-toggleAllColumns" onchange="toggleAllColumns('@Model.Id')" title="Hepsi/Hiçbiri">
+                                        Kolonlar
+                                    </span>
+                                    <button onclick="clearAdvancedFilters('@Model.Id')" class="btn-advanced-clear" title="Gelişmiş Filtreleri Temizle">
+                                        Temizle
+                                    </button>
+                                </h6>
+                                <div id="@Model.Id-columnCheckList"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-10">
+                            <div id="@Model.Id-slicerContainer">
+                                <div id="@Model.Id-noSlicerMsg" class="grid-no-slicer">
+                                    <i class="bi bi-arrow-left"></i> Soldaki listeden kolon seçin
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 </div>
