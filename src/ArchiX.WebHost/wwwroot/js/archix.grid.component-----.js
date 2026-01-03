@@ -66,61 +66,6 @@
         document.head.appendChild(style);
     }
 
-    function getActiveFiltersCollapseEl(tableId) {
-        return document.getElementById(`${tableId}-collapseFilters`);
-    }
-
-    function toggleActiveFiltersAccordion(tableId, ev) {
-        ev?.preventDefault?.();
-        ev?.stopPropagation?.();
-
-        const el = getActiveFiltersCollapseEl(tableId);
-        if (!el || !window.bootstrap?.Collapse) return;
-
-        const instance = window.bootstrap.Collapse.getOrCreateInstance(el, { toggle: false });
-        if (el.classList.contains('show')) instance.hide(); else instance.show();
-    }
-
-    function ensureActiveFiltersAccordionBehavior(tableId) {
-        const headerBtn = document.querySelector(`#${tableId}-filterAccordion .active-filter-toggle`);
-        const collapseEl = getActiveFiltersCollapseEl(tableId);
-
-        if (!headerBtn || !collapseEl || !window.bootstrap?.Collapse) return;
-
-        if (headerBtn.dataset.archixBound === '1') return;
-        headerBtn.dataset.archixBound = '1';
-
-        headerBtn.removeAttribute('data-bs-toggle');
-        headerBtn.removeAttribute('data-bs-target');
-
-        headerBtn.addEventListener('click', (e) => toggleActiveFiltersAccordion(tableId, e));
-
-        collapseEl.addEventListener('shown.bs.collapse', () => {
-            headerBtn.classList.remove('collapsed');
-            headerBtn.setAttribute('aria-expanded', 'true');
-        });
-        collapseEl.addEventListener('hidden.bs.collapse', () => {
-            headerBtn.classList.add('collapsed');
-            headerBtn.setAttribute('aria-expanded', 'false');
-        });
-
-        const isOpen = collapseEl.classList.contains('show');
-        headerBtn.classList.toggle('collapsed', !isOpen);
-        headerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-    }
-
-    function toggleActiveFilterColumnAccordion(tableId, colKey, ev) {
-        ev?.preventDefault?.();
-        ev?.stopPropagation?.();
-
-        const safeCol = sanitizeId(colKey);
-        const collapseEl = document.getElementById(`${tableId}-colCollapse-${safeCol}`);
-        if (!collapseEl || !window.bootstrap?.Collapse) return;
-
-        const instance = window.bootstrap.Collapse.getOrCreateInstance(collapseEl, { toggle: false });
-        if (collapseEl.classList.contains('show')) instance.hide(); else instance.show();
-    }
-
     function initGridTable(tableId, data, columns, showActions = false) {
         if (!tableId || !Array.isArray(data) || !Array.isArray(columns)) return;
         const fieldNames = {};
@@ -148,7 +93,6 @@
         render(tableId);
         initSlicers(tableId);
         displayActiveFilters(tableId);
-        ensureActiveFiltersAccordionBehavior(tableId);
     }
 
     function bindSearch(tableId) {
@@ -462,7 +406,6 @@
         updateAllSlicers(tableId);
         refreshFilterIcons(tableId);
         displayActiveFilters(tableId);
-        ensureActiveFiltersAccordionBehavior(tableId);
     }
 
     function displayActiveFilters(tableId) {
@@ -521,8 +464,7 @@
         allActiveFilters.sort((a, b) => a.order - b.order);
 
         allActiveFilters.forEach(f => {
-            const safeCol = sanitizeId(f.column);
-            const colCollapseId = `${tableId}-colCollapse-${safeCol}`;
+            const colCollapseId = `${tableId}-colCollapse-${sanitizeId(f.column)}`;
             const isOpen = openAccordions.has(colCollapseId);
             const columnTitle = state.fieldNames[f.column] || f.column;
 
@@ -539,13 +481,13 @@
             btn.className = `accordion-button filter-summary-trigger filter-accordion-btn ${isOpen ? '' : 'collapsed'}`;
             btn.type = 'button';
 
-            btn.dataset.colKey = f.column;
-            btn.removeAttribute('data-bs-toggle');
-            btn.removeAttribute('data-bs-target');
-            btn.addEventListener('click', (e) => toggleActiveFilterColumnAccordion(tableId, f.column, e));
-
+            // ÖNEMLİ: Bootstrap collapse tetikleyici (manuel onclick yok)
+            
+            btn.setAttribute('data-bs-toggle', 'collapse');  // ← YENİ SATIR EKLE
+            btn.setAttribute('data-bs-target', `#${colCollapseId}`);
             btn.setAttribute('aria-controls', colCollapseId);
             btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            // btn.onclick = ... TÜM BLOĞU SİL (13 satır)
 
             const titleSpan = document.createElement('span');
             titleSpan.className = 'filter-accordion-title';
@@ -558,6 +500,7 @@
             collapseDiv.id = colCollapseId;
             collapseDiv.dataset.collapseId = colCollapseId;
             collapseDiv.className = `accordion-collapse collapse ${isOpen ? 'show' : ''}`;
+
 
             const bodyDiv = document.createElement('div');
             bodyDiv.className = 'accordion-body filter-accordion-body';
@@ -628,6 +571,7 @@
             btn.appendChild(titleSpan);
             btn.appendChild(badgeSpan);
 
+            // Bootstrap eventleri ile class/aria senkronu
             collapseDiv.addEventListener('shown.bs.collapse', () => {
                 btn.classList.remove('collapsed');
                 btn.setAttribute('aria-expanded', 'true');
@@ -643,9 +587,9 @@
             accordionItem.appendChild(collapseDiv);
             accordionDiv.appendChild(accordionItem);
             tagsContainer.appendChild(accordionDiv);
-        });
 
-        ensureActiveFiltersAccordionBehavior(tableId);
+        
+        });
     }
 
     function removeIndividualFilter(tableId, column, value, event) {
@@ -682,16 +626,21 @@
     function toggleAllFilterAccordions(tableId) {
         const container = document.getElementById(`${tableId}-filterTags`);
         const btn = document.getElementById(`${tableId}-toggleAllBtn`);
-        if (!container || !btn || !window.bootstrap?.Collapse) return;
-
+        if (!container || !btn) return;
         const allCollapses = container.querySelectorAll('.accordion-collapse');
         const isAnyOpen = Array.from(allCollapses).some(c => c.classList.contains('show'));
-
-        allCollapses.forEach(collapseEl => {
-            const instance = window.bootstrap.Collapse.getOrCreateInstance(collapseEl, { toggle: false });
-            if (isAnyOpen) instance.hide(); else instance.show();
+        allCollapses.forEach(collapse => {
+            const headerBtn = collapse.previousElementSibling?.querySelector('.filter-summary-trigger');
+            if (isAnyOpen) {
+                collapse.classList.remove('show');
+                headerBtn?.classList.add('collapsed');
+                headerBtn?.setAttribute('aria-expanded', 'false');
+            } else {
+                collapse.classList.add('show');
+                headerBtn?.classList.remove('collapsed');
+                headerBtn?.setAttribute('aria-expanded', 'true');
+            }
         });
-
         btn.innerHTML = isAnyOpen ? '<i class="bi bi-chevron-down"></i> Hepsini Aç' : '<i class="bi bi-chevron-up"></i> Hepsini Kapat';
     }
 
@@ -710,7 +659,6 @@
         createColumnCheckList(tableId);
         updateAllSlicers(tableId);
         displayActiveFilters(tableId);
-        ensureActiveFiltersAccordionBehavior(tableId);
     }
 
     function sortTable(tableId, column) {

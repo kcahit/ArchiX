@@ -26,6 +26,10 @@
                 padding:6px 10px;
                 gap:8px;
             }
+            .filter-summary-accordion .accordion-button.filter-accordion-btn.collapsed {
+                background:#ffc107 !important;
+                color:#4b6bfb !important;
+            }
             .filter-summary-accordion .accordion-button.filter-accordion-btn:not(.collapsed) {
                 background:#ffc107 !important;
                 color:#4b6bfb !important;
@@ -62,6 +66,61 @@
         document.head.appendChild(style);
     }
 
+    function getActiveFiltersCollapseEl(tableId) {
+        return document.getElementById(`${tableId}-collapseFilters`);
+    }
+
+    function toggleActiveFiltersAccordion(tableId, ev) {
+        ev?.preventDefault?.();
+        ev?.stopPropagation?.();
+
+        const el = getActiveFiltersCollapseEl(tableId);
+        if (!el || !window.bootstrap?.Collapse) return;
+
+        const instance = window.bootstrap.Collapse.getOrCreateInstance(el, { toggle: false });
+        if (el.classList.contains('show')) instance.hide(); else instance.show();
+    }
+
+    function ensureActiveFiltersAccordionBehavior(tableId) {
+        const headerBtn = document.querySelector(`#${tableId}-filterAccordion .active-filter-toggle`);
+        const collapseEl = getActiveFiltersCollapseEl(tableId);
+
+        if (!headerBtn || !collapseEl || !window.bootstrap?.Collapse) return;
+
+        if (headerBtn.dataset.archixBound === '1') return;
+        headerBtn.dataset.archixBound = '1';
+
+        headerBtn.removeAttribute('data-bs-toggle');
+        headerBtn.removeAttribute('data-bs-target');
+
+        headerBtn.addEventListener('click', (e) => toggleActiveFiltersAccordion(tableId, e));
+
+        collapseEl.addEventListener('shown.bs.collapse', () => {
+            headerBtn.classList.remove('collapsed');
+            headerBtn.setAttribute('aria-expanded', 'true');
+        });
+        collapseEl.addEventListener('hidden.bs.collapse', () => {
+            headerBtn.classList.add('collapsed');
+            headerBtn.setAttribute('aria-expanded', 'false');
+        });
+
+        const isOpen = collapseEl.classList.contains('show');
+        headerBtn.classList.toggle('collapsed', !isOpen);
+        headerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    }
+
+    function toggleActiveFilterColumnAccordion(tableId, colKey, ev) {
+        ev?.preventDefault?.();
+        ev?.stopPropagation?.();
+
+        const safeCol = sanitizeId(colKey);
+        const collapseEl = document.getElementById(`${tableId}-colCollapse-${safeCol}`);
+        if (!collapseEl || !window.bootstrap?.Collapse) return;
+
+        const instance = window.bootstrap.Collapse.getOrCreateInstance(collapseEl, { toggle: false });
+        if (collapseEl.classList.contains('show')) instance.hide(); else instance.show();
+    }
+
     function initGridTable(tableId, data, columns, showActions = false) {
         if (!tableId || !Array.isArray(data) || !Array.isArray(columns)) return;
         const fieldNames = {};
@@ -89,6 +148,7 @@
         render(tableId);
         initSlicers(tableId);
         displayActiveFilters(tableId);
+        ensureActiveFiltersAccordionBehavior(tableId);
     }
 
     function bindSearch(tableId) {
@@ -100,6 +160,8 @@
     }
 
     function getState(tableId) { return states[tableId]; }
+
+
 
     function updateRecordCount(tableId) {
         const state = getState(tableId); if (!state) return;
@@ -400,6 +462,7 @@
         updateAllSlicers(tableId);
         refreshFilterIcons(tableId);
         displayActiveFilters(tableId);
+        ensureActiveFiltersAccordionBehavior(tableId);
     }
 
     function displayActiveFilters(tableId) {
@@ -412,9 +475,14 @@
         ensureActiveFilterStyles();
 
         const openAccordions = new Set();
-        tagsContainer.querySelectorAll('.accordion-collapse.show').forEach(c => openAccordions.add(c.dataset.collapseId || c.id));
+        tagsContainer.querySelectorAll('.accordion-collapse.show')
+            .forEach(c => openAccordions.add(c.dataset.collapseId || c.id));
 
-        const activeFilterCount = Object.keys(state.columnFilters).length + Object.keys(state.textFilters).length + Object.keys(state.slicerSelections).length;
+        const activeFilterCount =
+            Object.keys(state.columnFilters).length +
+            Object.keys(state.textFilters).length +
+            Object.keys(state.slicerSelections).length;
+
         if (activeFilterCount === 0) {
             container.style.display = 'none';
             filterCountSpan.textContent = '0';
@@ -432,48 +500,96 @@
 
         const columnOrder = Object.keys(state.fieldNames);
         const allActiveFilters = [];
-        for (let column in state.columnFilters) allActiveFilters.push({ column, type: 'list', values: state.columnFilters[column], order: columnOrder.indexOf(column) });
-        for (let column in state.textFilters) allActiveFilters.push({ column, type: 'text', filter: state.textFilters[column], order: columnOrder.indexOf(column) });
-        for (let column in state.slicerSelections) allActiveFilters.push({ column, type: 'slicer', values: state.slicerSelections[column], order: columnOrder.indexOf(column) });
+        for (let column in state.columnFilters) {
+            allActiveFilters.push({
+                column, type: 'list', values: state.columnFilters[column],
+                order: columnOrder.indexOf(column)
+            });
+        }
+        for (let column in state.textFilters) {
+            allActiveFilters.push({
+                column, type: 'text', filter: state.textFilters[column],
+                order: columnOrder.indexOf(column)
+            });
+        }
+        for (let column in state.slicerSelections) {
+            allActiveFilters.push({
+                column, type: 'slicer', values: state.slicerSelections[column],
+                order: columnOrder.indexOf(column)
+            });
+        }
         allActiveFilters.sort((a, b) => a.order - b.order);
 
         allActiveFilters.forEach(f => {
-            const colCollapseId = `${tableId}-colCollapse-${sanitizeId(f.column)}`;
+            const safeCol = sanitizeId(f.column);
+            const colCollapseId = `${tableId}-colCollapse-${safeCol}`;
             const isOpen = openAccordions.has(colCollapseId);
             const columnTitle = state.fieldNames[f.column] || f.column;
-            const columnAccordion = document.createElement('div');
-            columnAccordion.className = 'accordion mb-2 filter-summary-accordion';
+
+            const accordionDiv = document.createElement('div');
+            accordionDiv.className = 'accordion mb-2 filter-summary-accordion';
+
+            const accordionItem = document.createElement('div');
+            accordionItem.className = 'accordion-item border-0';
+
+            const header = document.createElement('h2');
+            header.className = 'accordion-header';
+
+            const btn = document.createElement('button');
+            btn.className = `accordion-button filter-summary-trigger filter-accordion-btn ${isOpen ? '' : 'collapsed'}`;
+            btn.type = 'button';
+
+            btn.dataset.colKey = f.column;
+            btn.removeAttribute('data-bs-toggle');
+            btn.removeAttribute('data-bs-target');
+            btn.addEventListener('click', (e) => toggleActiveFilterColumnAccordion(tableId, f.column, e));
+
+            btn.setAttribute('aria-controls', colCollapseId);
+            btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+
+            const titleSpan = document.createElement('span');
+            titleSpan.className = 'filter-accordion-title';
+            titleSpan.textContent = columnTitle;
+
+            const badgeSpan = document.createElement('span');
+            badgeSpan.className = 'badge filter-summary-badge ms-2';
+
+            const collapseDiv = document.createElement('div');
+            collapseDiv.id = colCollapseId;
+            collapseDiv.dataset.collapseId = colCollapseId;
+            collapseDiv.className = `accordion-collapse collapse ${isOpen ? 'show' : ''}`;
+
+            const bodyDiv = document.createElement('div');
+            bodyDiv.className = 'accordion-body filter-accordion-body';
+            bodyDiv.style.fontSize = '0.7rem';
 
             if (f.type === 'list' || f.type === 'slicer') {
                 const values = f.values || [];
+                badgeSpan.textContent = formatCount(values.length);
+
                 const limited = values.slice(0, MAX_BADGE);
-                let tagsHtml = '';
                 limited.forEach(value => {
-                    tagsHtml += `
-                        <span class="filter-tag d-inline-block mb-1 me-1">
-                            ${value}
-                            <i class="bi bi-x-circle" onclick="removeIndividualFilter('${tableId}','${f.column}','${value}', event)" style="margin-left:6px;cursor:pointer;color:#fff;"></i>
-                        </span>`;
+                    const tag = document.createElement('span');
+                    tag.className = 'filter-tag d-inline-block mb-1 me-1';
+                    tag.textContent = value;
+
+                    const removeIcon = document.createElement('i');
+                    removeIcon.className = 'bi bi-x-circle';
+                    removeIcon.style.cssText = 'margin-left:6px;cursor:pointer;color:#fff;';
+                    removeIcon.onclick = (e) => {
+                        removeIndividualFilter(tableId, f.column, value, e);
+                    };
+                    tag.appendChild(removeIcon);
+                    bodyDiv.appendChild(tag);
                 });
+
                 const remaining = values.length - limited.length;
                 if (remaining > 0) {
-                    tagsHtml += `<span class="filter-tag badge-more d-inline-block mb-1 me-1">+${remaining}</span>`;
+                    const moreTag = document.createElement('span');
+                    moreTag.className = 'filter-tag badge-more d-inline-block mb-1 me-1';
+                    moreTag.textContent = `+${remaining}`;
+                    bodyDiv.appendChild(moreTag);
                 }
-                const badgeCount = formatCount(values.length);
-                columnAccordion.innerHTML = `
-                    <div class="accordion-item border-0">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button filter-summary-trigger filter-accordion-btn ${isOpen ? '' : 'collapsed'}" type="button" data-target="#${colCollapseId}" aria-expanded="${isOpen ? 'true' : 'false'}" aria-controls="${colCollapseId}">
-                                <span class="filter-accordion-title">${columnTitle}</span>
-                                <span class="badge filter-summary-badge ms-2">${badgeCount}</span>
-                            </button>
-                        </h2>
-                        <div id="${colCollapseId}" data-collapse-id="${colCollapseId}" class="accordion-collapse collapse ${isOpen ? 'show' : ''}">
-                            <div class="accordion-body filter-accordion-body" style="font-size:0.7rem;">
-                                ${tagsHtml}
-                            </div>
-                        </div>
-                    </div>`;
             } else {
                 const filter = f.filter;
                 const operatorText = {
@@ -489,62 +605,49 @@
                     lessOrEqual: '<=',
                     between: 'Arasında'
                 }[filter.operator] || '';
-                const displayText = filter.operator === 'between'
+
+                badgeSpan.textContent = formatCount(1);
+
+                const tag = document.createElement('span');
+                tag.className = 'filter-tag';
+                tag.textContent = filter.operator === 'between'
                     ? `${operatorText} "${filter.value}"-"${filter.value2}"`
                     : `${operatorText} "${filter.value}"`;
-                columnAccordion.innerHTML = `
-                    <div class="accordion-item border-0">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button filter-summary-trigger filter-accordion-btn ${isOpen ? '' : 'collapsed'}" type="button" data-target="#${colCollapseId}" aria-expanded="${isOpen ? 'true' : 'false'}" aria-controls="${colCollapseId}">
-                                <span class="filter-accordion-title">${columnTitle}</span>
-                                <span class="badge filter-summary-badge ms-2">${formatCount(1)}</span>
-                            </button>
-                        </h2>
-                        <div id="${colCollapseId}" data-collapse-id="${colCollapseId}" class="accordion-collapse collapse ${isOpen ? 'show' : ''}">
-                            <div class="accordion-body filter-accordion-body" style="font-size:0.7rem;">
-                                <span class="filter-tag">
-                                    ${displayText}
-                                    <i class="bi bi-x-circle" onclick="removeColumnFilter('${tableId}','${f.column}')" style="margin-left:6px;cursor:pointer;color:#fff;"></i>
-                                </span>
-                            </div>
-                        </div>
-                    </div>`;
+
+                const removeIcon = document.createElement('i');
+                removeIcon.className = 'bi bi-x-circle';
+                removeIcon.style.cssText = 'margin-left:6px;cursor:pointer;color:#fff;';
+                removeIcon.onclick = (e) => {
+                    e?.stopPropagation();
+                    removeColumnFilter(tableId, f.column);
+                };
+                tag.appendChild(removeIcon);
+                bodyDiv.appendChild(tag);
             }
-            tagsContainer.appendChild(columnAccordion);
+
+            btn.appendChild(titleSpan);
+            btn.appendChild(badgeSpan);
+
+            collapseDiv.addEventListener('shown.bs.collapse', () => {
+                btn.classList.remove('collapsed');
+                btn.setAttribute('aria-expanded', 'true');
+            });
+            collapseDiv.addEventListener('hidden.bs.collapse', () => {
+                btn.classList.add('collapsed');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+
+            header.appendChild(btn);
+            collapseDiv.appendChild(bodyDiv);
+            accordionItem.appendChild(header);
+            accordionItem.appendChild(collapseDiv);
+            accordionDiv.appendChild(accordionItem);
+            tagsContainer.appendChild(accordionDiv);
         });
 
-        wireFilterAccordions(tableId);
+        ensureActiveFiltersAccordionBehavior(tableId);
     }
 
-    function wireFilterAccordions(tableId) {
-        const container = document.getElementById(`${tableId}-filterTags`);
-        if (!container) return;
-
-        container.querySelectorAll('.filter-summary-trigger').forEach(btn => {
-            const targetId = btn.getAttribute('data-target');
-            if (!targetId) return;
-
-            const collapseEl = document.querySelector(targetId);
-            if (!collapseEl) return;
-
-            btn.onclick = function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-
-                const isCurrentlyOpen = collapseEl.classList.contains('show');
-
-                if (isCurrentlyOpen) {
-                    collapseEl.classList.remove('show');
-                    btn.classList.add('collapsed');
-                    btn.setAttribute('aria-expanded', 'false');
-                } else {
-                    collapseEl.classList.add('show');
-                    btn.classList.remove('collapsed');
-                    btn.setAttribute('aria-expanded', 'true');
-                }
-            };
-        });
-    }
     function removeIndividualFilter(tableId, column, value, event) {
         event?.stopPropagation();
         const state = getState(tableId); if (!state) return;
@@ -579,21 +682,16 @@
     function toggleAllFilterAccordions(tableId) {
         const container = document.getElementById(`${tableId}-filterTags`);
         const btn = document.getElementById(`${tableId}-toggleAllBtn`);
-        if (!container || !btn) return;
+        if (!container || !btn || !window.bootstrap?.Collapse) return;
+
         const allCollapses = container.querySelectorAll('.accordion-collapse');
         const isAnyOpen = Array.from(allCollapses).some(c => c.classList.contains('show'));
-        allCollapses.forEach(collapse => {
-            const headerBtn = collapse.previousElementSibling?.querySelector('.filter-summary-trigger');
-            if (isAnyOpen) {
-                collapse.classList.remove('show');
-                headerBtn?.classList.add('collapsed');
-                headerBtn?.setAttribute('aria-expanded', 'false');
-            } else {
-                collapse.classList.add('show');
-                headerBtn?.classList.remove('collapsed');
-                headerBtn?.setAttribute('aria-expanded', 'true');
-            }
+
+        allCollapses.forEach(collapseEl => {
+            const instance = window.bootstrap.Collapse.getOrCreateInstance(collapseEl, { toggle: false });
+            if (isAnyOpen) instance.hide(); else instance.show();
         });
+
         btn.innerHTML = isAnyOpen ? '<i class="bi bi-chevron-down"></i> Hepsini Aç' : '<i class="bi bi-chevron-up"></i> Hepsini Kapat';
     }
 
@@ -612,6 +710,7 @@
         createColumnCheckList(tableId);
         updateAllSlicers(tableId);
         displayActiveFilters(tableId);
+        ensureActiveFiltersAccordionBehavior(tableId);
     }
 
     function sortTable(tableId, column) {
@@ -754,7 +853,6 @@
         updateRecordCount(tableId);
     }
 
-    // Advanced search / slicers
     function initSlicers(tableId) {
         createColumnCheckList(tableId);
         rebuildSlicers(tableId);

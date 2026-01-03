@@ -1,4 +1,4 @@
-﻿sen yarıda kestim kod yazman çok uzun sürüyor. Kodu benim koplamamam için bana ver.Aşağıdaki kurallara göre çalışacaksın. 
+﻿Aşağıdaki kurallara göre çalışacaksın. 
 
 1. Değişklikleri Library.Web projesine yapıyorsun. build yapınca zaten ArchiX.WebHost projesine otomatik geliyor.
 2. bana yacacağım kody vereceğin zaman
