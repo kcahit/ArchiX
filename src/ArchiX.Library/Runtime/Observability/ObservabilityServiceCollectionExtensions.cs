@@ -1,119 +1,114 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+﻿// File: src/ArchiX.Library/Runtime/Observability/ObservabilityServiceCollectionExtensions.cs
+using System.Diagnostics.Metrics;
+using System.Reflection;
 
-using OpenTelemetry.Logs;
+using ArchiX.Library.Infrastructure.EfCore;
+
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
+
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
-namespace ArchiX.Library.Runtime.Observability;
-
-/// <summary>
-/// OpenTelemetry tabanlı gözlemlenebilirlik bileşenlerinin DI kaydı için uzantılar.
-/// </summary>
-public static class ObservabilityServiceCollectionExtensions
+namespace ArchiX.Library.Runtime.Observability
 {
-    /// <summary>
-    /// ArchiX gözlemlenebilirlik (tracing, metrics, logs) yapılandırmasını ekler.
-    /// </summary>
-    /// <param name="services">DI koleksiyonu.</param>
-    /// <param name="configuration">Uygulama yapılandırması.</param>
-    /// <param name="environment">Çalışma ortamı.</param>
-    /// <returns>Güncellenmiş <see cref="IServiceCollection"/>.</returns>
-    public static IServiceCollection AddArchiXObservability(
-        this IServiceCollection services,
-        IConfiguration configuration,
-        IHostEnvironment environment)
+    public static class ObservabilityServiceCollectionExtensions
     {
-        var options = new ObservabilityOptions();
-        configuration.GetSection("Observability").Bind(options);
-        if (!options.Enabled)
+        public static IServiceCollection AddArchiXObservability(this IServiceCollection services)
+            => services.AddArchiXObservability("ArchiX.Library");
+
+        public static IServiceCollection AddArchiXObservability(this IServiceCollection services, string meterName)
         {
+            ArgumentNullException.ThrowIfNull(services);
+            ArgumentException.ThrowIfNullOrEmpty(meterName);
+
+            // Tek bir Meter instance
+            services.TryAddSingleton<Meter>(_ => new Meter(meterName));
+
+            // EF Core interceptor
+            services.TryAddSingleton<DbCommandMetricsInterceptor>();
+            services.TryAddSingleton<DbCommandInterceptor>(sp => sp.GetRequiredService<DbCommandMetricsInterceptor>());
+
+            // Metrik servisleri
+            services.TryAddSingleton<ErrorMetric>();
+            services.TryAddSingleton<DbMetric>();
+
             return services;
         }
 
-        var resource = ResourceBuilder.CreateDefault()
-            .AddService(serviceName: ArchiXTelemetry.ServiceName, serviceVersion: ArchiXTelemetry.ServiceVersion)
-            .AddAttributes([
-                new("deployment.environment", (object)environment.EnvironmentName)
-            ]);
-
-        services.AddOpenTelemetry()
-            .WithTracing(builder =>
-            {
-                if (!options.Tracing.Enabled) return;
-
-                builder
-                    .SetResourceBuilder(resource)
-                    .AddSource(ArchiXTelemetry.ServiceName)
-                    .AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
-                    .AddEntityFrameworkCoreInstrumentation();
-
-                if (string.Equals(options.Tracing.Exporter, "otlp", StringComparison.OrdinalIgnoreCase))
-                {
-                    builder.AddOtlpExporter(o =>
-                    {
-                        if (!string.IsNullOrWhiteSpace(options.Tracing.OtlpEndpoint))
-                        {
-                            o.Endpoint = new Uri(options.Tracing.OtlpEndpoint);
-                        }
-                    });
-                }
-            })
-            .WithMetrics(builder =>
-            {
-                if (!options.Metrics.Enabled) return;
-
-                builder
-                    .SetResourceBuilder(resource)
-                    .AddMeter(ArchiXTelemetry.Meter.Name)
-                    .AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
-                    .AddRuntimeInstrumentation();
-
-                if (string.Equals(options.Metrics.Exporter, "prometheus", StringComparison.OrdinalIgnoreCase))
-                {
-                    builder.AddPrometheusExporter();
-                }
-                else if (string.Equals(options.Metrics.Exporter, "otlp", StringComparison.OrdinalIgnoreCase))
-                {
-                    builder.AddOtlpExporter(o =>
-                    {
-                        if (!string.IsNullOrWhiteSpace(options.Metrics.OtlpEndpoint))
-                        {
-                            o.Endpoint = new Uri(options.Metrics.OtlpEndpoint);
-                        }
-                    });
-                }
-            });
-
-        services.AddLogging(loggingBuilder =>
+        public static IServiceCollection AddArchiXObservability(
+            this IServiceCollection services,
+            IConfiguration configuration,
+            IHostEnvironment environment)
         {
-            if (!options.Logs.Enabled) return;
+            ArgumentNullException.ThrowIfNull(services);
 
-            loggingBuilder.AddOpenTelemetry(o =>
+            var section = configuration.GetSection("Observability");
+
+            var meterName = section.GetValue<string?>("MeterName")
+                ?? environment.ApplicationName
+                ?? "ArchiX";
+
+            services.AddArchiXObservability(meterName);
+
+            var enableMetrics = section.GetValue("Metrics:Enabled", true);
+            var enablePrometheus = section.GetValue("Metrics:Prometheus:Enabled", true);
+            var enableTracing = section.GetValue("Tracing:Enabled", true);
+
+            // Scrape path konfigürasyonu (testin kullandığı anahtarlar dahil)
+            // Öncelik: ScrapeEndpointPath → ScrapeEndpoint → Path → "/metrics"
+            var scrapePath =
+                section.GetValue<string?>("Metrics:Prometheus:ScrapeEndpointPath")
+                ?? section.GetValue<string?>("Metrics:Prometheus:ScrapeEndpoint")
+                ?? section.GetValue<string?>("Metrics:Prometheus:Path")
+                ?? section.GetValue<string?>("Metrics:ScrapeEndpoint") // test burayı veriyor
+                ?? "/metrics";
+
+            if (!string.IsNullOrWhiteSpace(scrapePath) && !scrapePath.StartsWith('/'))
+                scrapePath = "/" + scrapePath;
+
+            var version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "0.0.0";
+
+            var otel = services.AddOpenTelemetry();
+            otel.ConfigureResource(rb => rb.AddService(meterName, serviceVersion: version));
+
+            if (enableMetrics)
             {
-                o.IncludeScopes = true;
-                o.ParseStateValues = true;
-                o.IncludeFormattedMessage = true;
-                o.SetResourceBuilder(resource);
-
-                if (string.Equals(options.Logs.Exporter, "otlp", StringComparison.OrdinalIgnoreCase))
+                otel.WithMetrics(mb =>
                 {
-                    o.AddOtlpExporter(otlp =>
-                    {
-                        if (!string.IsNullOrWhiteSpace(options.Logs.OtlpEndpoint))
-                        {
-                            otlp.Endpoint = new Uri(options.Logs.OtlpEndpoint);
-                        }
-                    });
-                }
-            });
-        });
+                    mb.AddAspNetCoreInstrumentation();
+                    mb.AddHttpClientInstrumentation();
+                    mb.AddRuntimeInstrumentation();
 
-        return services;
+
+                    // Kritik ekleme: yalnızca bu meter export edilsin
+                    mb.AddMeter(meterName, ArchiXTelemetry.ServiceName);
+
+                    if (enablePrometheus)
+                    {
+                        // Varsayılan /metrics yerine konfigürde edilen özel yol
+                        mb.AddPrometheusExporter(options =>
+                        {
+                            options.ScrapeEndpointPath = scrapePath;
+                        });
+                    }
+                });
+            }
+
+            if (enableTracing)
+            {
+                otel.WithTracing(tb =>
+                {
+                    tb.AddAspNetCoreInstrumentation();
+                    tb.AddHttpClientInstrumentation();
+                });
+            }
+
+            return services;
+        }
     }
 }

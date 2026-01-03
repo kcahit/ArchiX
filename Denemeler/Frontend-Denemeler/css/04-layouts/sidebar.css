@@ -1,0 +1,305 @@
+/* ========================================
+   SIDEBAR
+   ======================================== */
+
+/* Sidebar Ana Ekran için (ID #sidebar) */
+#sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px;
+    height: 100vh;
+    background: #2c3e50;
+    color: white;
+    padding-top: 60px;
+    overflow-y: auto;
+    transition: all 0.3s;
+    z-index: 1040;
+}
+
+#sidebar .sidebar-header h3 {
+    color: white;
+    padding: 20px;
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+#sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.7);
+    padding: 12px 20px;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+}
+
+#sidebar .nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+#sidebar .nav-link.active {
+    background: rgba(102, 126, 234, 0.2);
+    color: white;
+    border-left: 3px solid #667eea;
+}
+
+#sidebar .nav-link i {
+    margin-right: 10px;
+    font-size: 1.1rem;
+}
+
+/* Content area with sidebar */
+#content {
+    margin-left: 250px;
+    padding: 20px;
+    transition: all 0.3s;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    #sidebar {
+        left: -250px;
+    }
+    
+    #sidebar.active {
+        left: 0;
+    }
+    
+    #content {
+        margin-left: 0;
+    }
+}
+
+/* Sidebar Container */
+.sidebar {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    width: 260px;
+    height: calc(100vh - 60px);
+    background: white;
+    border-right: 1px solid var(--border-color);
+    overflow-y: auto;
+    transition: var(--transition-base);
+    z-index: var(--z-sidebar);
+}
+
+/* Sidebar Collapsed State */
+.sidebar.collapsed {
+    width: 70px;
+}
+
+.sidebar.collapsed .sidebar-text {
+    display: none;
+}
+
+.sidebar.collapsed .sidebar-submenu {
+    display: none;
+}
+
+/* Sidebar Header */
+.sidebar-header {
+    padding: var(--spacing-4);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sidebar-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-color);
+    margin: 0;
+}
+
+.sidebar-toggle-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: var(--spacing-1);
+    border-radius: var(--border-radius-sm);
+    transition: var(--transition-base);
+}
+
+.sidebar-toggle-btn:hover {
+    background-color: var(--background-light);
+    color: var(--color-primary);
+}
+
+/* Sidebar Menu */
+.sidebar-menu {
+    list-style: none;
+    margin: 0;
+    padding: var(--spacing-3);
+}
+
+.sidebar-menu-item {
+    margin-bottom: var(--spacing-1);
+}
+
+/* Sidebar Link */
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    padding: var(--spacing-3);
+    color: var(--text-color);
+    text-decoration: none;
+    border-radius: var(--border-radius-md);
+    transition: var(--transition-base);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+}
+
+.sidebar-link:hover {
+    background-color: rgba(var(--color-primary-rgb), 0.05);
+    color: var(--color-primary);
+}
+
+.sidebar-link.active {
+    background-color: rgba(var(--color-primary-rgb), 0.1);
+    color: var(--color-primary);
+    font-weight: var(--font-weight-semibold);
+}
+
+/* Sidebar Icon */
+.sidebar-icon {
+    font-size: 20px;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* Sidebar Text */
+.sidebar-text {
+    flex: 1;
+}
+
+/* Sidebar Badge */
+.sidebar-badge {
+    padding: 2px 8px;
+    border-radius: var(--border-radius-pill);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+}
+
+.sidebar-badge.badge-primary {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.sidebar-badge.badge-danger {
+    background-color: var(--color-danger);
+    color: white;
+}
+
+/* Sidebar Submenu */
+.sidebar-submenu {
+    list-style: none;
+    margin: var(--spacing-1) 0 0 0;
+    padding-left: 44px;
+}
+
+.sidebar-submenu .sidebar-link {
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: var(--font-size-sm);
+}
+
+/* Sidebar Section */
+.sidebar-section {
+    padding: var(--spacing-3) var(--spacing-4) var(--spacing-2);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Sidebar Footer */
+.sidebar-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--spacing-3);
+    border-top: 1px solid var(--border-color);
+    background: var(--background-light);
+}
+
+/* Sidebar Overlay (Mobile) */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: calc(var(--z-sidebar) - 1);
+}
+
+.sidebar-overlay.show {
+    display: block;
+}
+
+/* Main Content with Sidebar */
+.main-content {
+    margin-left: 260px;
+    margin-top: 60px;
+    padding: var(--spacing-4);
+    min-height: calc(100vh - 60px);
+    transition: var(--transition-base);
+}
+
+.sidebar.collapsed ~ .main-content {
+    margin-left: 70px;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .sidebar {
+        left: -260px;
+    }
+
+    .sidebar.show {
+        left: 0;
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .sidebar.collapsed ~ .main-content {
+        margin-left: 0;
+    }
+}
+
+/* Sidebar Dark Theme (Optional) */
+.sidebar-dark {
+    background: #2c3e50;
+    border-right-color: #34495e;
+}
+
+.sidebar-dark .sidebar-link {
+    color: #ecf0f1;
+}
+
+.sidebar-dark .sidebar-link:hover {
+    background-color: rgba(52, 152, 219, 0.2);
+    color: #3498db;
+}
+
+.sidebar-dark .sidebar-link.active {
+    background-color: rgba(52, 152, 219, 0.3);
+    color: #3498db;
+}
+
+.sidebar-dark .sidebar-section {
+    color: #95a5a6;
+}
+
+.sidebar-dark .sidebar-footer {
+    background: #34495e;
+    border-top-color: #34495e;
+}

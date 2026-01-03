@@ -6,9 +6,9 @@ namespace ArchiX.Library.External
 {
     /// <summary><see cref="IPingAdapter"/> üzerinden dış servisin sağlık kontrolü.</summary>
     /// <param name="adapter">Ping işlemlerini sağlayan bağımlılık.</param>
-    public sealed class PingHealthCheck(IPingAdapter adapter) : IHealthCheck
+    public sealed class PingHealthCheck(ArchiX.Library.Abstractions.External.IPingAdapter adapter) : IHealthCheck
     {
-        private readonly IPingAdapter _adapter = adapter ?? throw new ArgumentNullException(nameof(adapter));
+        private readonly ArchiX.Library.Abstractions.External.IPingAdapter _adapter = adapter ?? throw new ArgumentNullException(nameof(adapter));
 
         /// <summary>Ping çağrısı yapar ve sonucu <see cref="HealthCheckResult"/> olarak döner.</summary>
         public async Task<HealthCheckResult> CheckHealthAsync(

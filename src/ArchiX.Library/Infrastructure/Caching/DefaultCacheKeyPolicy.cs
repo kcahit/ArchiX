@@ -1,5 +1,6 @@
 ﻿// File: src/ArchiX.Library/Infrastructure/Caching/DefaultCacheKeyPolicy.cs
 using System.Globalization;
+using ArchiX.Library.Abstractions.Caching;
 
 namespace ArchiX.Library.Infrastructure.Caching
 {

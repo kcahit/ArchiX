@@ -3,44 +3,37 @@ using System.Diagnostics.Metrics;
 
 namespace ArchiX.Library.Runtime.Observability;
 
-/// <summary>
-/// DB işlemleri için özel metrikler.
-/// </summary>
-public static class DbMetric
+public sealed class DbMetric
 {
-    /// <summary>
-    /// Toplam DB işlem sayısı (op etiketi: select|insert|update|delete|migrate|seed).
-    /// </summary>
-    public static readonly Counter<long> OpsTotal =
-        ArchiXTelemetry.Meter.CreateCounter<long>(
-            name: "archix_db_ops_total",
+    public const string MeterName = "ArchiX.Library";
+
+    private readonly Counter<long> _total;
+    private readonly Histogram<double> _duration;
+
+    public DbMetric(Meter meter)
+    {
+        ArgumentNullException.ThrowIfNull(meter);
+
+        _total = meter.CreateCounter<long>(
+            "archix_db_ops_total",
             unit: "count",
-            description: "Toplam DB işlem sayısı");
+            description: "Toplam veritabanı işlemleri");
 
-    /// <summary>
-    /// DB işlem süreleri (ms).
-    /// </summary>
-    public static readonly Histogram<double> DurationMs =
-        ArchiXTelemetry.Meter.CreateHistogram<double>(
-            name: "archix_db_op_duration_ms",
+        _duration = meter.CreateHistogram<double>(
+            "archix_db_op_duration_ms",
             unit: "ms",
-            description: "DB işlem süresi (ms)");
+            description: "Veritabanı işlemlerinin süresi");
+    }
 
-    /// <summary>
-    /// Bir DB işlemini say ve süresini kaydet.
-    /// </summary>
-    /// <param name="op">İşlem türü (select|insert|update|delete|migrate|seed).</param>
-    /// <param name="elapsedMs">Geçen süre (ms).</param>
-    /// <param name="success">Başarı durumu.</param>
-    public static void Record(string op, double elapsedMs, bool success)
+    public void Record(string op, double elapsedMs, bool success)
     {
         var tags = new TagList
         {
-            { "op", op },
+            { "op", string.IsNullOrWhiteSpace(op) ? "unknown" : op },
             { "success", success }
         };
 
-        OpsTotal.Add(1, tags);
-        DurationMs.Record(elapsedMs, tags);
+        _total.Add(1, tags);
+        _duration.Record(elapsedMs, tags);
     }
 }
