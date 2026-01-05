@@ -6,54 +6,68 @@ Kapsam: Bu doküman; aşağıdaki iki karar dokümanını **eksiksiz** birleşti
 - `docs/#17 architecture-decisions-multi-db-instance-scope-kombine.md`
 - `docs/#16 architecture-decisions-dataset-driven-kombine-report.md`
 
-Amaç: ArchiX tabanlı projelerde (ERP/CRM/WMS vb.) **connection yönetimi**, **güvenlik/policy**, **secret yönetimi**, `Application` kavramı ve **dataset-driven Kombine raporlama** mimarisini; tasarım ilkeleri + veri modeli + UI davranışları + limit/koruma politikalarıyla birlikte standart hale getirmek.
+Amaç: ArchiX tabanlı projelerde (ERP/CRM/WMS vb.) **connection yönetimi**, **güvenlik/policy**, **secret yönetimi**, `Application` kavramı ve **dataset-driven Kombine raporlama** mimarisini; her başlık altında (1) teknik tasarım sözleşmeleri ve (2) test senaryolarıyla birlikte standart hale getirmek.
 
 > Öncelik sırası: **Güvenlik > Performans/Stabilite > Kullanıcı dostu uygulama**
 
 ---
 
+## Dokümanı okuma kuralı
+Her başlık altında iki alt bölüm vardır:
+- `### Teknik Tasarım`: Uygulamada uygulanacak tasarım/kontrat.
+- `### Test Senaryoları`: Bu kuralın doğrulanması için minimum test/checklist.
+
+---
+
 ## 1) Temel Varsayımlar ve Hedef (Instance / Tenant / İzolasyon)
 
-### 1.1 Hedeflenen işletim modeli
+### Teknik Tasarım
 - Müşteri bazında izolasyon, **ayrı instance (deployment)** ile sağlanır.
 - Bir instance içerisinde tek müşteri bulunur (customer data isolation; tenant-discriminator yerine deployment sınırından gelir).
 
-### 1.2 Neden bu model?
+Neden:
 - Güvenlik: müşteri verisi izolasyonunu en güçlü sınırdan (deployment/instance) almak.
-- Operasyon: müşteri bazlı yedekleme/restore, performans tuning, incident izolasyonu.
+- Operasyon: müşteri bazında yedekleme/restore, performans tuning, incident izolasyonu.
 - Mimari sadeleşme: tenant switching, request başına tenant resolution, global filtreler vb. karmaşıklıkların azalması.
+
+### Test Senaryoları
+- Bir instance içerisinde “tenant switching / request başına tenant resolution” gerektiren bir akış bulunmamalıdır.
+- Deployment sınırı dışında (aynı instance içinde) ikinci müşteri verisini ayıran bir mekanizma varsayılmamalıdır.
 
 ---
 
 ## 2) `Application` Kavramı (Ürün/Proje) ve Scope
 
-### 2.1 Karar
+### Teknik Tasarım
 - `Application` = **ürün/proje** kavramıdır (ERP, CRM, WMS vb.).
 - `Application` **müşteri/tenant değildir**.
 
-### 2.2 Neden `Application` içine connection konmuyor?
-- `Application` “ürün”ü temsil ettiği için connection detayları ürün kavramına doğrudan ait değildir.
+`Application` içine connection konmaz:
+- `Application` “ürün”ü temsil ettiği için connection detayları ürün kavramına ait değildir.
 - Connection bilgisini `Application` içine koymak;
   - projelerin birden fazla DB’ye çıkması,
   - environment ayrımları,
   - secret rotasyonu,
   - farklı bağlantı profilleri
-  gibi ihtiyaçlarda modeli gereksiz şekilde kilitler.
+  gibi ihtiyaçlarda modeli kilitler.
 
-### 2.3 Scope yaklaşımı
+Scope yaklaşımı:
 - `Application` ile ilişkilendirilen ayarlar/policy’ler (parametreler) **ürün scope**’udur.
 - Müşteri ayrımı instance/deployment ile sağlandığı için “tenant scope” bu seviyede taşınmaz.
+
+### Test Senaryoları
+- `Application` entity/modelinde connection string veya bağlantı profilini temsil eden alanlar bulunmamalıdır.
+- Connection tanımları `Application` yerine parametre/konfig yapısından çözülmelidir.
 
 ---
 
 ## 3) Connection Yönetimi (Çoklu DB + Alias/Key)
 
-### 3.1 Bağlantı çeşitliliği
-- Tek bir instance yine de **birden fazla DB** ile konuşabilir.
-  - Örn. ERP: operasyonel DB + raporlama DB + entegrasyon DB.
-- Bu nedenle bağlantı kavramı “tek connection string” değil; **bağlantı seti / bağlantı profili** gibi ele alınır.
+### Teknik Tasarım
+- Tek bir instance **birden fazla DB** ile konuşabilir (operasyonel/raporlama/entegrasyon).
+- Bu nedenle bağlantı “tek connection string” değil; **bağlantı seti / bağlantı profili** gibi ele alınır.
 
-### 3.2 DB dataset’lerde connection seçimi (zorunlu)
+DB dataset’lerde connection seçimi:
 - DB kaynaklı dataset’ler (`sp`, `view`, `table`) **mutlaka** önceden tanımlı bir **`ConnectionName`** (alias) ile çalışır.
 - Dataset kayıtları:
   - yeni connection/şifre içermez,
@@ -61,240 +75,264 @@ Amaç: ArchiX tabanlı projelerde (ERP/CRM/WMS vb.) **connection yönetimi**, **
 - `ConnectionName` çözümü sistemin genel parametre/konfig yapısındaki tanım üzerinden yapılır.
 - Server bilgisi ayrıca dataset’te tutulmaz; connection içinden türetilir.
 
+### Test Senaryoları
+- DB dataset kaydı oluşturma/düzenleme akışında host/user/password gibi alanlar bulunmamalıdır.
+- DB dataset çalıştırılırken mutlaka bir alias çözümleme adımı olmalıdır.
+
 ---
 
 ## 4) Secret Yönetimi (Güvenlik Önceliği)
 
-### 4.1 Prensip
+### Teknik Tasarım
+Prensip:
 - “Connection bilgisini yönetmek” ile “secret saklamak” ayrıdır.
 - Veritabanında (özellikle `_ArchiX`) saklanan yapı, tercihen connection’ın kendisi değil; connection’a giden **referans/anahtar (alias)** olmalıdır.
 
-### 4.2 Kesin karar: Şifre `_ArchiX` içinde tutulmaz
+Kesin karar:
 - Tenant DB’lerine ait **User/Password** gibi secret’lar `_ArchiX` içinde **asla** saklanmaz.
 - `_ArchiX` tarafında yalnızca secret’a giden bir referans saklanır.
 
-### 4.3 Asgari secret referansı standardı
+Asgari secret referansı standardı:
 - Minimum desteklenecek format: `PasswordRef = ENV:<NAME>`
 - Şifre uygulama çalıştığı ortamda (host/tenant) environment variable olarak sağlanır.
 
 > Not: İleride güvenli secret store (örn. Key Vault vb.) ihtiyacı olursa yeni ref formatları eklenebilir; ancak bu dokümandaki minimum standart `ENV:`’dir.
 
+### Test Senaryoları
+- `_ArchiX` tarafındaki parametre/tablolar içinde password alanı veya password değeri bulunmamalıdır.
+- `PasswordRef` çözümlenemiyorsa bağlantı reddedilmelidir (fail-closed).
+
 ---
 
 ## 5) Connection Security Policy (Zorunlu)
 
-### 5.1 Politika yaklaşımı
+### Teknik Tasarım
 - Tüm DB bağlantıları için merkezi bir **connection policy** yaklaşımı esastır.
 
-### 5.2 Policy zorunlulukları (kontrol listesi)
+Policy zorunlulukları (kontrol listesi):
 - Şifreli iletişim zorunluluğu (Encrypt)
 - Güvenilir olmayan sertifika kabulünün engellenmesi veya kontrollü olması (TrustServerCertificate)
 - Integrated Security kullanımının kontrollü olması
 - Hedef sunucu / IP aralığı whitelist
 
-### 5.3 Audit ve veri sızıntısı kontrolü
+Audit:
 - Bağlantı denemeleri/audit kayıtları tutulur.
 - Audit kayıtlarında ham connection string **maskelenmiş** olarak saklanır.
-- Amaç:
-  - bağlantı güvenliği ihlallerini izlemek,
-  - secret sızıntısını önlemek.
+
+### Test Senaryoları
+- Policy ihlali durumunda (örn. Encrypt kapalıysa) bağlantı engellenmelidir veya policy mode gereği uyarı verilmelidir.
+- Audit kayıtlarında açık password veya tam connection string bulunmamalıdır (mask zorunlu).
 
 ---
 
 ## 6) Connection Tanımının Nerede Duracağı (Bootstrap + Parametre)
 
-### 6.1 Bootstrap connection (zorunlu başlangıç)
+### Teknik Tasarım
+Bootstrap:
 - Tenant/host, sistem altyapısını kullanabilmek için önce `ArchiX.Library` konfig DB’si olan `_ArchiX`’e bağlanabilmelidir.
-- Bu bootstrap bağlantı, host tarafında konfigürasyon ile sağlanır (örn. `ConnectionStrings:ArchiXDb`).
+- Bootstrap bağlantı host tarafında konfigürasyon ile sağlanır (örn. `ConnectionStrings:ArchiXDb`).
 
-### 6.2 Tenant uygulama DB connection’ları `_ArchiX` içinde tutulur
+Tenant uygulama DB connection’ları:
 - Tenant’ın kendi DB’leri (örn. `Archix.Arsanmak`) host projesi tarafından kullanılacak olsa da connection tanımı `_ArchiX` içindedir.
 
-### 6.3 Parametre standardı (tek satır / çok alias)
-Tenant DB bağlantı seti, `_ArchiX` içindeki `Parameters` tablosunda **tek satır** olarak tutulur:
+Parametre standardı (tek satır / çok alias):
+- `_ArchiX.Parameters` içinde **tek satır**
+  - `ApplicationId = 1` (Global zorunlu application)
+  - `Group = "ConnectionStrings"`
+  - `Key = "ConnectionStrings"`
+  - `Value` = JSON (tek value içinde çok alias)
 
-- `ApplicationId = 1` (Global zorunlu application)
-- `Group = "ConnectionStrings"`
-- `Key = "ConnectionStrings"`
-- `Value` = JSON (tek value içinde çok alias)
-
-### 6.4 JSON formatı (delimiter sorunu yok)
+JSON formatı:
 - Connection string içinde `;` bulunduğu için delimiter tabanlı formatlar kırılgan kabul edilir.
 - Bu nedenle `Value` JSON olmalıdır.
 
-Örnek şema (provider-agnostic, güvenlik odaklı):
-
+Not:
 - Her alias bir connection profile objesidir.
 - `Auth` temel olarak `SqlLogin` varsayılır.
 - `PasswordRef` sadece `SqlLogin` için vardır.
+
+### Test Senaryoları
+- `_ArchiX` ayağa kalkmadan tenant DB connection’ları çözümlenemez (bootstrap bağımlılığı doğrulanmalı).
+- Parametre çözümlemesi: doğru `Group`/`Key` ile tek satırdan tüm alias’lar okunabilmelidir.
 
 ---
 
 ## 7) Teknoloji ve Çoklu Provider Yaklaşımı
 
-### 7.1 Varsayılan / hedef olmayan teknoloji
+### Teknik Tasarım
 - Default hedef: SQL Server + EF Core.
 - Ancak bu “tek hedef” değildir; tenant ne kullanırsa (örn. Oracle kısmen mevcut), ihtiyaç olursa diğerleri de eklenir.
+- Connection ve dataset yürütme katmanı, farklı DB provider’larına genişlemeye uygun tasarlanmalıdır.
 
-### 7.2 Tasarım çıktısı
-- Connection ve dataset yürütme katmanı, ileride farklı DB provider’larına genişlemeye uygun tasarlanmalıdır.
+### Test Senaryoları
+- Provider bağımlı parçalar soyutlanmış olmalıdır (en azından tasarım seviyesinde).
+- En az bir provider ile (SQL Server) uçtan uca dataset çalıştırma doğrulanmalıdır.
 
 ---
 
 ## 8) Dataset-Driven Kombine (Tanım Tabanlı Rapor)
 
-### 8.1 Dataset tablosu nerede?
+### Teknik Tasarım
 - **Dataset tablosu `ArchiX.Library` / `_ArchiX` içinde olacak.**
 
-### 8.2 Dataset kayıtları DB’de tutulur
+Dataset kayıtları:
 - Dataset tanımları DB’de tutulur ve `BaseEntity`’den inherit eder.
 - Dropdown’da listelenecek dataset’ler yalnızca **onaylı** olanlardır.
   - Onay kriteri: `StatusId == BaseEntity.ApprovedStatusId`
 
-### 8.3 Dataset temel alanları
-Dataset tanımında bulunması gerekenler:
-- **ConnectionName**: DB kaynaklı dataset’lerde hangi connection alias’ın kullanılacağını belirtir.
-- **FileName**:
-  - DB için: SP/View/Table adı
-  - File için: dosya adı
-- **DisplayName**: UI dropdown’da görünen isim
-- **Type**:
+Dataset temel alanları:
+- `ConnectionName` (DB kaynaklı)
+- `FileName`
+- `DisplayName`
+- `Type`:
   - DB: `sp`, `view`, `table`
   - File: `json`, `ndjson`, `csv`, `txt`, `xml`, `xls`, `xlsx`
 
-### 8.4 Source family (DB/File) ve genişleyebilirlik
-- Kısa vadede kaynak ailesi: **DB** ve **File**.
-- Uzun vadede yeni aileler (örn. API/Queue) gelebilir.
-- Type kurgusu büyümeye uygun tasarlanmalıdır.
-  - İstenirse `DatasetSourceType` ve `DatasetType` master tablolarla genişletilebilir.
-  - Mevcut minimum hedef: `Type` bilgisinden DB/File çıkarımı yapılabilmesi.
+Source family:
+- Kısa vadede: DB ve File.
+- Uzun vadede: API/Queue gibi aileler gelebilir.
+
+### Test Senaryoları
+- Approved olmayan dataset dropdown’da görünmemelidir.
+- `Type` değerine göre DB/File ayrımı doğru yapılmalıdır.
 
 ---
 
 ## 9) Kombine Rapor Sayfası (Dinamik Çalışma Modeli)
 
-### 9.1 Amaç
-- `Kombine` sayfası, kullanıcının seçimine göre farklı kaynaklardan veri çekip aynı grid altyapısında gösterecek şekilde tasarlanır.
+### Teknik Tasarım
+Amaç:
+- `Kombine` sayfası, kullanıcı seçimine göre farklı kaynaklardan veri çekip aynı grid altyapısında gösterir.
 
-### 9.2 “Seçim” ve “Kaynak” ayrımı
-- Seçilen seçenek bir “rapor tanımı / dataset tanımı” olarak ele alınır.
-- Tanım içinde:
-  - hangi veri kaynağının kullanılacağı,
-  - grid kolonları,
-  - (varsa) filtreleme/sıralama davranışı
-  bulunur.
+Seçim ve kaynak ayrımı:
+- Seçilen seçenek bir “rapor/dataset tanımı”dır.
+- Tanım içinde kaynak türü açıkça belirtilir.
+  - Yalnız view adı/json adı yeterli kabul edilmez.
 
-### 9.3 Kaynak tipinin açık olması
-- Sadece “view adı” veya “json dosya adı” vermek yeterli değildir.
-- Kaynağın türü açıkça belirtilmelidir (DB view, JSON, SP, Table, ileride API/Queue).
-- Heuristik (uzantıdan tahmin vb.) kırılgan kabul edilir.
-
-### 9.4 Beklenen backend davranışı
-Seçilen dataset tanımına göre:
+Beklenen davranış:
 - doğru connection alias seçilir,
-- connection policy uygulanır,
-- uygun veri kaynağı yürütülür,
+- policy kuralları uygulanır,
+- uygun veri kaynağı işlenir,
 - grid’e uygun kolon/row üretilir.
+
+### Test Senaryoları
+- “Kaynak türü belirsiz” tanımlar reddedilmeli veya çalıştırılamamalıdır.
+- Policy uygulanmadan DB kaynağı çalışmamalıdır.
 
 ---
 
 ## 10) File Dataset – Dosya Konumu ve Güvenlik
 
-### 10.1 Root + alt dizin yaklaşımı
-File dataset path şu şekilde oluşur:
-- **Root**: sistem genelinde Parametre tablosunda tanımlıdır
-- **Alt dizin(ler)**: dataset kaydında tanımlıdır
-- **FileName**: dataset kaydında tanımlıdır
+### Teknik Tasarım
+- File dataset path:
+  - Root: parametre tablosu
+  - Alt dizin(ler): dataset kaydı
+  - FileName: dataset kaydı
+- Amaç: path traversal riskini azaltmak.
 
-Amaç: path traversal riskini azaltmak (dataset yazan kişinin ana dizin dışına çıkmasını engellemek).
-
-### 10.2 File dataset’lerde parametre şeması
+Parametre şeması:
 - File dataset’lerde parametre tanımı/şeması dataset kaydının içinde bulunur.
 - Parametre ekranı bu şemaya göre dinamik oluşur.
+
+### Test Senaryoları
+- Root dışına çıkma (.. / absolute path) engellenmelidir.
+- Parametre ekranı şemaya göre oluşmalı ve şema olmayan durumda güvenli şekilde hata vermelidir.
 
 ---
 
 ## 11) SP Dataset Parametre Davranışı
 
-### 11.1 Kullanıcıdan parametre alınmaz
-- SP dataset’lerde kullanıcıdan input parametresi alınmayacaktır.
-- SP’nin output parametreleri de kullanıcıya filtre ekranı olarak gösterilmez.
+### Teknik Tasarım
+- SP dataset’lerde kullanıcıdan input parametresi alınmaz.
+- SP output parametreleri filtre ekranı olarak gösterilmez.
+- SP’lerde limit garantisi olmayabileceği için streaming sırasında limit korumaları zorunludur.
 
-### 11.2 Limit zorunluluğu
-- Müşteri DB’lerinde SP’lerin `@MaxRows` benzeri garanti edilen limit parametreleri olmayabilir.
-- Bu nedenle uygulama tarafında streaming sırasında limit korumaları zorunludur.
+### Test Senaryoları
+- SP dataset UI’sında input parametre alanı olmamalıdır.
+- Büyük SP çıktısı limitlere göre kesilmelidir.
 
 ---
 
 ## 12) UI Davranışları (Kombine + GridListe Toolbar)
 
-### 12.1 Dataset seçimi UI’da yeni bir obje
-- Kombine ve GridListe toolbar’ına dataset seçici eklenir.
+### Teknik Tasarım
+- Toolbar’a dataset seçici eklenir.
 - Dropdown başlangıçta `null` gelir.
 - Listede sadece `Approved` dataset’ler bulunur.
 - Dropdown’da `DisplayName` gösterilir.
 
-### 12.2 “Raporla” butonu
+“Raporla” butonu:
 - Dropdown `null` değilse ve seçim değiştiyse enabled.
 - Başarılı rapor çalıştıktan sonra disabled.
 - Dataset seçimi değişince yeniden enabled.
+
+### Test Senaryoları
+- İlk açılışta rapor butonu disabled olmalıdır.
+- Dataset değişince enabled olmalıdır.
+- Başarılı çalıştırmadan sonra disabled olmalıdır.
 
 ---
 
 ## 13) Pivot Analiz ve Detaylı Liste (Tek Dataset, Tek Gerçek Veri)
 
-1. Pivot Analiz ve Detaylı Liste aynı dataset çıktısından beslenir.
-2. Sahte data yoktur; gerçek veri dataset çıktısıdır.
-3. Grid filtreleri ile pivot senkronu ilk sürümde zorunlu değildir; gerekirse farklı yaklaşım uygulanabilir.
+### Teknik Tasarım
+- Pivot Analiz ve Detaylı Liste aynı dataset çıktısından beslenir.
+- Sahte data yoktur; veri dataset çıktısıdır.
+- Grid filtreleri ile pivot senkronu ilk sürümde zorunlu değildir.
+
+### Test Senaryoları
+- Pivot ve detaylı liste aynı run-id/aynı sonuç setinden üretilebilmelidir.
 
 ---
 
 ## 14) Kolonlar ve Formatlama
 
-### 14.1 Kolonların tamamı alınır
+### Teknik Tasarım
 - Dataset’den gelen kolonlar dinamik alınır.
 - Kolon yapısı/isimleri dataset tasarımcısının sorumluluğundadır.
+- Kolon başlıkları ve formatlar sistemde tanımlı standartlara göre uygulanır.
+- Gelecekte: kolon seçme ve kullanıcı bazında kolon tercihleri saklama gelebilir.
 
-### 14.2 Başlık ve format
-- Dataset’e bağlı tasarımda raporda görünecek kolon adları tanımlanabilir.
-- Tarih/para/sayı formatları sistemde tanımlı standart formatlara göre uygulanır.
-
-### 14.3 Gelecek planı
-- İleride kolon seçme, kullanıcı bazında kolon tercihleri saklama gelebilir.
-- Tasarım “dataset default” + “user override” modeline genişleyebilir olmalıdır.
+### Test Senaryoları
+- Farklı kolon setleriyle (değişken schema) grid render edebilmelidir.
+- Tarih/para/sayı formatları beklenen standartlara göre görünmelidir.
 
 ---
 
 ## 15) Limitler ve Koruma Politikaları (Performans + Stabilite)
 
-### 15.1 Birincil kontrol: hücre bütçesi
+### Teknik Tasarım
+Birincil kontrol:
 - `MaxCells = rows * cols`
 - `allowedRows = floor(MaxCells / colCount)`
 
-### 15.2 Hard limitler
-- `HardMaxRows` ve `HardMaxCols` gibi üst sınırlar zorunludur.
+Hard limit:
+- `HardMaxRows`, `HardMaxCols` üst sınırları zorunludur.
 
-### 15.3 Metin taşması limiti
-- `MaxCellChars` (veya benzeri) limiti kabul edilmiştir.
+Metin taşması:
+- `MaxCellChars` limiti kabul edilmiştir.
 - `MaxTotalChars` / `MaxBytes` secondary guard olabilir.
 
-### 15.4 Ölçüm maliyeti
-- Kontroller iki aşamalı olmalıdır:
-  - Pre-check (policy + doğrulama)
-  - Streaming sırasında ucuz kontroller (row/col/cell)
-- `MaxBytes` gibi pahalı ölçümlerden kaçınılır.
+Ölçüm maliyeti:
+- Pre-check + streaming sırasında ucuz kontroller.
+- Pahalı ölçümlerden kaçın.
 
-### 15.5 Global vs dataset limit precedence
-- Limitler hem sistem parametrelerinde hem dataset üzerinde tanımlı olabilir.
+Precedence:
+- Limitler sistem parametrelerinde ve dataset üzerinde tanımlanabilir.
 - Boş ise parametre tablosu geçerlidir.
-- İkisi doluysa daha sıkı olan (min) kazanır:
-  - Dataset > parametre ise parametre üst sınırdır.
-  - Dataset < parametre ise dataset limiti geçerlidir.
+- İkisi doluysa daha sıkı olan (min) kazanır.
+
+### Test Senaryoları
+- MaxCells aşıldığında satır sayısı otomatik düşmelidir.
+- HardMaxRows/Cols kesin uygulanmalıdır.
+- MaxCellChars aşıldığında hücre kırpılmalıdır (veya güvenli davranış).
+- Dataset limiti ile parametre limiti çakışınca daha sıkı olan seçilmelidir.
 
 ---
 
 ## 16) Tutarlılık Kuralları (Özet)
 
+### Teknik Tasarım
 1. Instance = müşteri izolasyonu. Tenant switching scope’a taşınmaz.
 2. `Application` = ürün/proje. Connection detayı bu entity’ye eklenmez.
 3. Connection yönetimi çoklu DB’yi destekler. Bağlantı “tek string” değil “profil”dür.
@@ -303,10 +341,14 @@ Amaç: path traversal riskini azaltmak (dataset yazan kişinin ana dizin dışı
 6. Dataset tablosu `ArchiX.Library` / `_ArchiX` içindedir.
 7. Secret’lar `_ArchiX` içinde tutulmaz; minimum `ENV:` referansı ile yönetilir.
 
+### Test Senaryoları
+- Bu maddelerin her biri, ilgili başlıklardaki test checklist’leri ile kapsanmış olmalıdır.
+
 ---
 
 ## 17) Örnek DB düşünce modeli (Not)
 
+### Teknik Tasarım
 Örnek DB yapısı:
 
 - `ArchiX.Library` → `_ArchiX` (library/config DB)
@@ -316,11 +358,70 @@ Amaç: path traversal riskini azaltmak (dataset yazan kişinin ana dizin dışı
   - `Archix.ERP.Arsanmak2025`
   - `Archix.ERP.Arsanmak2025.Test`
 
+### Test Senaryoları
+- Bu bölüm örnek niteliğindedir; zorunlu test içermez.
+
 ---
 
 ## Son Not
-Bu doküman “tek gerçek” olarak değerlendirilmelidir. Karar değişirse:
-- değişiklik nedeni,
-- tarih,
-- etkilenen alanlar
-mutlaka not edilmelidir.
+- Bu doküman “tek gerçek” olarak değerlendirilmelidir.
+- Karar değişirse: değişiklik nedeni, tarih ve etkilenen alanlar mutlaka not edilmelidir.
+
+---
+
+## İş Listesi (GitHub Issue Planı)
+
+Aşağıdaki işler **sıralıdır**. Bir iş bitmeden (merge/commit edilmeden) bir sonraki işe başlanmamalıdır. Amaç: her işin tek başına çalışır/derlenir ve test edilebilir olması.
+
+### 1) Bootstrap + Connection Alias Çözümleme Altyapısı
+**Kapsadığı bölümler:** 3, 4, 5, 6, 7
+
+- `_ArchiX` bağlantısının (bootstrap) host tarafında standartlaştırılması
+- `_ArchiX.Parameters` içindeki `Group="ConnectionStrings"`, `Key="ConnectionStrings"` satırından JSON okuma
+- `PasswordRef = ENV:<NAME>` çözümleme (fail-closed)
+- Provider-agnostic bağlantı profil modeli (en az SQL Server destekli)
+- ConnectionPolicy zorunlu uygulanacak şekilde çağrı noktalarının belirlenmesi
+- Audit maskleme kuralının uygulanacağı sözleşmenin netleştirilmesi
+
+### 2) Dataset Tablosu ve Dataset Tanımı (DB/File) + Approved Filtre
+**Kapsadığı bölümler:** 8, 3, 2
+
+- Dataset tablosunun `_ArchiX` içinde konumlandırılması
+- Dataset `Type` değerleri (DB: sp/view/table; File: json/ndjson/csv/txt/xml/xls/xlsx)
+- `StatusId == Approved` filtre kuralı
+- `ConnectionName`, `FileName`, `DisplayName` alanlarının standardı
+
+### 3) Dataset Executor (DB + File) ve Limit/Guard Mekanizması
+**Kapsadığı bölümler:** 9, 10, 11, 15, 5
+
+- DB executor: `sp/view/table` çalıştırma (input param yok; output param yok)
+- File executor: root + subpath + filename; traversal koruması
+- Pre-check + streaming sırasında limitler:
+  - `MaxCells`, `HardMaxRows`, `HardMaxCols`, `MaxCellChars`
+  - Global vs dataset limit precedence (min kazanır)
+- Policy + audit executordan önce uygulanır
+
+### 4) Razor Pages UI Entegrasyonu (Kombine / GridListe)
+**Kapsadığı bölümler:** 12, 13, 14, 9
+
+- Toolbar’a dataset seçici
+- “Raporla” butonu enable/disable davranışı
+- Tek dataset çıktısından hem Pivot hem Detaylı Liste üretimi
+- Dinamik kolon/formatlama kuralları
+
+### 5) Test Paketi ve Regresyon Checklist
+**Kapsadığı bölümler:** 1–17 (özellikle 4, 5, 8, 10, 11, 15)
+
+- Security:
+  - `_ArchiX` içinde secret yok
+  - `PasswordRef` çözümlenemeyince fail-closed
+  - Audit maskeli
+  - Policy ihlali yakalanıyor
+- Functional:
+  - Approved filtre
+  - SP parametre alınmıyor
+  - File traversal engeli
+- Performance/Stability:
+  - Limitler (MaxCells/HardMax/MaxCellChars)
+
+> Not: İş #5, önceki işler tamamlandıktan sonra güvenle genişletilir.
