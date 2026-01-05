@@ -383,6 +383,28 @@ Aşağıdaki işler **sıralıdır**. Bir iş bitmeden (merge/commit edilmeden) 
 - ConnectionPolicy zorunlu uygulanacak şekilde çağrı noktalarının belirlenmesi
 - Audit maskleme kuralının uygulanacağı sözleşmenin netleştirilmesi
 
+---
+✅ Tamamlandı: 2026-01-05  (saat: 13:00 )
+Kod Dosyaları
+•	ConnectionProfile.cs (eklendi)
+•	IConnectionProfileProvider.cs (eklendi)
+•	ISecretResolver.cs (eklendi)
+•	ArchixParameterConnectionProfileProvider.cs (eklendi)
+•	EnvSecretResolver.cs (eklendi)
+•	ConnectionStringBuilderService.cs (eklendi)
+•	ConnectionsServiceCollectionExtensions.cs (eklendi)
+•	ConnectionStringsStartup.cs (eklendi)
+•	Program.cs (değişti)
+Test Dosyaları
+•	EnvSecretResolverTests.cs (eklendi)
+•	ConnectionStringBuilderServiceTests.cs (eklendi)
+•	ConnectionPolicyAuditorTests.cs (eklendi)
+•	ConnectionStringsStartupTests.cs (eklendi)
+Notlar:
+•	Saat kısmını sen doldur (örn. 17:45).
+•	Program.cs gerçekten “değişti” (DI’a AddArchiXConnections() eklendi).
+---
+
 ### 2) Dataset Tablosu ve Dataset Tanımı (DB/File) + Approved Filtre
 **Kapsadığı bölümler:** 8, 3, 2
 
