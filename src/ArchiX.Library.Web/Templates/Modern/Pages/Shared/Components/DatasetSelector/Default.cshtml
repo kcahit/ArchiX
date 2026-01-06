@@ -1,0 +1,85 @@
+﻿@model ArchiX.Library.Web.ViewModels.Grid.GridToolbarViewModel
+
+@if (Model.ShowDatasetSelector)
+{
+    <div class="d-flex align-items-center gap-2">
+        <select class="form-select form-select-sm" id="@Model.Id-datasetSelect" style="min-width:220px;height:32px;padding-top:0;padding-bottom:0;">
+            <option value="">@Model.DatasetPlaceholder</option>
+            @foreach (var opt in (Model.DatasetOptions ?? Array.Empty<ArchiX.Library.Web.ViewModels.Grid.ReportDatasetOptionViewModel>()))
+            {
+                if (Model.SelectedReportDatasetId.HasValue && Model.SelectedReportDatasetId.Value == opt.Id)
+                {
+                    <option value="@opt.Id" selected="selected">@opt.DisplayName</option>
+                }
+                else
+                {
+                    <option value="@opt.Id">@opt.DisplayName</option>
+                }
+            }
+        </select>
+
+        <button type="button"
+                class="btn btn-primary btn-sm grid-btn-reset"
+                style="height:32px;width:32px;padding:0;"
+                id="@Model.Id-runReportBtn"
+                data-endpoint="@Model.RunReportEndpoint"
+                data-loading-message="Raporlar yüklenecek..."
+                title="@Model.RunReportText"
+                aria-label="@Model.RunReportText">
+            <i class="bi bi-arrow-right-circle-fill text-white"></i>
+        </button>
+    </div>
+
+    <script>
+        (function () {
+            var id = '@Model.Id';
+            var select = document.getElementById(id + '-datasetSelect');
+            var btn = document.getElementById(id + '-runReportBtn');
+
+            if (!select || !btn) return;
+
+            var lastSuccessful = null;
+
+            function updateEnabled() {
+                var v = select.value || '';
+                var hasSelection = v.length > 0;
+                var changedSinceLastRun = (lastSuccessful === null) || (lastSuccessful !== v);
+                btn.disabled = !(hasSelection && changedSinceLastRun);
+            }
+
+            select.addEventListener('change', function () {
+                updateEnabled();
+            });
+
+            btn.addEventListener('click', async function () {
+                var endpoint = btn.getAttribute('data-endpoint') || '';
+                var v = select.value || '';
+
+                if (!endpoint || !v) {
+                    updateEnabled();
+                    return;
+                }
+
+                var loadingMessage = btn.getAttribute('data-loading-message') || 'Raporlar yüklenecek...';
+                try { alert(loadingMessage); } catch (e) { }
+
+                btn.disabled = true;
+
+                var url = endpoint;
+                url += (url.indexOf('?') >= 0 ? '&' : '?') + 'reportDatasetId=' + encodeURIComponent(v);
+
+                try {
+                    var res = await fetch(url, { method: 'POST' });
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+                    lastSuccessful = v;
+                    updateEnabled();
+                } catch (e) {
+                    btn.disabled = false;
+                }
+            });
+
+            updateEnabled();
+        })();
+    </script>
+}

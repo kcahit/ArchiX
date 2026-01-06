@@ -3,35 +3,10 @@
 <div class="table-header">
     <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
         <div class="d-flex align-items-center gap-2">
-            <span class="text-muted grid-record-count">(<strong><span id="@Model.Id-totalRecords">@Model.TotalRecords</span></strong> Kayıt)</span>
+            @await Component.InvokeAsync("DatasetSelector", Model)
+
+            <span class="text-muted grid-record-count ms-1">(<strong><span id="@Model.Id-totalRecords">@Model.TotalRecords</span></strong> Kayıt)</span>
         </div>
-
-        @if (Model.ShowDatasetSelector)
-        {
-            <div class="d-flex align-items-center gap-2">
-                <select class="form-select form-select-sm" id="@Model.Id-datasetSelect" style="min-width:260px">
-                    <option value="">@Model.DatasetPlaceholder</option>
-                    @foreach (var opt in (Model.DatasetOptions ?? Array.Empty<ArchiX.Library.Web.ViewModels.Grid.ReportDatasetOptionViewModel>()))
-                    {
-                        if (Model.SelectedReportDatasetId.HasValue && Model.SelectedReportDatasetId.Value == opt.Id)
-                        {
-                            <option value="@opt.Id" selected="selected">@opt.DisplayName</option>
-                        }
-                        else
-                        {
-                            <option value="@opt.Id">@opt.DisplayName</option>
-                        }
-                    }
-                </select>
-
-                <button type="button"
-                        class="btn btn-primary btn-sm"
-                        id="@Model.Id-runReportBtn"
-                        data-endpoint="@Model.RunReportEndpoint">
-                    <i class="bi bi-play-fill me-1"></i> @Model.RunReportText
-                </button>
-            </div>
-        }
 
         <div class="d-flex align-items-center gap-2 flex-grow-1">
             <div class="search-box flex-grow-1">
@@ -104,57 +79,3 @@
         </div>
     }
 </div>
-
-@if (Model.ShowDatasetSelector)
-{
-    <script>
-        (function () {
-            var id = '@Model.Id';
-            var select = document.getElementById(id + '-datasetSelect');
-            var btn = document.getElementById(id + '-runReportBtn');
-
-            if (!select || !btn) return;
-
-            var lastSuccessful = null;
-
-            function updateEnabled() {
-                var v = select.value || '';
-                var hasSelection = v.length > 0;
-                var changedSinceLastRun = (lastSuccessful === null) || (lastSuccessful !== v);
-                btn.disabled = !(hasSelection && changedSinceLastRun);
-            }
-
-            select.addEventListener('change', function () {
-                updateEnabled();
-            });
-
-            btn.addEventListener('click', async function () {
-                var endpoint = btn.getAttribute('data-endpoint') || '';
-                var v = select.value || '';
-
-                if (!endpoint || !v) {
-                    updateEnabled();
-                    return;
-                }
-
-                btn.disabled = true;
-
-                var url = endpoint;
-                url += (url.indexOf('?') >= 0 ? '&' : '?') + 'reportDatasetId=' + encodeURIComponent(v);
-
-                try {
-                    var res = await fetch(url, { method: 'POST' });
-                    if (!res.ok) throw new Error('HTTP ' + res.status);
-
-                    lastSuccessful = v;
-                    updateEnabled();
-                } catch (e) {
-                    // hata olursa tekrar enable (kullanıcı tekrar deneyebilsin)
-                    btn.disabled = false;
-                }
-            });
-
-            updateEnabled();
-        })();
-    </script>
-}

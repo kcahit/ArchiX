@@ -1,9 +1,17 @@
 ﻿@page "/Raporlar"
 @model ArchiX.Library.Web.Templates.Modern.Pages.Raporlar.GridListeModel
+@using ArchiX.Library.Web.ViewModels.Grid
 
 @{
     ViewData["Title"] = "Raporlar";
     Layout = "~/Templates/Modern/Pages/Shared/_Layout.cshtml";
+
+    var datasetOptions = new List<ReportDatasetOptionViewModel>
+    {
+        new(1, "Örnek Rapor 1"),
+        new(2, "Örnek Rapor 2"),
+        new(3, "Örnek Rapor 3")
+    };
 }
 
 @section Styles {
@@ -13,11 +21,27 @@
     <link rel="stylesheet" href="~/css/archix.reports.header.css" />
 }
 
-@await Component.InvokeAsync("GridTable", new ArchiX.Library.Web.ViewModels.Grid.GridTableViewModel
+@await Component.InvokeAsync("GridTable", new GridTableViewModel
 {
     Id = "gridListe",
     Title = "Raporlar",
     SearchPlaceholder = "Genel arama...",
     Columns = Model.Columns,
-    Rows = Model.Rows
+    Rows = Model.Rows,
+    Toolbar = new GridToolbarViewModel
+    {
+        Id = "gridListe",
+        TotalRecords = 0,
+        SearchPlaceholder = "Genel arama...",
+        ShowAdvancedSearch = true,
+        ShowExport = true,
+        IncludeAdvancedSearchPanel = true,
+
+        ShowDatasetSelector = true,
+        DatasetOptions = datasetOptions,
+        SelectedReportDatasetId = null,
+        RunReportEndpoint = "/Raporlar?handler=Run",
+        RunReportText = "Raporla",
+        DatasetPlaceholder = "Rapor seçin..."
+    }
 })

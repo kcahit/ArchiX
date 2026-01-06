@@ -1,6 +1,7 @@
 ﻿Aşağıdaki kurallara göre çalışacaksın. 
 
-1. Değişklikleri Library.Web projesine yapıyorsun. build yapınca zaten ArchiX.WebHost projesine otomatik geliyor.
+1. Değişklikleri Library.Web projesine yapıyorsun. build yapınca zaten ArchiX.WebHost projesine otomatik geliyor. 
+	Program.cs hariç
 2. bana  kody vereceğin zaman
 	a. kodu tam ve tek parça olarak veriyorsun.
     b. kodu verirken başına yeni mi yoksa değişiklik mi olduğunu yazıyorsun. 
@@ -13,8 +14,7 @@
 seninle bu yazışma önemli ==> Tamam. Bundan sonra Dizin satırını editör kısaltmasın diye tırnak içinde yazacağım (tek satır, full path).
 Dizin: "D:\_git\ArchiX\Dev\ArchiX\src\ArchiX.Library.Web\Templates\Modern\Pages\Shared\Components\GridToolbar\Default.cshtml"
 
-
-Kodu sen güncelleme bana ver bunu asala unutma. Ne anladıysan bana yorumla şimdi
+bana başlarken sürekli sorular sormak yerine kendiliğinden anla (poje kodlarını kendin oku) ve olabildiğince az soru ile direkt kodu ver.
 Yorum yaparken örnek olsun diye  kodları ekrana yazma kesinlikle yazma zorunlu ise yapılacak bir şey olacak ise yaz. thread aşırı derecede gereksiz şekilde büyüyor
 
 

@@ -10,6 +10,21 @@
     var jsonColumns = JsonSerializer.Serialize(Model.Columns ?? Array.Empty<GridColumnDefinition>(), options);
     var tableId = Model.Id ?? "gridTable";
     var columns = Model.Columns ?? Array.Empty<GridColumnDefinition>();
+
+    var toolbarModel = Model.Toolbar ?? new GridToolbarViewModel
+    {
+        Id = tableId,
+        TotalRecords = 0,
+        SearchPlaceholder = Model.SearchPlaceholder,
+        ResetText = Model.ResetText,
+        AdvancedSearchText = Model.AdvancedSearchText,
+        ExportText = Model.ExportText,
+        ShowAdvancedSearch = true,
+        ShowExport = true,
+        IncludeAdvancedSearchPanel = true
+    };
+
+    toolbarModel.Id = tableId;
 }
 
 <link rel="stylesheet" href="~/_content/ArchiX.Library.Web/lib/bootstrap-icons/font/bootstrap-icons.css" />
@@ -20,18 +35,7 @@
         <div class="table-container">
             @if (Model.ShowToolbar)
             {
-                @await Component.InvokeAsync("GridToolbar", new GridToolbarViewModel
-                {
-                    Id = tableId,
-                    TotalRecords = 0,
-                    SearchPlaceholder = Model.SearchPlaceholder,
-                    ResetText = Model.ResetText,
-                    AdvancedSearchText = Model.AdvancedSearchText,
-                    ExportText = Model.ExportText,
-                    ShowAdvancedSearch = true,
-                    ShowExport = true,
-                    IncludeAdvancedSearchPanel = true
-                })
+                @await Component.InvokeAsync("GridToolbar", toolbarModel)
             }
 
             @if (!Model.ShowToolbar)
