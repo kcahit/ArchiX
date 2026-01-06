@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ArchiX.Library.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class FirstMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -266,6 +266,36 @@ namespace ArchiX.Library.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ReportDatasetTypeGroups",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    RowId = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()"),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset(4)", precision: 4, nullable: false, defaultValueSql: "SYSDATETIMEOFFSET()"),
+                    CreatedBy = table.Column<int>(type: "int", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset(4)", precision: 4, nullable: true),
+                    UpdatedBy = table.Column<int>(type: "int", nullable: true),
+                    StatusId = table.Column<int>(type: "int", nullable: false),
+                    LastStatusAt = table.Column<DateTimeOffset>(type: "datetimeoffset(4)", precision: 4, nullable: true, defaultValueSql: "SYSDATETIMEOFFSET()"),
+                    LastStatusBy = table.Column<int>(type: "int", nullable: false),
+                    IsProtected = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ReportDatasetTypeGroups", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ReportDatasetTypeGroups_Status_StatusId",
+                        column: x => x.StatusId,
+                        principalTable: "Status",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserPasswordHistories",
                 columns: table => new
                 {
@@ -415,6 +445,43 @@ namespace ArchiX.Library.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ReportDatasetTypes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ReportDatasetTypeGroupId = table.Column<int>(type: "int", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    RowId = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()"),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset(4)", precision: 4, nullable: false, defaultValueSql: "SYSDATETIMEOFFSET()"),
+                    CreatedBy = table.Column<int>(type: "int", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset(4)", precision: 4, nullable: true),
+                    UpdatedBy = table.Column<int>(type: "int", nullable: true),
+                    StatusId = table.Column<int>(type: "int", nullable: false),
+                    LastStatusAt = table.Column<DateTimeOffset>(type: "datetimeoffset(4)", precision: 4, nullable: true, defaultValueSql: "SYSDATETIMEOFFSET()"),
+                    LastStatusBy = table.Column<int>(type: "int", nullable: false),
+                    IsProtected = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ReportDatasetTypes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ReportDatasetTypes_ReportDatasetTypeGroups_ReportDatasetTypeGroupId",
+                        column: x => x.ReportDatasetTypeGroupId,
+                        principalTable: "ReportDatasetTypeGroups",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_ReportDatasetTypes_Status_StatusId",
+                        column: x => x.StatusId,
+                        principalTable: "Status",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserApplications",
                 columns: table => new
                 {
@@ -451,6 +518,44 @@ namespace ArchiX.Library.Migrations
                         name: "FK_UserApplications_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ReportDatasets",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ReportDatasetTypeId = table.Column<int>(type: "int", nullable: false),
+                    ConnectionName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    FileName = table.Column<string>(type: "nvarchar(260)", maxLength: 260, nullable: false),
+                    DisplayName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    SubPath = table.Column<string>(type: "nvarchar(260)", maxLength: 260, nullable: true),
+                    RowId = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()"),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset(4)", precision: 4, nullable: false, defaultValueSql: "SYSDATETIMEOFFSET()"),
+                    CreatedBy = table.Column<int>(type: "int", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset(4)", precision: 4, nullable: true),
+                    UpdatedBy = table.Column<int>(type: "int", nullable: true),
+                    StatusId = table.Column<int>(type: "int", nullable: false),
+                    LastStatusAt = table.Column<DateTimeOffset>(type: "datetimeoffset(4)", precision: 4, nullable: true, defaultValueSql: "SYSDATETIMEOFFSET()"),
+                    LastStatusBy = table.Column<int>(type: "int", nullable: false),
+                    IsProtected = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ReportDatasets", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ReportDatasets_ReportDatasetTypes_ReportDatasetTypeId",
+                        column: x => x.ReportDatasetTypeId,
+                        principalTable: "ReportDatasetTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_ReportDatasets_Status_StatusId",
+                        column: x => x.StatusId,
+                        principalTable: "Status",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -533,6 +638,16 @@ namespace ArchiX.Library.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "ReportDatasetTypeGroups",
+                columns: new[] { "Id", "Code", "CreatedBy", "Description", "IsProtected", "LastStatusBy", "Name", "StatusId", "UpdatedAt", "UpdatedBy" },
+                values: new object[,]
+                {
+                    { 1, "Db", 0, "DB backed datasets", true, 0, "Database", 3, null, null },
+                    { 2, "File", 0, "File backed datasets", true, 0, "File", 3, null, null },
+                    { 3, "Other", 0, "Other sources (future)", true, 0, "Other", 3, null, null }
+                });
+
+            migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "CreatedBy", "DisplayName", "Email", "IsAdmin", "IsProtected", "LastStatusBy", "MaxPasswordAgeDays", "NormalizedEmail", "NormalizedUserName", "PasswordChangedAtUtc", "Phone", "StatusId", "UpdatedAt", "UpdatedBy", "UserName" },
                 values: new object[] { 1, 0, "System Admin", "admin@example.com", true, true, 0, 90, "ADMIN@EXAMPLE.COM", "ADMIN", null, null, 3, null, null, "admin" });
@@ -575,6 +690,23 @@ namespace ArchiX.Library.Migrations
                     { 18, 1, new DateTimeOffset(new DateTime(2025, 12, 11, 10, 0, 17, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), 0, false, 0, new Guid("00000000-0000-0000-0000-000000000017"), 3, null, null, "654321" },
                     { 19, 1, new DateTimeOffset(new DateTime(2025, 12, 11, 10, 0, 18, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), 0, false, 0, new Guid("00000000-0000-0000-0000-000000000018"), 3, null, null, "michael" },
                     { 20, 1, new DateTimeOffset(new DateTime(2025, 12, 11, 10, 0, 19, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), 0, false, 0, new Guid("00000000-0000-0000-0000-000000000019"), 3, null, null, "football" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "ReportDatasetTypes",
+                columns: new[] { "Id", "Code", "CreatedBy", "Description", "IsProtected", "LastStatusBy", "Name", "ReportDatasetTypeGroupId", "StatusId", "UpdatedAt", "UpdatedBy" },
+                values: new object[,]
+                {
+                    { 1, "sp", 0, null, true, 0, "Stored Procedure", 1, 3, null, null },
+                    { 2, "view", 0, null, true, 0, "View", 1, 3, null, null },
+                    { 3, "table", 0, null, true, 0, "Table", 1, 3, null, null },
+                    { 4, "json", 0, null, true, 0, "JSON", 2, 3, null, null },
+                    { 5, "ndjson", 0, null, true, 0, "NDJSON", 2, 3, null, null },
+                    { 6, "csv", 0, null, true, 0, "CSV", 2, 3, null, null },
+                    { 7, "txt", 0, null, true, 0, "Text", 2, 3, null, null },
+                    { 8, "xml", 0, null, true, 0, "XML", 2, 3, null, null },
+                    { 9, "xls", 0, null, true, 0, "Excel (XLS)", 2, 3, null, null },
+                    { 10, "xlsx", 0, null, true, 0, "Excel (XLSX)", 2, 3, null, null }
                 });
 
             migrationBuilder.InsertData(
@@ -716,6 +848,42 @@ namespace ArchiX.Library.Migrations
                 column: "StatusId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ReportDatasets_DisplayName",
+                table: "ReportDatasets",
+                column: "DisplayName");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReportDatasets_ReportDatasetTypeId",
+                table: "ReportDatasets",
+                column: "ReportDatasetTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReportDatasets_StatusId",
+                table: "ReportDatasets",
+                column: "StatusId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReportDatasetTypeGroups_StatusId",
+                table: "ReportDatasetTypeGroups",
+                column: "StatusId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReportDatasetTypes_Code",
+                table: "ReportDatasetTypes",
+                column: "Code",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReportDatasetTypes_ReportDatasetTypeGroupId",
+                table: "ReportDatasetTypes",
+                column: "ReportDatasetTypeGroupId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReportDatasetTypes_StatusId",
+                table: "ReportDatasetTypes",
+                column: "StatusId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Status_Code",
                 table: "Status",
                 column: "Code",
@@ -799,6 +967,9 @@ namespace ArchiX.Library.Migrations
                 name: "PasswordPolicyAudits");
 
             migrationBuilder.DropTable(
+                name: "ReportDatasets");
+
+            migrationBuilder.DropTable(
                 name: "UserApplications");
 
             migrationBuilder.DropTable(
@@ -808,10 +979,16 @@ namespace ArchiX.Library.Migrations
                 name: "ParameterDataTypes");
 
             migrationBuilder.DropTable(
+                name: "ReportDatasetTypes");
+
+            migrationBuilder.DropTable(
                 name: "Applications");
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "ReportDatasetTypeGroups");
 
             migrationBuilder.DropTable(
                 name: "Status");

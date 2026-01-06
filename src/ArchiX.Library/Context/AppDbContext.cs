@@ -2,7 +2,7 @@
 using ArchiX.Library.Entities;
 
 using Microsoft.EntityFrameworkCore;
-
+using ArchiX.Library.Runtime.Reports;
 namespace ArchiX.Library.Context
 {
     /// <summary>ArchiX EF Core DbContext.</summary>
@@ -28,6 +28,10 @@ namespace ArchiX.Library.Context
         public DbSet<UserApplication> UserApplications => Set<UserApplication>();
         public DbSet<UserPasswordHistory> UserPasswordHistories => Set<UserPasswordHistory>();
         public DbSet<PasswordBlacklist> PasswordBlacklists => Set<PasswordBlacklist>();
+
+        public DbSet<ReportDatasetTypeGroup> ReportDatasetTypeGroups => Set<ReportDatasetTypeGroup>();
+        public DbSet<ReportDatasetType> ReportDatasetTypes => Set<ReportDatasetType>();
+        public DbSet<ReportDataset> ReportDatasets => Set<ReportDataset>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -177,6 +181,43 @@ namespace ArchiX.Library.Context
                     IsProtected = false
                 })
                 .ToArray();
+
+            // ✅ ReportDataset master seeds (TypeGroups + Types) - migration/ensureCreated ile otomatik gelir.
+            // deterministic Id kullanıyoruz (FK ilişkileri için şart)
+            var rdGroupSeeds = ReportDatasetSeeds.TypeGroups
+                .Select((g, i) => new ReportDatasetTypeGroup
+                {
+                    Id = i + 1,
+                    Code = g.Code,
+                    Name = g.Name,
+                    Description = g.Description,
+                    StatusId = BaseEntity.ApprovedStatusId,
+                    CreatedBy = 0,
+                    LastStatusBy = 0,
+                    IsProtected = true,
+                })
+                .ToArray();
+
+            modelBuilder.Entity<ReportDatasetTypeGroup>().HasData(rdGroupSeeds);
+
+            var groupIdByCode = rdGroupSeeds.ToDictionary(x => x.Code, x => x.Id);
+
+            var rdTypeSeeds = ReportDatasetSeeds.Types
+                .Select((t, i) => new ReportDatasetType
+                {
+                    Id = i + 1,
+                    ReportDatasetTypeGroupId = groupIdByCode[t.GroupCode],
+                    Code = t.Code,
+                    Name = t.Name,
+                    Description = t.Description,
+                    StatusId = BaseEntity.ApprovedStatusId,
+                    CreatedBy = 0,
+                    LastStatusBy = 0,
+                    IsProtected = true,
+                })
+                .ToArray();
+
+            modelBuilder.Entity<ReportDatasetType>().HasData(rdTypeSeeds);
 
             modelBuilder.Entity<PasswordBlacklist>().HasData(blacklistEntities);
 

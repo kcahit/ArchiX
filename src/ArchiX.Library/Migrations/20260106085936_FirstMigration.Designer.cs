@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ArchiX.Library.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251215134931_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260106085936_FirstMigration")]
+    partial class FirstMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1663,6 +1663,435 @@ namespace ArchiX.Library.Migrations
                     b.ToTable("PasswordPolicyAudits", (string)null);
                 });
 
+            modelBuilder.Entity("ArchiX.Library.Entities.ReportDataset", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnOrder(0);
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ConnectionName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(2);
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(4)
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1001)
+                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int")
+                        .HasColumnOrder(1002);
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnOrder(4);
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("nvarchar(260)")
+                        .HasColumnOrder(3);
+
+                    b.Property<bool>("IsProtected")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(1008);
+
+                    b.Property<DateTimeOffset?>("LastStatusAt")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(4)
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1006)
+                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
+
+                    b.Property<int>("LastStatusBy")
+                        .HasColumnType("int")
+                        .HasColumnOrder(1007);
+
+                    b.Property<int>("ReportDatasetTypeId")
+                        .HasColumnType("int")
+                        .HasColumnOrder(1);
+
+                    b.Property<Guid>("RowId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(1000)
+                        .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+                    b.Property<int>("StatusId")
+                        .HasColumnType("int")
+                        .HasColumnOrder(1005);
+
+                    b.Property<string>("SubPath")
+                        .HasMaxLength(260)
+                        .HasColumnType("nvarchar(260)")
+                        .HasColumnOrder(5);
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasPrecision(4)
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1003);
+
+                    b.Property<int?>("UpdatedBy")
+                        .HasColumnType("int")
+                        .HasColumnOrder(1004);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DisplayName");
+
+                    b.HasIndex("ReportDatasetTypeId");
+
+                    b.HasIndex("StatusId");
+
+                    b.ToTable("ReportDatasets", (string)null);
+                });
+
+            modelBuilder.Entity("ArchiX.Library.Entities.ReportDatasetType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnOrder(0);
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnOrder(2);
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(4)
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1001)
+                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int")
+                        .HasColumnOrder(1002);
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnOrder(4);
+
+                    b.Property<bool>("IsProtected")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(1008);
+
+                    b.Property<DateTimeOffset?>("LastStatusAt")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(4)
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1006)
+                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
+
+                    b.Property<int>("LastStatusBy")
+                        .HasColumnType("int")
+                        .HasColumnOrder(1007);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)")
+                        .HasColumnOrder(3);
+
+                    b.Property<int>("ReportDatasetTypeGroupId")
+                        .HasColumnType("int")
+                        .HasColumnOrder(1);
+
+                    b.Property<Guid>("RowId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(1000)
+                        .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+                    b.Property<int>("StatusId")
+                        .HasColumnType("int")
+                        .HasColumnOrder(1005);
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasPrecision(4)
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1003);
+
+                    b.Property<int?>("UpdatedBy")
+                        .HasColumnType("int")
+                        .HasColumnOrder(1004);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("ReportDatasetTypeGroupId");
+
+                    b.HasIndex("StatusId");
+
+                    b.ToTable("ReportDatasetTypes", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Code = "sp",
+                            CreatedAt = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = true,
+                            LastStatusBy = 0,
+                            Name = "Stored Procedure",
+                            ReportDatasetTypeGroupId = 1,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            StatusId = 3
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Code = "view",
+                            CreatedAt = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = true,
+                            LastStatusBy = 0,
+                            Name = "View",
+                            ReportDatasetTypeGroupId = 1,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            StatusId = 3
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Code = "table",
+                            CreatedAt = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = true,
+                            LastStatusBy = 0,
+                            Name = "Table",
+                            ReportDatasetTypeGroupId = 1,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            StatusId = 3
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Code = "json",
+                            CreatedAt = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = true,
+                            LastStatusBy = 0,
+                            Name = "JSON",
+                            ReportDatasetTypeGroupId = 2,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            StatusId = 3
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Code = "ndjson",
+                            CreatedAt = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = true,
+                            LastStatusBy = 0,
+                            Name = "NDJSON",
+                            ReportDatasetTypeGroupId = 2,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            StatusId = 3
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Code = "csv",
+                            CreatedAt = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = true,
+                            LastStatusBy = 0,
+                            Name = "CSV",
+                            ReportDatasetTypeGroupId = 2,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            StatusId = 3
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Code = "txt",
+                            CreatedAt = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = true,
+                            LastStatusBy = 0,
+                            Name = "Text",
+                            ReportDatasetTypeGroupId = 2,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            StatusId = 3
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Code = "xml",
+                            CreatedAt = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = true,
+                            LastStatusBy = 0,
+                            Name = "XML",
+                            ReportDatasetTypeGroupId = 2,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            StatusId = 3
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Code = "xls",
+                            CreatedAt = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = true,
+                            LastStatusBy = 0,
+                            Name = "Excel (XLS)",
+                            ReportDatasetTypeGroupId = 2,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            StatusId = 3
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Code = "xlsx",
+                            CreatedAt = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            IsProtected = true,
+                            LastStatusBy = 0,
+                            Name = "Excel (XLSX)",
+                            ReportDatasetTypeGroupId = 2,
+                            RowId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            StatusId = 3
+                        });
+                });
+
+            modelBuilder.Entity("ArchiX.Library.Entities.ReportDatasetTypeGroup", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnOrder(0);
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnOrder(1);
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(4)
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1001)
+                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int")
+                        .HasColumnOrder(1002);
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnOrder(3);
+
+                    b.Property<bool>("IsProtected")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(1008);
+
+                    b.Property<DateTimeOffset?>("LastStatusAt")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(4)
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1006)
+                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
+
+                    b.Property<int>("LastStatusBy")
+                        .HasColumnType("int")
+                        .HasColumnOrder(1007);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)")
+                        .HasColumnOrder(2);
+
+                    b.Property<Guid>("RowId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(1000)
+                        .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+                    b.Property<int>("StatusId")
+                        .HasColumnType("int")
+                        .HasColumnOrder(1005);
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasPrecision(4)
+                        .HasColumnType("datetimeoffset(4)")
+                        .HasColumnOrder(1003);
+
+                    b.Property<int?>("UpdatedBy")
+                        .HasColumnType("int")
+                        .HasColumnOrder(1004);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StatusId");
+
+                    b.ToTable("ReportDatasetTypeGroups", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Code = "Db",
+                            CreatedAt = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            Description = "DB backed datasets",
+                            IsProtected = true,
+                            LastStatusBy = 0,
+                            Name = "Database",
+                            RowId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            StatusId = 3
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Code = "File",
+                            CreatedAt = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            Description = "File backed datasets",
+                            IsProtected = true,
+                            LastStatusBy = 0,
+                            Name = "File",
+                            RowId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            StatusId = 3
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Code = "Other",
+                            CreatedAt = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = 0,
+                            Description = "Other sources (future)",
+                            IsProtected = true,
+                            LastStatusBy = 0,
+                            Name = "Other",
+                            RowId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            StatusId = 3
+                        });
+                });
+
             modelBuilder.Entity("ArchiX.Library.Entities.Statu", b =>
                 {
                     b.Property<int>("Id")
@@ -2219,6 +2648,49 @@ namespace ArchiX.Library.Migrations
                 });
 
             modelBuilder.Entity("ArchiX.Library.Entities.PasswordPolicyAudit", b =>
+                {
+                    b.HasOne("ArchiX.Library.Entities.Statu", null)
+                        .WithMany()
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ArchiX.Library.Entities.ReportDataset", b =>
+                {
+                    b.HasOne("ArchiX.Library.Entities.ReportDatasetType", "Type")
+                        .WithMany()
+                        .HasForeignKey("ReportDatasetTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ArchiX.Library.Entities.Statu", null)
+                        .WithMany()
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Type");
+                });
+
+            modelBuilder.Entity("ArchiX.Library.Entities.ReportDatasetType", b =>
+                {
+                    b.HasOne("ArchiX.Library.Entities.ReportDatasetTypeGroup", "Group")
+                        .WithMany()
+                        .HasForeignKey("ReportDatasetTypeGroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ArchiX.Library.Entities.Statu", null)
+                        .WithMany()
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Group");
+                });
+
+            modelBuilder.Entity("ArchiX.Library.Entities.ReportDatasetTypeGroup", b =>
                 {
                     b.HasOne("ArchiX.Library.Entities.Statu", null)
                         .WithMany()
