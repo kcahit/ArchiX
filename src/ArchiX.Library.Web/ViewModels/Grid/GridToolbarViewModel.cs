@@ -12,4 +12,20 @@ public class GridToolbarViewModel
     public bool ShowExport { get; set; } = true;
 
     public bool IncludeAdvancedSearchPanel { get; set; } = false;
+
+    // Kombine / Dataset-driven destek (Issue #17 - bölüm 12)
+    public bool ShowDatasetSelector { get; set; } = false;
+
+    // Dropdown seçenekleri: sadece Approved datasetler buraya doldurulacak
+    public IReadOnlyList<ReportDatasetOptionViewModel> DatasetOptions { get; set; } =
+        [];
+
+    // Seçili dataset (dropdown)
+    public int? SelectedReportDatasetId { get; set; }
+
+    // Raporla butonunun POST edeceği endpoint (ör: "/Raporlar/Kombine?handler=Run")
+    public string? RunReportEndpoint { get; set; }
+
+    public string RunReportText { get; set; } = "Raporla";
+    public string DatasetPlaceholder { get; set; } = "Rapor seçin...";
 }

@@ -61,7 +61,7 @@ Scope yaklaşımı:
 
 ---
 
-## 3) Connection Yönetimi (Çoklu DB + Alias/Key)
+## 3-) Connection Yönetimi (Çoklu DB + Alias/Key)
 
 ### Teknik Tasarım
 - Tek bir instance **birden fazla DB** ile konuşabilir (operasyonel/raporlama/entegrasyon).
@@ -80,7 +80,23 @@ DB dataset’lerde connection seçimi:
 - DB dataset çalıştırılırken mutlaka bir alias çözümleme adımı olmalıdır.
 
 ---
+### 3-2) UI Notu – Dataset Selector Bileşeni (Unutulmasın)
 
+### Teknik Tasarım
+- Dataset selector UI (dropdown + `Raporla` butonu) **ayrı bir component** olarak ele alınacaktır (grid’e bağımlı olmayacak).
+- Grid sayfalarında (GridListe, Kombine) hedef yerleşim:
+  - `DatasetSelector` → `Toolbar` → (`Pivot`) → `Grid`
+- Gerekirse dataset selector, `GridToolbar` içinde **gömülü** şekilde kullanılabilir (layout tutarlılığı için).
+- Dataset selector’ın gösterimi parametrik olmalıdır:
+  - Kullanıcı dataset seçecekse görünür.
+  - Sayfa dataset/veri ile açılıyorsa gizli.
+
+### Test Senaryoları
+- Dataset selector component’i grid olmadan bağımsız bir sayfada render edilebilir olmalıdır.
+- GridListe sayfasında sıralama `DatasetSelector` → `GridToolbar` → `GridTable` şeklinde doğrulanmalıdır.
+- Kombine sayfasında sıralama `DatasetSelector` → `GridToolbar` → `Pivot` → `GridTable` şeklinde doğrulanmalıdır.
+- 
+----
 ## 4) Secret Yönetimi (Güvenlik Önceliği)
 
 ### Teknik Tasarım

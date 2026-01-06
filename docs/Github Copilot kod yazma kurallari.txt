@@ -1,7 +1,7 @@
 ﻿Aşağıdaki kurallara göre çalışacaksın. 
 
 1. Değişklikleri Library.Web projesine yapıyorsun. build yapınca zaten ArchiX.WebHost projesine otomatik geliyor.
-2. bana yacacağım kody vereceğin zaman
+2. bana  kody vereceğin zaman
 	a. kodu tam ve tek parça olarak veriyorsun.
     b. kodu verirken başına yeni mi yoksa değişiklik mi olduğunu yazıyorsun. 
 	c. Dizin: Dosyanın  full dizini.
@@ -10,9 +10,12 @@
 		- Tahmini satır sayısı
 		- Hangi kod parçasından sonra yazılcaksa onu belirtiyorsun.
 
+seninle bu yazışma önemli ==> Tamam. Bundan sonra Dizin satırını editör kısaltmasın diye tırnak içinde yazacağım (tek satır, full path).
+Dizin: "D:\_git\ArchiX\Dev\ArchiX\src\ArchiX.Library.Web\Templates\Modern\Pages\Shared\Components\GridToolbar\Default.cshtml"
+
 
 Kodu sen güncelleme bana ver bunu asala unutma. Ne anladıysan bana yorumla şimdi
-Yorum yaparken örnek olsn die  kodları ekrana yazma kesinlikle yazma zorunlu ise yapılacak bir şey olacak ise yaz. thread aşırı derecede gereksiz şekilde büyüyor
+Yorum yaparken örnek olsun diye  kodları ekrana yazma kesinlikle yazma zorunlu ise yapılacak bir şey olacak ise yaz. thread aşırı derecede gereksiz şekilde büyüyor
 
 
 

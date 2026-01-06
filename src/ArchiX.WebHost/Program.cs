@@ -8,6 +8,7 @@ using ArchiX.Library.Runtime.ConnectionPolicy;
 using ArchiX.Library.Runtime.Connections;
 using ArchiX.Library.Runtime.Database;
 using ArchiX.Library.Runtime.Observability;
+using ArchiX.Library.Runtime.Reports;
 using ArchiX.Library.Runtime.Security;
 using ArchiX.Library.Services.Security;
 using ArchiX.Library.Time;
@@ -57,6 +58,7 @@ builder.Services.AddRazorPages(opts =>
 builder.Services.AddApplicationMappings();
 builder.Services.AddConnectionPolicyEvaluator();
 builder.Services.AddArchiXConnections();
+builder.Services.AddArchiXReports(); // ✅ Issue #17: Dataset executor + limit guard DI
 builder.Services.AddAttemptLimiter(builder.Configuration);
 builder.Services.AddTwoFactorCore(builder.Configuration, "ArchiX:TwoFactor");
 builder.Services.AddJwtSecurity(builder.Configuration, "ArchiX:Jwt");
@@ -107,6 +109,7 @@ var forceProvision = string.Equals(
 await AdminProvisionerRunner.EnsureDatabaseProvisionedAsync(app.Services, force: forceProvision);
 await PasswordPolicyStartup.EnsureSeedAndWarningsAsync(app.Services, 1);
 await ArchiX.Library.Runtime.Connections.ConnectionStringsStartup.EnsureSeedAsync(app.Services);
+
 // ✅ Static Files (Symbolic link sayesinde css/ erişilebilir)
 app.UseStaticFiles();
 
