@@ -4,7 +4,7 @@ using Microsoft.Data.SqlClient;
 
 namespace ArchiX.Library.Runtime.Connections;
 
-internal sealed class ConnectionStringBuilderService(
+public sealed class ConnectionStringBuilderService(
     IConnectionProfileProvider profiles,
     ISecretResolver secrets,
     IConnectionPolicyEvaluator policy)
