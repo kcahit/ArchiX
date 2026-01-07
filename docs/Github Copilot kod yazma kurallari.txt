@@ -20,7 +20,7 @@ ben tamam, devam, ok dersem sonraki adıma geçmeen önce kod doğru uygulanmı�
 kod doğru uyuglanmadı ise hatayı ve düzeltme önerisini yazacaksın.
 ğer iş no ş sıra nı varsa açıklamaya onu da yazacaksın.
 Yorum yaparken örnek olsun diye  kodları ekrana yazma kesinlikle yazma zorunlu ise yapılacak bir şey olacak ise yaz. thread aşırı derecede gereksiz şekilde büyüyor
-
+Benimle TÜRKÇE YAZIŞ. BEN iNGİLİZCE BİLMİYORUM. LÜTFEN.
 
 
 

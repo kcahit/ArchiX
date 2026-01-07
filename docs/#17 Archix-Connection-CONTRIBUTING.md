@@ -205,7 +205,7 @@ Bu revize; bu thread’de netleşen `3-2 Dataset Selector` gereksinimlerini, rep
 3-2 İŞLERİN HEPSİ TAMAMLANDI (2025-01-07 15:40)
 
 ----
-## 4) Secret Yönetimi (Güvenlik Önceliği)
+## 4) Secret Yönetimi (Güvenlik Önceliği) ==> TAMAMLANDI (2026-01-07 16:40)
 
 ### Teknik Tasarım
 Prensip:
@@ -332,6 +332,8 @@ Aşağıdaki işler sıralıdır. Bir iş bitmeden sonraki işe geçilmez. Her a
 •	Grid/Pivot fake olabilir.
 •	Ancak RunEndpoint’ler gerçek handler olarak çalışır olmalı (wiring + test zorunlu).
 
+4 İŞLERİN HEPSİ TAMAMLANDI (2025-01-07 16:40)
+
 ---
 
 ## 5) Connection Security Policy (Zorunlu)
@@ -352,6 +354,67 @@ Audit:
 ### Test Senaryoları
 - Policy ihlali durumunda (örn. Encrypt kapalıysa) bağlantı engellenmelidir veya policy mode gereği uyarı verilmelidir.
 - Audit kayıtlarında açık password veya tam connection string bulunmamalıdır (mask zorunlu).
+
+Revize (2026-01-07 17:00)
+Bu revize, “5) Connection Security Policy” bölümündeki sözleşmeyi multi-db (application birden fazla DB) gerçeğiyle uyumlu olacak şekilde daha net hale getirir ve “masking” şartını garanti (no-leak) seviyesinde tanımlar.
+Teknik Notlar (Net Sözleşme)
+5.0) Kapsam (bu bölüm neyi kapsar?)
+•	Bu bölümde “tüm DB bağlantıları” ifadesi şu anlama gelir:
+Application runtime sırasında (dataset executor / raporlama / entegrasyon vb.) uygulamanın bağlandığı tüm DB alias’ları ve tüm connection string üretimleri.
+•	Bu ifade “tek connection string” değil, çoklu DB / çoklu alias gerçeğini kapsar. (örn. operasyonel DB, raporlama DB, entegrasyon DB)
+•	Bu bölümün amacı; hangi DB olursa olsun aynı güvenlik sözleşmesinin merkezi uygulanmasıdır.
+5.1) Merkezi policy zorunluluğu (fail-closed)
+•	Uygulama runtime’da oluşturulan her DB bağlantısı, bağlantı kurulmadan önce mutlaka merkezi ConnectionPolicy değerlendirmesinden geçmelidir.
+•	Belirsiz/uygunsuz durumda bağlantı kurulmaz (fail-closed).
+(örn. Encrypt yoksa, whitelist boşsa, kural ihlali varsa)
+5.2) Policy kontrol listesi (değişmedi, netleştirildi) Aşağıdaki kontroller merkezi policy’de zorunludur:
+•	Encrypt zorunlu
+•	TrustServerCertificate kontrollü / yasak (policy’ye göre)
+•	Integrated Security kontrollü (policy’ye göre)
+•	Hedef sunucu / IP aralığı whitelist (host veya CIDR)
+5.3) Whitelist boşsa davranış (security-first)
+•	Whitelist boş ise sistem “varsayılan izin ver” yaklaşımıyla davranmaz.
+•	Policy Mode davranışı geçerlidir:
+•	Enforce → bağlantı engellenir (Blocked)
+•	Warn → uyarı üretilir (Warn) (ama güvenlik gereksinimine göre ileride Enforce’a taşınacaktır)
+5.4) Audit masking (no-leak garantisi)
+•	Audit kayıtlarında ham connection string tam haliyle saklanamaz.
+•	Masking yalnızca “karakter kırpma” mantığıyla bırakılmayacak; anahtar bazlı (key-based) maskeleme zorunludur:
+•	Password / Pwd gibi secret alanlarının değeri audit’e asla açık yazılamaz.
+•	Masking sonucu, şifre veya secret içeriğini hiçbir koşulda geri üretilebilir şekilde içermemelidir.
+Test Notları (Netleştirme)
+•	Policy ihlali halinde (Encrypt=False, TrustServerCertificate=True yasakken, whitelist dışı hedef vb.) sonuç:
+•	Enforce → Blocked
+•	Warn → Warn
+•	Audit kaydında:
+•	açık password bulunmamalı,
+•	connection string’in ham hali birebir bulunmamalı,
+•	en azından secret alanlar kesin maskelenmiş olmalı.
+
+#### Yapılacak İşler (İş #5 – Uygulama Sırası). tamamlandı (2026-01-07 17:05)
+
+1) Masking sözleşmesini kodda garanti hale getir (no-leak)
+   - Audit’e yazılan connection string masking’i “karakter kırpma” yaklaşımından çıkarılacak.
+   - `Password` / `Pwd` gibi alanlar **anahtar bazlı** yakalanıp kesin maskelenecek.
+   - Hedef: Audit kaydında açık password ve ham connection string bulunmayacak.
+
+2) Policy değerlendirmesi + audit çağrı noktaları (runtime DB bağlantıları) doğrulaması
+   - Application runtime’da açılan tüm DB bağlantılarının policy’den geçtiği doğrulanacak.
+   - Multi-db (çok alias) senaryoda her alias için aynı policy uygulanmalı.
+
+3) Test ekle (regresyon)
+   - Audit masking testleri:
+     - `Password=` içeren farklı connection string formatlarında (ör. `Password=...`, `Pwd=...`) sızıntı olmamalı.
+     - Masked string içinde secret değeri asla yer almamalı.
+   - Policy testleri (varsa genişlet):
+     - Enforce modda whitelist boş → Blocked
+     - Encrypt yok → Blocked
+
+4) Build temizliği
+   - Build sonrası Warning/Message kalmayacak şekilde son kontrol yapılacak.
+   
+  
+işlerin hepsi tamlandı (2026-01-07 17:05).
 
 ---
 
