@@ -15,6 +15,10 @@ seninle bu yazışma önemli ==> Tamam. Bundan sonra Dizin satırını editör k
 Dizin: "D:\_git\ArchiX\Dev\ArchiX\src\ArchiX.Library.Web\Templates\Modern\Pages\Shared\Components\GridToolbar\Default.cshtml"
 
 bana başlarken sürekli sorular sormak yerine kendiliğinden anla (poje kodlarını kendin oku) ve olabildiğince az soru ile direkt kodu ver.
+ama kod varsa kodu önce okuyacaksın sonra kod önerisi vereceksin.
+ben tamam, devam, ok dersem sonraki adıma geçmeen önce kod doğru uygulanmış mı bakacaksın. sonraki işe geçerken önceki kod doğru uygulandı notu ile yeni ile devam edeceksin.
+kod doğru uyuglanmadı ise hatayı ve düzeltme önerisini yazacaksın.
+ğer iş no ş sıra nı varsa açıklamaya onu da yazacaksın.
 Yorum yaparken örnek olsun diye  kodları ekrana yazma kesinlikle yazma zorunlu ise yapılacak bir şey olacak ise yaz. thread aşırı derecede gereksiz şekilde büyüyor
 
 

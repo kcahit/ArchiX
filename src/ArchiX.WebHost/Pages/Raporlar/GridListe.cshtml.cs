@@ -16,7 +16,7 @@ public class GridListeModel : PageModel
     }
 
     public IReadOnlyList<GridColumnDefinition> Columns { get; private set; } = new List<GridColumnDefinition>();
-    public IEnumerable<IDictionary<string, object?>> Rows { get; private set; } = Enumerable.Empty<IDictionary<string, object?>>();
+    public IEnumerable<IDictionary<string, object?>> Rows { get; private set; } = [];
 
     public void OnGet()
     {
@@ -25,6 +25,9 @@ public class GridListeModel : PageModel
 
     public async Task<IActionResult> OnPostRunAsync([FromQuery] int reportDatasetId, CancellationToken ct)
     {
+        if (reportDatasetId <= 0)
+            return new BadRequestResult();
+
         try
         {
             var result = await _executor.ExecuteAsync(new ReportDatasetExecutionRequest(reportDatasetId), ct);

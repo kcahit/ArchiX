@@ -33,6 +33,17 @@ public sealed class KombineRunEndpointTests
         Assert.IsType<BadRequestResult>(result);
     }
 
+    [Fact]
+    public async Task OnPostRunAsync_Should_Return_BadRequest_When_ReportDatasetId_Is_Zero_Or_Less()
+    {
+        var executor = new FakeOkExecutor();
+        var page = new KombineModel(executor);
+
+        var result = await page.OnPostRunAsync(reportDatasetId: 0, ct: default);
+
+        Assert.IsType<BadRequestResult>(result);
+    }
+
     private sealed class FakeOkExecutor : IReportDatasetExecutor
     {
         public Task<ReportDatasetExecutionResult> ExecuteAsync(ReportDatasetExecutionRequest request, CancellationToken ct = default)

@@ -23,6 +23,9 @@ public sealed class FormModel : PageModel
 
     public async Task<IActionResult> OnPostRunAsync([FromQuery] int reportDatasetId, CancellationToken ct)
     {
+        if (reportDatasetId <= 0)
+            return new BadRequestResult();
+
         try
         {
             var result = await _executor.ExecuteAsync(new ReportDatasetExecutionRequest(reportDatasetId), ct);

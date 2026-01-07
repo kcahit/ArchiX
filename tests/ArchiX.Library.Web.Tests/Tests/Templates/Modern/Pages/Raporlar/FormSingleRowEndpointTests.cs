@@ -44,6 +44,17 @@ public sealed class FormSingleRowEndpointTests
         Assert.IsType<BadRequestResult>(result);
     }
 
+    [Fact]
+    public async Task OnPostRunAsync_Should_Return_BadRequest_When_ReportDatasetId_Is_Zero_Or_Less()
+    {
+        var executor = new FakeExecutor(columns: new[] { "id" }, rows: new List<IReadOnlyList<object?>> { new object?[] { 1 } });
+        var page = new FormModel(executor);
+
+        var result = await page.OnPostRunAsync(reportDatasetId: 0, ct: default);
+
+        Assert.IsType<BadRequestResult>(result);
+    }
+
     private sealed class FakeExecutor : IReportDatasetExecutor
     {
         private readonly IReadOnlyList<string> _columns;

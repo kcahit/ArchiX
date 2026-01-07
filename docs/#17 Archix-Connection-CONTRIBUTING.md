@@ -227,6 +227,112 @@ Asgari secret referansı standardı:
 - `PasswordRef` çözümlenemiyorsa bağlantı reddedilmelidir (fail-closed).
 
 ---
+4) Razor Pages UI Entegrasyonu (Kombine / GridListe) – Revize (2026-01-07 16:03 )
+Öncelik sırası: Güvenlik > Performans/Stabilite > Kullanıcı dostu uygulama
+Belirsiz durumda işlem yapılmaz (fail-closed).
+Kapsam ve Amaç
+Bu işin hedefi:
+•	Razor Pages tarafında sayfaların oluşması, DatasetSelector entegrasyonu, endpoint wiring ve minimum test kapsamı.
+•	Şimdilik fake data ile ilerlemek (UI iskeleti ve akışlar tamamlanacak).
+Bu işin kapsamı dışı:
+•	Dataset dropdown seçeneklerinin DB’den “ApprovedOnly” olarak çekilmesi.
+•	Grid kolon/satırlarının dataset sonucuna göre dinamik oluşması.
+•	Pivot’un dataset sonucundan beslenmesi / pivot-grid senkronizasyonu.
+
+Teknik Tasarım
+4.1) DatasetSelector component sözleşmesi (UI contract)
+•	DatasetSelector tam bağımsız bir component’tir; GridToolbar/GridTable gibi bileşenlere model bağımlılığı olmayacaktır.
+•	DatasetSelector, hem:
+•	herhangi bir Razor Page’de tek başına render edilebilir,
+•	hem de GridToolbar içinde embed edilerek kullanılabilir.
+•	DatasetSelector yalnızca DatasetSelectorViewModel ile beslenir:
+•	Id: DOM prefix (zorunlu)
+•	IsVisible
+•	Options (şimdilik fake data olabilir)
+•	SelectedReportDatasetId (nullable)
+•	RunEndpoint (örn. "/Raporlar/Kombine?handler=Run")
+•	RunText, Placeholder
+•	Mode: GridMultiRow / FormSingleRow
+4.2) Yerleşim (layout) sözleşmesi
+•	Grid tabanlı rapor sayfalarında hedef sıralama:
+•	DatasetSelector → GridToolbar → (Pivot) → GridTable
+•	GridListe sayfasında Pivot yoktur.
+•	Kombine sayfasında Pivot vardır.
+•	DatasetSelector embed edilebilir; ancak bağımsız component olması zorunludur.
+4.3) Run endpoint / hook-up zorunluluğu (fail-closed)
+•	DatasetSelector “Raporla” butonu tıklanınca mutlaka RunEndpoint’e POST eder.
+•	RunEndpoint server tarafında karşılanmıyorsa bu sözleşme ihlalidir.
+•	Endpoint standardı:
+•	Kombine: POST /Raporlar/Kombine?handler=Run&reportDatasetId=<id>
+•	GridListe: POST /Raporlar?handler=Run&reportDatasetId=<id>
+•	Server handler minimum davranış:
+•	başarı: 200 OK
+•	hata/exception/uygunsuz istek: 400 BadRequest (fail-closed)
+4.4) “Raporla” butonu enable/disable davranışı (UI contract)
+•	Dropdown başlangıçta null gelir.
+•	“Raporla” butonu:
+•	seçim yokken disabled
+•	seçim yapılınca Enabled
+•	başarılı run sonrası aynı seçim için disabled
+•	seçim değişince tekrar Enabled
+•	Bu davranış client-side uygulanır; güvenlik için server-side fail-closed her zaman geçerlidir.
+4.5) Bu işte “fake data” kuralı (kapsam sınırı)
+•	Dropdown options şimdilik fake olabilir.
+•	Grid/Pivot şimdilik fake olabilir.
+•	Ancak RunEndpoint’ler gerçek handler olarak çalışır olmalı ve testlerle doğrulanmalıdır.
+4.6) Pivot + Detaylı Liste (gelecek uyumluluğu)
+•	Nihai hedefte pivot ve detaylı liste aynı dataset run sonucundan beslenecektir.
+•	Bu işte pivotun “UI olarak var olması” yeterlidir; dataset sonucu ile besleme sonraki işlere bırakılır.
+---
+Test Senaryoları (minimum / repo uyumlu)
+1.	Run endpoint mevcut ve çalışır olmalı
+•	GridListe:
+•	executor success → 200 OK
+•	exception → 400 BadRequest
+•	Kombine:
+•	executor success → 200 OK
+•	exception → 400 BadRequest
+2.	FormSingleRow fail-closed
+•	RowCount == 1 → 200 OK + model doldurulur
+•	RowCount == 0 veya RowCount > 1 → 400 BadRequest
+3.	DatasetSelector bağımsız render
+•	Sadece DatasetSelectorViewModel ile render edilebilir olmalı (grid bileşenlerine bağımlılık olmamalı).
+4.	GridToolbar embed mapping
+•	GridToolbarViewModel → DatasetSelectorViewModel map edilerek invoke yapılmalıdır.
+---
+İş Listesi (GitHub Issue Planı) – İş #4 (uygulama sırası 2025-01-07 16:03)
+
+Aşağıdaki işler sıralıdır. Bir iş bitmeden sonraki işe geçilmez. Her adım derlenebilir ve testleri çalışır olmalıdır.
+4.0) Kapsam netleştirici kural-1 (DB ApprovedOptions bu işte yok)
+•	Bu işte Options DB’den çekilmeyecek.
+•	Options listesi fake/in-memory olabilir.
+•	DB’den ApprovedOnly listeleme kuralı korunur; ancak bu işin teslim kriteri değildir (sonraki işe taşınır).
+4.1) Kapsam netleştirici kural-2 (Kombine Pivot sample data ile kalabilir)
+•	Kombine pivot alanı bu işte sample/fake data ile çalışabilir.
+•	Pivot’un dataset run sonucundan beslenmesi ve pivot-grid senkronizasyonu bu işin kapsamı dışıdır.
+4.2) Kombine ve GridListe sayfalarında DatasetSelector entegrasyonunu standardize et
+•	RunEndpoint doğru handler’a bağlı olmalı (?handler=Run).
+•	Id değerleri sayfa bazında benzersiz ve tutarlı olmalı (örn. gridListe, kombineGrid).
+4.3) Run endpoint sözleşmesini netleştir ve fail-closed uygula
+•	reportDatasetId yok/boş/uygunsuz ise BadRequest (fail-closed).
+•	Exception catch: BadRequest.
+4.4) DatasetSelector UI behavior sözleşmesini repo standardı haline getir
+•	initial disabled, change enabled, success sonrası disabled, seçim değişince enabled.
+•	Davranış component içinde standardize olmalı; sayfa bazlı dağınık JS üretilmemeli.
+4.5) GridToolbar embed kullanımını koru, fakat bağımsızlığı bozma
+•	GridToolbar içinde invoke edilirken DatasetSelectorViewModel ile çağır.
+•	DatasetSelector hiçbir şekilde GridToolbarViewModel bağımlılığı almamalı.
+4.6) Minimum test paketini tamamla
+•	GridListe run endpoint testleri
+•	Kombine run endpoint testleri
+•	FormSingleRow fail-closed testleri
+•	(gerekirse) component bağımsızlığına yönelik düşük seviye test(ler)
+4.7) Kapsam sınırı doğrulaması (bilinçli fake data kabulü)
+•	Dropdown options fake olabilir.
+•	Grid/Pivot fake olabilir.
+•	Ancak RunEndpoint’ler gerçek handler olarak çalışır olmalı (wiring + test zorunlu).
+
+---
 
 ## 5) Connection Security Policy (Zorunlu)
 

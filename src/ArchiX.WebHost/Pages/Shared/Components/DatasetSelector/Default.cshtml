@@ -55,6 +55,7 @@
                 var endpoint = btn.getAttribute('data-endpoint') || '';
                 var v = select.value || '';
 
+                // fail-closed (endpoint veya seçim yoksa POST atma)
                 if (!endpoint || !v) {
                     updateEnabled();
                     return;
