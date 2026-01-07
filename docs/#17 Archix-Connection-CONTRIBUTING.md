@@ -98,7 +98,98 @@ DB dataset’lerde connection seçimi:
 - Dataset selector component’i grid olmadan bağımsız bir sayfada render edilebilir olmalıdır.
 - GridListe sayfasında sıralama `DatasetSelector` → `GridToolbar` → `GridTable` şeklinde doğrulanmalıdır.
 - Kombine sayfasında sıralama `DatasetSelector` → `GridToolbar` → `Pivot` → `GridTable` şeklinde doğrulanmalıdır.
-- 
+
+### Revize (2026-01-07 13:15)
+
+Bu revize; bu thread’de netleşen `3-2 Dataset Selector` gereksinimlerini, repo gerçekleri ile çelişmeyecek şekilde “uygulamaya dönük / soru bırakmayan” standart olarak günceller.
+
+#### Teknik Tasarım (Revize 3-2)
+
+**3-2.0) Öncelik**
+- Karar sırası: **Güvenlik > Performans/Stabilite > Kullanıcı dostu uygulama**.
+- Belirsiz/uygunsuz durumda işlem yapılmaz (**fail-closed**).
+
+**3-2.1) Tam bağımsız component (GridToolbar bağımlılığı kaldırılacak)**
+- `DatasetSelector`, `GridToolbar` / `GridTable` olmadan da tek başına herhangi bir Razor Page’de render edilebilmelidir.
+- `GridToolbar` içinde *embed* kullanım (layout tutarlılığı) devam edebilir; ancak `DatasetSelector`’ın **model/sözleşme bağımlılığı** `GridToolbar`’a bağlı olmayacaktır.
+- Repo tespiti (mevcut durum):
+  - `DatasetSelectorViewComponent` şu an `Invoke(GridToolbarViewModel model)` imzasıyla `GridToolbarViewModel`’a bağlıdır.
+  - `DatasetSelector` view’ları `@model GridToolbarViewModel` kullanır.
+  - Bu durum “grid’den bağımsız component” şartını tam karşılamaz.
+- Hedef sözleşme:
+  - Minimal bir model tanımlanır: `DatasetSelectorViewModel`.
+  - `DatasetSelectorViewComponent` birincil olarak `Invoke(DatasetSelectorViewModel model)` ile çalışır.
+  - `GridToolbar` içinde kullanımda `GridToolbarViewModel` → `DatasetSelectorViewModel` map edilerek component beslenir.
+- `DatasetSelectorViewModel` için minimum alanlar (zorunlu):
+  - `Id`: DOM prefix (aynı sayfada birden fazla selector için).
+  - `IsVisible`: selector görünür/gizli.
+  - `Options`: dropdown seçenekleri (**sadece Approved dataset**).
+  - `SelectedReportDatasetId`: seçili dataset id (nullable).
+  - `RunEndpoint`: “Raporla” butonunun POST edeceği endpoint.
+  - `RunText`, `Placeholder`: UI metinleri.
+  - `Mode`: kullanım modu
+    - `GridMultiRow` (grid raporları için)
+    - `FormSingleRow` (form ekranları için)
+
+**3-2.2) Yerleşim kuralı (grid sayfaları)**
+- Grid sayfalarında hedef yerleşim:
+  - `DatasetSelector` → `Toolbar` → (`Pivot`) → `Grid`
+- `Pivot`:
+  - GridListe’de yoktur
+  - Kombine’de vardır
+- `DatasetSelector`, toolbar içinde embed edilebilir; ancak bağımsız render (toolbar olmadan) mümkün olmalıdır.
+
+**3-2.3) Görünürlük / mod kuralı**
+- `DatasetSelector`’ın görünmesi parametrik olmalıdır:
+  - Kullanıcı dataset seçecekse: **görünür** (`IsVisible = true`)
+  - Sayfa dataset/veri ile açılıyorsa: **gizli** (`IsVisible = false`)
+- Örnek akışlar:
+  - Kullanıcı menüden tıklar → sayfa seçim bekler → selector görünür.
+  - Kullanıcı “Stok Kartı Aç” gibi bir butonla veya listeden “detaya git” akışıyla `id` göndererek sayfayı açar → sayfa kaydı yükler → selector gizlidir.
+
+**3-2.4) Form ekranları: tek kayıt zorunluluğu (Security-first / fail-closed)**
+- Form ekranları **tek kayıt (single row)** ile çalışır.
+- `Mode = FormSingleRow` iken dataset sonucu:
+  - `RowCount == 1` → form alanları doldurulur.
+  - `RowCount == 0` veya `RowCount > 1` → işlem reddedilir (**fail-closed**).
+- Bu kontrol yalnızca UI tarafında bırakılamaz; **server-side zorunlu** uygulanır.
+- Gerekçe: çoklu kayıt dönen dataset form ekranına uygun değildir; yanlış kayıt açılmasına/veri karışmasına yol açabilir.
+
+**3-2.5) Run endpoint / hook-up zorunluluğu (repo ile uyum)**
+- Repo tespiti: mevcut `DatasetSelector` JS, `RunEndpoint`’e **POST** atıyor; ancak örnek sayfalarda (`GridListe`, `Kombine`) karşılayan handler yoksa çağrı çalışmaz.
+- Bu nedenle şu iki yaklaşımdan biri seçilmelidir (en az biri zorunlu):
+  1) “Raporla” butonu gerçekten çalışacaksa: ilgili Razor Page(ler)de `OnPost...` handler yazılacak ve endpoint bağlanacak,
+  2) “Şimdilik sadece mesaj gösterilecek” ise: POST çağrısı kaldırılacak / no-op yapılacak.
+- Doküman hedefi “dataset-driven” çalışma olduğu için tercih: (1) handler + endpoint.
+
+**3-2.6) Kombine sayfası uyumu**
+- `Kombine.cshtml` bu sözleşmeye göre çalışır hale getirilmelidir:
+  - selector model besleme (options/visibility/endpoint)
+  - yerleşim: `DatasetSelector` → `GridToolbar` → `Pivot` → `GridTable` sırası korunacak
+
+#### Test Senaryoları (Revize)
+
+- `DatasetSelector` component’i `GridToolbar` olmadan bağımsız bir Razor Page’de render edilebilmelidir.
+- `GridToolbar` içinde embed çalışırken `DatasetSelector` doğrudan `GridToolbarViewModel` ile beslenmemelidir (map ile `DatasetSelectorViewModel` verilmelidir).
+- Detay sayfası `id` ile açıldığında `DatasetSelector` gizli olmalıdır.
+- Form dataset çalıştırma sonucunda:
+  - `RowCount == 1` → form doldurulur,
+  - `RowCount == 0` veya `RowCount > 1` → fail-closed (işlem reddedilir).
+- `RunEndpoint` için POST çağrısını karşılayan Razor Page handler yoksa test başarısız sayılır (endpoint/hook-up zorunlu).
+- `Kombine` sayfasında sıralama `DatasetSelector` → `GridToolbar` → `Pivot` → `GridTable` doğrulanmalıdır.
+
+#### 3-2 İçin Kalan İşler (Sadece Bu Başlık)
+
+1) `DatasetSelectorViewModel` ekle (minimal, bağımsız model).
+2) `DatasetSelectorViewComponent`’i `Invoke(DatasetSelectorViewModel model)` olacak şekilde değiştir.
+3) `DatasetSelector` view’larını `DatasetSelectorViewModel` ile çalışacak şekilde güncelle.
+4) `GridToolbar` içinde embed kullanım için `GridToolbarViewModel` → `DatasetSelectorViewModel` map ederek component çağrısını güncelle.
+5) `RunEndpoint` için Razor Pages handler sözleşmesini ekle ve en az bir sayfada (GridListe/Kombine) çalışır hale getir:
+   - Grid modu: dataset sonucu grid/pivot/table’a basılacak.
+   - Form modu: dataset sonucu `RowCount == 1` değilse fail-closed.
+6) `Kombine.cshtml`’i yeni modele göre uyarlayıp selector + endpoint/hook-up + yerleşim sırasını doğrula.
+
+
 ----
 ## 4) Secret Yönetimi (Güvenlik Önceliği)
 
