@@ -1,11 +1,11 @@
-﻿@model ArchiX.Library.Web.ViewModels.Grid.GridToolbarViewModel
+﻿@model ArchiX.Library.Web.ViewModels.Grid.DatasetSelectorViewModel
 
-@if (Model.ShowDatasetSelector)
+@if (Model.IsVisible)
 {
     <div class="d-flex align-items-center gap-2">
         <select class="form-select form-select-sm" id="@Model.Id-datasetSelect" style="min-width:220px;height:32px;padding-top:0;padding-bottom:0;">
-            <option value="">@Model.DatasetPlaceholder</option>
-            @foreach (var opt in (Model.DatasetOptions ?? Array.Empty<ArchiX.Library.Web.ViewModels.Grid.ReportDatasetOptionViewModel>()))
+            <option value="">@Model.Placeholder</option>
+            @foreach (var opt in (Model.Options ?? Array.Empty<ArchiX.Library.Web.ViewModels.Grid.ReportDatasetOptionViewModel>()))
             {
                 if (Model.SelectedReportDatasetId.HasValue && Model.SelectedReportDatasetId.Value == opt.Id)
                 {
@@ -22,10 +22,10 @@
                 class="btn btn-primary btn-sm grid-btn-reset"
                 style="height:32px;width:32px;padding:0;"
                 id="@Model.Id-runReportBtn"
-                data-endpoint="@Model.RunReportEndpoint"
+                data-endpoint="@Model.RunEndpoint"
                 data-loading-message="Raporlar yüklenecek..."
-                title="@Model.RunReportText"
-                aria-label="@Model.RunReportText">
+                title="@Model.RunText"
+                aria-label="@Model.RunText">
             <i class="bi bi-arrow-right-circle-fill text-white"></i>
         </button>
     </div>

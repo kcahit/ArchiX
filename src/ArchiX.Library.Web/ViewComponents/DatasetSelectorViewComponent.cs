@@ -6,7 +6,7 @@ namespace ArchiX.Library.Web.ViewComponents;
 
 public sealed class DatasetSelectorViewComponent : ViewComponent
 {
-    public IViewComponentResult Invoke(GridToolbarViewModel model)
+    public IViewComponentResult Invoke(DatasetSelectorViewModel model)
     {
         if (string.IsNullOrWhiteSpace(model.Id))
         {

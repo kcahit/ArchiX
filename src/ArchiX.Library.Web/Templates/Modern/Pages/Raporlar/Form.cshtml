@@ -1,0 +1,81 @@
+﻿@page "/Raporlar/Form"
+@model ArchiX.Library.Web.Templates.Modern.Pages.Raporlar.FormModel
+@using ArchiX.Library.Web.ViewModels.Grid
+@{
+    ViewData["Title"] = "Form (Müşteri)";
+    Layout = "~/Templates/Modern/Pages/Shared/_Layout.cshtml";
+
+    var datasetOptions = new List<ReportDatasetOptionViewModel>
+    {
+        new(1, "Müşteri Kartı (Örnek)"),
+        new(2, "Müşteri Kartı (Örnek-2)"),
+        new(3, "Müşteri Kartı (Örnek-3)")
+    };
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/modern/main.css">
+}
+
+<div class="container py-4">
+
+    @* FormSingleRow: dataset sonucu tek kayıt olmalı (server-side kontrol) *@
+    @await Component.InvokeAsync("DatasetSelector", new DatasetSelectorViewModel
+    {
+        Id = "musteriForm",
+        IsVisible = true,
+        Options = datasetOptions,
+        SelectedReportDatasetId = null,
+        RunEndpoint = "/Raporlar/Form?handler=Run",
+        RunText = "Raporla",
+        Placeholder = "Müşteri dataset seçin...",
+        Mode = DatasetSelectorMode.FormSingleRow
+    })
+
+    <div class="card mt-3">
+        <div class="card-header d-flex align-items-center gap-2">
+            <i class="bi bi-person-vcard"></i>
+            <span class="fw-semibold">Müşteri Formu (fake)</span>
+        </div>
+        <div class="card-body">
+            <form class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">ID</label>
+                    <input class="form-control" value="@(Model.Customer?.Id?.ToString() ?? string.Empty)" readonly />
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label">Ad Soyad</label>
+                    <input class="form-control" value="@(Model.Customer?.Name ?? string.Empty)" readonly />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Telefon</label>
+                    <input class="form-control" value="@(Model.Customer?.Phone ?? string.Empty)" readonly />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    <input class="form-control" value="@(Model.Customer?.Email ?? string.Empty)" readonly />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Şehir</label>
+                    <input class="form-control" value="@(Model.Customer?.City ?? string.Empty)" readonly />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Vergi No</label>
+                    <input class="form-control" value="@(Model.Customer?.TaxNumber ?? string.Empty)" readonly />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Durum</label>
+                    <input class="form-control" value="@(Model.Customer?.Status ?? string.Empty)" readonly />
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Adres</label>
+                    <textarea class="form-control" rows="2" readonly>@(Model.Customer?.Address ?? string.Empty)</textarea>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

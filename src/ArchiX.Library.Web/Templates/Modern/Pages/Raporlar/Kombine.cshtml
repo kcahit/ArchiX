@@ -5,6 +5,14 @@
     ViewData["Title"] = "Kombine Rapor";
     Layout = "~/Templates/Modern/Pages/Shared/_Layout.cshtml";
 
+    // Şimdilik örnek seçenekler (Approved datasetler gerçek DB'den geleceğinde burası değişecek)
+    var datasetOptions = new List<ReportDatasetOptionViewModel>
+    {
+        new(1, "Örnek Rapor 1"),
+        new(2, "Örnek Rapor 2"),
+        new(3, "Örnek Rapor 3")
+    };
+
     var columns = new List<GridColumnDefinition>
     {
         new("id", "ID", "number"),
@@ -36,6 +44,20 @@
 }
 
 <div class="container py-4">
+
+    @* Sözleşme: DatasetSelector → Toolbar → Pivot → Grid *@
+    @await Component.InvokeAsync("DatasetSelector", new DatasetSelectorViewModel
+    {
+        Id = "kombineGrid",
+        IsVisible = true,
+        Options = datasetOptions,
+        SelectedReportDatasetId = null,
+        RunEndpoint = "/Raporlar/Kombine?handler=Run",
+        RunText = "Raporla",
+        Placeholder = "Rapor seçin...",
+        Mode = DatasetSelectorMode.GridMultiRow
+    })
+
     @await Component.InvokeAsync("GridToolbar", new GridToolbarViewModel
     {
         Id = "kombineGrid",
@@ -44,7 +66,15 @@
         ResetText = "Sıfırla",
         ShowAdvancedSearch = true,
         ShowExport = true,
-        IncludeAdvancedSearchPanel = true
+        IncludeAdvancedSearchPanel = true,
+
+        // Toolbar embed (layout tutarlılığı) devam ediyor
+        ShowDatasetSelector = true,
+        DatasetOptions = datasetOptions,
+        SelectedReportDatasetId = null,
+        RunReportEndpoint = "/Raporlar/Kombine?handler=Run",
+        RunReportText = "Raporla",
+        DatasetPlaceholder = "Rapor seçin..."
     })
 
     <div class="accordion" id="reportsAccordion">

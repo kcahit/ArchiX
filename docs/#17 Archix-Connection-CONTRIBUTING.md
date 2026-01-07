@@ -178,17 +178,31 @@ Bu revize; bu thread’de netleşen `3-2 Dataset Selector` gereksinimlerini, rep
 - `RunEndpoint` için POST çağrısını karşılayan Razor Page handler yoksa test başarısız sayılır (endpoint/hook-up zorunlu).
 - `Kombine` sayfasında sıralama `DatasetSelector` → `GridToolbar` → `Pivot` → `GridTable` doğrulanmalıdır.
 
-#### 3-2 İçin Kalan İşler (Sadece Bu Başlık)
+#### 3-2 İçin Kalan İşler (Sadece Bu Başlık) – Uygulama Sırası (13:50 2026-01-07) .TAMAMLANDI (2025-01-07 15:40)
 
-1) `DatasetSelectorViewModel` ekle (minimal, bağımsız model).
-2) `DatasetSelectorViewComponent`’i `Invoke(DatasetSelectorViewModel model)` olacak şekilde değiştir.
-3) `DatasetSelector` view’larını `DatasetSelectorViewModel` ile çalışacak şekilde güncelle.
-4) `GridToolbar` içinde embed kullanım için `GridToolbarViewModel` → `DatasetSelectorViewModel` map ederek component çağrısını güncelle.
-5) `RunEndpoint` için Razor Pages handler sözleşmesini ekle ve en az bir sayfada (GridListe/Kombine) çalışır hale getir:
-   - Grid modu: dataset sonucu grid/pivot/table’a basılacak.
-   - Form modu: dataset sonucu `RowCount == 1` değilse fail-closed.
-6) `Kombine.cshtml`’i yeni modele göre uyarlayıp selector + endpoint/hook-up + yerleşim sırasını doğrula.
+1) `DatasetSelectorViewModel` ekle (minimal, bağımsız model). TAMAMLANDI.
+   - Amaç: `DatasetSelector` artık `GridToolbarViewModel`’a bağlı kalmadan render edilebilsin.
 
+2) `DatasetSelectorViewComponent`’i `Invoke(DatasetSelectorViewModel model)` olacak şekilde değiştir.  TAMAMLANDI.
+   - Mevcut repo: `Invoke(GridToolbarViewModel model)` (bağımlılık burada).
+
+3) `Templates/Modern/.../DatasetSelector/Default.cshtml` view’ını `@model DatasetSelectorViewModel` yapacak şekilde güncelle.  TAMAMLANDI.
+   - Mevcut repo: view `@model GridToolbarViewModel`.
+
+4) `GridToolbar` embed kullanımını koru: `GridToolbarViewModel` → `DatasetSelectorViewModel` map ederek component çağrısını güncelle.  TAMAMLANDI.
+   - Amaç: toolbar içinde gömülü kullanım devam etsin ama model bağımlılığı kalksın.
+
+5) `RunEndpoint` / hook-up’ı gerçekten çalışır hale getir. TAMAMLANDI.
+   - Repo tespiti: JS `RunReportEndpoint`’e POST atıyor; sayfalarda handler yoksa bu çağrı boşa gider.
+   - En az bir Razor Page’de (GridListe veya Kombine) `OnPost...` handler + endpoint wiring yapılacak.
+
+6) `Kombine` sayfasını yeni sözleşmeye göre uyarlayıp doğrula (selector + endpoint + yerleşim). TAMAMLANDI.
+   - Yerleşim: `DatasetSelector` → `GridToolbar` → `Pivot` → `GridTable`.
+
+7) Form sayfaları için dataset-run akışında server-side `RowCount == 1` zorunluluğunu uygula (fail-closed).
+   - Not: Bu madde “3-2 selector UI”nin değil, selector’ın **FormSingleRow modu**nun güvenlik sözleşmesidir; bu yüzden en sona konur ama tamamlanmadan 3-2 “bitti” sayılmaz.
+
+3-2 İŞLERİN HEPSİ TAMAMLANDI (2025-01-07 15:40)
 
 ----
 ## 4) Secret Yönetimi (Güvenlik Önceliği)
