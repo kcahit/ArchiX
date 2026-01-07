@@ -1,31 +1,41 @@
 ﻿@page "/Raporlar/Kombine"
 @model ArchiX.Library.Web.Templates.Modern.Pages.Raporlar.KombineModel
+@using System
+@using System.Linq
+@using System.Collections.Generic
 @using ArchiX.Library.Web.ViewModels.Grid
 @{
     ViewData["Title"] = "Kombine Rapor";
     Layout = "~/Templates/Modern/Pages/Shared/_Layout.cshtml";
 
-    var columns = new List<GridColumnDefinition>
-    {
-        new("id", "ID", "number"),
-        new("name", "İsim"),
-        new("department", "Departman"),
-        new("position", "Pozisyon"),
-        new("city", "Şehir"),
-        new("salary", "Maaş", "number"),
-        new("status", "Durum")
-    };
+    // Öncelik: gerçek dataset sonucu varsa onu göster.
+    IReadOnlyList<GridColumnDefinition> columns = (Model.Columns != null && Model.Columns.Count > 0)
+        ? Model.Columns
+        : new List<GridColumnDefinition>
+        {
+            new("id", "ID", "number"),
+            new("name", "İsim"),
+            new("department", "Departman"),
+            new("position", "Pozisyon"),
+            new("city", "Şehir"),
+            new("salary", "Maaş", "number"),
+            new("status", "Durum")
+        };
 
-    var rows = Model.SampleData.Select(x => new Dictionary<string, object?>
-    {
-        ["id"] = x.Id,
-        ["name"] = x.Name,
-        ["department"] = x.Department,
-        ["position"] = x.Position,
-        ["city"] = x.City,
-        ["salary"] = x.Salary,
-        ["status"] = x.Status
-    }).ToList();
+    IEnumerable<IDictionary<string, object?>> rows = (Model.Rows != null && Model.Rows.Any())
+        ? Model.Rows
+        : Model.SampleData.Select(x => (IDictionary<string, object?>)new Dictionary<string, object?>
+        {
+            ["id"] = x.Id,
+            ["name"] = x.Name,
+            ["department"] = x.Department,
+            ["position"] = x.Position,
+            ["city"] = x.City,
+            ["salary"] = x.Salary,
+            ["status"] = x.Status
+        }).ToList();
+
+    var totalRecords = rows is ICollection<IDictionary<string, object?>> c ? c.Count : rows.Count();
 }
 
 @section Styles {
@@ -48,12 +58,12 @@
         RunText = "Raporla",
         Placeholder = "Rapor seçin...",
         Mode = DatasetSelectorMode.GridMultiRow
-    })
+        })
 
     @await Component.InvokeAsync("GridToolbar", new GridToolbarViewModel
-    {
+        {
         Id = "kombineGrid",
-        TotalRecords = Model.SampleData.Count,
+        TotalRecords = totalRecords,
         SearchPlaceholder = "Tüm alanlarda ara...",
         ResetText = "Sıfırla",
         ShowAdvancedSearch = true,
@@ -66,7 +76,7 @@
         RunReportEndpoint = "/Raporlar/Kombine?handler=Run",
         RunReportText = "Raporla",
         DatasetPlaceholder = "Rapor seçin..."
-    })
+        })
 
     <div class="accordion" id="reportsAccordion">
         <div class="accordion-item mb-3">
@@ -91,15 +101,15 @@
             <div id="gridSection" class="accordion-collapse collapse show">
                 <div class="accordion-body">
                     @await Component.InvokeAsync("GridTable", new GridTableViewModel
-                    {
+                                        {
                         Id = "kombineGrid",
-                        Title = "Detaylı Liste",
-                        SearchPlaceholder = "Tüm alanlarda ara...",
-                        Columns = columns,
-                        Rows = rows,
-                        ShowActions = false,
-                        ShowToolbar = false
-                    })
+                                        Title = "Detaylı Liste",
+                                        SearchPlaceholder = "Tüm alanlarda ara...",
+                                        Columns = columns,
+                                        Rows = rows,
+                                        ShowActions = false,
+                                        ShowToolbar = false
+                                        })
                 </div>
             </div>
         </div>

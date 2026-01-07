@@ -25,7 +25,7 @@ Benimle TÜRKÇE YAZIŞ. BEN iNGİLİZCE BİLMİYORUM. LÜTFEN.
 
 
 #file:'D:\_git\ArchiX\Dev\ArchiX\docs\#17 Archix-Connection-CONTRIBUTING.md':421-450 önce dokümanı oku. sonra seçili alanı oku. seçili işin tasarımında mutabık mısın. Değişiklik var  mı? bana sorun var mı?
-
+bir de gerçek var olan tüm kodlara bak ona göre karar ver
 
 
 

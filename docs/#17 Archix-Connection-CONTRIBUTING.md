@@ -581,6 +581,76 @@ Beklenen davranış:
 - “Kaynak türü belirsiz” tanımlar reddedilmeli veya çalıştırılamamalıdır.
 - Policy uygulanmadan DB kaynağı çalışmamalıdır.
 
+### Revize (2026-01-07 18:26)
+
+Bu revize; `## 9 Kombine Rapor Sayfası` bölümünü **repo gerçekleri** ile tam uyumlu ve “uygulamaya dönük / soru bırakmayan” bir sözleşme haline getirir.
+
+> Öncelik sırası: **Güvenlik > Performans/Stabilite > Kullanıcı dostu uygulama**  
+> Belirsiz/uygunsuz durumda işlem yapılmaz (**fail-closed**).
+
+#### Teknik Notlar (Net Sözleşme)
+
+**9.1) Kombine sayfa giriş modeli (seçim + çalıştırma ayrımı)**
+- Kullanıcı seçimi `reportDatasetId` üzerinden temsil edilir.
+- Sayfa açılışında (`GET`) seçim yoksa sayfa sadece UI’ı render eder; veri çalıştırma zorunlu değildir.
+- “Raporla” aksiyonu (`POST`) mutlaka server-side handler üzerinden çalışır.
+
+**9.2) ApprovedOnly (zorunlu)**
+- `reportDatasetId` ile gelen seçim **mutlaka** server-side `ApprovedOnly` kontrolünden geçmelidir.
+- UI bu kontrolün yerine geçmez; UI bypass edilse bile çalıştırma engellenir (fail-closed).
+
+**9.3) Kaynak türü belirsizliği (zorunlu fail-closed)**
+- Dataset kaydı içinde kaynak türü açık olmalıdır (`Db` / `File` gibi source group + type).
+- Kaynak türü belirsiz / desteklenmeyen bir değer ise:
+  - sistem çalıştırmayı reddeder (fail-closed),
+  - sonuç `NotSupported`/`BadRequest` mantığıyla ele alınır (UI tarafında sessiz “boş tablo” gibi davranılmaz).
+
+**9.4) DB kaynaklı çalıştırma sözleşmesi**
+- DB dataset çalıştırmada:
+  - `ConnectionName` zorunludur (alias).
+  - Alias çözümü ve connection string üretimi **merkezi** servis üzerinden yapılır.
+- `ConnectionName` boş/yanlış ise çalıştırma reddedilir (fail-closed).
+
+**9.5) Connection policy uygulanmadan DB’ye bağlanılamaz**
+- DB’ye bağlantı kurulmadan önce connection policy değerlendirmesi zorunludur.
+- Policy değerlendirmesi + audit (maskeli) uygulanmadan dataset DB execution başlamaz.
+- Policy ihlali / belirsizlik durumunda bağlantı kurulmaz (fail-closed).
+
+**9.6) Çıktı sözleşmesi (grid’e uygun sonuç)**
+- Kombine çalıştırma sonucu:
+  - `Columns`: dataset executor’dan gelen kolon isimlerinden türetilir,
+  - `Rows`: kolon isimlerini key alacak şekilde sözlük/dictionary row olarak üretilir.
+- Veri kaynağı DB veya File olsa da çıktı kontratı aynıdır.
+
+#### Yapılacak İşler (İş #9 – Uygulama Sırası)
+
+1) Kombine Run sözleşmesi (endpoint) doğrula
+   - `POST /Raporlar/Kombine?handler=Run&reportDatasetId=<id>` karşılanmalı.
+   - `reportDatasetId <= 0` → `BadRequest` (fail-closed).
+
+2) ApprovedOnly server-side kontrolü zorunlu kıl
+   - `reportDatasetId` gelen seçim, `ApprovedOptions` listesinde yoksa çalıştırma yapılmaz.
+   - Sonuç: `BadRequest` (fail-closed).
+
+3) Kaynak türü belirsiz / desteklenmeyen dataset davranışı
+   - Type/Group desteklenmiyorsa çalıştırma fail etmeli.
+   - UI tarafında “sessiz başarı” üretilmemeli.
+
+4) DB bağlantı öncesi policy zorunluluğu (merkezi)
+   - Connection string üretimi + policy validate + audit zinciri, DB’ye bağlanmadan önce çalışmış olmalı.
+   - Policy ihlali → çalıştırma bloke (fail-closed).
+
+5) Çıktı mapping standardı
+   - Executor sonucu `Columns/Rows` her çalıştırmada grid formatına map edilmeli.
+   - Kolon/row uyumsuzluğunda çalışma reddedilmeli veya güvenli şekilde BadRequest dönülmeli (fail-closed).
+
+6) Minimum test paketi (regresyon)
+   - `reportDatasetId <= 0` → BadRequest
+   - Executor throws → BadRequest
+   - Approved olmayan id → BadRequest
+   - Başarılı run → Ok + Columns/Rows dolu
+
+9 nolu iş tamamlandı (2026-01-07 18:48).
 ---
 
 ## 10) File Dataset – Dosya Konumu ve Güvenlik

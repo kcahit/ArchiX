@@ -52,6 +52,19 @@ public sealed class KombineRunEndpointTests
         Assert.IsType<BadRequestResult>(result);
     }
 
+    [Fact]
+    public async Task OnPostRunAsync_Should_Return_BadRequest_When_Columns_And_Row_Length_Mismatch()
+    {
+        var executor = new FakeMismatchExecutor();
+        var optionsSvc = new FakeOptionsService(allowId: 1);
+
+        var page = new KombineModel(executor, optionsSvc);
+
+        var result = await page.OnPostRunAsync(reportDatasetId: 1, ct: default);
+
+        Assert.IsType<BadRequestResult>(result);
+    }
+
     private sealed class FakeOkExecutor : IReportDatasetExecutor
     {
         public Task<ReportDatasetExecutionResult> ExecuteAsync(ReportDatasetExecutionRequest request, CancellationToken ct = default)
@@ -60,6 +73,20 @@ public sealed class KombineRunEndpointTests
             var rows = new List<IReadOnlyList<object?>>
             {
                 new object?[] { 1, "A" }
+            };
+
+            return Task.FromResult(new ReportDatasetExecutionResult(cols, rows));
+        }
+    }
+
+    private sealed class FakeMismatchExecutor : IReportDatasetExecutor
+    {
+        public Task<ReportDatasetExecutionResult> ExecuteAsync(ReportDatasetExecutionRequest request, CancellationToken ct = default)
+        {
+            var cols = new[] { "id", "name" };
+            var rows = new List<IReadOnlyList<object?>>
+            {
+                new object?[] { 1 } // mismatch: 2 kolon var ama satırda 1 değer var
             };
 
             return Task.FromResult(new ReportDatasetExecutionResult(cols, rows));
