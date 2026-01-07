@@ -448,6 +448,42 @@ Not:
 - `_ArchiX` ayağa kalkmadan tenant DB connection’ları çözümlenemez (bootstrap bağımlılığı doğrulanmalı).
 - Parametre çözümlemesi: doğru `Group`/`Key` ile tek satırdan tüm alias’lar okunabilmelidir.
 
+Revize (2026-01-07 17:25)
+Bu revize, ## 6) Connection Tanımının Nerede Duracağı (Bootstrap + Parametre) bölümünü repo gerçekleriyle ve güvenlik sözleşmesiyle uyumlu hale getirir. Özellikle “tenant DB bağlantısı” için Windows/Integrated Security kullanımının kabul edilmediği (login ile bağlantı) netleştirilir.
+Teknik Notlar (Net Sözleşme)
+6.0) Bootstrap bağlantısı (değişmedi)
+•	Host/tenant instance, _ArchiX DB’sine ayağa kalkmak için host config üzerinden bağlanır:
+•	ConnectionStrings:ArchiXDb
+•	_ArchiX ayağa kalkmadan tenant DB alias’ları çözümlenemez (bootstrap bağımlılığı).
+6.1) Tenant uygulama DB bağlantıları (SqlLogin zorunluluğu)
+•	Tenant uygulama DB bağlantıları Parameters içindeki Group="ConnectionStrings", Key="ConnectionStrings" satırındaki JSON’dan çözülür.
+•	Tenant DB bağlantılarında Windows/IntegratedSecurity kullanılmaz.
+•	Gerekçe: uygulama host’u tenant ortamında Windows domain/host yetkisi varsayamaz.
+•	Bu nedenle tenant DB’ler için varsayılan ve kabul edilen auth:
+•	Auth = "SqlLogin"
+•	SqlLogin için zorunlu alanlar:
+•	User (zorunlu)
+•	PasswordRef (zorunlu; minimum format ENV:<NAME>; çözümlenmezse fail-closed)
+6.2) JSON standardı (tek satır / çok alias)
+•	Parameters içinde tek satır:
+•	ApplicationId = 1
+•	Group = "ConnectionStrings"
+•	Key = "ConnectionStrings"
+•	Value = JSON (alias -> profile)
+•	Her alias tek bir “connection profile” objesidir.
+•	JSON zorunludur; delimiter tabanlı formatlar kabul edilmez.
+6.3) Repo uyum notu (örnek seed düzeltme gereksinimi)
+•	Repo’daki ConnectionStringsStartup demo seed’i, Auth alanında IntegratedSecurity örneği içeriyorsa bu standartla uyumsuz kabul edilir.
+•	Demo seed örneği dahi olsa, tenant DB tarafında SqlLogin örneği verilmelidir.
+Yapılacak İşler (İş #6 – Uygulama Sırası)
+1.	ConnectionStringsStartup demo seed’i SqlLogin olacak şekilde güncelle
+•	Auth = "SqlLogin"
+•	User alanı eklenecek (örn. sa veya archix)
+•	PasswordRef alanı eklenecek (örn. ENV:ARCHIX_DB_DEMO_PASSWORD)
+•	Not: gerçek password kesinlikle yazılmayacak.
+2.	Test / kontrol checklist (minimum)
+•	Auth = "SqlLogin" iken PasswordRef çözümlenemezse fail-closed çalıştığı doğrulanmalı (mevcut testler ile).
+
 ---
 
 ## 7) Teknoloji ve Çoklu Provider Yaklaşımı

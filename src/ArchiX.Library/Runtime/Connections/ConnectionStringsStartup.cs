@@ -57,7 +57,9 @@ public static class ConnectionStringsStartup
                     Provider = "SqlServer",
                     Server = "(local)",
                     Database = "master",
-                    Auth = "IntegratedSecurity",
+                    Auth = "SqlLogin",
+                    User = "sa",
+                    PasswordRef = "ENV:ARCHIX_DB_DEMO_PASSWORD",
                     Encrypt = true,
                     TrustServerCertificate = true
                 }

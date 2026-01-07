@@ -24,6 +24,9 @@ Benimle TÜRKÇE YAZIŞ. BEN iNGİLİZCE BİLMİYORUM. LÜTFEN.
 
 
 
+#file:'D:\_git\ArchiX\Dev\ArchiX\docs\#17 Archix-Connection-CONTRIBUTING.md':421-450 önce dokümanı oku. sonra seçili alanı oku. seçili işin tasarımında mutabık mısın. Değişiklik var  mı? bana sorun var mı?
+
+
 
 
 1. KODLARI HİÇ BİR ZAMAN YAZIŞMA EDİTÖRÜ ŞEKLİNDE VERME.  BU KOPYALA YAPIŞTIRMADA HATAYA SEBEP OLUYOR. KOD EDİTÖRÜNDE İNDENTLİ VE RENKLİ OLAN FORMATTA VERİRSEN SORUN OLMUYOR. 
