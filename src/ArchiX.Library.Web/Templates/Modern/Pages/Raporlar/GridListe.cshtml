@@ -5,13 +5,6 @@
 @{
     ViewData["Title"] = "Raporlar";
     Layout = "~/Templates/Modern/Pages/Shared/_Layout.cshtml";
-
-    var datasetOptions = new List<ReportDatasetOptionViewModel>
-    {
-        new(1, "Örnek Rapor 1"),
-        new(2, "Örnek Rapor 2"),
-        new(3, "Örnek Rapor 3")
-    };
 }
 
 @section Styles {
@@ -38,8 +31,8 @@
         IncludeAdvancedSearchPanel = true,
 
         ShowDatasetSelector = true,
-        DatasetOptions = datasetOptions,
-        SelectedReportDatasetId = null,
+        DatasetOptions = Model.DatasetOptions,
+        SelectedReportDatasetId = Model.SelectedReportDatasetId,
         RunReportEndpoint = "/Raporlar?handler=Run",
         RunReportText = "Raporla",
         DatasetPlaceholder = "Rapor seçin..."

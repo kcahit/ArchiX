@@ -1,4 +1,5 @@
 ﻿using ArchiX.Library.Abstractions.Reports;
+using ArchiX.Library.Web.Abstractions.Reports;
 using ArchiX.Library.Web.ViewModels.Grid;
 
 using Microsoft.AspNetCore.Mvc;
@@ -9,23 +10,71 @@ namespace ArchiX.Library.Web.Templates.Modern.Pages.Raporlar;
 public class GridListeModel : PageModel
 {
     private readonly IReportDatasetExecutor _executor;
+    private readonly IReportDatasetOptionService _optionsSvc;
 
-    public GridListeModel(IReportDatasetExecutor executor)
+    public GridListeModel(IReportDatasetExecutor executor, IReportDatasetOptionService optionsSvc)
     {
         _executor = executor;
+        _optionsSvc = optionsSvc;
     }
 
     public IReadOnlyList<GridColumnDefinition> Columns { get; private set; } = new List<GridColumnDefinition>();
     public IEnumerable<IDictionary<string, object?>> Rows { get; private set; } = [];
 
-    public void OnGet()
+    public IReadOnlyList<ReportDatasetOptionViewModel> DatasetOptions { get; private set; } = [];
+    public int? SelectedReportDatasetId { get; private set; }
+
+    public async Task OnGetAsync([FromQuery] int? reportDatasetId, CancellationToken ct)
     {
-        LoadSampleData();
+        DatasetOptions = await _optionsSvc.GetApprovedOptionsAsync(ct);
+
+        if (!reportDatasetId.HasValue || reportDatasetId.Value <= 0)
+        {
+            LoadSampleData();
+            return;
+        }
+
+        SelectedReportDatasetId = reportDatasetId.Value;
+
+        // fail-closed: Approved olmayan dataset seçilirse sayfa boş/örnek data ile devam etmez.
+        if (!DatasetOptions.Any(x => x.Id == reportDatasetId.Value))
+            return;
+
+        try
+        {
+            var result = await _executor.ExecuteAsync(new ReportDatasetExecutionRequest(reportDatasetId.Value), ct);
+
+            Columns = result.Columns
+                .Select(c => new GridColumnDefinition(c, c))
+                .ToList();
+
+            Rows = result.Rows
+                .Select(r =>
+                {
+                    var dict = new Dictionary<string, object?>(StringComparer.Ordinal);
+                    for (var i = 0; i < result.Columns.Count; i++)
+                    {
+                        dict[result.Columns[i]] = r[i];
+                    }
+
+                    return (IDictionary<string, object?>)dict;
+                })
+                .ToList();
+        }
+        catch
+        {
+            // GET tarafında hata fırlatmayalım; sayfa render edilsin.
+        }
     }
 
     public async Task<IActionResult> OnPostRunAsync([FromQuery] int reportDatasetId, CancellationToken ct)
     {
         if (reportDatasetId <= 0)
+            return new BadRequestResult();
+
+        // fail-closed: ApprovedOnly kontrolü (UI bypass edilirse bile)
+        var opts = await _optionsSvc.GetApprovedOptionsAsync(ct);
+        if (!opts.Any(x => x.Id == reportDatasetId))
             return new BadRequestResult();
 
         try

@@ -5,14 +5,6 @@
     ViewData["Title"] = "Kombine Rapor";
     Layout = "~/Templates/Modern/Pages/Shared/_Layout.cshtml";
 
-    // Şimdilik örnek seçenekler (Approved datasetler gerçek DB'den geleceğinde burası değişecek)
-    var datasetOptions = new List<ReportDatasetOptionViewModel>
-    {
-        new(1, "Örnek Rapor 1"),
-        new(2, "Örnek Rapor 2"),
-        new(3, "Örnek Rapor 3")
-    };
-
     var columns = new List<GridColumnDefinition>
     {
         new("id", "ID", "number"),
@@ -50,8 +42,8 @@
     {
         Id = "kombineGrid",
         IsVisible = true,
-        Options = datasetOptions,
-        SelectedReportDatasetId = null,
+        Options = Model.DatasetOptions,
+        SelectedReportDatasetId = Model.SelectedReportDatasetId,
         RunEndpoint = "/Raporlar/Kombine?handler=Run",
         RunText = "Raporla",
         Placeholder = "Rapor seçin...",
@@ -69,8 +61,8 @@
         IncludeAdvancedSearchPanel = true,
 
         ShowDatasetSelector = true,
-        DatasetOptions = datasetOptions,
-        SelectedReportDatasetId = null,
+        DatasetOptions = Model.DatasetOptions,
+        SelectedReportDatasetId = Model.SelectedReportDatasetId,
         RunReportEndpoint = "/Raporlar/Kombine?handler=Run",
         RunReportText = "Raporla",
         DatasetPlaceholder = "Rapor seçin..."
@@ -119,11 +111,18 @@
     <script src="~/lib/jquery-ui/jquery-ui.min.js"></script>
     <script src="~/lib/pivottable/pivot.min.js"></script>
     <script src="~/lib/pivottable/pivot.tr.js"></script>
+
+    <script type="application/json" id="kombineDataJson">
+        @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.SampleData))
+    </script>
+
     <script>
-        window.kombineDataRaw = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.SampleData));
         $(function () {
-            if (typeof $.fn.pivotUI === 'function' && window.kombineDataRaw) {
-                $('#pivotContainer').pivotUI(window.kombineDataRaw, {
+            const raw = document.getElementById('kombineDataJson')?.textContent ?? '[]';
+            const data = JSON.parse(raw);
+
+            if (typeof $.fn.pivotUI === 'function' && data) {
+                $('#pivotContainer').pivotUI(data, {
                     rows: ['Department', 'City'],
                     cols: ['Status'],
                     vals: ['Salary'],

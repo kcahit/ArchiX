@@ -418,7 +418,8 @@ işlerin hepsi tamlandı (2026-01-07 17:05).
 
 ---
 
-## 6) Connection Tanımının Nerede Duracağı (Bootstrap + Parametre)
+## 6) Connection Tanımının Nerede Duracağı (Bootstrap + Parametre) ==>  tamamlandı (2026-01-07 17:30).
+
 
 ### Teknik Tasarım
 Bootstrap:
@@ -484,6 +485,9 @@ Yapılacak İşler (İş #6 – Uygulama Sırası)
 2.	Test / kontrol checklist (minimum)
 •	Auth = "SqlLogin" iken PasswordRef çözümlenemezse fail-closed çalıştığı doğrulanmalı (mevcut testler ile).
 
+İş #6 tamamlandı (2026-01-07 17:30).
+
+
 ---
 
 ## 7) Teknoloji ve Çoklu Provider Yaklaşımı
@@ -496,6 +500,35 @@ Yapılacak İşler (İş #6 – Uygulama Sırası)
 ### Test Senaryoları
 - Provider bağımlı parçalar soyutlanmış olmalıdır (en azından tasarım seviyesinde).
 - En az bir provider ile (SQL Server) uçtan uca dataset çalıştırma doğrulanmalıdır.
+
+Revize (2026-01-07 17:40)
+Bu revize, ## 7) Teknoloji ve Çoklu Provider Yaklaşımı bölümünü repo gerçekleriyle uyumlu hale getirir. Dokümanda geçen “Oracle kısmen mevcut” ifadesi korunur; ancak mevcut repo’da Oracle desteğinin aktif/çalışır olmadığı, yalnızca bir iskelet (placeholder) bulunduğu netleştirilir.
+Teknik Notlar (Net Sözleşme)
+7.0) Şu an desteklenen “aktif” provider
+•	Şu an runtime (tenant DB bağlantıları + dataset executor) tarafında aktif ve desteklenen tek provider: SqlServer.
+•	Repo gerçekleri (mevcut durum):
+•	ConnectionStringBuilderService yalnızca Provider = "SqlServer" kabul eder; diğer provider’larda NotSupportedException fırlatır.
+•	Provisioning tarafında ArchiXDatabase provider seçimi şu an yalnızca SqlServer provisioner’ını çalıştırır.
+7.1) Oracle “kısmen mevcut” ifadesinin anlamı (netleştirme)
+•	Oracle tarafında repo’da bir provisioner dosyası bulunabilir (OracleArchiXDbProvisioner).
+•	Ancak bu dosya:
+•	aktif provider listesine bağlı değildir,
+•	provider seçimi tarafından kullanılmıyordur,
+•	implementasyonu TODO’dur.
+•	Bu nedenle “Oracle kısmen mevcut” = “repo’da iskelet/placeholder var” anlamındadır; çalışır özellik değildir.
+7.2) Multi-provider hedefi (tasarım prensibi – ileri uyumluluk)
+•	Tasarım hedefi: Connection profile modeli, executor katmanı ve provisioning akışı; ileride farklı DB provider’ları eklenebilecek şekilde parçalı (genişletilebilir) kalmalıdır.
+•	Ancak yeni provider eklemek “cfg ile açılır” seviyesinde değildir; kod + test + entegrasyon işleri gerektirir.
+Yapılacak İşler (İş #7 – Uygulama Sırası)
+1.	Dokümana göre “aktif provider” netliği korunsun
+•	Şu an tek aktif provider: SqlServer.
+2.	Oracle’ı “aktif” yapmak istenirse (ayrı iş kalemi)
+•	ArchiXDatabase provider alias + GetProvisioner() içine Oracle ekleme
+•	ConnectionStringBuilderService içinde provider’e göre builder oluşturma (SqlServer dışı destek)
+•	Dataset executor / DB erişim katmanında provider’e göre connection/command üretimi
+•	Minimum test paketi (provider seçimi + basic connection build + executor smoke)
+
+ iş #7 tamamlandı. sistem hazır herhangi bir şey yapılmadı. (2026-01-07 17:35).
 
 ---
 
