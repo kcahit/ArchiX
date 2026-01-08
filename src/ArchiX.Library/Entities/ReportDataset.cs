@@ -38,5 +38,24 @@ namespace ArchiX.Library.Entities
         /// </summary>
         [MaxLength(260)]
         public string? SubPath { get; set; }
+
+        /// <summary>
+        /// Dataset input parametre şeması (JSON). UI'da kullanıcıdan alınacak input parametrelerini tanımlar.
+        /// Format: array. Örn:
+        /// [
+        ///   { "name": "@StartDate", "type": "DateTime" },
+        ///   { "name": "@CustomerCode", "type": "NVarchar(50)" }
+        /// ]
+        /// </summary>
+        /// 
+        [MaxLength(2000)]
+        public string? InputParameter { get; set; }
+
+        /// <summary>
+        /// Dataset output parametre şeması (JSON). Varsayılan davranış: UI'da input üretmez (bilgi amaçlı).
+        /// </summary>
+        ///
+        [MaxLength(2000)]
+        public string? OutputParameter { get; set; }
     }
 }

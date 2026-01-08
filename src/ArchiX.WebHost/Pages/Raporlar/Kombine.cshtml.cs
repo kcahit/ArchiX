@@ -19,7 +19,8 @@ namespace ArchiX.WebHost.Pages.Raporlar
         }
 
         public IReadOnlyList<GridColumnDefinition> Columns { get; private set; } = new List<GridColumnDefinition>();
-        public IEnumerable<IDictionary<string, object?>> Rows { get; private set; } = [];
+
+        public List<IDictionary<string, object?>> Rows { get; private set; } = [];
 
         public IReadOnlyList<ReportDatasetOptionViewModel> DatasetOptions { get; private set; } = [];
         public int? SelectedReportDatasetId { get; private set; }
@@ -85,7 +86,7 @@ namespace ArchiX.WebHost.Pages.Raporlar
             }
         }
 
-        private static IReadOnlyList<IDictionary<string, object?>> MapToRowsOrThrow(ReportDatasetExecutionResult result)
+        private static List<IDictionary<string, object?>> MapToRowsOrThrow(ReportDatasetExecutionResult result)
         {
             if (result.Columns.Count <= 0)
                 throw new InvalidOperationException("Dataset returned no columns.");

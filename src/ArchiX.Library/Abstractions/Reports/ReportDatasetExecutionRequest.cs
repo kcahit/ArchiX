@@ -5,4 +5,5 @@ public sealed record ReportDatasetExecutionRequest(
     int? MaxCells = null,
     int? HardMaxRows = null,
     int? HardMaxCols = null,
-    int? MaxCellChars = null);
+    int? MaxCellChars = null,
+    IReadOnlyDictionary<string, string?>? Parameters = null);

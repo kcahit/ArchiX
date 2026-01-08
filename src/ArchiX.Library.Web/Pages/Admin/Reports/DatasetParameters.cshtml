@@ -1,0 +1,284 @@
+﻿@page "{reportDatasetId:int}"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Policy = ArchiX.Library.Abstractions.Security.PolicyNames.Admin)]
+@model ArchiX.Library.Web.Pages.Admin.Reports.DatasetParametersModel
+@{
+    ViewData["Title"] = "Dataset Parametre Şeması (JSON)";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid py-3">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+        <div>
+            <h2 class="mb-1"><i class="fas fa-sliders-h me-2"></i>Dataset Parametre Şeması (JSON)</h2>
+            <div class="text-muted small">
+                Dataset Id: <span class="fw-semibold">@Model.ReportDatasetId</span> ·
+                Ad: <span class="fw-semibold">@Model.Form.DisplayName</span> ·
+                Tip: <span class="fw-semibold">@Model.Form.TypeGroup/@Model.Form.TypeCode</span> ·
+                Kaynak: <span class="fw-semibold">@Model.Form.FileName</span>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary btn-sm" asp-page="/Admin/Security/Index">
+                <i class="fas fa-arrow-left me-1"></i>Admin
+            </a>
+            <a class="btn btn-outline-secondary btn-sm" asp-page="./DatasetParameters" asp-route-reportDatasetId="@Model.ReportDatasetId">
+                <i class="fas fa-rotate-right me-1"></i>Yenile
+            </a>
+        </div>
+    </div>
+
+    <div class="alert alert-warning">
+        <div class="fw-semibold">Not</div>
+        <div class="small">
+            Bu ekran JSON doğrulamasını (schema + allowlist) yapar.
+            <span class="fw-semibold">Kaydetme</span> işlemi, <code>ReportDataset</code> entity'si <code>InputParameter</code> / <code>OutputParameter</code> alanları eklendiğinde aktif olacaktır.
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-xl-8">
+            <form method="post" class="card shadow-sm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="ReportDatasetId" />
+
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <div class="fw-semibold">
+                        <i class="fas fa-code me-2"></i>JSON Şemaları
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" asp-page-handler="Validate" class="btn btn-outline-primary btn-sm" id="btnValidate">
+                            <i class="fas fa-check me-1"></i>Doğrula
+                        </button>
+                        <button type="submit" asp-page-handler="Save" class="btn btn-primary btn-sm" id="btnSave">
+                            <i class="fas fa-save me-1"></i>Kaydet
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div id="clientValidation" class="mb-3" style="display:none;">
+                        <div id="cvSummary" class="alert pb-2 pt-2 mb-2" role="alert" style="font-weight:700"></div>
+                        <div id="cvDetails" class="small"></div>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+                    {
+                        <div class="alert alert-info" style="font-weight:700">@Model.StatusMessage</div>
+                    }
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger" style="font-weight:700">
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <div>@error.ErrorMessage</div>
+                            }
+                        </div>
+                    }
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" asp-for="Form.InputParameterJson">InputParameter (JSON)</label>
+                        <textarea class="form-control font-monospace"
+                                  rows="12"
+                                  spellcheck="false"
+                                  id="inpJson"
+                                  asp-for="Form.InputParameterJson"
+                                  placeholder='[ { "name": "@@StartDate", "type": "DateTime" } ]'></textarea>
+                        <div class="form-text">
+                            Kullanıcıdan alınacak input parametrelerini tanımlar. Boş bırakılabilir.
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold" asp-for="Form.OutputParameterJson">OutputParameter (JSON)</label>
+                        <textarea class="form-control font-monospace"
+                                  rows="10"
+                                  spellcheck="false"
+                                  id="outJson"
+                                  asp-for="Form.OutputParameterJson"
+                                  placeholder='[ { "name": "@@ResultCode", "type": "Int" } ]'></textarea>
+                        <div class="form-text">
+                            SP output parametreleri için tanımdır. Varsayılan davranış: UI’da input üretmez (bilgi amaçlı). Boş bırakılabilir.
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-header">
+                    <div class="fw-semibold"><i class="fas fa-circle-info me-2"></i>Format</div>
+                </div>
+                <div class="card-body">
+                    <div class="small text-muted mb-2">
+                        JSON <span class="fw-semibold">array</span> olmalıdır. Her eleman:
+                        <span class="fw-semibold">name</span> + <span class="fw-semibold">type</span> içermelidir.
+                    </div>
+
+                    <label class="form-label fw-semibold" for="exampleJson">Kopyalanabilir örnek</label>
+                    <textarea class="form-control font-monospace" rows="8" readonly id="exampleJson">@Model.HelpJsonExample</textarea>
+
+                    <div class="d-flex gap-2 mt-2 flex-wrap">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="btnCopyExample">
+                            <i class="fas fa-copy me-1"></i>Kopyala
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="btnFillInputFromExample">
+                            <i class="fas fa-arrow-down me-1"></i>Input’a doldur
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <div class="fw-semibold"><i class="fas fa-list-check me-2"></i>Type allowlist</div>
+                </div>
+                <div class="card-body small">
+                    <ul class="mb-2">
+                        <li><span class="fw-semibold">NVarchar(n)</span> (n: 1..500), <span class="fw-semibold">NVarchar(Max)</span></li>
+                        <li><span class="fw-semibold">Int</span>, <span class="fw-semibold">BigInt</span>, <span class="fw-semibold">SmallInt</span>, <span class="fw-semibold">TinyInt</span></li>
+                        <li><span class="fw-semibold">Decimal(p,s)</span> (p: 1..38, s: 0..p)</li>
+                        <li><span class="fw-semibold">Bit</span></li>
+                        <li><span class="fw-semibold">Date</span>, <span class="fw-semibold">DateTime</span>, <span class="fw-semibold">DateTime2</span></li>
+                        <li><span class="fw-semibold">UniqueIdentifier</span></li>
+                    </ul>
+                    <div class="text-muted">
+                        Parametre adı kuralı: <span class="fw-semibold">@@Param</span> veya <span class="fw-semibold">Param</span> (harf/rakam/altçizgi).
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var inp = document.getElementById('inpJson');
+            var outp = document.getElementById('outJson');
+            var btnSave = document.getElementById('btnSave');
+            var btnValidate = document.getElementById('btnValidate');
+
+            var box = document.getElementById('clientValidation');
+            var sum = document.getElementById('cvSummary');
+            var det = document.getElementById('cvDetails');
+
+            var exampleTa = document.getElementById('exampleJson');
+            var btnCopy = document.getElementById('btnCopyExample');
+            var btnFill = document.getElementById('btnFillInputFromExample');
+
+            function show(ok, title, lines) {
+                if (!box || !sum || !det) return;
+                box.style.display = 'block';
+                sum.className = 'alert ' + (ok ? 'alert-success' : 'alert-danger');
+                sum.textContent = title;
+                det.innerHTML = '';
+                if (lines && lines.length) {
+                    var ul = document.createElement('ul');
+                    ul.className = 'mb-0';
+                    for (var i = 0; i < lines.length; i++) {
+                        var li = document.createElement('li');
+                        li.textContent = lines[i];
+                        ul.appendChild(li);
+                    }
+                    det.appendChild(ul);
+                }
+            }
+
+            function setButtonsEnabled(enabled) {
+                if (btnSave) btnSave.disabled = !enabled;
+                if (btnValidate) btnValidate.disabled = false;
+            }
+
+            function tryValidateJson(raw, label) {
+                var ok = true;
+                var errors = [];
+
+                if (!raw || !raw.trim()) return { ok: true, errors: [] };
+
+                try {
+                    var root = JSON.parse(raw);
+                    if (!Array.isArray(root)) {
+                        ok = false;
+                        errors.push(label + ': root bir array olmalı.');
+                        return { ok: ok, errors: errors };
+                    }
+                    for (var i = 0; i < root.length; i++) {
+                        var item = root[i];
+                        var idx = i + 1;
+                        if (typeof item !== 'object' || item === null || Array.isArray(item)) {
+                            ok = false;
+                            errors.push(label + ': Eleman #' + idx + ' object olmalı.');
+                            continue;
+                        }
+                        if (typeof item.name !== 'string' || !item.name.trim()) {
+                            ok = false;
+                            errors.push(label + ': Eleman #' + idx + ' name string zorunlu.');
+                        }
+                        if (typeof item.type !== 'string' || !item.type.trim()) {
+                            ok = false;
+                            errors.push(label + ': Eleman #' + idx + ' type string zorunlu.');
+                        }
+                    }
+                } catch (e) {
+                    ok = false;
+                    errors.push(label + ': JSON parse edilemedi. ' + ((e && e.message) ? e.message : String(e)));
+                }
+
+                return { ok: ok, errors: errors };
+            }
+
+            function validateAllClientSide() {
+                var r1 = tryValidateJson(inp ? inp.value : '', 'InputParameter');
+                var r2 = tryValidateJson(outp ? outp.value : '', 'OutputParameter');
+
+                var allOk = r1.ok && r2.ok;
+                var errs = [];
+                if (r1.errors && r1.errors.length) errs = errs.concat(r1.errors);
+                if (r2.errors && r2.errors.length) errs = errs.concat(r2.errors);
+
+                if (!allOk) {
+                    show(false, 'Client-side doğrulama başarısız. (Server-side doğrulama zorunludur)', errs);
+                    setButtonsEnabled(false);
+                    return false;
+                }
+
+                if (errs.length === 0) {
+                    box.style.display = 'none';
+                }
+
+                setButtonsEnabled(true);
+                return true;
+            }
+
+            function onBlurValidate() {
+                validateAllClientSide();
+            }
+
+            if (inp) inp.addEventListener('blur', onBlurValidate);
+            if (outp) outp.addEventListener('blur', onBlurValidate);
+
+            if (btnCopy && exampleTa) {
+                btnCopy.addEventListener('click', async function () {
+                    try {
+                        await navigator.clipboard.writeText(exampleTa.value || '');
+                        show(true, 'Örnek JSON kopyalandı.', []);
+                    } catch (e) {
+                        show(false, 'Kopyalama başarısız.', [String(e)]);
+                    }
+                });
+            }
+
+            if (btnFill && exampleTa && inp) {
+                btnFill.addEventListener('click', function () {
+                    inp.value = exampleTa.value || '';
+                    validateAllClientSide();
+                });
+            }
+
+            validateAllClientSide();
+        })();
+    </script>
+}

@@ -683,7 +683,209 @@ Parametre şeması:
 - SP dataset UI’sında input parametre alanı olmamalıdır.
 - Büyük SP çıktısı limitlere göre kesilmelidir.
 
+11.1) Parametre şeması dataset kaydında tutulur (DB side, metadata yok)
+•	Dataset parametreleri, DB metadata / SP introspection yapılmadan yönetilir.
+•	Gerekçe: metadata erişimi tenant DB’lerde güvenlik/permission nedeniyle garanti değildir; sistem “metadata’ya bağlı” kurgulanmayacaktır.
+•	Bu nedenle parametre şeması, dataset kaydında “tanım” olarak durur ve uygulama bu tanıma göre UI/validation üretir.
+11.2) Şema formatı: JSON + parametre adı zorunlu
+•	Parametre şeması JSON formatındadır.
+•	Parametre adları zorunludur (isim olmadan güvenli parameterized SP çağrısı yapılamaz; string birleştirme ile EXEC ... üretilmesi yasaktır).
+•	JSON formatı: array (wrapper yok)
+•	Örnek:
+[
+  { "name": "@StartDate", "type": "DateTime" },
+  { "name": "@CustomerCode", "type": "NVarchar(50)" }
+]
+11.3) Kolonlar (ReportDataset) – Input/Output şema alanları
+•	ReportDataset üzerinde iki ayrı alan bulunur:
+•	InputParameter (nullable): JSON şema. Kullanıcıdan alınacak input parametreleri tanımlar.
+•	OutputParameter (nullable): JSON şema. SP output parametreleri için tanım alanıdır.
+•	Notlar:
+•	Her iki alan da null olabilir.
+•	Output parametreleri UI’da filtre/input ekranı olarak gösterilmez (gerekirse farklı bir ekranda “bilgi amaçlı/diagnostic” olarak ele alınabilir; default davranış: UI’da input üretilmez).
+11.4) Çalıştırma güvenliği (SQL Injection önlemi – zorunlu)
+•	Stored procedure çalıştırma sırasında:
+•	Komut metni string birleştirme ile asla üretilmez (EXEC ... string concat yasak).
+•	Mutlaka CommandType = StoredProcedure + SqlParameter kullanılır.
+•	Parametre değerleri:
+•	JSON şemaya göre UI’dan alınır.
+•	Server-side parse + tip doğrulamasından geçer.
+•	Ardından cmd.Parameters.Add(...) dinamik olarak (foreach) oluşturulur.
+11.5) Tip sözleşmesi (allowlist) + fail-closed doğrulama
+•	Type alanı serbest metin değildir; allowlist yaklaşımı zorunludur.
+•	Minimum allowlist (başlangıç):
+•	NVarchar(n) (n: 1..500 veya sistemin belirlediği üst sınır)
+•	NVarchar(Max) (opsiyonel; performans/stabilite gerekçesiyle sonradan kapatılabilir)
+•	Int, BigInt, SmallInt, TinyInt
+•	Decimal(p,s) (örn. Decimal(18,6))
+•	Bit
+•	Date, DateTime, DateTime2
+•	UniqueIdentifier
+•	Allowlist dışı Type görülürse:
+•	Admin kaydında: kaydetme reddedilir (ModelState error)
+•	Runtime çalıştırmada: istek reddedilir (BadRequest / fail-closed)
+11.6) JSON doğrulama zorunluluğu (server-side mecburi)
+•	JSON doğrulama yalnızca client-side’a bırakılamaz.
+•	Aşağıdaki kontroller server-side zorunludur:
+•	JSON parse edilebilir olmalı
+•	Şema elemanları beklenen shape’de olmalı (Name, Type)
+•	Name boş olmamalı, güvenli karakter setinde olmalı (örn. @ ile başlayan ve alfa-numerik/underscore içeren)
+•	Type allowlist içinde olmalı
+•	Geçersiz durumda sistem işlem yapmaz (fail-closed).
+11.7) Client-side doğrulama (Razor Pages) – alandan çıkınca (blur) kontrol
+•	Admin sayfasında JSON textarea için client-side JSON kontrolü olmalıdır.
+•	Kontrol tetikleme: kullanıcı textarea’dan çıkınca (blur) çalışır.
+•	Geçersiz JSON:
+•	kullanıcıya hata mesajı gösterilir
+•	tercihen “Kaydet” butonu disabled edilir
+•	Not: client-side doğrulama yardımcıdır; server-side zorunlu validasyonun yerine geçmez.
+11.8) Kullanıcıya yardım/rehber (zorunlu)
+•	Kullanıcının JSON formatını doğru yazabilmesi için admin ekranında mutlaka “yardım/örnek” görünür olmalıdır:
+•	Kopyalanabilir örnek JSON (snippet)
+•	Desteklenen Type allowlist listesi
+•	(opsiyon) “Doğrula / Validate” butonu: kaydetmeden önce server-side parse+schema validate sonucu gösterir
 ---
+Yapılacak İşler (Sıralı)
+1.	ReportDataset entity + migration
+•	InputParameter (nullable)
+•	OutputParameter (nullable)
+2.	Admin ekranı: dataset tanım/düzenleme UI alanları
+•	InputParameter ve OutputParameter için textarea alanları
+•	Kopyalanabilir örnek JSON + allowlist tip listesi (yardım alanı)
+3.	Admin ekranı: client-side JSON doğrulama (blur)
+•	JSON.parse(...) ile kontrol
+•	Hata mesajı + (tercihen) kaydet butonu disable
+4.	Admin ekranı: server-side JSON + şema doğrulama
+•	Parse + allowlist + name kuralları
+•	Geçersizse kaydetme reddedilecek (ModelState)
+5.	Runtime: SP çalıştırma sözleşmesi (parameterized)
+•	EXEC ... string birleştirme kesin yasak
+•	CommandType.StoredProcedure + SqlParameter
+•	InputParameter JSON şemasından dinamik parametre üretimi (foreach)
+•	Tip parse/validate fail-closed
+6.	Runtime: Şema bozuksa fail-closed
+•	Dataset kaydındaki JSON bozuksa veya allowlist dışıysa BadRequest / NotSupported mantığıyla reddet
+7.	Test paketi (minimum)
+•	Geçersiz JSON → admin kaydı reddedilir
+•	Allowlist dışı type → admin kaydı reddedilir
+•	Runtime’da JSON bozuk → BadRequest (fail-closed)
+•	Runtime’da input parametreler SqlParameter ile gönderiliyor (en az bir smoke test)
+•	(UI test opsiyonel) blur doğrulamanın temel davranışı
+
+DEĞİŞİKLİK ==> 2026-01-08 15:00 düzenlendi
+Dizin: "D:\\_git\\ArchiX\\Dev\\ArchiX\\docs\\#17 Archix-Connection-CONTRIBUTING.md"
+Dosya Adı: #17 Archix-Connection-CONTRIBUTING.md
+Açıklama: İş #11 – Son kararlara göre ## 11 bölümü revizesi. (Önceki kararlarla karşılaştırma: “SP input param alınmaz” kaldırıldı; InputParameter şeması + runtime SqlParameter zorunluluğu + request üzerinden parametre taşıma eklendi.)
+
+## 11) SP Dataset Parametre Davranışı (Revize)
+
+> Öncelik sırası: **Güvenlik > Performans/Stabilite > Kullanıcı dostu uygulama**  
+> Belirsiz/uygunsuz durumda işlem yapılmaz (**fail-closed**).
+
+### Teknik Tasarım
+
+#### 11.1) Parametre şeması dataset kaydında tutulur (metadata yok)
+- Dataset parametreleri DB metadata / SP introspection yapılmadan yönetilir.
+- Gerekçe: tenant DB’lerde metadata erişimi permission/güvenlik nedeniyle garanti değildir.
+- Bu nedenle parametre şeması, dataset kaydında “tanım” olarak durur ve uygulama bu tanıma göre UI/validation üretir.
+
+#### 11.2) Şema formatı: JSON array + parametre adı zorunlu
+- Parametre şeması JSON formatındadır.
+- JSON formatı: **array (wrapper yok)**.
+- Her eleman: `{ "name": "...", "type": "..." }`
+- `name` zorunludur (isim olmadan güvenli parameterized SP çağrısı yapılamaz).
+- Örnek:
+[ { "name": "@StartDate", "type": "DateTime" }, { "name": "@CustomerCode", "type": "NVarchar(50)" } ]
+
+
+#### 11.3) Kolonlar (ReportDataset) – Input/Output şema alanları
+`ReportDataset` üzerinde iki alan bulunur:
+- `InputParameter` (nullable): Kullanıcıdan alınacak input parametrelerini tanımlar (JSON şema).
+- `OutputParameter` (nullable): SP output parametreleri için tanım alanıdır.
+
+Notlar:
+- Her iki alan da null olabilir.
+- Output parametreleri varsayılan davranışta UI’da “input/filtre” üretmez (bilgi amaçlı tutulur).
+
+#### 11.4) UI parametre değerleri (Razor Pages) – Standart form post 
+- Parametre değerleri UI’dan **form post** (`application/x-www-form-urlencoded`) ile gönderilir.
+- Alan isim standardı:
+  - Her parametre için güvenli prefix kullanılır: `p_`
+  - Örnek: `p_StartDate`, `p_CustomerCode`, `p_Amount`
+- `@StartDate` gibi SQL param adları UI tarafında **normalize edilerek** `StartDate` anahtarına map edilir.
+- UI’daki doğrulama yardımcıdır; server-side zorunlu doğrulamanın yerine geçmez.
+
+#### 11.5) Runtime sözleşmesi: parameterized SP çağrısı (SQL Injection önlemi – zorunlu)
+- Stored procedure çalıştırma sırasında:
+  - Komut metni **string birleştirme** ile asla üretilmez (**EXEC ... string concat yasak**).
+  - Mutlaka `CommandType = StoredProcedure` kullanılır.
+  - Mutlaka `SqlParameter` kullanılır.
+- Parametre üretimi:
+  - Dataset’teki `InputParameter` JSON şeması parse edilir.
+  - UI’dan gelen değerler, şemaya göre server-side parse + tip doğrulamasından geçirilir.
+  - Sonrasında `cmd.Parameters.Add(...)` ile dinamik olarak eklenir.
+
+#### 11.6) Tip sözleşmesi (allowlist) + fail-closed doğrulama
+- `type` serbest metin değildir; allowlist yaklaşımı zorunludur.
+- Minimum allowlist:
+  - `NVarchar(n)` (n: 1..500) veya `NVarchar(Max)` (opsiyonel)
+  - `Int`, `BigInt`, `SmallInt`, `TinyInt`
+  - `Decimal(p,s)` (p: 1..38, s: 0..p)
+  - `Bit`
+  - `Date`, `DateTime`, `DateTime2`
+  - `UniqueIdentifier`
+- Allowlist dışı type:
+  - Admin kaydında: kaydetme reddedilir (ModelState error)
+  - Runtime çalıştırmada: istek reddedilir (BadRequest / fail-closed)
+
+#### 11.7) Name kuralı (allowlist) + fail-closed
+- Parametre adı güvenli karakter setinde olmalıdır.
+- Minimum regex standardı:
+  - `^@?[A-Za-z_][A-Za-z0-9_]*$`
+- Geçersiz name:
+  - Admin kaydında: kaydetme reddedilir
+  - Runtime çalıştırmada: istek reddedilir (BadRequest / fail-closed)
+
+#### 11.8) JSON doğrulama zorunluluğu (server-side mecburi)
+- JSON doğrulama yalnızca client-side’a bırakılamaz.
+- Server-side zorunlu kontroller:
+  - JSON parse edilebilir olmalı
+  - Root array olmalı
+  - Her eleman object olmalı ve `name` + `type` içermeli
+  - `name` regex’e uymalı
+  - `type` allowlist içinde olmalı
+- Geçersiz durumda sistem işlem yapmaz (**fail-closed**).
+
+#### 11.9) Executor kontratı (sözleşme netliği)
+- Runtime executor çağrısı, parametre değerlerini taşıyabilmelidir.
+- Bu nedenle execution request modeli, parametreleri kabul eden bir alan içerir (örn. `Dictionary<string, string?>`).
+- Böylece executor, sadece kendisine verilmiş parametreleri işler; `Request.Form` gibi UI bağımlılığı executor içine taşınmaz.
+
+---
+
+### Test Senaryoları (minimum)
+
+1) Admin doğrulama
+- Geçersiz JSON → admin kaydı reddedilir.
+- Allowlist dışı type → admin kaydı reddedilir.
+- Regex dışı name → admin kaydı reddedilir.
+
+2) Runtime fail-closed
+- Dataset `InputParameter` JSON bozuk → `BadRequest` / fail-closed.
+- Allowlist dışı type → `BadRequest` / fail-closed.
+- Regex dışı name → `BadRequest` / fail-closed.
+
+3) Runtime parameterized SP (smoke)
+- Şeması olan SP dataset çalıştırmada:
+  - Parametreler `SqlParameter` ile gönderiliyor olmalı.
+  - `EXEC ...` string concat yaklaşımı bulunmamalı.
+
+4) (Opsiyonel) UI blur doğrulama
+- JSON parse edilemez ise “Kaydet” disabled olmalı, “Doğrula” enabled kalmalı.
+
+Düzenleme notu sonu  (2026-01-08 15:00)
+---
+
 
 ## 12) UI Davranışları (Kombine + GridListe Toolbar)
 

@@ -1,60 +1,34 @@
 ﻿Aşağıdaki kurallara göre çalışacaksın. 
 
-1. Değişklikleri Library.Web projesine yapıyorsun. build yapınca zaten ArchiX.WebHost projesine otomatik geliyor. 
-	Program.cs hariç
-2. bana  kody vereceğin zaman
+1. Değişklikleri Library.Web projesine yapıyorsun. build yapınca zaten ArchiX.WebHost projesine otomatik geliyor. Program.cs hariç. detayları 
+2. KOd vermeyeye başlamadan poje kodlarını muhakkak oku ve olabildiğince belli olmayan şeyleri sor yoksa direkt kodu ver ArchiX..csprojda görebilirsin akışı net anlarsın.
+3. ben tamam, devam, ok dersem sonraki adıma geç
+4. bana  kody vereceğin zaman;
 	a. kodu tam ve tek parça olarak veriyorsun.
-    b. kodu verirken başına yeni mi yoksa değişiklik mi olduğunu yazıyorsun. 
-	c. Dizin: Dosyanın  full dizini.
-	d. Dosya Adı: Dosyanın adı.
-	e. eğer sadece değişecek parçaları veriyorsan yukarıdaki isteklerime ilave olarak,
+	b. önceki kod doğru uygulanmış mı bakacaksın (varsa) önceki kod "doğru uygulandı" notunu yazacaksın açıklamaya. ama kod doğru uyuglanmadı ise hatayı ve düzeltme önerisini yazacaksın (tabii ki yeni kod öneisi olmayacak) 
+    c. kodu verirken başına yeni mi yoksa değişiklik mi olduğunu yazıyorsun. 
+	d. Dizin: Dosyanın  full dizini. "" içinde dizini yazacaktın. Yoksa senin ediör kısaltıyor ve dizin yerine sadece dosya adı kalıyor
+	e. Dosya Adı: Dosyanın adı.
+	f. eğer sadece değişecek parçaları veriyorsan yukarıdaki isteklerime ilave olarak (bunu tercih etmiyorum ama bazen gerekebilir)
 		- Tahmini satır sayısı
 		- Hangi kod parçasından sonra yazılcaksa onu belirtiyorsun.
+	g. Eğer iş no ş sıra no varsa açıklamaya onu da yazacaksın.
 
-seninle bu yazışma önemli ==> Tamam. Bundan sonra Dizin satırını editör kısaltmasın diye tırnak içinde yazacağım (tek satır, full path).
-Dizin: "D:\_git\ArchiX\Dev\ArchiX\src\ArchiX.Library.Web\Templates\Modern\Pages\Shared\Components\GridToolbar\Default.cshtml"
+5. Yorum yaparken örnek olsun diye  kodları ekrana yazma kesinlikle yazma zorunlu ise yapılacak bir şey olacak ise yaz. thread aşırı derecede gereksiz şekilde büyüyor. Mümkün olduğunca Thread doldurmamaya çalış.	
+6. Benimle TÜRKÇE YAZIŞ. BEN iNGİLİZCE BİLMİYORUM. LÜTFEN.
 
-bana başlarken sürekli sorular sormak yerine kendiliğinden anla (poje kodlarını kendin oku) ve olabildiğince az soru ile direkt kodu ver.
-ama kod varsa kodu önce okuyacaksın sonra kod önerisi vereceksin.
-ben tamam, devam, ok dersem sonraki adıma geçmeen önce kod doğru uygulanmış mı bakacaksın. sonraki işe geçerken önceki kod doğru uygulandı notu ile yeni ile devam edeceksin.
-kod doğru uyuglanmadı ise hatayı ve düzeltme önerisini yazacaksın.
-ğer iş no ş sıra nı varsa açıklamaya onu da yazacaksın.
-Yorum yaparken örnek olsun diye  kodları ekrana yazma kesinlikle yazma zorunlu ise yapılacak bir şey olacak ise yaz. thread aşırı derecede gereksiz şekilde büyüyor
-Benimle TÜRKÇE YAZIŞ. BEN iNGİLİZCE BİLMİYORUM. LÜTFEN.
-
+Not: en çok 4.b maddesine dikkat et.hep unutuyorsun benşm için KRTİK bir madde orası ve sen asla kodlara müdahale etme kodları bana ver.
 
 
 #file:'D:\_git\ArchiX\Dev\ArchiX\docs\#17 Archix-Connection-CONTRIBUTING.md':421-450 önce dokümanı oku. sonra seçili alanı oku. seçili işin tasarımında mutabık mısın. Değişiklik var  mı? bana sorun var mı?
-bir de gerçek var olan tüm kodlara bak ona göre karar ver
-
-
-
-1. KODLARI HİÇ BİR ZAMAN YAZIŞMA EDİTÖRÜ ŞEKLİNDE VERME.  BU KOPYALA YAPIŞTIRMADA HATAYA SEBEP OLUYOR. KOD EDİTÖRÜNDE İNDENTLİ VE RENKLİ OLAN FORMATTA VERİRSEN SORUN OLMUYOR. 
-2. KOD VERECEĞİN ZAMAN DAİMA 1 TANE TAM KOD VERECEKSİN. BEN ONU ÇAŞILTIRACAĞIM. BENİM DONÜŞÜME GÖFE SONRAKİ KODA GEÇECEKSİN
-3. BENİMLE MUHAKKAK TÜRKÇE YAZIŞ LÜTFEN. ÇÜNKÜ BEN İNGİLİZCE BİLMİYORUM. LÜTFEN...
-4. bir kodu verdikten sonra sadece bu koda ait bir test olacaksa sonraki adım test kodunu yazıp ver .
-5. Bütün interfaceler Abstractions altında İlgili Klasöre yazılıyor.
-6. test kodları daima esas kodla hiyerarşik uyum içinde hem isim ve klasörleme ile yazılıyor.
-7. Asla sen kodlara müdahale etmeyeceksin. Kodları vereceksin ben kodu uyarlayacağım. senin otomatik müdahaleni asla istemiyorum çünkü çok yavaş oluyor. yani sen kod/dosya edit etmeyeceksin ben yapacağım tüm işlemleri.
-8. Eğer migration olacak ise . migration kodu yazma APPDbConext içine ekleyeceksin. 
-8.1  public DbSet<PasswordBlacklist> PasswordBlacklists => Set<PasswordBlacklist>(); öneiindeki gibi ekleme yapacaksın
-8.2 Hasdata ile data ekleme yapacaksın.
-9. migration dosyalarında değişiklik istemiyorum. Çünkü tüm migration dosyalarını silsem ve her şeyi sıfırdan yapsam ne olacak. Birde projesine library referans ekleyen na yapacak? her zaman kaynak dosyada düeltme olacak.
-10. run_build sonrasında Warning/Message tipinde uyarı kalmamalıdır. buna her zaman dikkat et.
-11. Dönüşlerinde maçıklama yaz. gereksiz açıklama yapma. olabildiğince sadece kod.
-12. KOd verirken ilk önce yeni mi yoksa değişiklik mi var onu yaz sonra kod ver.
-13. Kodun Başına değişiklik mi yok yeni mi onu yaz. dosya adını dizinle birlikte yaz.
-14. Projenin klasör yapısını ve mevcut kodlarını incele öyle karar ver.
-15. zoeunlu kalırsan kısa açıklamalar yaz. thread çabuk şişiyor
-
-tek kod ve tam dosya kodu  vermeyi sakın unutma. daima dönüşümü bekle
-Kod vermeye başla şimdi
+bir de var olan tüm kodlara bak ona göre karar ver
 
 
 ✅ 5. Strateji Önerisi
 
 Kod tamam ama test bekliyor → sadece #17 yaz (kapanmaz).
 Tamamlandı ve merge edilecek → Fixes #17 yaz (kapanır).
+
 PR açıklamasında kapatma → daha temiz yöntem.
 Benzer anahtar kelimeler:
 
