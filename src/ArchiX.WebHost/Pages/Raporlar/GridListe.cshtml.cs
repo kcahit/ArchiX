@@ -67,19 +67,28 @@ public class GridListeModel : PageModel
         }
     }
 
-    public async Task<IActionResult> OnPostRunAsync([FromQuery] int reportDatasetId, CancellationToken ct)
+    public async Task<IActionResult> OnPostRunAsync([FromForm] int reportDatasetId, CancellationToken ct)
     {
+        // Unit tests instantiate the PageModel without HttpContext; Request will be null.
+        var hasForm = Request?.HasFormContentType == true;
+
         if (reportDatasetId <= 0)
             return new BadRequestResult();
 
         // fail-closed: ApprovedOnly kontrolü (UI bypass edilirse bile)
-        var opts = await _optionsSvc.GetApprovedOptionsAsync(ct);
+        List<ReportDatasetOptionViewModel> opts = (await _optionsSvc.GetApprovedOptionsAsync(ct)).ToList();
         if (!opts.Any(x => x.Id == reportDatasetId))
             return new BadRequestResult();
 
+        Dictionary<string, string?> parameters = hasForm
+            ? ExtractParametersFromForm(Request!.Form)
+            : new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+
         try
         {
-            var result = await _executor.ExecuteAsync(new ReportDatasetExecutionRequest(reportDatasetId), ct);
+            ReportDatasetExecutionResult result = await _executor.ExecuteAsync(
+                new ReportDatasetExecutionRequest(reportDatasetId, Parameters: parameters),
+                ct);
 
             Columns = result.Columns
                 .Select(c => new GridColumnDefinition(c, c))
@@ -104,6 +113,28 @@ public class GridListeModel : PageModel
         {
             return new BadRequestResult();
         }
+    }
+
+    private const string ParamPrefix = "p_";
+
+    private static Dictionary<string, string?> ExtractParametersFromForm(Microsoft.AspNetCore.Http.IFormCollection form)
+    {
+        Dictionary<string, string?> dict = new(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var kv in form)
+        {
+            var key = kv.Key ?? string.Empty;
+            if (!key.StartsWith(ParamPrefix, StringComparison.Ordinal))
+                continue;
+
+            var normalized = key[ParamPrefix.Length..].Trim();
+            if (normalized.Length == 0)
+                continue;
+
+            dict[normalized] = kv.Value.Count > 0 ? kv.Value[0] : null;
+        }
+
+        return dict;
     }
 
     private void LoadSampleData()

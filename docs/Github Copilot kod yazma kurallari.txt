@@ -5,7 +5,10 @@
 3. ben tamam, devam, ok dersem sonraki adıma geç
 4. bana  kody vereceğin zaman;
 	a. kodu tam ve tek parça olarak veriyorsun.
-	b. önceki kod doğru uygulanmış mı bakacaksın (varsa) önceki kod "doğru uygulandı" notunu yazacaksın açıklamaya. ama kod doğru uyuglanmadı ise hatayı ve düzeltme önerisini yazacaksın (tabii ki yeni kod öneisi olmayacak) 
+	b. önceki kod doğru uygulanmış mı bakacaksın (varsa) önceki kod "doğru uygulandı" notunu yazacaksın açıklamaya. 
+		ama kod doğru uyuglanmadı ise hatayı ve düzeltme önerisini yazacaksın (tabii ki yeni kod öneisi olmayacak).
+		ama sadece build edip hata var mı diye bakma kodun içi istediğin gibi olmuş mu diye bak.
+
     c. kodu verirken başına yeni mi yoksa değişiklik mi olduğunu yazıyorsun. 
 	d. Dizin: Dosyanın  full dizini. "" içinde dizini yazacaktın. Yoksa senin ediör kısaltıyor ve dizin yerine sadece dosya adı kalıyor
 	e. Dosya Adı: Dosyanın adı.
