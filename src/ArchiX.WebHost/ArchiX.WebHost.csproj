@@ -33,8 +33,7 @@
 
 	<!-- *** BUILD: CLEAN İŞLEMİ *** -->
 	<Target Name="CleanCopiedFiles" BeforeTargets="Clean">
-		<RemoveDir Directories="Pages\Templates;Pages\Shared;Pages\Raporlar;wwwroot\css\modern;wwwroot\css\shared;wwwroot\images;wwwroot\js" />
-		<Delete Files="Pages\Login.cshtml;Pages\Login.cshtml.cs;Pages\Dashboard.cshtml;Pages\Dashboard.cshtml.cs;Pages\Error.cshtml;Pages\Error.cshtml.cs" />
+		<RemoveDir Directories="Pages;Templates;wwwroot\css\modern;wwwroot\css\shared;wwwroot\images;wwwroot\js" />
 	</Target>
 
 	<!-- *** BUILD: TEMPLATE KOPYALAMA (merkez target çağrısı) *** -->

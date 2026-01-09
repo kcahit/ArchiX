@@ -1,4 +1,4 @@
-@using Microsoft.AspNetCore.Mvc.ViewFeatures
+﻿@using Microsoft.AspNetCore.Mvc.ViewFeatures
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @{
     var requestToken = Antiforgery.GetAndStoreTokens(Context).RequestToken;
@@ -24,13 +24,18 @@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
+
+
+
+ 
+    
     <!-- Navbar -->
-    @await Html.PartialAsync("_Navbar")
+    @await Html.PartialAsync("Shared/_Navbar")
 
     <div class="container-fluid">
         <div class="row dashboard-layout-row">
             <!-- Sidebar -->
-            @await Html.PartialAsync("_Sidebar")
+            @await Html.PartialAsync("Shared/_Sidebar")
 
             <!-- Main Content -->
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
@@ -56,7 +61,7 @@
     </div>
 
     <!-- Footer -->
-    @await Html.PartialAsync("_Footer")
+    @await Html.PartialAsync("Shared/_Footer")
 
     <!-- Toast Container -->
     <div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>

@@ -39,10 +39,13 @@ public sealed partial class DatasetParametersModel : PageModel
 
     public async Task<IActionResult> OnGetAsync(CancellationToken ct)
     {
-        if (ReportDatasetId <= 0)
-            return BadRequest();
-
         HelpJsonExample = BuildExampleJson();
+
+        if (ReportDatasetId <= 0)
+        {
+            StatusMessage = "Dataset seçilmedi. Lütfen URL'e dataset id ekleyin. Örn: /Admin/Reports/DatasetParameters/1";
+            return Page();
+        }
 
         await using var db = await _dbFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
@@ -69,10 +72,13 @@ public sealed partial class DatasetParametersModel : PageModel
 
     public async Task<IActionResult> OnPostSaveAsync(CancellationToken ct)
     {
-        if (ReportDatasetId <= 0)
-            return BadRequest();
-
         HelpJsonExample = BuildExampleJson();
+
+        if (ReportDatasetId <= 0)
+        {
+            StatusMessage = "Dataset seçilmedi. Kaydetmek için önce dataset seçin.";
+            return Page();
+        }
 
         ValidateMaxLen(nameof(Form.InputParameterJson), Form.InputParameterJson);
         ValidateMaxLen(nameof(Form.OutputParameterJson), Form.OutputParameterJson);
@@ -104,6 +110,12 @@ public sealed partial class DatasetParametersModel : PageModel
     public IActionResult OnPostValidateAsync()
     {
         HelpJsonExample = BuildExampleJson();
+
+        if (ReportDatasetId <= 0)
+        {
+            StatusMessage = "Dataset seçilmedi. Doğrulamak için önce dataset seçin.";
+            return Page();
+        }
 
         ValidateMaxLen(nameof(Form.InputParameterJson), Form.InputParameterJson);
         ValidateMaxLen(nameof(Form.OutputParameterJson), Form.OutputParameterJson);

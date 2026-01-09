@@ -1,4 +1,4 @@
-﻿@page "{reportDatasetId:int}"
+﻿@page "{reportDatasetId:int?}"
 @attribute [Microsoft.AspNetCore.Authorization.Authorize(Policy = ArchiX.Library.Abstractions.Security.PolicyNames.Admin)]
 @model ArchiX.Library.Web.Pages.Admin.Reports.DatasetParametersModel
 @{
@@ -64,7 +64,7 @@
 
                     @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
                     {
-                        <div class="alert alert-info" style="font-weight:700">@Model.StatusMessage</div>
+                        <div class="alert alert-info fs-5 fw-bold">@Model.StatusMessage</div>
                     }
 
                     @if (!ViewData.ModelState.IsValid)

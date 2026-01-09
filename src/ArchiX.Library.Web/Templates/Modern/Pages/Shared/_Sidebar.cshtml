@@ -1,33 +1,21 @@
-<nav id="sidebar" class="col-md-3 col-lg-2 d-md-block sidebar">
+ï»¿<nav id="sidebar" class="col-md-3 col-lg-2 d-md-block sidebar">
     <div class="sidebar-header">
-        <h3><i class="bi bi-grid-fill"></i> Menü</h3>
+        <h3><i class="bi bi-grid-fill"></i> MenÃ¼</h3>
     </div>
+
     <div class="position-sticky pt-3">
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["page"]?.ToString() == "/Dashboard" ? "active" : "")" 
+                <a class="nav-link @(ViewContext.RouteData.Values["page"]?.ToString() == "/Dashboard" ? "active" : "")"
                    asp-page="/Dashboard">
                     <i class="bi bi-house-door-fill"></i>
                     Ana Sayfa
                 </a>
             </li>
+
+            <!-- Raporlar Menu (Collapsible) -->
             <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="bi bi-person-fill"></i>
-                    Kullanýcýlar
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link position-relative" href="#">
-                    <i class="bi bi-envelope-fill"></i>
-                    Mesajlar
-                    <span class="badge bg-danger rounded-pill float-end">5</span>
-                </a>
-            </li>
-            
-            <!-- Raporlar Menu (Collapsible - AÇIK) -->
-            <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#raporlarMenu" 
+                <a class="nav-link" data-bs-toggle="collapse" href="#raporlarMenu"
                    role="button" aria-expanded="true" aria-controls="raporlarMenu">
                     <i class="bi bi-graph-up"></i>
                     Raporlar
@@ -36,30 +24,92 @@
                 <div class="collapse show" id="raporlarMenu">
                     <ul class="nav flex-column ms-3">
                         <li class="nav-item">
-                            <<a class="nav-link @(ViewContext.RouteData.Values["page"]?.ToString() == "/Raporlar/Kombine" ? "active" : "")"
-                                href="/Raporlar/Kombine">
+                            <a class="nav-link" href="/Raporlar/Kombine" target="_blank" rel="noopener">
                                 <i class="bi bi-graph-up-arrow"></i>
-                                Kombine Rapor
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/Raporlar/pivot" target="_blank">
-                                <i class="bi bi-table"></i>
-                                Pivot Rapor
+                                Kombine
                                 <i class="bi bi-box-arrow-up-right ms-1" style="font-size: 0.8em;"></i>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/Raporlar" target="_blank">
-                                <i class="bi bi-file-earmark-bar-graph"></i>
-                                Genel Raporlar
+                            <a class="nav-link" href="/Raporlar/Pivot" target="_blank" rel="noopener">
+                                <i class="bi bi-table"></i>
+                                Pivot
+                                <i class="bi bi-box-arrow-up-right ms-1" style="font-size: 0.8em;"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Raporlar/GridListe" target="_blank" rel="noopener">
+                                <i class="bi bi-list-check"></i>
+                                GridListe
+                                <i class="bi bi-box-arrow-up-right ms-1" style="font-size: 0.8em;"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Raporlar/Form" target="_blank" rel="noopener">
+                                <i class="bi bi-ui-checks-grid"></i>
+                                Form
                                 <i class="bi bi-box-arrow-up-right ms-1" style="font-size: 0.8em;"></i>
                             </a>
                         </li>
                     </ul>
                 </div>
             </li>
-            
+
+            <!-- Admin Menu: Raporlar altÄ±na, Ayarlar Ã¼stÃ¼ne -->
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="collapse" href="#adminMenu"
+                   role="button" aria-expanded="true" aria-controls="adminMenu">
+                    <i class="bi bi-tools"></i>
+                    Admin
+                    <i class="bi bi-chevron-down float-end"></i>
+                </a>
+
+                <div class="collapse show" id="adminMenu">
+                    <ul class="nav flex-column ms-3">
+
+                        <!-- Admin / Security -->
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="collapse" href="#adminSecurityMenu"
+                               role="button" aria-expanded="true" aria-controls="adminSecurityMenu">
+                                <i class="bi bi-shield-lock-fill"></i>
+                                Security
+                                <i class="bi bi-chevron-down float-end"></i>
+                            </a>
+
+                            <div class="collapse show" id="adminSecurityMenu">
+                                <ul class="nav flex-column ms-3">
+                                    <li class="nav-item"><a class="nav-link" href="/Admin/Security/Index" target="_blank" rel="noopener noreferrer">Index aaa</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="/Admin/Security/Blacklist" target="_blank" rel="noopener noreferrer">Blacklist</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="/Admin/Security/PolicySettings" target="_blank" rel="noopener noreferrer">PolicySettings</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="/Admin/Security/PasswordPolicy" target="_blank" rel="noopener noreferrer">PasswordPolicy</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="/Admin/Security/AuditTrail" target="_blank" rel="noopener noreferrer">AuditTrail</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="/Admin/Security/PasswordHistory" target="_blank" rel="noopener noreferrer">PasswordHistory</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="/Admin/Security/PolicyTest" target="_blank" rel="noopener noreferrer">PolicyTest</a></li>
+                                </ul>
+                            </div>
+                        </li>
+
+                        <!-- Admin / Reports -->
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="collapse" href="#adminReportsMenu"
+                               role="button" aria-expanded="true" aria-controls="adminReportsMenu">
+                                <i class="bi bi-graph-up"></i>
+                                Reports
+                                <i class="bi bi-chevron-down float-end"></i>
+                            </a>
+
+                            <div class="collapse show" id="adminReportsMenu">
+                                <ul class="nav flex-column ms-3">
+                                    <li class="nav-item"><a class="nav-link" href="/Admin/Reports/DatasetParameters" target="_blank" rel="noopener noreferrer">DatasetParameters</a></li>
+                                </ul>
+                            </div>
+                        </li>
+
+                    </ul>
+                </div>
+            </li>
+
+            <!-- Ayarlar (Admin'in altÄ±nda) -->
             <li class="nav-item">
                 <a class="nav-link" href="#">
                     <i class="bi bi-gear-fill"></i>
@@ -71,88 +121,18 @@
             <li class="nav-item mt-3">
                 <hr class="text-white-50">
             </li>
-
-            <!-- Security Menu (Alt menüler var - AÇIK) -->
-            <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#securityMenu" 
-                   role="button" aria-expanded="true" aria-controls="securityMenu">
-                    <i class="bi bi-shield-lock-fill"></i>
-                    Güvenlik
-                    <i class="bi bi-chevron-down float-end"></i>
-                </a>
-                <div class="collapse show" id="securityMenu">
-                    <ul class="nav flex-column ms-3">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-page="/Admin/Security/Index">
-                                <i class="bi bi-speedometer2"></i>
-                                Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-page="/Admin/Security/PasswordPolicy">
-                                <i class="bi bi-key-fill"></i>
-                                Þifre Politikasý
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-page="/Admin/Security/AuditTrail">
-                                <i class="bi bi-clock-history"></i>
-                                Denetim Kaydý
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-page="/Admin/Security/Blacklist">
-                                <i class="bi bi-ban"></i>
-                                Kara Liste
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-
-            <!-- Admin Menu (Alt menüler var - AÇIK) -->
-            <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#adminMenu" 
-                   role="button" aria-expanded="true" aria-controls="adminMenu">
-                    <i class="bi bi-tools"></i>
-                    Yönetim
-                    <i class="bi bi-chevron-down float-end"></i>
-                </a>
-                <div class="collapse show" id="adminMenu">
-                    <ul class="nav flex-column ms-3">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="bi bi-people-fill"></i>
-                                Kullanýcý Yönetimi
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="bi bi-shield-check"></i>
-                                Rol Yönetimi
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="bi bi-file-earmark-text"></i>
-                                Log Yönetimi
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
         </ul>
     </div>
 </nav>
 
 <script>
     // Sidebar toggle for mobile
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const sidebarToggle = document.getElementById('sidebarToggle');
         const sidebar = document.getElementById('sidebar');
-        
+
         if (sidebarToggle && sidebar) {
-            sidebarToggle.addEventListener('click', function() {
+            sidebarToggle.addEventListener('click', function () {
                 sidebar.classList.toggle('show');
             });
         }

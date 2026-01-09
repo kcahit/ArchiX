@@ -1,119 +1,92 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <PropertyGroup>
-    <CopyTemplates Condition="'$(CopyTemplates)' == ''">1</CopyTemplates>
-    <HostPagesRootNamespace Condition="'$(HostPagesRootNamespace)' == ''">$(MSBuildProjectName).Pages</HostPagesRootNamespace>
+	<PropertyGroup>
+		<CopyTemplates Condition="'$(CopyTemplates)' == ''">1</CopyTemplates>
+		<HostPagesRootNamespace Condition="'$(HostPagesRootNamespace)' == ''">$(MSBuildProjectName).Pages</HostPagesRootNamespace>
 
-    <_AxLibraryWebProjectDir>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\\'))</_AxLibraryWebProjectDir>
-    <_AxLibraryWebPagesDir>$(_AxLibraryWebProjectDir)Pages\</_AxLibraryWebPagesDir>
-    <_AxLibraryWebWwwrootDir>$(_AxLibraryWebProjectDir)wwwroot\</_AxLibraryWebWwwrootDir>
-    <_AxLibraryWebTemplatesModernPagesDir>$(_AxLibraryWebProjectDir)Templates\Modern\Pages\</_AxLibraryWebTemplatesModernPagesDir>
+		<_AxLibraryWebProjectDir>$([System.IO.Path]::GetFullPath("$(MSBuildThisFileDirectory)..\"))</_AxLibraryWebProjectDir>
+		<_AxLibraryWebPagesDir>$(_AxLibraryWebProjectDir)Pages\</_AxLibraryWebPagesDir>
+		<_AxLibraryWebTemplatesDir>$(_AxLibraryWebProjectDir)Templates\</_AxLibraryWebTemplatesDir>
+		<_AxLibraryWebWwwrootDir>$(_AxLibraryWebProjectDir)wwwroot\</_AxLibraryWebWwwrootDir>
 
-    <_AxHostProjectDir>$(MSBuildProjectDirectory)\</_AxHostProjectDir>
-    <_AxHostPagesDir>$(_AxHostProjectDir)Pages\</_AxHostPagesDir>
-    <_AxHostWwwrootDir>$(_AxHostProjectDir)wwwroot\</_AxHostWwwrootDir>
+		<_AxHostProjectDir>$(MSBuildProjectDirectory)\</_AxHostProjectDir>
+		<_AxHostPagesDir>$(_AxHostProjectDir)Pages\</_AxHostPagesDir>
+		<_AxHostTemplatesDir>$(_AxHostPagesDir)Templates\</_AxHostTemplatesDir>
+		<_AxHostWwwrootDir>$(_AxHostProjectDir)wwwroot\</_AxHostWwwrootDir>
 
-    <_AxLibraryWebRootPagesNamespace>ArchiX.Library.Web.Pages</_AxLibraryWebRootPagesNamespace>
-    <_AxLibraryWebTemplatePagesNamespace>ArchiX.Library.Web.Templates.Modern.Pages</_AxLibraryWebTemplatePagesNamespace>
+		<_AxLibraryWebRootPagesNamespace>ArchiX.Library.Web.Pages</_AxLibraryWebRootPagesNamespace>
+		<_AxLibraryWebTemplatesNamespace>ArchiX.Library.Web.Templates</_AxLibraryWebTemplatesNamespace>
+		<_AxHostTemplatesNamespace>$(HostPagesRootNamespace).Templates</_AxHostTemplatesNamespace>
+	</PropertyGroup>
 
-    <_AxHostTemplatePagesNamespace>$(HostPagesRootNamespace).Templates.Modern.Pages</_AxHostTemplatePagesNamespace>
-  </PropertyGroup>
+	<Target Name="ArchiX_LibraryWeb_CopyToHost" BeforeTargets="BeforeBuild" Condition="'$(CopyTemplates)' == '1'">
 
-  <Target Name="ArchiX_LibraryWeb_CopyToHost" BeforeTargets="BeforeBuild" Condition="'$(CopyTemplates)' == '1'">
+		<MakeDir Directories="$(_AxHostPagesDir)" />
+		<MakeDir Directories="$(_AxHostTemplatesDir)" />
+		<MakeDir Directories="$(_AxHostWwwrootDir)" />
 
-    <!-- hedef klasörler yoksa oluştur -->
-    <MakeDir Directories="$(_AxHostPagesDir)" />
-    <MakeDir Directories="$(_AxHostPagesDir)Templates\Modern\Pages" />
-    <MakeDir Directories="$(_AxHostWwwrootDir)" />
+		<ItemGroup>
+			<_AxLibWwwrootFiles Include="$(_AxLibraryWebWwwrootDir)**\*" />
+			<_AxLibPagesFiles Include="$(_AxLibraryWebPagesDir)**\*" />
+			<_AxLibTemplatesFiles Include="$(_AxLibraryWebTemplatesDir)**\*" />
+		</ItemGroup>
 
-    <ItemGroup>
-      <_AxLibWwwrootFiles Include="$(_AxLibraryWebWwwrootDir)**\*" />
-      <_AxLibRootPagesFiles Include="$(_AxLibraryWebPagesDir)**\*" />
-      <_AxLibTemplateModernPagesFiles Include="$(_AxLibraryWebTemplatesModernPagesDir)**\*" />
+		<!-- Copy -->
+		<Copy SourceFiles="@(_AxLibWwwrootFiles)"
+			  DestinationFiles="@(_AxLibWwwrootFiles->'$(_AxHostWwwrootDir)%(RecursiveDir)%(Filename)%(Extension)')"
+			  SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
 
-      <_AxLibLoginFiles Include="$(_AxLibraryWebTemplatesModernPagesDir)Login.cshtml;$(_AxLibraryWebTemplatesModernPagesDir)Login.cshtml.cs" />
-      <_AxLibDashboardFiles Include="$(_AxLibraryWebTemplatesModernPagesDir)Dashboard.cshtml;$(_AxLibraryWebTemplatesModernPagesDir)Dashboard.cshtml.cs" />
-      <_AxLibErrorFiles Include="$(_AxLibraryWebTemplatesModernPagesDir)Error.cshtml;$(_AxLibraryWebTemplatesModernPagesDir)Error.cshtml.cs" />
+		<Copy SourceFiles="@(_AxLibPagesFiles)"
+			  DestinationFiles="@(_AxLibPagesFiles->'$(_AxHostPagesDir)%(RecursiveDir)%(Filename)%(Extension)')"
+			  SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
 
-      <_AxLibRootViewImports Include="$(_AxLibraryWebPagesDir)_ViewImports.cshtml" />
-      <_AxLibTemplateViewImports Include="$(_AxLibraryWebTemplatesModernPagesDir)_ViewImports.cshtml" />
-    </ItemGroup>
+		<Copy SourceFiles="@(_AxLibTemplatesFiles)"
+			  DestinationFiles="@(_AxLibTemplatesFiles->'$(_AxHostTemplatesDir)%(RecursiveDir)%(Filename)%(Extension)')"
+			  SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
 
-    <Copy SourceFiles="@(_AxLibWwwrootFiles)" DestinationFiles="@(_AxLibWwwrootFiles->'$(_AxHostWwwrootDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+		<!-- Namespace rewrite (PageModels) -->
+		<ItemGroup>
+			<_AxHostPageModelFiles Include="$(_AxHostPagesDir)**\*.cshtml.cs" Exclude="$(_AxHostTemplatesDir)**\*.cshtml.cs" />
+			<_AxHostTemplateModelFiles Include="$(_AxHostTemplatesDir)**\*.cshtml.cs" />
+		</ItemGroup>
 
-    <Copy SourceFiles="@(_AxLibRootPagesFiles)" DestinationFiles="@(_AxLibRootPagesFiles->'$(_AxHostPagesDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+		<PropertyGroup>
+			<_AxRootRewriteFrom>namespace $(_AxLibraryWebRootPagesNamespace)</_AxRootRewriteFrom>
+			<_AxRootRewriteTo>namespace $(HostPagesRootNamespace)</_AxRootRewriteTo>
 
-    <Copy SourceFiles="@(_AxLibTemplateModernPagesFiles)" DestinationFiles="@(_AxLibTemplateModernPagesFiles->'$(_AxHostPagesDir)Templates\Modern\Pages\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+			<_AxTemplateRewriteFrom>namespace $(_AxLibraryWebTemplatesNamespace)</_AxTemplateRewriteFrom>
+			<_AxTemplateRewriteTo>namespace $(_AxHostTemplatesNamespace)</_AxTemplateRewriteTo>
+		</PropertyGroup>
 
-    <!-- Login -->
-    <MakeDir Directories="$(_AxHostPagesDir)" />
-    <PropertyGroup>
-      <_AxLoginCsContent>$([System.IO.File]::ReadAllText('$(_AxLibraryWebTemplatesModernPagesDir)Login.cshtml.cs'))</_AxLoginCsContent>
-      <_AxLoginCsContent>$(_AxLoginCsContent.Replace('namespace $(_AxLibraryWebTemplatePagesNamespace)', 'namespace $(HostPagesRootNamespace)'))</_AxLoginCsContent>
-    </PropertyGroup>
-    <WriteLinesToFile File="$(_AxHostPagesDir)Login.cshtml.cs" Lines="$(_AxLoginCsContent)" Overwrite="true" Encoding="UTF-8" />
-    <Copy SourceFiles="$(_AxLibraryWebTemplatesModernPagesDir)Login.cshtml" DestinationFiles="$(_AxHostPagesDir)Login.cshtml" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+		<WriteLinesToFile
+		  File="@(_AxHostPageModelFiles->'%(FullPath)')"
+		  Lines="$([System.IO.File]::ReadAllText('%(FullPath)').Replace('$(_AxRootRewriteFrom)', '$(_AxRootRewriteTo)'))"
+		  Overwrite="true"
+		  Encoding="UTF-8" />
 
-    <!-- Dashboard -->
-    <MakeDir Directories="$(_AxHostPagesDir)" />
-    <PropertyGroup>
-      <_AxDashboardCsContent>$([System.IO.File]::ReadAllText('$(_AxLibraryWebTemplatesModernPagesDir)Dashboard.cshtml.cs'))</_AxDashboardCsContent>
-      <_AxDashboardCsContent>$(_AxDashboardCsContent.Replace('namespace $(_AxLibraryWebTemplatePagesNamespace)', 'namespace $(HostPagesRootNamespace)'))</_AxDashboardCsContent>
-    </PropertyGroup>
-    <WriteLinesToFile File="$(_AxHostPagesDir)Dashboard.cshtml.cs" Lines="$(_AxDashboardCsContent)" Overwrite="true" Encoding="UTF-8" />
-    <Copy SourceFiles="$(_AxLibraryWebTemplatesModernPagesDir)Dashboard.cshtml" DestinationFiles="$(_AxHostPagesDir)Dashboard.cshtml" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+		<WriteLinesToFile
+		  File="@(_AxHostTemplateModelFiles->'%(FullPath)')"
+		  Lines="$([System.IO.File]::ReadAllText('%(FullPath)').Replace('$(_AxTemplateRewriteFrom)', '$(_AxTemplateRewriteTo)'))"
+		  Overwrite="true"
+		  Encoding="UTF-8" />
 
-    <!-- Error -->
-    <MakeDir Directories="$(_AxHostPagesDir)" />
-    <PropertyGroup>
-      <_AxErrorCsContent>$([System.IO.File]::ReadAllText('$(_AxLibraryWebTemplatesModernPagesDir)Error.cshtml.cs'))</_AxErrorCsContent>
-      <_AxErrorCsContent>$(_AxErrorCsContent.Replace('namespace $(_AxLibraryWebTemplatePagesNamespace)', 'namespace $(HostPagesRootNamespace)'))</_AxErrorCsContent>
-    </PropertyGroup>
-    <WriteLinesToFile File="$(_AxHostPagesDir)Error.cshtml.cs" Lines="$(_AxErrorCsContent)" Overwrite="true" Encoding="UTF-8" />
-    <Copy SourceFiles="$(_AxLibraryWebTemplatesModernPagesDir)Error.cshtml" DestinationFiles="$(_AxHostPagesDir)Error.cshtml" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+		<!-- Root _ViewImports -->
+		<PropertyGroup>
+			<_AxRootViewImportsContent>$([System.IO.File]::ReadAllText('$(_AxLibraryWebPagesDir)_ViewImports.cshtml'))</_AxRootViewImportsContent>
+			<_AxRootViewImportsContent>$(_AxRootViewImportsContent.Replace('@using ArchiX.Library.Web', '@using $(MSBuildProjectName)'))</_AxRootViewImportsContent>
+			<_AxRootViewImportsContent>$(_AxRootViewImportsContent.Replace('@namespace $(_AxLibraryWebRootPagesNamespace)', '@namespace $(HostPagesRootNamespace)'))</_AxRootViewImportsContent>
+		</PropertyGroup>
+		<WriteLinesToFile File="$(_AxHostPagesDir)_ViewImports.cshtml" Lines="$(_AxRootViewImportsContent)" Overwrite="true" Encoding="UTF-8" />
 
-    <ItemGroup>
-      <_AxHostRootPageModelFiles
-        Include="$(_AxHostPagesDir)**\*.cshtml.cs"
-        Exclude="$(_AxHostPagesDir)Templates\**;$(_AxHostPagesDir)Login.cshtml.cs;$(_AxHostPagesDir)Dashboard.cshtml.cs;$(_AxHostPagesDir)Error.cshtml.cs" />
-      <_AxHostTemplatePageModelFiles Include="$(_AxHostPagesDir)Templates\Modern\Pages\**\*.cshtml.cs" />
-    </ItemGroup>
+		<!-- Templates/Modern/Pages _ViewImports -->
+		<PropertyGroup>
+			<_AxTemplateViewImportsContent>$([System.IO.File]::ReadAllText('$(_AxLibraryWebTemplatesDir)Modern\Pages\_ViewImports.cshtml'))</_AxTemplateViewImportsContent>
+			<_AxTemplateViewImportsContent>$(_AxTemplateViewImportsContent.Replace('@using ArchiX.Library.Web', '@using $(MSBuildProjectName)'))</_AxTemplateViewImportsContent>
+			<_AxTemplateViewImportsContent>$(_AxTemplateViewImportsContent.Replace('@namespace ArchiX.Library.Web.Templates', '@namespace $(_AxHostTemplatesNamespace)'))</_AxTemplateViewImportsContent>
+		</PropertyGroup>
+		<MakeDir Directories="$(_AxHostTemplatesDir)Modern\Pages" />
+		<WriteLinesToFile File="$(_AxHostTemplatesDir)Modern\Pages\_ViewImports.cshtml" Lines="$(_AxTemplateViewImportsContent)" Overwrite="true" Encoding="UTF-8" />
 
-    <PropertyGroup>
-      <_AxRootRewriteFrom>namespace $(_AxLibraryWebRootPagesNamespace)</_AxRootRewriteFrom>
-      <_AxRootRewriteTo>namespace $(HostPagesRootNamespace)</_AxRootRewriteTo>
-
-      <_AxTemplateRewriteFrom>namespace $(_AxLibraryWebTemplatePagesNamespace)</_AxTemplateRewriteFrom>
-      <_AxTemplateRewriteTo>namespace $(_AxHostTemplatePagesNamespace)</_AxTemplateRewriteTo>
-    </PropertyGroup>
-
-    <WriteLinesToFile
-      File="@(_AxHostRootPageModelFiles->'%(FullPath)')"
-      Lines="$([System.IO.File]::ReadAllText('%(FullPath)').Replace('$(_AxRootRewriteFrom)', '$(_AxRootRewriteTo)'))"
-      Overwrite="true"
-      Encoding="UTF-8" />
-
-    <WriteLinesToFile
-      File="@(_AxHostTemplatePageModelFiles->'%(FullPath)')"
-      Lines="$([System.IO.File]::ReadAllText('%(FullPath)').Replace('$(_AxTemplateRewriteFrom)', '$(_AxTemplateRewriteTo)'))"
-      Overwrite="true"
-      Encoding="UTF-8" />
-
-    <!-- Root _ViewImports -->
-    <PropertyGroup>
-      <_AxRootViewImportsContent>$([System.IO.File]::ReadAllText('$(_AxLibraryWebPagesDir)_ViewImports.cshtml'))</_AxRootViewImportsContent>
-      <_AxRootViewImportsContent>$(_AxRootViewImportsContent.Replace('@namespace $(_AxLibraryWebRootPagesNamespace)', '@namespace $(HostPagesRootNamespace)'))</_AxRootViewImportsContent>
-    </PropertyGroup>
-    <WriteLinesToFile File="$(_AxHostPagesDir)_ViewImports.cshtml" Lines="$(_AxRootViewImportsContent)" Overwrite="true" Encoding="UTF-8" />
-
-    <!-- Template _ViewImports -->
-    <MakeDir Directories="$(_AxHostPagesDir)Templates\Modern\Pages" />
-    <PropertyGroup>
-      <_AxTemplateViewImportsContent>$([System.IO.File]::ReadAllText('$(_AxLibraryWebTemplatesModernPagesDir)_ViewImports.cshtml'))</_AxTemplateViewImportsContent>
-      <_AxTemplateViewImportsContent>$(_AxTemplateViewImportsContent.Replace('@namespace $(_AxLibraryWebTemplatePagesNamespace)', '@namespace $(_AxHostTemplatePagesNamespace)'))</_AxTemplateViewImportsContent>
-    </PropertyGroup>
-    <WriteLinesToFile File="$(_AxHostPagesDir)Templates\Modern\Pages\_ViewImports.cshtml" Lines="$(_AxTemplateViewImportsContent)" Overwrite="true" Encoding="UTF-8" />
-
-  </Target>
+	</Target>
 
 </Project>
