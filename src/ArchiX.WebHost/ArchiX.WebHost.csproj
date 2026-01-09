@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<!-- *** PROJE AYARLARI *** -->
 	<PropertyGroup>
@@ -20,100 +20,28 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.*" PrivateAssets="all" />
 	</ItemGroup>
 
-	<!-- ********************* ARCHIX WEBHOST �ZEL YAPILANDIRMA ********************* -->
+	<!-- ********************* ARCHIX WEBHOST ÖZEL YAPILANDIRMA ********************* -->
 	<ItemGroup>
 		<EditorConfigFiles Remove="C:\_git\ArchiX\Dev\ArchiX\src\ArchiX.WebHost\.editorconfig" />
 		<Content Include="Properties\launchSettings.json" />
 		<None Include="C:\_git\ArchiX\Dev\ArchiX\src\ArchiX.WebHost\.editorconfig" />
 	</ItemGroup>
 
-	<!-- *** BUILD: CLEAN ��LEM� *** -->
+	<!-- Merkez kopyalama altyapısı (Library.Web) -->
+	<Import Project="..\ArchiX.Library.Web\build\ArchiX.Library.Web.CopyToHost.targets"
+			Condition="Exists('..\ArchiX.Library.Web\build\ArchiX.Library.Web.CopyToHost.targets')" />
+
+	<!-- *** BUILD: CLEAN İŞLEMİ *** -->
 	<Target Name="CleanCopiedFiles" BeforeTargets="Clean">
 		<RemoveDir Directories="Pages\Templates;Pages\Shared;Pages\Raporlar;wwwroot\css\modern;wwwroot\css\shared;wwwroot\images;wwwroot\js" />
 		<Delete Files="Pages\Login.cshtml;Pages\Login.cshtml.cs;Pages\Dashboard.cshtml;Pages\Dashboard.cshtml.cs;Pages\Error.cshtml;Pages\Error.cshtml.cs" />
 	</Target>
 
-	<!-- *** BUILD: TEMPLATE KOPYALAMA *** -->
+	<!-- *** BUILD: TEMPLATE KOPYALAMA (merkez target çağrısı) *** -->
 	<Target Name="CopyFromLibraryWeb" BeforeTargets="BeforeBuild" Condition="'$(CopyTemplates)' == '1'">
-
-		<RemoveDir Directories="Pages\Templates" />
-
-		<!-- CSS -->
-		<ItemGroup>
-			<LibCss Include="..\ArchiX.Library.Web\wwwroot\css\**\*" />
-		</ItemGroup>
-		<Copy SourceFiles="@(LibCss)" DestinationFolder="wwwroot\css\%(RecursiveDir)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
-
-		<!-- JS -->
-		<ItemGroup>
-			<LibJs Include="..\ArchiX.Library.Web\wwwroot\js\**\*" />
-		</ItemGroup>
-		<Copy SourceFiles="@(LibJs)" DestinationFolder="wwwroot\js\%(RecursiveDir)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
-
-		<!-- Images -->
-		<ItemGroup>
-			<LibImages Include="..\ArchiX.Library.Web\wwwroot\images\**\*" />
-		</ItemGroup>
-		<Copy SourceFiles="@(LibImages)" DestinationFolder="wwwroot\images\%(RecursiveDir)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
-
-		<!-- Shared -->
-		<ItemGroup>
-			<LibShared Include="..\ArchiX.Library.Web\Templates\Modern\Pages\Shared\**\*" />
-		</ItemGroup>
-		<Copy SourceFiles="@(LibShared)" DestinationFolder="Pages\Shared\%(RecursiveDir)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
-
-		<!-- Login -->
-		<Copy SourceFiles="..\ArchiX.Library.Web\Templates\Modern\Pages\Login.cshtml" DestinationFiles="Pages\Login.cshtml" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
-		<PropertyGroup>
-			<LoginCsContent>$([System.IO.File]::ReadAllText('..\ArchiX.Library.Web\Templates\Modern\Pages\Login.cshtml.cs'))</LoginCsContent>
-			<LoginCsContent>$(LoginCsContent.Replace('namespace ArchiX.Library.Web.Templates.Modern.Pages', 'namespace ArchiX.WebHost.Pages'))</LoginCsContent>
-		</PropertyGroup>
-		<WriteLinesToFile File="Pages\Login.cshtml.cs" Lines="$(LoginCsContent)" Overwrite="true" Encoding="UTF-8" />
-
-		<!-- Dashboard -->
-		<Copy SourceFiles="..\ArchiX.Library.Web\Templates\Modern\Pages\Dashboard.cshtml" DestinationFiles="Pages\Dashboard.cshtml" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
-		<PropertyGroup>
-			<DashboardCsContent>$([System.IO.File]::ReadAllText('..\ArchiX.Library.Web\Templates\Modern\Pages\Dashboard.cshtml.cs'))</DashboardCsContent>
-			<DashboardCsContent>$(DashboardCsContent.Replace('namespace ArchiX.Library.Web.Templates.Modern.Pages', 'namespace ArchiX.WebHost.Pages'))</DashboardCsContent>
-		</PropertyGroup>
-		<WriteLinesToFile File="Pages\Dashboard.cshtml.cs" Lines="$(DashboardCsContent)" Overwrite="true" Encoding="UTF-8" />
-
-		<!-- Error -->
-		<Copy SourceFiles="..\ArchiX.Library.Web\Templates\Modern\Pages\Error.cshtml" DestinationFiles="Pages\Error.cshtml" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
-		<PropertyGroup>
-			<ErrorCsContent>$([System.IO.File]::ReadAllText('..\ArchiX.Library.Web\Templates\Modern\Pages\Error.cshtml.cs'))</ErrorCsContent>
-			<ErrorCsContent>$(ErrorCsContent.Replace('namespace ArchiX.Library.Web.Templates.Modern.Pages', 'namespace ArchiX.WebHost.Pages'))</ErrorCsContent>
-		</PropertyGroup>
-		<WriteLinesToFile File="Pages\Error.cshtml.cs" Lines="$(ErrorCsContent)" Overwrite="true" Encoding="UTF-8" />
-
-		<!-- Raporlar Klas�r� (CSHTML dosyalar�n� kopyala) -->
-		<ItemGroup>
-			<LibRaporlar Include="..\ArchiX.Library.Web\Templates\Modern\Pages\Raporlar\**\*.cshtml" />
-		</ItemGroup>
-		<Copy SourceFiles="@(LibRaporlar)" DestinationFolder="Pages\Raporlar\%(RecursiveDir)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
-
-		<!-- Raporlar CS dosyalar�n� namespace de�i�tirerek kopyala -->
-		<PropertyGroup>
-			<GridListeCsContent>$([System.IO.File]::ReadAllText('..\ArchiX.Library.Web\Templates\Modern\Pages\Raporlar\GridListe.cshtml.cs'))</GridListeCsContent>
-			<GridListeCsContent>$(GridListeCsContent.Replace('namespace ArchiX.Library.Web.Templates.Modern.Pages.Raporlar', 'namespace ArchiX.WebHost.Pages.Raporlar'))</GridListeCsContent>
-		</PropertyGroup>
-		<WriteLinesToFile File="Pages\Raporlar\GridListe.cshtml.cs" Lines="$(GridListeCsContent)" Overwrite="true" Encoding="UTF-8" />
-
-		<PropertyGroup>
-			<PivotCsContent>$([System.IO.File]::ReadAllText('..\ArchiX.Library.Web\Templates\Modern\Pages\Raporlar\Pivot.cshtml.cs'))</PivotCsContent>
-			<PivotCsContent>$(PivotCsContent.Replace('namespace ArchiX.Library.Web.Templates.Modern.Pages.Raporlar', 'namespace ArchiX.WebHost.Pages.Raporlar'))</PivotCsContent>
-		</PropertyGroup>
-		<WriteLinesToFile File="Pages\Raporlar\Pivot.cshtml.cs" Lines="$(PivotCsContent)" Overwrite="true" Encoding="UTF-8" />
-
-		<PropertyGroup>
-			<KombineCsContent>$([System.IO.File]::ReadAllText('..\ArchiX.Library.Web\Templates\Modern\Pages\Raporlar\Kombine.cshtml.cs'))</KombineCsContent>
-			<KombineCsContent>$(KombineCsContent.Replace('namespace ArchiX.Library.Web.Templates.Modern.Pages.Raporlar', 'namespace ArchiX.WebHost.Pages.Raporlar'))</KombineCsContent>
-		</PropertyGroup>
-		<WriteLinesToFile File="Pages\Raporlar\Kombine.cshtml.cs" Lines="$(KombineCsContent)" Overwrite="true" Encoding="UTF-8" />
-
-		<Message Importance="high" Text="? Templates copied: CSS + JS + Images + Shared + Login + Dashboard + Error + Raporlar (GridListe, Pivot, Kombine)" />
+		<MSBuild Projects="$(MSBuildProjectFile)" Targets="ArchiX_LibraryWeb_CopyToHost" />
 	</Target>
 
-	<!-- ********************* ARCHIX WEBHOST �ZEL YAPILANDIRMA SONU ********************* -->
+	<!-- ********************* ARCHIX WEBHOST ÖZEL YAPILANDIRMA SONU ********************* -->
 
 </Project>

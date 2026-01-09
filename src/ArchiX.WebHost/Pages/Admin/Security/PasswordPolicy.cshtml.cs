@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 
-namespace ArchiX.Library.Web.Pages.Admin.Security
+namespace ArchiX.WebHost.Pages.Admin.Security
 {
     [Authorize(Policy = PolicyNames.Admin)]
     [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]

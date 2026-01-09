@@ -1,4 +1,4 @@
-@page "/Dashboard"
+ï»¿@page 
 @model ArchiX.Library.Web.Templates.Modern.Pages.DashboardModel
 @{
     ViewData["Title"] = "Dashboard";
@@ -19,7 +19,7 @@
             </div>
             <div class="stat-details">
                 <h3 class="stat-value">1,234</h3>
-                <p class="stat-label">Toplam Kullanýcý</p>
+                <p class="stat-label">Toplam KullanÄ±cÄ±</p>
             </div>
             <div class="stat-trend positive">
                 <i class="bi bi-arrow-up"></i> 12%
@@ -64,7 +64,7 @@
             </div>
             <div class="stat-details">
                 <h3 class="stat-value">12</h3>
-                <p class="stat-label">Bekleyen Ýþler</p>
+                <p class="stat-label">Bekleyen Ä°ÅŸler</p>
             </div>
             <div class="stat-trend negative">
                 <i class="bi bi-arrow-down"></i> 5%
@@ -78,7 +78,7 @@
     <div class="col-md-8">
         <div class="card modern-card">
             <div class="card-header">
-                <h5 class="card-title mb-0">Aylýk Ýstatistikler</h5>
+                <h5 class="card-title mb-0">AylÄ±k Ä°statistikler</h5>
             </div>
             <div class="card-body">
                 <canvas id="monthlyStatsChart" height="80"></canvas>
@@ -89,7 +89,7 @@
     <div class="col-md-4">
         <div class="card modern-card">
             <div class="card-header">
-                <h5 class="card-title mb-0">Kullanýcý Daðýlýmý</h5>
+                <h5 class="card-title mb-0">KullanÄ±cÄ± DaÄŸÄ±lÄ±mÄ±</h5>
             </div>
             <div class="card-body">
                 <canvas id="userDistributionChart"></canvas>
@@ -112,8 +112,8 @@
                             <i class="bi bi-person-plus"></i>
                         </div>
                         <div class="activity-content">
-                            <p class="activity-text"><strong>Yeni kullanýcý</strong> eklendi</p>
-                            <span class="activity-time">5 dakika önce</span>
+                            <p class="activity-text"><strong>Yeni kullanÄ±cÄ±</strong> eklendi</p>
+                            <span class="activity-time">5 dakika Ã¶nce</span>
                         </div>
                     </div>
                     <div class="activity-item">
@@ -121,8 +121,8 @@
                             <i class="bi bi-check-circle"></i>
                         </div>
                         <div class="activity-content">
-                            <p class="activity-text"><strong>Proje tamamlandý</strong></p>
-                            <span class="activity-time">1 saat önce</span>
+                            <p class="activity-text"><strong>Proje tamamlandÄ±</strong></p>
+                            <span class="activity-time">1 saat Ã¶nce</span>
                         </div>
                     </div>
                     <div class="activity-item">
@@ -130,8 +130,8 @@
                             <i class="bi bi-exclamation-circle"></i>
                         </div>
                         <div class="activity-content">
-                            <p class="activity-text"><strong>Sistem güncellemesi</strong> gerekli</p>
-                            <span class="activity-time">2 saat önce</span>
+                            <p class="activity-text"><strong>Sistem gÃ¼ncellemesi</strong> gerekli</p>
+                            <span class="activity-time">2 saat Ã¶nce</span>
                         </div>
                     </div>
                 </div>
@@ -148,9 +148,9 @@
             new Chart(monthlyCtx, {
                 type: 'line',
                 data: {
-                    labels: ['Oca', 'Þub', 'Mar', 'Nis', 'May', 'Haz'],
+                    labels: ['Oca', 'Åžub', 'Mar', 'Nis', 'May', 'Haz'],
                     datasets: [{
-                        label: 'Kullanýcýlar',
+                        label: 'KullanÄ±cÄ±lar',
                         data: [65, 78, 90, 81, 95, 105],
                         borderColor: 'rgb(102, 126, 234)',
                         backgroundColor: 'rgba(102, 126, 234, 0.1)',

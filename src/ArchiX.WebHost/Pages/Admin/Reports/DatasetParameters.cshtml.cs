@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
-namespace ArchiX.Library.Web.Pages.Admin.Reports;
+namespace ArchiX.WebHost.Pages.Admin.Reports;
 
 [Authorize(Policy = PolicyNames.Admin)]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]

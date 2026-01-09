@@ -4,7 +4,7 @@
 2. KOd vermeyeye başlamadan poje kodlarını muhakkak oku ve olabildiğince belli olmayan şeyleri sor yoksa direkt kodu ver ArchiX..csprojda görebilirsin akışı net anlarsın.
 3. ben tamam, devam, ok dersem sonraki adıma geç
 4. bana  kody vereceğin zaman;
-	a. kodu tam ve tek parça olarak veriyorsun.
+	a. kodu tam ve tek parça olarak veriyorsun. iş için birden fazla kod vermen gerekse bikle tek dosyaya ait kodu vereceksin. onalyrasm sonraki parçaya geçeceksin.
 	b. önceki kod doğru uygulanmış mı bakacaksın (varsa) önceki kod "doğru uygulandı" notunu yazacaksın açıklamaya. 
 		ama kod doğru uyuglanmadı ise hatayı ve düzeltme önerisini yazacaksın (tabii ki yeni kod öneisi olmayacak).
 		ama sadece build edip hata var mı diye bakma kodun içi istediğin gibi olmuş mu diye bak.
@@ -20,7 +20,8 @@
 5. Yorum yaparken örnek olsun diye  kodları ekrana yazma kesinlikle yazma zorunlu ise yapılacak bir şey olacak ise yaz. thread aşırı derecede gereksiz şekilde büyüyor. Mümkün olduğunca Thread doldurmamaya çalış.	
 6. Benimle TÜRKÇE YAZIŞ. BEN iNGİLİZCE BİLMİYORUM. LÜTFEN.
 
-Not: en çok 4.b maddesine dikkat et.hep unutuyorsun benşm için KRTİK bir madde orası ve sen asla kodlara müdahale etme kodları bana ver.
+Not: 
+En Ömenlisi: en çok 4. a ve b maddelerine dikkat et.hep unutuyorsun benşm için KRTİK bir madde orası ve sen asla kodlara müdahale etme kodları bana ver.
 
 
 #file:'D:\_git\ArchiX\Dev\ArchiX\docs\#17 Archix-Connection-CONTRIBUTING.md':421-450 önce dokümanı oku. sonra seçili alanı oku. seçili işin tasarımında mutabık mısın. Değişiklik var  mı? bana sorun var mı?

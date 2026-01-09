@@ -1,9 +1,8 @@
-@page "/Login"
-@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+ï»¿@page 
 @model ArchiX.Library.Web.Templates.Modern.Pages.LoginModel
 @{
     Layout = "Shared/_AuthLayout";
-    ViewData["Title"] = "GÝRÝÞ";
+    ViewData["Title"] = "GÄ°RÄ°Åž";
 }
 
 <div class="container">
@@ -11,18 +10,18 @@
         <div class="row g-0">
             <div class="col-md-7 login-image d-md-flex">
                 @* <i class="bi bi-shield-lock-fill"></i> *@
-             @*    <img src="~/images/login.jpg" alt="ArchiX Logo" class="login-logo" /> *@
+                @*    <img src="~/images/login.jpg" alt="ArchiX Logo" class="login-logo" /> *@
                 <img src="~/images/login.jpg" alt="ArchiX Logo" class="login-logo" style="max-width: 500px !important; width: 100%;" />
-                <h4>Hoþ Geldiniz!</h4>
-                <p>Hesabýnýza giriþ yaparak tüm özelliklere eriþebilirsiniz.</p>
+                <h4>HoÅŸ Geldiniz!</h4>
+                <p>HesabÄ±nÄ±za giriÅŸ yaparak tÃ¼m Ã¶zelliklere eriÅŸebilirsiniz.</p>
             </div>
 
             <div class="col-md-5 login-form">
-             @*    <h3>Giriþ Yap</h3> *@
-                @* <p class="text-muted small mb-0">Hesabýnýza giriþ yapmak için bilgilerinizi girin</p> *@
+                @*    <h3>GiriÅŸ Yap</h3> *@
+                @* <p class="text-muted small mb-0">HesabÄ±nÄ±za giriÅŸ yapmak iÃ§in bilgilerinizi girin</p> *@
 
                 <form id="loginForm" method="post">
-                    <input name="__RequestVerificationToken" type="hidden" value="@Antiforgery.GetAndStoreTokens(HttpContext).RequestToken" />
+                    @Html.AntiForgeryToken()
                     @* <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div> *@
 
                     <div class="mb-3">
@@ -37,13 +36,13 @@
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="Input.Password" class="form-label">Þifre</label>
+                        <label asp-for="Input.Password" class="form-label">Åžifre</label>
                         <div class="input-group">
                             <span class="input-group-text">
                                 <i class="bi bi-lock-fill"></i>
                             </span>
                             <input asp-for="Input.Password" type="password" class="form-control" id="password"
-                                   placeholder="••••••••" autocomplete="current-password" />
+                                   placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" autocomplete="current-password" />
                             <button class="btn btn-outline-secondary" type="button" id="togglePassword">
                                 <i class="bi bi-eye"></i>
                             </button>
@@ -55,53 +54,50 @@
                         <div class="form-check">
                             <input asp-for="Input.RememberMe" class="form-check-input" type="checkbox" />
                             <label asp-for="Input.RememberMe" class="form-check-label">
-                                Beni hatýrla
+                                Beni hatÄ±rla
                             </label>
                         </div>
-                        <a href="#" class="text-end">Þifremi unuttum?</a>
+                        <a href="#" class="text-end">Åžifremi unuttum?</a>
                     </div>
 
                     <button type="submit" class="btn btn-login w-100">
                         <i class="bi bi-shield-lock-fill"></i>
                         @* <i class="bi bi-box-arrow-in-right me-2"></i> *@
-                        Giriþ Yap
-                        
+                        GiriÅŸ Yap
+
                     </button>
                 </form>
-               
-                <!-- SOSYAL MEDYA GÝRÝÞÝ kapattým.
-                        
+
+                <!-- SOSYAL MEDYA GÄ°RÄ°ÅžÄ° kapattÄ±m.
+
                    <div class="divider">
                     <span>veya</span>
                    </div>
 
                   <div class="social-login">
                         @* mb-1 *@
-                        <button class="social-btn" type="button" title="Google ile giriþ">
+                        <button class="social-btn" type="button" title="Google ile giriÅŸ">
                             <i class="bi bi-google google"></i>
                         </button>
-                        <button class="social-btn" type="button" title="Facebook ile giriþ">
+                        <button class="social-btn" type="button" title="Facebook ile giriÅŸ">
                             <i class="bi bi-facebook facebook"></i>
                         </button>
-                        <button class="social-btn" type="button" title="Twitter ile giriþ">
+                        <button class="social-btn" type="button" title="Twitter ile giriÅŸ">
                             <i class="bi bi-twitter twitter"></i>
                         </button>
                     </div>
 
 
-                     @* ÞÝfre deðiþikliði yapýlýyor *@
+                     @* ÅžÄ°fre deÄŸiÅŸikliÄŸi yapÄ±lÄ±yor *@
                     <div class="text-center">
-                        <p class="mb-0">Þifreyi Deðiþtir  <a href="#" class="fw-bold">Kayýt Ol</a></p>
-                        <@* a href="#" class="fw-bold">Þifreyi Deðiþtir</a> *@
+                        <p class="mb-0">Åžifreyi DeÄŸiÅŸtir  <a href="#" class="fw-bold">KayÄ±t Ol</a></p>
+                        <@* a href="#" class="fw-bold">Åžifreyi DeÄŸiÅŸtir</a> *@
                     </div>
 
                 -->
-            
-                
-
                 <!-- Footer inside card -->
                 <div class="text-center mt-4 pt-3 border-top">
-                    <p class="text-muted small mb-0">&copy; @DateTime.Now.Year ArchiX - Tüm haklarý saklýdýr.</p>
+                    <p class="text-muted small mb-0">&copy; @DateTime.Now.Year ArchiX - TÃ¼m haklarÄ± saklÄ±dÄ±r.</p>
                 </div>
             </div>
         </div>
@@ -130,7 +126,7 @@
             btn.addEventListener('click', function() {
                 const platform = this.querySelector('i').classList.contains('bi-google') ? 'Google' :
                                this.querySelector('i').classList.contains('bi-facebook') ? 'Facebook' : 'Twitter';
-                alert(platform + ' ile giriþ yapýlýyor...');
+                alert(platform + ' ile giriÅŸ yapÄ±lÄ±yor...');
             });
         });
     </script>

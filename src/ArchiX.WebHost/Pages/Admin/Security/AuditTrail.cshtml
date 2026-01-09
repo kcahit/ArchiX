@@ -1,0 +1,205 @@
+@page
+@model ArchiX.Library.Web.Pages.Admin.Security.AuditTrailModel
+@{
+    ViewData["Title"] = "Policy Audit Trail";
+    Layout = "_AdminLayout";
+    string? oldJsonLiteral = null;
+    string? newJsonLiteral = null;
+    if (Model.SelectedDiff is not null)
+    {
+        oldJsonLiteral = System.Text.Json.JsonSerializer.Serialize(Model.SelectedDiff.OldJson ?? "{}");
+        newJsonLiteral = System.Text.Json.JsonSerializer.Serialize(Model.SelectedDiff.NewJson ?? "{}");
+    }
+}
+
+<div class="container-fluid py-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+            <h2 class="mb-0"><i class="fas fa-history text-primary me-2"></i>Policy Audit Trail</h2>
+            <small class="text-muted">Application ID: @Model.ApplicationId</small>
+        </div>
+    </div>
+
+    <div class="card form-section mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filtre</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label asp-for="From" class="form-label">Baþlangýç Tarihi</label>
+                    <input asp-for="From" class="form-control" type="date" />
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="To" class="form-label">Bitiþ Tarihi</label>
+                    <input asp-for="To" class="form-control" type="date" />
+                </div>
+                <div class="col-md-3 align-self-end">
+                    <input type="hidden" asp-for="ApplicationId" />
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-1"></i> Filtrele
+                    </button>
+                    <a asp-page="/Admin/Security/AuditTrail" asp-route-applicationId="@Model.ApplicationId" class="btn btn-outline-secondary ms-2">
+                        <i class="fas fa-times me-1"></i> Temizle
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <i class="fas fa-list me-2"></i>Audit Kayýtlarý
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover audit-table mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Tarih</th>
+                                <th>Kullanýcý</th>
+                                <th>Eylem</th>
+                                <th style="width: 10%" class="text-end">Diff</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.AuditEntries.Count == 0)
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">
+                                        <i class="fas fa-info-circle fa-2x mb-2"></i>
+                                        <p>Kayýt bulunamadý.</p>
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                foreach (var entry in Model.AuditEntries)
+                                {
+                                    <tr class="@(Model.SelectedAuditId == entry.AuditId ? "selected" : string.Empty)">
+                                        <td>@entry.ChangedAt.ToLocalTime().ToString("g")</td>
+                                        <td><i class="fas fa-user me-1"></i>@entry.UserDisplayName</td>
+                                        <td>@entry.ActionSummary</td>
+                                        <td class="text-end">
+                                            <a asp-page="/Admin/Security/AuditTrail"
+                                               asp-route-applicationId="@Model.ApplicationId"
+                                               asp-route-from="@Model.From?.ToString("yyyy-MM-dd")"
+                                               asp-route-to="@Model.To?.ToString("yyyy-MM-dd")"
+                                               asp-route-selectedAuditId="@entry.AuditId"
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-exchange-alt me-1"></i> Diff
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light">
+                    <i class="fas fa-code-compare me-2"></i>Deðiþiklik Detayý
+                </div>
+                <div class="card-body">
+                    @if (Model.SelectedDiff is null)
+                    {
+                        <div class="text-muted text-center py-5">
+                            <i class="fas fa-arrow-left fa-3x mb-3"></i>
+                            <p>Soldan bir kayýt seçerek diff görüntüleyin.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="fw-semibold"><i class="fas fa-file-code me-1"></i> Görsel Diff</div>
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-secondary"
+                                        id="policy-json-export"
+                                        data-audit-id="@Model.SelectedAuditId">
+                                    <i class="fas fa-download me-1"></i> JSON Ýndir
+                                </button>
+                            </div>
+                            <div id="policy-json-diff" class="diff-container"></div>
+                            <script type="application/json" id="policy-json-old-data">@Html.Raw(oldJsonLiteral ?? "\"{}\"")</script>
+                            <script type="application/json" id="policy-json-new-data">@Html.Raw(newJsonLiteral ?? "\"{}\"")</script>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @if (Model.SelectedDiff is not null)
+    {
+        <script>
+            (function () {
+                var container = document.getElementById('policy-json-diff');
+                if (!container || typeof jsondiffpatch === 'undefined') {
+                    return;
+                }
+
+                var oldSource = document.getElementById('policy-json-old-data');
+                var newSource = document.getElementById('policy-json-new-data');
+                var oldJsonText = (oldSource && oldSource.textContent) ? oldSource.textContent : '{}';
+                var newJsonText = (newSource && newSource.textContent) ? newSource.textContent : '{}';
+
+                var oldObject;
+                var newObject;
+
+                try {
+                    oldObject = JSON.parse(oldJsonText);
+                    newObject = JSON.parse(newJsonText);
+                }
+                catch (err)
+                {
+                    container.textContent = 'JSON içeriði çözümlenemedi.';
+                    return;
+                }
+
+                var delta = jsondiffpatch.diff(oldObject, newObject);
+                if (!delta) {
+                    container.innerHTML = '<p class="text-muted">Deðiþiklik bulunamadý.</p>';
+                }
+                else {
+                    var diffContent = jsondiffpatch.formatters.html.format(delta, oldObject);
+                    container.innerHTML = '';
+                    if (typeof diffContent === 'string') {
+                        container.innerHTML = diffContent;
+                    }
+                    else if (typeof Node !== 'undefined' && diffContent instanceof Node) {
+                        container.appendChild(diffContent);
+                    }
+                }
+
+                var exportButton = document.getElementById('policy-json-export');
+                if (exportButton) {
+                    exportButton.addEventListener('click', function () {
+                        var payload = {
+                            auditId: exportButton.getAttribute('data-audit-id') || null,
+                            generatedAtUtc: new Date().toISOString(),
+                            oldPolicy: oldObject,
+                            newPolicy: newObject
+                        };
+
+                        var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+                        var url = URL.createObjectURL(blob);
+                        var anchor = document.createElement('a');
+                        anchor.href = url;
+                        anchor.download = 'password-policy-diff-' + (payload.auditId || 'current') + '.json';
+                        document.body.appendChild(anchor);
+                        anchor.click();
+                        document.body.removeChild(anchor);
+                        setTimeout(function () { URL.revokeObjectURL(url); }, 0);
+                    });
+                }
+            })();
+        </script>
+    }
+}

@@ -1,11 +1,10 @@
+ï»¿using System.ComponentModel.DataAnnotations;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-using System.ComponentModel.DataAnnotations;
-
 namespace ArchiX.Library.Web.Templates.Modern.Pages
 {
-   
     public class LoginModel : PageModel
     {
         [BindProperty]
@@ -13,27 +12,12 @@ namespace ArchiX.Library.Web.Templates.Modern.Pages
 
         public string? ReturnUrl { get; set; }
 
-        public void OnGet(string? returnUrl = null)
-        {
-            ReturnUrl = returnUrl;
-        }
-
-        public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
+        public IActionResult OnPost(string? returnUrl = null)
         {
             returnUrl ??= "/Dashboard";
 
-            // GEÇÝCÝ OLARAK DOÐRULAMA KONTROLÜ KAPATILDI ÞÝFRE YOK ÞÝMDÝLÝK
-            //if (!ModelState.IsValid)
-            //{
-            //    return Page();
-            //}
+            TempData["StatusMessage"] = $"HoÅŸ geldiniz, {Input.Email}!";
 
-            // TODO: Authentication logic will be implemented here
-            // Temporary: Accept any login for demo purposes
-
-            TempData["StatusMessage"] = $"Hoþ geldiniz, {Input.Email}!";
-
-            // Redirect to Dashboard (Modern template)
             return Redirect(returnUrl);
         }
     }
@@ -41,16 +25,16 @@ namespace ArchiX.Library.Web.Templates.Modern.Pages
     public class LoginInputModel
     {
         [Required(ErrorMessage = "E-posta adresi gereklidir")]
-        [EmailAddress(ErrorMessage = "Geçerli bir e-posta adresi giriniz")]
+        [EmailAddress(ErrorMessage = "GeÃ§erli bir e-posta adresi giriniz")]
         [Display(Name = "E-posta")]
         public string Email { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Þifre gereklidir")]
+        [Required(ErrorMessage = "Åžifre gereklidir")]
         [DataType(DataType.Password)]
-        [Display(Name = "Þifre")]
+        [Display(Name = "Åžifre")]
         public string Password { get; set; } = string.Empty;
 
-        [Display(Name = "Beni hatýrla")]
+        [Display(Name = "Beni hatÄ±rla")]
         public bool RememberMe { get; set; }
     }
 }
