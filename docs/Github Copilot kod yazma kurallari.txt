@@ -28,6 +28,23 @@ En Ömenlisi: en çok 4. a ve b maddelerine dikkat et.hep unutuyorsun benşm iç
 bir de var olan tüm kodlara bak ona göre karar ver
 
 
+Analiz/Tasarım dokümanı oluşturulma kuralları:
+Şİmdi çok iyi formatta hiç bir detayı açıkta bırakmyacak şekilde yaz. Her Bölümün Altında Analiz, Teknik Tasarım. Unit Test, Kullanıcı testi alt bölümleri olacak ana bölümler "BÖLÜM 1:" yazılacak. her satır bir numara olacak.Önce bana düzgün md formatında sunnacaksın.
+dokümün en altınca Yapılacak İşler Olacak Numarası işin yapılış sırasına göre olacak. Örneğin İş Sıra No: 1 yazıdktan sonra alt detaylarda üstteki yazıların ngi satır numarasına denk geldiği de yazacak
+
+öRNEK :
+
+BÖLÜM 1: Parametreler ve Standart Davranış Sözleşmesi
+1.1 Analiz:
+1.1.1.  Bu çalışma, Grid/Combo/Form ekranlarını tek bir standart akışa bağlamak için iki ana parametre ve birkaç sabit davranış kuralı tanımlar
+1.2 Teknik Tasarım:
+1.2.1 xxxxxxxxxxxxxxxxxxxxxxxx
+
+...
+BÖLÜM 2:
+...
+Yapılacak işler numarasız yazaca. altı bu şekilde numaralı olacak
+
 ✅ 5. Strateji Önerisi
 
 Kod tamam ama test bekliyor → sadece #17 yaz (kapanmaz).
