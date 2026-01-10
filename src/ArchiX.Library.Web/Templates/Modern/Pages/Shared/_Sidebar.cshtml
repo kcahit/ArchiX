@@ -1,6 +1,11 @@
 ﻿<nav id="sidebar" class="col-md-3 col-lg-2 d-md-block sidebar">
     <div class="sidebar-header">
         <h3><i class="bi bi-grid-fill"></i> Menü</h3>
+
+        <!-- Desktop collapse/expand button (right-top icon) -->
+        <button class="sidebar-toggle-btn" type="button" id="sidebarCollapseToggle" aria-label="Toggle sidebar">
+            <i class="bi bi-chevron-left"></i>
+        </button>
     </div>
 
     <div class="position-sticky pt-3">
@@ -13,15 +18,16 @@
                 </a>
             </li>
 
-            <!-- Raporlar Menu (Collapsible) -->
+            <!-- Raporlar Menu (Collapsible) - default CLOSED -->
             <li class="nav-item">
                 <a class="nav-link" data-bs-toggle="collapse" href="#raporlarMenu"
-                   role="button" aria-expanded="true" aria-controls="raporlarMenu">
+                   role="button" aria-expanded="false" aria-controls="raporlarMenu">
                     <i class="bi bi-graph-up"></i>
                     Raporlar
                     <i class="bi bi-chevron-down float-end"></i>
                 </a>
-                <div class="collapse show" id="raporlarMenu">
+
+                <div class="collapse" id="raporlarMenu">
                     <ul class="nav flex-column ms-3">
                         <li class="nav-item">
                             <a class="nav-link" href="/Raporlar/Kombine" target="_blank" rel="noopener">
@@ -55,28 +61,61 @@
                 </div>
             </li>
 
-            <!-- Admin Menu: Raporlar altına, Ayarlar üstüne -->
+            <!-- Definitions (Tanımlar) - Admin üstünde - default CLOSED -->
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="collapse" href="#definitionsMenu"
+                   role="button" aria-expanded="false" aria-controls="definitionsMenu">
+                    <i class="bi bi-folder2-open"></i>
+                    Definitions
+                    <i class="bi bi-chevron-down float-end"></i>
+                </a>
+
+                <div class="collapse" id="definitionsMenu">
+                    <ul class="nav flex-column ms-3">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Definitions/Application" target="_blank" rel="noopener noreferrer">
+                                Application
+                                <i class="bi bi-box-arrow-up-right ms-1" style="font-size: 0.8em;"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Definitions/Parameters" target="_blank" rel="noopener noreferrer">
+                                Parameters
+                                <i class="bi bi-box-arrow-up-right ms-1" style="font-size: 0.8em;"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Definitions/Datasets" target="_blank" rel="noopener noreferrer">
+                                Datasets
+                                <i class="bi bi-box-arrow-up-right ms-1" style="font-size: 0.8em;"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
+            <!-- Admin Menu - default CLOSED -->
             <li class="nav-item">
                 <a class="nav-link" data-bs-toggle="collapse" href="#adminMenu"
-                   role="button" aria-expanded="true" aria-controls="adminMenu">
+                   role="button" aria-expanded="false" aria-controls="adminMenu">
                     <i class="bi bi-tools"></i>
                     Admin
                     <i class="bi bi-chevron-down float-end"></i>
                 </a>
 
-                <div class="collapse show" id="adminMenu">
+                <div class="collapse" id="adminMenu">
                     <ul class="nav flex-column ms-3">
 
-                        <!-- Admin / Security -->
+                        <!-- Admin / Security - default CLOSED -->
                         <li class="nav-item">
                             <a class="nav-link" data-bs-toggle="collapse" href="#adminSecurityMenu"
-                               role="button" aria-expanded="true" aria-controls="adminSecurityMenu">
+                               role="button" aria-expanded="false" aria-controls="adminSecurityMenu">
                                 <i class="bi bi-shield-lock-fill"></i>
                                 Security
                                 <i class="bi bi-chevron-down float-end"></i>
                             </a>
 
-                            <div class="collapse show" id="adminSecurityMenu">
+                            <div class="collapse" id="adminSecurityMenu">
                                 <ul class="nav flex-column ms-3">
                                     <li class="nav-item"><a class="nav-link" href="/Admin/Security/Index" target="_blank" rel="noopener noreferrer">Index aaa</a></li>
                                     <li class="nav-item"><a class="nav-link" href="/Admin/Security/Blacklist" target="_blank" rel="noopener noreferrer">Blacklist</a></li>
@@ -89,16 +128,16 @@
                             </div>
                         </li>
 
-                        <!-- Admin / Reports -->
+                        <!-- Admin / Reports - default CLOSED -->
                         <li class="nav-item">
                             <a class="nav-link" data-bs-toggle="collapse" href="#adminReportsMenu"
-                               role="button" aria-expanded="true" aria-controls="adminReportsMenu">
+                               role="button" aria-expanded="false" aria-controls="adminReportsMenu">
                                 <i class="bi bi-graph-up"></i>
                                 Reports
                                 <i class="bi bi-chevron-down float-end"></i>
                             </a>
 
-                            <div class="collapse show" id="adminReportsMenu">
+                            <div class="collapse" id="adminReportsMenu">
                                 <ul class="nav flex-column ms-3">
                                     <li class="nav-item"><a class="nav-link" href="/Admin/Reports/DatasetParameters" target="_blank" rel="noopener noreferrer">DatasetParameters</a></li>
                                 </ul>
@@ -109,7 +148,7 @@
                 </div>
             </li>
 
-            <!-- Ayarlar (Admin'in altında) -->
+            <!-- Ayarlar -->
             <li class="nav-item">
                 <a class="nav-link" href="#">
                     <i class="bi bi-gear-fill"></i>
@@ -117,7 +156,6 @@
                 </a>
             </li>
 
-            <!-- Divider -->
             <li class="nav-item mt-3">
                 <hr class="text-white-50">
             </li>
@@ -126,14 +164,30 @@
 </nav>
 
 <script>
-    // Sidebar toggle for mobile
     document.addEventListener('DOMContentLoaded', function () {
-        const sidebarToggle = document.getElementById('sidebarToggle');
         const sidebar = document.getElementById('sidebar');
 
+        // Mobile (<=768): CSS expects #sidebar.active
+        const sidebarToggle = document.getElementById('sidebarToggle');
         if (sidebarToggle && sidebar) {
             sidebarToggle.addEventListener('click', function () {
-                sidebar.classList.toggle('show');
+                sidebar.classList.toggle('active');
+            });
+        }
+
+        // Desktop: collapse/expand (CSS expects .sidebar.collapsed)
+        const sidebarCollapseToggle = document.getElementById('sidebarCollapseToggle');
+        if (sidebarCollapseToggle && sidebar) {
+            sidebarCollapseToggle.addEventListener('click', function () {
+                sidebar.classList.toggle('collapsed');
+
+                // set icon deterministically
+                const icon = sidebarCollapseToggle.querySelector('i');
+                if (icon) {
+                    const isCollapsed = sidebar.classList.contains('collapsed');
+                    icon.classList.toggle('bi-chevron-left', !isCollapsed);
+                    icon.classList.toggle('bi-chevron-right', isCollapsed);
+                }
             });
         }
     });

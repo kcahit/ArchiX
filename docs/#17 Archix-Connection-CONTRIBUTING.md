@@ -887,7 +887,7 @@ Düzenleme notu sonu  (2026-01-08 15:00)
 ---
 
 
-## 12) UI Davranışları (Kombine + GridListe Toolbar)
+## 12-A) UI Davranışları (Kombine + GridListe Toolbar) ==> BU iş tamamlandı (2026-01-10 11:20).
 
 ### Teknik Tasarım
 - Toolbar’a dataset seçici eklenir.
@@ -904,8 +904,28 @@ Düzenleme notu sonu  (2026-01-08 15:00)
 - İlk açılışta rapor butonu disabled olmalıdır.
 - Dataset değişince enabled olmalıdır.
 - Başarılı çalıştırmadan sonra disabled olmalıdır.
+ 
+Bu 12) nolu iş tamamlandı (2026-01-10 11:20).
 
 ---
+
+## 12-A) Dataselectorun ReportDataset.cs üzerinen doldurulması 2026-01-10 11:42
+
+- Aşağıdaki analiz domünanı yarımdır. İLgili Tanım ekranı tamamlandıktan sonra bu iş yapılacaktır.
+
+1.	DatasetSelector verisi ReportDataset.cs.cs Üzerinde gelecek.
+2.	 Şu an _Archix. ReportDatasets tablosunda hiç kayıt yok. Kayıtlar gerçek uygulamalar Üzerinde üretilecek.
+3.	D:\_git\ArchiX\Dev\ArchiX\docs\DataSets altında 2 adet ndjson dosyası var. Bu dosyalar örnek veri seti olacak.
+4.	Veri setleri 3 tiptir. (ReportDatasetTypeGroups tablosunda veriler var.) Ndjson File tipindedir.
+5.	File olan veri setleri zorunlu olarak. Bir dizin altında olacaktır.
+6.	Kök Dizin parametre tablosundan okunacak. ( şu an bu kayot yok).
+6.a.	Parametre tablosuna insert yapılacak (HasData)
+6.b.	adıVeri setleri Kök Dizini olacak.
+7. kök dizinden sonra eğer alt klasörler var ise SubPath alanında tutulacak.
+
+
+---
+
 
 ## 13) Pivot Analiz ve Detaylı Liste (Tek Dataset, Tek Gerçek Veri)
 
