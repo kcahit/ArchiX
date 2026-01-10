@@ -47,21 +47,8 @@
 
 <div class="container py-4">
 
-    @* Sözleşme: DatasetSelector → Toolbar → Pivot → Grid *@
-    @await Component.InvokeAsync("DatasetSelector", new DatasetSelectorViewModel
-    {
-        Id = "kombineGrid",
-        IsVisible = true,
-        Options = Model.DatasetOptions,
-        SelectedReportDatasetId = Model.SelectedReportDatasetId,
-        RunEndpoint = "/Raporlar/Kombine?handler=Run",
-        RunText = "Raporla",
-        Placeholder = "Rapor seçin...",
-        Mode = DatasetSelectorMode.GridMultiRow
-        })
-
     @await Component.InvokeAsync("GridToolbar", new GridToolbarViewModel
-        {
+    {
         Id = "kombineGrid",
         TotalRecords = totalRecords,
         SearchPlaceholder = "Tüm alanlarda ara...",
