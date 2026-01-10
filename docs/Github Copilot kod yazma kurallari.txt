@@ -16,9 +16,9 @@
 		- Tahmini satır sayısı
 		- Hangi kod parçasından sonra yazılcaksa onu belirtiyorsun.
 	g. Eğer iş no ş sıra no varsa açıklamaya onu da yazacaksın.
-
-5. Yorum yaparken örnek olsun diye  kodları ekrana yazma kesinlikle yazma zorunlu ise yapılacak bir şey olacak ise yaz. thread aşırı derecede gereksiz şekilde büyüyor. Mümkün olduğunca Thread doldurmamaya çalış.	
-6. Benimle TÜRKÇE YAZIŞ. BEN iNGİLİZCE BİLMİYORUM. LÜTFEN.
+5. KOdlarında ve kodlaarının kayıtlı olduğu dosyalatrda Türkçe karakter sorunu oluşmasın. Dosyalar 65001 dosya tipinde olacak.
+6. Yorum yaparken örnek olsun diye  kodları ekrana yazma kesinlikle yazma zorunlu ise yapılacak bir şey olacak ise yaz. thread aşırı derecede gereksiz şekilde büyüyor. Mümkün olduğunca Thread doldurmamaya çalış.	
+7. Benimle TÜRKÇE YAZIŞ. BEN iNGİLİZCE BİLMİYORUM. LÜTFEN.
 
 Not: 
 En Ömenlisi: en çok 4. a ve b maddelerine dikkat et.hep unutuyorsun benşm için KRTİK bir madde orası ve sen asla kodlara müdahale etme kodları bana ver.

@@ -21,10 +21,10 @@ namespace ArchiX.Library.Entities
         public string? ConnectionName { get; set; }
 
         /// <summary>
-        /// DB: object name (sp/view/table). File: filename (json/xls/...).
+        /// DB: Sql cümlesi yazılacak. File: Mutseriler.ndjson gibi (json/xls/...).
         /// </summary>
-        [Required, MaxLength(260)]
-        public string FileName { get; set; } = string.Empty;
+        [Required, MaxLength(3000)]
+        public string Source { get; set; } = string.Empty;
 
         /// <summary>
         /// UI dropdown'da görünen isim.

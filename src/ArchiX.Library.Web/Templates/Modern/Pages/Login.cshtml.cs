@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
+using ArchiX.Library.Web.Security.Redirects;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -12,29 +14,34 @@ namespace ArchiX.Library.Web.Templates.Modern.Pages
 
         public string? ReturnUrl { get; set; }
 
+        public void OnGet(string? returnUrl = null)
+        {
+            ReturnUrl = returnUrl;
+        }
+
         public IActionResult OnPost(string? returnUrl = null)
         {
-            returnUrl ??= "/Dashboard";
+            const string defaultUrl = "/Dashboard";
 
-            TempData["StatusMessage"] = $"Hoş geldiniz, {Input.Email}!";
+            TempData["StatusMessage"] = $"Hos geldiniz, {Input.Email}!";
 
-            return Redirect(returnUrl);
+            return SafeRedirect.LocalRedirectOrDefault(this, returnUrl, defaultUrl);
         }
     }
 
     public class LoginInputModel
     {
         [Required(ErrorMessage = "E-posta adresi gereklidir")]
-        [EmailAddress(ErrorMessage = "Geçerli bir e-posta adresi giriniz")]
+        [EmailAddress(ErrorMessage = "Gecerli bir e-posta adresi giriniz")]
         [Display(Name = "E-posta")]
         public string Email { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Şifre gereklidir")]
+        [Required(ErrorMessage = "Sifre gereklidir")]
         [DataType(DataType.Password)]
-        [Display(Name = "Şifre")]
+        [Display(Name = "Sifre")]
         public string Password { get; set; } = string.Empty;
 
-        [Display(Name = "Beni hatırla")]
+        [Display(Name = "Beni hatirla")]
         public bool RememberMe { get; set; }
     }
 }

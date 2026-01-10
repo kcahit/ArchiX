@@ -60,7 +60,7 @@ public sealed partial class DatasetParametersModel : PageModel
             return NotFound();
 
         Form.DisplayName = ds.DisplayName;
-        Form.FileName = ds.FileName;
+        Form.Source = ds.Source;
         Form.TypeGroup = ds.Type.Group.Code;
         Form.TypeCode = ds.Type.Code;
 
@@ -303,7 +303,7 @@ public sealed partial class DatasetParametersModel : PageModel
     public sealed class FormModel
     {
         public string DisplayName { get; set; } = string.Empty;
-        public string FileName { get; set; } = string.Empty;
+        public string Source { get; set; } = string.Empty;
         public string TypeGroup { get; set; } = string.Empty;
         public string TypeCode { get; set; } = string.Empty;
 

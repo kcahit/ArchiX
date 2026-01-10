@@ -72,7 +72,7 @@ internal sealed class ReportDatasetExecutor(
         if (typeCode == "sp")
         {
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.CommandText = dataset.FileName;
+            cmd.CommandText = dataset.Source;
 
             // İş #11: InputParameter JSON şeması -> SqlParameter (fail-closed)
             ApplySpParameters(dataset, request.Parameters, cmd);
@@ -81,8 +81,8 @@ internal sealed class ReportDatasetExecutor(
         {
             cmd.CommandType = CommandType.Text;
             cmd.CommandText = typeCode == "view"
-                ? $"SELECT * FROM {Bracket(dataset.FileName)}"
-                : $"SELECT * FROM {Bracket(dataset.FileName)}";
+                ? $"SELECT * FROM {Bracket(dataset.Source)}"
+                : $"SELECT * FROM {Bracket(dataset.Source)}";
         }
 
         await using var reader = await cmd.ExecuteReaderAsync(CommandBehavior.SequentialAccess, ct).ConfigureAwait(false);
@@ -348,7 +348,7 @@ internal sealed class ReportDatasetExecutor(
             throw new NotSupportedException($"File dataset type not supported: '{typeCode}'.");
 
         var root = await ReportDatasetParameterReader.GetValueAsync(dbFactory, "Reports", "FileDatasetRoot", ct).ConfigureAwait(false);
-        var path = ReportDatasetFilePathResolver.ResolveAndValidate(root ?? string.Empty, dataset.SubPath, dataset.FileName);
+        var path = ReportDatasetFilePathResolver.ResolveAndValidate(root ?? string.Empty, dataset.SubPath, dataset.Source);
 
         if (!File.Exists(path))
             throw new FileNotFoundException("Dataset file not found.", path);

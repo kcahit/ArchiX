@@ -53,7 +53,7 @@ public sealed class ReportDatasetExecutorSentinelTests
             db.ReportDatasets.Add(new ReportDataset
             {
                 ReportDatasetTypeId = typeId,
-                FileName = "..\\evil.ndjson",
+                Source = "..\\evil.ndjson",
                 DisplayName = "Evil",
                 SubPath = "..",
                 StatusId = BaseEntity.ApprovedStatusId,
