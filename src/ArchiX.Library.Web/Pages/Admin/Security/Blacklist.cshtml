@@ -1,14 +1,14 @@
-@page
+ï»¿@page
 @model ArchiX.Library.Web.Pages.Admin.Security.BlacklistModel
 @{
-    ViewData["Title"] = "Blacklist Yönetimi";
+    ViewData["Title"] = "Blacklist YÃ¶netimi";
     Layout = "_AdminLayout";
 }
 
 <div class="container-fluid py-3">
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <div>
-            <h2 class="mb-0"><i class="fas fa-ban text-danger me-2"></i>Blacklist Yönetimi</h2>
+            <h2 class="mb-0"><i class="fas fa-ban text-danger me-2"></i>Blacklist YÃ¶netimi</h2>
             <small class="text-muted">Application ID: @Model.ApplicationId</small>
         </div>
     </div>
@@ -45,7 +45,7 @@
                     <form method="post" asp-page-handler="BulkAdd" class="row g-3">
                         <div class="col-12">
                             <label asp-for="BulkWords" class="form-label"></label>
-                            <textarea asp-for="BulkWords" rows="6" class="form-control" placeholder="Her satýra bir kelime yazýn"></textarea>
+                            <textarea asp-for="BulkWords" rows="6" class="form-control" placeholder="Her satÄ±ra bir kelime yazÄ±n"></textarea>
                             <span asp-validation-for="BulkWords" class="text-danger"></span>
                             <small class="text-muted">Maksimum 100 kelime, minimum 2 karakter.</small>
                         </div>
@@ -66,7 +66,7 @@
         <div class="card-header bg-light d-flex justify-content-between align-items-center flex-wrap gap-2">
             <span><i class="fas fa-table me-2"></i>Blacklist (Toplam: @Model.Words.Count)</span>
             <a asp-page-handler="Export" asp-route-applicationId="@Model.ApplicationId" class="btn btn-sm btn-outline-secondary export-csv-btn">
-                <i class="fas fa-download me-1"></i> CSV Ýndir
+                <i class="fas fa-download me-1"></i> CSV Ä°ndir
             </a>
         </div>
         <div class="table-responsive">
@@ -76,7 +76,7 @@
                         <th style="width:40%">Kelime</th>
                         <th style="width:25%">Ekleyen</th>
                         <th style="width:20%">Tarih</th>
-                        <th style="width:15%" class="text-end">Ýþlemler</th>
+                        <th style="width:15%" class="text-end">Ä°ÅŸlemler</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -85,7 +85,7 @@
                         <tr>
                             <td colspan="4" class="text-muted text-center py-4">
                                 <i class="fas fa-info-circle fa-2x mb-2"></i>
-                                <p>Henüz kelime eklenmemiþ.</p>
+                                <p>HenÃ¼z kelime eklenmemiÅŸ.</p>
                             </td>
                         </tr>
                     }
@@ -105,7 +105,7 @@
                                 <td>@word.CreatedAtUtc.ToLocalTime().ToString("g")</td>
                                 <td class="text-end">
                                     <form method="post" asp-page-handler="Delete" asp-route-id="@word.Id" asp-route-applicationId="@Model.ApplicationId" class="d-inline">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Kelimeyi silmek istediðinize emin misiniz?');" @(word.IsActive ? null : "disabled")>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm(" Kelimeyi silmek istediÄŸinizden emin misiniz?");" @(word.IsActive ? null : "disabled")>
                                             <i class="fas fa-trash me-1"></i> Sil
                                         </button>
                                     </form>
