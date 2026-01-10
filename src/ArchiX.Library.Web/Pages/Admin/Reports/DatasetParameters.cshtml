@@ -13,7 +13,7 @@
             <div class="text-muted small">
                 Dataset Id: <span class="fw-semibold">@Model.ReportDatasetId</span> ·
                 Ad: <span class="fw-semibold">@Model.Form.DisplayName</span> ·
-                Tip: <span class="fw-semibold">@Model.Form.TypeGroup/@Model.Form.TypeCode</span> ·
+                Tip: <span class="fw-semibold">@($"{Model.Form.TypeGroup}/{Model.Form.TypeCode}")</span> ·
                 Kaynak: <span class="fw-semibold">@Model.Form.FileName</span>
             </div>
         </div>
@@ -83,8 +83,7 @@
                                   rows="12"
                                   spellcheck="false"
                                   id="inpJson"
-                                  asp-for="Form.InputParameterJson"
-                                  placeholder='[ { "name": "\u0040\u0040StartDate", "type": "DateTime" } ]'></textarea>
+                                  asp-for="Form.InputParameterJson"></textarea>
                         <div class="form-text">
                             Kullanıcıdan alınacak input parametrelerini tanımlar. Boş bırakılabilir.
                         </div>
@@ -96,8 +95,7 @@
                                   rows="10"
                                   spellcheck="false"
                                   id="outJson"
-                                  asp-for="Form.OutputParameterJson"
-                                  placeholder='[ { "name": "\u0040\u0040ResultCode", "type": "Int" } ]'></textarea>
+                                  asp-for="Form.OutputParameterJson"></textarea>
                         <div class="form-text">
                             SP output parametreleri için tanımdır. Varsayılan davranış: UI’da input üretmez (bilgi amaçlı). Boş bırakılabilir.
                         </div>
@@ -160,6 +158,13 @@
             var outp = document.getElementById('outJson');
             var btnSave = document.getElementById('btnSave');
             var btnValidate = document.getElementById('btnValidate');
+
+            // Razor parser riskini azaltmak için placeholder'lar HTML attribute yerine JS ile set edilir
+            var inputExample = '[ { "name": "@@StartDate", "type": "DateTime" } ]';
+            var outputExample = '[ { "name": "@@ResultCode", "type": "Int" } ]';
+
+            if (inp) inp.placeholder = inputExample;
+            if (outp) outp.placeholder = outputExample;
 
             var box = document.getElementById('clientValidation');
             var sum = document.getElementById('cvSummary');

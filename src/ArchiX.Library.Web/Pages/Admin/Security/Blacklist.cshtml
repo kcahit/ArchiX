@@ -105,7 +105,7 @@
                                 <td>@word.CreatedAtUtc.ToLocalTime().ToString("g")</td>
                                 <td class="text-end">
                                     <form method="post" asp-page-handler="Delete" asp-route-id="@word.Id" asp-route-applicationId="@Model.ApplicationId" class="d-inline">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm(" Kelimeyi silmek istediğinizden emin misiniz?");" @(word.IsActive ? null : "disabled")>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm(&quot;Kelimeyi silmek istediğinizden emin misiniz?&quot;);" @(word.IsActive ? null : "disabled")>
                                             <i class="fas fa-trash me-1"></i> Sil
                                         </button>
                                     </form>
