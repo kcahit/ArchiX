@@ -1,8 +1,8 @@
-﻿@page "/Raporlar/Form"
+﻿@page "/Raporlar/FormRecordDetail"
 @model ArchiX.Library.Web.Templates.Modern.Pages.Raporlar.FormModel
 @using ArchiX.Library.Web.ViewModels.Grid
 @{
-    ViewData["Title"] = "Form (Müşteri)";
+    ViewData["Title"] = "Form Detay";
     Layout = "~/Templates/Modern/Pages/Shared/_Layout.cshtml";
 
     var datasetOptions = new List<ReportDatasetOptionViewModel>
@@ -11,6 +11,10 @@
         new(2, "Müşteri Kartı (Örnek-2)"),
         new(3, "Müşteri Kartı (Örnek-3)")
     };
+
+    var backUrl = Model.BackToGridUrl ?? "/Raporlar/GridListe";
+    var hasOps = Model.HasRecordOperations;
+    var isNew = Model.IsNew;
 }
 
 @section Styles {
@@ -20,26 +24,51 @@
 
 <div class="container py-4">
 
-    @* FormSingleRow: dataset sonucu tek kayıt olmalı (server-side kontrol) *@
+    <div class="d-flex align-items-center justify-content-between mb-2">
+        <a class="btn btn-outline-secondary btn-sm" href="@backUrl">
+            <i class="bi bi-arrow-left"></i> Listeye Dön
+        </a>
+
+        <div class="d-flex align-items-center gap-2">
+            @if (hasOps)
+            {
+                <button type="button" class="btn btn-primary btn-sm" id="btnDegistir">
+                    <i class="bi bi-check2-circle"></i> Değiştir
+                </button>
+
+                @if (!isNew)
+                {
+                    <button type="button" class="btn btn-danger btn-sm" id="btnSil">
+                        <i class="bi bi-trash"></i> Sil
+                    </button>
+                }
+            }
+
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="btnKapat">
+                <i class="bi bi-x-circle"></i> Kapat
+            </button>
+        </div>
+    </div>
+
     @await Component.InvokeAsync("DatasetSelector", new DatasetSelectorViewModel
     {
         Id = "musteriForm",
         IsVisible = true,
         Options = datasetOptions,
         SelectedReportDatasetId = null,
-        RunEndpoint = "/Raporlar/Form?handler=Run",
+        RunEndpoint = "/Raporlar/FormRecordDetail?handler=Run",
         RunText = "Raporla",
         Placeholder = "Müşteri dataset seçin...",
         Mode = DatasetSelectorMode.FormSingleRow
-    })
+        })
 
     <div class="card mt-3">
         <div class="card-header d-flex align-items-center gap-2">
             <i class="bi bi-person-vcard"></i>
-            <span class="fw-semibold">Müşteri Formu (fake)</span>
+            <span class="fw-semibold">Form (fake)</span>
         </div>
         <div class="card-body">
-            <form class="row g-3">
+            <form class="row g-3" id="formDetail">
                 <div class="col-md-3">
                     <label class="form-label">ID</label>
                     <input class="form-control" value="@(Model.Customer?.Id?.ToString() ?? string.Empty)" readonly />
@@ -79,3 +108,29 @@
         </div>
     </div>
 </div>
+
+<div id="formRecordDetail-ctx"
+     data-backurl="@backUrl"
+     data-hasops="@((hasOps ? "1" : "0"))"
+     style="display:none"></div>
+
+<div class="modal fade" id="closeConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Değişiklikleri kaydetmek ister misiniz?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+                Form üzerinde değişiklik var. Ne yapmak istersiniz?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnModalEvet">Evet</button>
+                <button type="button" class="btn btn-outline-secondary" id="btnModalHayir">Hayır</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" id="btnModalIptal">İptal</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/archix.formrecorddetail"></script>

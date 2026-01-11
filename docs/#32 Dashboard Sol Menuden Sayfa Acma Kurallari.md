@@ -139,6 +139,9 @@ BÖLÜM 5: Yan Menü (Application / Parameter / Dataset) Kapsam ve Bağlantılar
 5.4 Kullanıcı Testi:  
 5.4.1. Menüden ilgili liste ekranına (GridTable) geçişlerin doğru çalıştığı manuel kontrol (detaylar netleşince).  
 
+ÖNEMLİ NOT:
+Form.cshtml adı FormRecordDetail.cshtml değiştiildi. Ayrıca yapılmama kakarı alındı (202601-11- 15:35)
+
 Yapılacak İşler:  
 - İş Sıra No: 1  ==> (github Issue NO: #36)
   - BÖLÜM 1 / Satır: 1.2.1–1.2.8: Parametre sözleşmesi, default davranışlar, kapat uyarısı (Evet/Hayır/İptal), tek kayıt kuralı ve state koruma standartları.  
@@ -150,3 +153,65 @@ Yapılacak İşler:
   - BÖLÜM 4 / Satır: 4.2.1–4.2.5: FormRecord.cshtml akışı (tek kayıt dolumu), “Değiştir” butonu, kaydetmeden çıkış uyarısı ve grid state korunumu.  
 - İş Sıra No: 5  ==> (github Issue NO: #40)
   - BÖLÜM 5 / Satır: 5.2.1–5.2.2: Side menu → dataset → GridTable bağlama sözleşmesi (detaylar netleşince genişletme).  
+	- 
+kalan iş notu: 11.01.2026 14:12 tarhinde eklendi.(İş Sıra No: 1  ==> (github Issue NO: #36))
+	- Kalan iş (#36 / İş Sıra No: 1) için yeni thread’e taşıyabileceğin durum notu + yapılacaklar listesi (1.2.1–1.2.8):
+Yeni thread’e yapıştırmalık NOT (özet durum)
+•	GridListe rapor çalıştırma akışı yapıldı: OnPostRunAsync([FromQuery] int, CancellationToken) artık Page() dönüyor, endpoint /Raporlar/GridListe?handler=Run.
+•	Fake data kaldırıldı, ilk açılış boş grid.
+•	Testler güncellendi ve yeşil: AntiforgeryRateLimitRegistrationTests.cs 51/51.
+•	Grid “Değiştir” aksiyonu için JS tarafında offcanvas panel açma denemesi yapıldı (şu an temel gösterim var). Bu kısım “kombine sonra refactor” diye notlandı.
+•	Build başarılı.
+#36 / İş Sıra No: 1 (Bölüm 1 / 1.2.1–1.2.8) KALANLAR
+1.2.1 Parametre sözleşmesi (IsFormOpenEnabled / HasRecordOperations) — Eksik
+•	GridTable/GridListe tarafında IsFormOpenEnabled (default 0) parametresi model/viewmodel üzerinden taşınmalı.
+•	Form/FormRecord tarafında HasRecordOperations (default 0) backend’de enforce edilmeli (buton görünürlüğü + handler’larda yetki kontrolü).
+Yapılacak:
+•	GridTableViewModel / GridToolbarViewModel içine IsFormOpenEnabled (bool/int) ekle.
+•	GridTable component render’ında “Değiştir” butonunu IsFormOpenEnabled==1 ise göster.
+•	Form sayfalarında HasRecordOperations parametresi yoksa 0 kabul et; post handler’larda 0 iken değiştir/sil reddet.
+1.2.2 IsFormOpenEnabled=0 iken “Değiştir” görünmeyecek — Eksik
+•	Şu an JS/HTML’de action butonları genel bir “showActions” mantığı ile çıkıyor, fakat “Değiştir” kontrolü standart parametreye bağlı değil.
+Yapılacak:
+•	“Actions” içinde Edit butonu: IsFormOpenEnabled==1 koşuluyla render.
+•	Kombine sayfa için default IsFormOpenEnabled=0.
+1.2.3 IsFormOpenEnabled=1 iken “Değiştir” → FormRecord açacak — Eksik
+•	Şu an “Değiştir” offcanvas panel açıyor. Doküman (#36) hedefi: FormRecord ekranını açmak ve tek kayıt/form akışını başlatmak.
+Yapılacak:
+•	“Değiştir” tıklayınca navigation: /Raporlar/FormRecord?... benzeri bir Razor Page route.
+•	Seçili row/dataset + geri dönüş bağlamı querystring/TempData ile taşınacak.
+1.2.4 HasRecordOperations=0 iken kayıt aksiyonları görünmez/pasif + backend enforce — Eksik
+Yapılacak:
+•	FormRecord page model: HasRecordOperations false ise OnPostUpdate/Delete -> Forbid()/BadRequest().
+1.2.5 “Tek kayıt” dataset kuralı (0/1/2+) — Eksik
+Yapılacak:
+•	FormRecord açılışında dataset çalıştır → result row count:
+•	0: kullanıcıya “kayıt yok” mesajı
+•	1: formu doldur
+•	>1: kullanıcıya “tek kayıt zorunluluğu” uyarısı ve işlem durdur
+•	Unit test: 0/1/2+ senaryoları.
+1.2.6 Grid state koruma (filtre/sayfa/seçili satır) — Eksik
+Şu an “Run” reload ediyor ve filtre state server’a taşınmıyor.
+Yapılacak:
+•	Grid JS state serialize (filters, page, itemsPerPage, sort) → hidden input veya querystring (returnContext).
+•	FormRecord’a giderken bu context taşınacak.
+•	FormRecord kapanınca/geri dönünce GridListe aynı context ile init edilecek.
+•	Unit test: context roundtrip.
+1.2.7 Kapat uyarısı üç seçenek (Evet/Hayır/İptal) — Eksik
+Yapılacak:
+•	FormRecord UI: “dirty” tracking (JS) + bootstrap modal:
+•	Evet: save → close → return
+•	Hayır: close → return
+•	İptal: modal kapan → formda kal
+•	Unit test: dirty/no-dirty + 3 seçenek.
+1.2.8 Yeni kayıt modunda “Sil” görünmeyecek — Eksik
+Yapılacak:
+•	FormRecord “mode=new|edit” belirlemesi.
+•	mode=new ise UI’da Sil yok + backend’de delete handler kapalı.
+•	Unit test: new modda sil butonu yok.
+---
+Yeni thread’de benden istenecek ilk dosya(lar) (başlangıç önerisi)
+#36’yı düzgün başlatmak için önce altyapı:
+1.	GridToolbarViewModel.cs (IsFormOpenEnabled eklenecek)
+2.	Default.cshtml (Değiştir render kuralı uygulanacak)
+3.	Ardından yeni Razor Page: FormRecord (yoksa oluşturulacak) + state taşıma.

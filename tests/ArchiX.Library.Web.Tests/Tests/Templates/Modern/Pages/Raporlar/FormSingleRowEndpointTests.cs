@@ -15,7 +15,7 @@ public sealed class FormSingleRowEndpointTests
         var executor = new FakeExecutor(columns: new[] { "id", "name" }, rows: new List<IReadOnlyList<object?>> { new object?[] { 1, "A" } });
         var page = new FormModel(executor);
 
-        var result = await page.OnPostRunAsync(reportDatasetId: 1, ct: default);
+        var result = await page.OnPostRunAsync(reportDatasetId: 1, returnContext: null, ct: default);
 
         Assert.IsType<OkResult>(result);
         Assert.NotNull(page.Customer);
@@ -28,7 +28,7 @@ public sealed class FormSingleRowEndpointTests
         var executor = new FakeExecutor(columns: new[] { "id" }, rows: new List<IReadOnlyList<object?>>());
         var page = new FormModel(executor);
 
-        var result = await page.OnPostRunAsync(reportDatasetId: 1, ct: default);
+        var result = await page.OnPostRunAsync(reportDatasetId: 1, returnContext: null, ct: default);
 
         Assert.IsType<BadRequestResult>(result);
     }
@@ -39,7 +39,7 @@ public sealed class FormSingleRowEndpointTests
         var executor = new FakeExecutor(columns: new[] { "id" }, rows: new List<IReadOnlyList<object?>> { new object?[] { 1 }, new object?[] { 2 } });
         var page = new FormModel(executor);
 
-        var result = await page.OnPostRunAsync(reportDatasetId: 1, ct: default);
+        var result = await page.OnPostRunAsync(reportDatasetId: 1, returnContext: null, ct: default);
 
         Assert.IsType<BadRequestResult>(result);
     }
@@ -50,7 +50,7 @@ public sealed class FormSingleRowEndpointTests
         var executor = new FakeExecutor(columns: new[] { "id" }, rows: new List<IReadOnlyList<object?>> { new object?[] { 1 } });
         var page = new FormModel(executor);
 
-        var result = await page.OnPostRunAsync(reportDatasetId: 0, ct: default);
+        var result = await page.OnPostRunAsync(reportDatasetId: 0, returnContext: null, ct: default);
 
         Assert.IsType<BadRequestResult>(result);
     }

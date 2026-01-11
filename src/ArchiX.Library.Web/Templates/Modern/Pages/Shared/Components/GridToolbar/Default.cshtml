@@ -6,14 +6,14 @@
             @await Component.InvokeAsync("DatasetSelector", new ArchiX.Library.Web.ViewModels.Grid.DatasetSelectorViewModel
             {
                 Id = Model.Id,
-                IsVisible = Model.ShowDatasetSelector,
-                Options = Model.DatasetOptions,
-                SelectedReportDatasetId = Model.SelectedReportDatasetId,
-                RunEndpoint = Model.RunReportEndpoint,
-                RunText = Model.RunReportText,
-                Placeholder = Model.DatasetPlaceholder,
-                Mode = ArchiX.Library.Web.ViewModels.Grid.DatasetSelectorMode.GridMultiRow
-            })
+                        IsVisible = Model.ShowDatasetSelector,
+                        Options = Model.DatasetOptions,
+                        SelectedReportDatasetId = Model.SelectedReportDatasetId,
+                        RunEndpoint = Model.RunReportEndpoint,
+                        RunText = Model.RunReportText,
+                        Placeholder = Model.DatasetPlaceholder,
+                        Mode = ArchiX.Library.Web.ViewModels.Grid.DatasetSelectorMode.GridMultiRow
+                        })
 
             <span class="text-muted grid-record-count ms-1">(<strong><span id="@Model.Id-totalRecords">@Model.TotalRecords</span></strong> Kayıt)</span>
         </div>

@@ -1,4 +1,7 @@
-﻿using ArchiX.Library.Abstractions.Reports;
+﻿using System.Text;
+using System.Text.Json;
+
+using ArchiX.Library.Abstractions.Reports;
 using ArchiX.Library.Web.Abstractions.Reports;
 using ArchiX.Library.Web.ViewModels.Grid;
 
@@ -24,13 +27,19 @@ public class GridListeModel : PageModel
     public IReadOnlyList<ReportDatasetOptionViewModel> DatasetOptions { get; private set; } = [];
     public int? SelectedReportDatasetId { get; private set; }
 
-    public async Task OnGetAsync([FromQuery] int? reportDatasetId, CancellationToken ct)
+    // state restore (UI init için)
+    public string? RestoredSearch { get; private set; }
+    public int? RestoredPage { get; private set; }
+    public int? RestoredItemsPerPage { get; private set; }
+
+    public async Task OnGetAsync([FromQuery] int? reportDatasetId, [FromQuery] string? returnContext, CancellationToken ct)
     {
         DatasetOptions = await _optionsSvc.GetApprovedOptionsAsync(ct);
 
+        TryRestoreGridContext(returnContext);
+
         if (!reportDatasetId.HasValue || reportDatasetId.Value <= 0)
         {
-            // İlk açılış: boş grid (fake data yok)
             Columns = [];
             Rows = [];
             return;
@@ -38,7 +47,6 @@ public class GridListeModel : PageModel
 
         SelectedReportDatasetId = reportDatasetId.Value;
 
-        // fail-closed: Approved olmayan dataset seçilirse sayfa boş kalsın.
         if (!DatasetOptions.Any(x => x.Id == reportDatasetId.Value))
         {
             Columns = [];
@@ -57,7 +65,6 @@ public class GridListeModel : PageModel
         DatasetOptions = await _optionsSvc.GetApprovedOptionsAsync(ct);
         SelectedReportDatasetId = reportDatasetId;
 
-        // fail-closed: ApprovedOnly kontrolü (UI bypass edilirse bile)
         if (!DatasetOptions.Any(x => x.Id == reportDatasetId))
             return new BadRequestResult();
 
@@ -67,8 +74,30 @@ public class GridListeModel : PageModel
 
         await TryLoadDatasetAsync(reportDatasetId, parameters, ct);
 
-        // Sayfayı refresh ederek aynı ekranda grid’i yeniden render et.
         return Page();
+    }
+
+    private void TryRestoreGridContext(string? returnContext)
+    {
+        if (string.IsNullOrWhiteSpace(returnContext))
+            return;
+
+        try
+        {
+            var json = Encoding.UTF8.GetString(Convert.FromBase64String(returnContext));
+            var ctx = JsonSerializer.Deserialize<GridReturnContextViewModel>(json);
+
+            if (ctx is null)
+                return;
+
+            RestoredSearch = ctx.Search;
+            RestoredPage = ctx.Page;
+            RestoredItemsPerPage = ctx.ItemsPerPage;
+        }
+        catch
+        {
+            // fail-safe: context bozuksa ignore
+        }
     }
 
     private async Task TryLoadDatasetAsync(int reportDatasetId, IReadOnlyDictionary<string, string?>? parameters, CancellationToken ct)

@@ -25,6 +25,8 @@
     };
 
     toolbarModel.Id = tableId;
+
+    var isFormOpenEnabledJs = toolbarModel.IsFormOpenEnabled == 1 ? "true" : "false";
 }
 
 <link rel="stylesheet" href="~/_content/ArchiX.Library.Web/lib/bootstrap-icons/font/bootstrap-icons.css" />
@@ -175,7 +177,14 @@
         columns: @Html.Raw(jsonColumns),
         showActions: @Model.ShowActions.ToString().ToLowerInvariant()
     };
+
     if (window.initGridTable) {
-        window.initGridTable('@tableId', window.gridTables['@tableId'].data, window.gridTables['@tableId'].columns, window.gridTables['@tableId'].showActions);
+        window.initGridTable(
+            '@tableId',
+            window.gridTables['@tableId'].data,
+            window.gridTables['@tableId'].columns,
+            window.gridTables['@tableId'].showActions,
+            @Html.Raw(isFormOpenEnabledJs)
+        );
     }
 </script>

@@ -13,6 +13,10 @@ public class GridToolbarViewModel
 
     public bool IncludeAdvancedSearchPanel { get; set; } = false;
 
+    // GridListe/GridTable -> FormRecord açma davranışı (Issue #36 / 1.2.1-1.2.3)
+    // Default=0: "Değiştir" aksiyonu render edilmez.
+    public int IsFormOpenEnabled { get; set; } = 0;
+
     // Kombine / Dataset-driven destek (Issue #17 - bölüm 12)
     public bool ShowDatasetSelector { get; set; } = false;
 
