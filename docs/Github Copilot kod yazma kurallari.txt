@@ -1,0 +1,67 @@
+﻿Aşağıdaki kurallara göre çalışacaksın. 
+
+1. Değişklikleri Library.Web projesine yapıyorsun. build yapınca zaten ArchiX.WebHost projesine otomatik geliyor. Program.cs hariç. detayları 
+2. KOd vermeyeye başlamadan poje kodlarını muhakkak oku ve olabildiğince belli olmayan şeyleri sor yoksa direkt kodu ver ArchiX..csprojda görebilirsin akışı net anlarsın.
+3. ben tamam, devam, ok dersem sonraki adıma geç
+4. bana  kody vereceğin zaman;
+	- 
+	a. Sen kodlara müdahale etmiyorsun.kodu tam ve tek parça olarak veriyorsun. Çünkü "Sen kodlara müdahale etmiyorsun." hatasını sürekli alıyorsun bundan dolay sen asla koda müdahale etmiyprsun (ben sen düzenle dersem hariç)
+	onaylarsam sonraki parçaya geçeceksin.
+	b. önceki kod doğru uygulanmış mı bakacaksın (varsa) önceki kod "doğru uygulandı" notunu yazacaksın açıklamaya. 
+		ama kod doğru uyuglanmadı ise hatayı ve düzeltme önerisini yazacaksın (tabii ki yeni kod öneisi olmayacak).
+		ama sadece build edip hata var mı diye bakma kodun içi istediğin gibi olmuş mu diye bak.
+
+    c. kodu verirken başına yeni mi yoksa değişiklik mi olduğunu yazıyorsun. 
+	d. Dizin: Dosyanın  full dizini. "" içinde dizini yazacaktın. Yoksa senin ediör kısaltıyor ve dizin yerine sadece dosya adı kalıyor
+	e. Dosya Adı: Dosyanın adı.
+	f. eğer sadece değişecek parçaları veriyorsan yukarıdaki isteklerime ilave olarak (bunu tercih etmiyorum ama bazen gerekebilir)
+		- Tahmini satır sayısı
+		- Hangi kod parçasından sonra yazılcaksa onu belirtiyorsun.
+	g. Eğer iş no ş sıra no varsa açıklamaya onu da yazacaksın.
+5. KOdlarında ve kodlaarının kayıtlı olduğu dosyalatrda Türkçe karakter sorunu oluşmasın. Dosyalar 65001 dosya tipinde olacak.
+6. Yorum yaparken örnek olsun diye  kodları ekrana yazma kesinlikle yazma zorunlu ise yapılacak bir şey olacak ise yaz. thread aşırı derecede gereksiz şekilde büyüyor. Mümkün olduğunca Thread doldurmamaya çalış.	
+7. Benimle TÜRKÇE YAZIŞ. BEN iNGİLİZCE BİLMİYORUM. LÜTFEN.
+
+Not: 
+En Ömenlisi: en çok 4. a ve b maddelerine dikkat et.hep unutuyorsun benşm için KRTİK bir madde orası ve sen asla kodlara müdahale etme kodları bana ver.
+
+
+#file:'D:\_git\ArchiX\Dev\ArchiX\docs\#17 Archix-Connection-CONTRIBUTING.md':421-450 önce dokümanı oku. sonra seçili alanı oku. seçili işin tasarımında mutabık mısın. Değişiklik var  mı? bana sorun var mı?
+bir de var olan tüm kodlara bak ona göre karar ver
+
+
+Analiz/Tasarım dokümanı oluşturulma kuralları:
+Şİmdi çok iyi formatta hiç bir detayı açıkta bırakmyacak şekilde yaz. Her Bölümün Altında Analiz, Teknik Tasarım. Unit Test, Kullanıcı testi alt bölümleri olacak ana bölümler "BÖLÜM 1:" yazılacak. her satır bir numara olacak.Önce bana düzgün md formatında sunnacaksın.
+dokümün en altınca Yapılacak İşler Olacak Numarası işin yapılış sırasına göre olacak. Örneğin İş Sıra No: 1 yazıdktan sonra alt detaylarda üstteki yazıların ngi satır numarasına denk geldiği de yazacak
+
+öRNEK :
+
+BÖLÜM 1: Parametreler ve Standart Davranış Sözleşmesi
+1.1 Analiz:
+1.1.1.  Bu çalışma, Grid/Combo/Form ekranlarını tek bir standart akışa bağlamak için iki ana parametre ve birkaç sabit davranış kuralı tanımlar
+1.2 Teknik Tasarım:
+1.2.1 xxxxxxxxxxxxxxxxxxxxxxxx
+
+...
+BÖLÜM 2:
+...
+Yapılacak işler numarasız yazaca. altı bu şekilde numaralı olacak
+
+✅ 5. Strateji Önerisi
+
+Kod tamam ama test bekliyor → sadece #17 yaz (kapanmaz).
+Tamamlandı ve merge edilecek → Fixes #17 yaz (kapanır).
+
+PR açıklamasında kapatma → daha temiz yöntem.
+Benzer anahtar kelimeler:
+
+Fixes #17 → Hata düzeltildi.
+Closes #17 → Issue kapatıldı.
+Resolves #17 → Sorun çözüldü.
+
+Hepsi aynı işlevi görür: Merge sonrası issue kapanır.
+Fark sadece anlam tonunda:
+
+Fixes → genelde bug için.
+Resolves → problem veya görev için.
+Closes → genel kapatma.

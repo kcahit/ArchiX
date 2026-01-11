@@ -1,4 +1,5 @@
-﻿using ArchiX.Library.Context;
+﻿using ArchiX.Library.Abstractions.Persistence;
+using ArchiX.Library.Context;
 
 
 
@@ -26,6 +27,14 @@ namespace ArchiX.Library.Infrastructure.EfCore
         public async Task<int> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// İptal belirteci ile değişiklikleri kaydeder.
+        /// </summary>
+        public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            return _context.SaveChangesAsync(cancellationToken);
         }
     }
 }

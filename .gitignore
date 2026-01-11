@@ -73,3 +73,12 @@ appsettings.Local.json
 *.dbmdl
 *.bak
 *.sql
+
+# Auto-copied from Library.Web (don't commit)
+src/ArchiX.WebHost/Pages/Login.cshtml
+src/ArchiX.WebHost/Pages/Login.cshtml.cs
+src/ArchiX.WebHost/Pages/Dashboard.cshtml
+src/ArchiX.WebHost/Pages/Dashboard.cshtml.cs
+src/ArchiX.WebHost/Pages/Templates/
+src/ArchiX.WebHost/wwwroot/css/modern/
+src/ArchiX.WebHost/wwwroot/css/shared/

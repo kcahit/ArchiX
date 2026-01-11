@@ -1,0 +1,217 @@
+/* ============================================
+   TYPOGRAPHY - Yazı Stilleri
+   ============================================ */
+
+/* Başlıklar */
+h1 {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    margin-bottom: var(--spacing-lg);
+    color: var(--text-primary);
+}
+
+h2 {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+}
+
+h3 {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-tight);
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+}
+
+h4 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-normal);
+    margin-bottom: var(--spacing-sm);
+    color: var(--text-primary);
+}
+
+h5 {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-normal);
+    margin-bottom: var(--spacing-sm);
+    color: var(--text-primary);
+}
+
+h6 {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-normal);
+    margin-bottom: var(--spacing-sm);
+    color: var(--text-secondary);
+}
+
+/* Paragraf */
+p {
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-normal);
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+}
+
+p.lead {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-light);
+    line-height: var(--line-height-relaxed);
+}
+
+p.small {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+/* Inline elementler */
+strong, b {
+    font-weight: var(--font-weight-bold);
+}
+
+em, i {
+    font-style: italic;
+}
+
+small {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+mark {
+    background-color: #fff3cd;
+    padding: 2px 4px;
+}
+
+code {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    color: var(--danger-color);
+    background-color: var(--bg-light);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+}
+
+pre {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    background-color: var(--bg-light);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    margin-bottom: var(--spacing-md);
+}
+
+pre code {
+    background-color: transparent;
+    padding: 0;
+}
+
+/* Blockquote */
+blockquote {
+    padding: var(--spacing-md) var(--spacing-lg);
+    margin: 0 0 var(--spacing-lg);
+    border-left: 4px solid var(--primary-color);
+    background-color: var(--bg-light);
+    font-style: italic;
+    color: var(--text-secondary);
+}
+
+blockquote p {
+    margin-bottom: 0;
+}
+
+/* Listeler */
+ul, ol {
+    margin-bottom: var(--spacing-md);
+    padding-left: var(--spacing-xl);
+}
+
+ul ul,
+ol ol,
+ul ol,
+ol ul {
+    margin-bottom: 0;
+}
+
+li {
+    margin-bottom: var(--spacing-xs);
+    line-height: var(--line-height-normal);
+}
+
+/* Liste stilleri */
+ul.unstyled,
+ol.unstyled {
+    list-style: none;
+    padding-left: 0;
+}
+
+ul.inline,
+ol.inline {
+    list-style: none;
+    padding-left: 0;
+}
+
+ul.inline li,
+ol.inline li {
+    display: inline-block;
+    margin-right: var(--spacing-md);
+    margin-bottom: 0;
+}
+
+/* Linkler */
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color var(--transition-normal);
+}
+
+a:hover {
+    color: var(--secondary-color);
+}
+
+a:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Horizontal rule */
+hr {
+    margin: var(--spacing-lg) 0;
+    border: 0;
+    border-top: 2px solid var(--border-color);
+}
+
+/* Text utilities */
+.text-uppercase {
+    text-transform: uppercase !important;
+}
+
+.text-lowercase {
+    text-transform: lowercase !important;
+}
+
+.text-capitalize {
+    text-transform: capitalize !important;
+}
+
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.text-break {
+    word-wrap: break-word !important;
+    word-break: break-word !important;
+}
+
+.text-nowrap {
+    white-space: nowrap !important;
+}
