@@ -1,0 +1,98 @@
+﻿@model ArchiX.Library.Web.ViewModels.Dataset.DatasetKombineViewModel
+@using System
+@using System.Linq
+@using System.Collections.Generic
+@using System.Text.Json
+@using ArchiX.Library.Web.ViewModels.Grid
+
+@{
+    var id = Model.InstanceId ?? "dskombine";
+
+    var columns = Model.Columns ?? Array.Empty<GridColumnDefinition>();
+    var rows = Model.Rows ?? Enumerable.Empty<IDictionary<string, object?>>();
+
+    var totalRecords = Model.TotalRecords > 0
+        ? Model.TotalRecords
+        : (rows is ICollection<IDictionary<string, object?>> c ? c.Count : rows.Count());
+
+    var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+    var pivotJson = JsonSerializer.Serialize(rows, options);
+}
+
+<link rel="stylesheet" href="~/_content/ArchiX.Library.Web/lib/pivottable/pivot.min.css" />
+<link rel="stylesheet" href="~/_content/ArchiX.Library.Web/lib/bootstrap-icons/font/bootstrap-icons.css" />
+<link rel="stylesheet" href="~/_content/ArchiX.Library.Web/css/modern/main.css" />
+
+<div class="container py-4">
+
+    @await Component.InvokeAsync("GridToolbar", new GridToolbarViewModel
+    {
+        Id = id,
+        TotalRecords = totalRecords,
+        SearchPlaceholder = "Tüm alanlarda ara...",
+        ResetText = "Sıfırla",
+        ShowAdvancedSearch = true,
+        ShowExport = true,
+        IncludeAdvancedSearchPanel = true,
+
+        ShowDatasetSelector = true,
+        DatasetOptions = Model.DatasetOptions,
+        SelectedReportDatasetId = Model.SelectedReportDatasetId,
+        RunReportEndpoint = Model.RunReportEndpoint,
+        RunReportText = "Raporla",
+        DatasetPlaceholder = "Rapor seçin..."
+    })
+
+    <div class="accordion" id="@id-accordion">
+        <div class="accordion-item mb-3">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@id-pivotSection">
+                    Pivot Analiz
+                </button>
+            </h2>
+            <div id="@id-pivotSection" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                    <div id="@id-pivotContainer"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#@id-gridSection">
+                    Detaylı Liste
+                </button>
+            </h2>
+            <div id="@id-gridSection" class="accordion-collapse collapse show">
+                <div class="accordion-body">
+                    @await Component.InvokeAsync("DatasetGrid", new GridTableViewModel
+                    {
+                        Id = id,
+                        Title = "Detaylı Liste",
+                        SearchPlaceholder = "Tüm alanlarda ara...",
+                        Columns = columns,
+                        Rows = rows,
+                        ShowActions = false,
+                        ShowToolbar = false
+                    })
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="application/json" id="@id-pivotSourceJson">@Html.Raw(pivotJson)</script>
+
+<script src="~/_content/ArchiX.Library.Web/lib/jquery/jquery.min.js"></script>
+<script src="~/_content/ArchiX.Library.Web/lib/jquery-ui/jquery-ui.min.js"></script>
+<script src="~/_content/ArchiX.Library.Web/lib/pivottable/pivot.min.js"></script>
+<script src="~/_content/ArchiX.Library.Web/lib/pivottable/pivot.tr.js"></script>
+<script src="~/_content/ArchiX.Library.Web/js/archix.dataset.kombine.pivot.js"></script>
+
+<script>
+    (function () {
+        if (window.archixDatasetKombinePivot) {
+            window.archixDatasetKombinePivot.bindAutoRefresh('@id');
+        }
+    })();
+</script>

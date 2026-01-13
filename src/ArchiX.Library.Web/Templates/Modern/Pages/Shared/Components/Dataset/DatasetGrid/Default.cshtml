@@ -38,40 +38,40 @@
         <div class="table-container">
             @if (Model.ShowToolbar)
             {
-                    @await Component.InvokeAsync("GridToolbar", toolbarModel)
+                @await Component.InvokeAsync("GridToolbar", toolbarModel)
             }
 
             @if (!Model.ShowToolbar)
             {
-                    <div class="collapse mb-3" id="@tableId-advancedSearch">
-                        <div class="card advanced-search-card">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-2">
-                                        <div class="column-selector-panel">
-                                            <h6 class="column-selector-title">
-                                                <span class="column-selector-title-group">
-                                                    <input type="checkbox" class="column-selector-toggle" id="@tableId-toggleAllColumns" onchange="toggleAllColumns('@tableId')" title="Hepsi/Hiçbiri">
-                                                    Kolonlar
-                                                </span>
-                                                <button onclick="clearAdvancedFilters('@tableId')" class="btn-advanced-clear" title="Gelişmiş Filtreleri Temizle">
-                                                    Temizle
-                                                </button>
-                                            </h6>
-                                            <div id="@tableId-columnCheckList"></div>
-                                        </div>
+                <div class="collapse mb-3" id="@tableId-advancedSearch">
+                    <div class="card advanced-search-card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <div class="column-selector-panel">
+                                        <h6 class="column-selector-title">
+                                            <span class="column-selector-title-group">
+                                                <input type="checkbox" class="column-selector-toggle" id="@tableId-toggleAllColumns" onchange="toggleAllColumns('@tableId')" title="Hepsi/Hiçbiri">
+                                                Kolonlar
+                                            </span>
+                                            <button onclick="clearAdvancedFilters('@tableId')" class="btn-advanced-clear" title="Gelişmiş Filtreleri Temizle">
+                                                Temizle
+                                            </button>
+                                        </h6>
+                                        <div id="@tableId-columnCheckList"></div>
                                     </div>
-                                    <div class="col-md-10">
-                                        <div id="@tableId-slicerContainer">
-                                            <div id="@tableId-noSlicerMsg" class="grid-no-slicer">
-                                                <i class="bi bi-arrow-left"></i> Soldaki listeden kolon seçin
-                                            </div>
+                                </div>
+                                <div class="col-md-10">
+                                    <div id="@tableId-slicerContainer">
+                                        <div id="@tableId-noSlicerMsg" class="grid-no-slicer">
+                                            <i class="bi bi-arrow-left"></i> Soldaki listeden kolon seçin
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
             }
 
             <div id="@tableId-activeFilters">
@@ -108,38 +108,38 @@
                         <tr>
                             @foreach (var col in columns)
                             {
-                                    var field = col.Field;
-                                    var title = col.Title;
-                                    var numericClass = col.DataType?.Equals("number", StringComparison.OrdinalIgnoreCase) == true ? "grid-col-number" : string.Empty;
-                                    <th class="@numericClass" @(col.Width != null ? $"style=\"width:{col.Width}\"" : "")>
-                                        <div class="header-content">
-                                            @if (col.Sortable)
-                                            {
-                                                    <span class="header-text" onclick="sortTable('@tableId','@field')">
-                                                        @title <i class="bi bi-arrow-down-up sort-icon"></i>
-                                                    </span>
-                                            }
-                                            else
-                                            {
-                                                    <span class="header-text">@title</span>
-                                            }
-                                            @if (col.Filterable)
-                                            {
-                                                    <span class="filter-icon" onclick="toggleFilter('@tableId','@field', arguments[0])">
-                                                        <i class="bi bi-funnel"></i>
-                                                        <span class="filter-count" id="@tableId-count-@field">0</span>
-                                                    </span>
-                                            }
-                                        </div>
+                                var field = col.Field;
+                                var title = col.Title;
+                                var numericClass = col.DataType?.Equals("number", StringComparison.OrdinalIgnoreCase) == true ? "grid-col-number" : string.Empty;
+                                <th class="@numericClass" @(col.Width != null ? $"style=\"width:{col.Width}\"" : "")>
+                                    <div class="header-content">
+                                        @if (col.Sortable)
+                                        {
+                                            <span class="header-text" onclick="sortTable('@tableId','@field')">
+                                                @title <i class="bi bi-arrow-down-up sort-icon"></i>
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="header-text">@title</span>
+                                        }
                                         @if (col.Filterable)
                                         {
-                                                <div class="filter-dropdown" id="@tableId-filter-@field"></div>
+                                            <span class="filter-icon" onclick="toggleFilter('@tableId','@field', arguments[0])">
+                                                <i class="bi bi-funnel"></i>
+                                                <span class="filter-count" id="@tableId-count-@field">0</span>
+                                            </span>
                                         }
-                                    </th>
+                                    </div>
+                                    @if (col.Filterable)
+                                    {
+                                        <div class="filter-dropdown" id="@tableId-filter-@field"></div>
+                                    }
+                                </th>
                             }
                             @if (Model.ShowActions)
                             {
-                                    <th>İşlemler</th>
+                                <th>İşlemler</th>
                             }
                         </tr>
                     </thead>
@@ -171,6 +171,7 @@
 </div>
 
 <script src="~/_content/ArchiX.Library.Web/js/archix.grid.component.js"></script>
+<script src="~/_content/ArchiX.Library.Web/js/archix.grid.interactions.js"></script>
 <script>
     window.gridTables = window.gridTables || {};
     window.gridTables['@tableId'] = {

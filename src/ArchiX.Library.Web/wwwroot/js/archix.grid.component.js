@@ -12,27 +12,38 @@
 
     function getState(tableId) { return states[tableId]; }
 
-    function ensureRowEditorShell() {
-        if (document.getElementById('archix-row-editor')) return;
+    function getRowEditorIds(tableId) {
+        const safe = String(tableId || 'dsgrid');
+        return {
+            offcanvasId: `archix-row-editor-${safe}`,
+            titleId: `archix-row-editor-title-${safe}`,
+            bodyId: `archix-row-editor-body-${safe}`
+        };
+    }
+
+    function ensureRowEditorShell(tableId) {
+        const ids = getRowEditorIds(tableId);
+        if (document.getElementById(ids.offcanvasId)) return;
 
         const el = document.createElement('div');
         el.innerHTML = `
-<div class="offcanvas offcanvas-end" tabindex="-1" id="archix-row-editor" aria-labelledby="archix-row-editor-title">
+<div class="offcanvas offcanvas-end" tabindex="-1" id="${ids.offcanvasId}" aria-labelledby="${ids.titleId}">
   <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="archix-row-editor-title">Kayıt Detayı</h5>
+    <h5 class="offcanvas-title" id="${ids.titleId}">Kayıt Detayı</h5>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Kapat"></button>
   </div>
   <div class="offcanvas-body">
-    <div id="archix-row-editor-body"></div>
+    <div id="${ids.bodyId}"></div>
   </div>
 </div>`;
         document.body.appendChild(el.firstElementChild);
     }
 
     function showRowEditor(tableId, row) {
-        ensureRowEditorShell();
+        ensureRowEditorShell(tableId);
 
-        const body = document.getElementById('archix-row-editor-body');
+        const ids = getRowEditorIds(tableId);
+        const body = document.getElementById(ids.bodyId);
         if (!body) return;
 
         const state = getState(tableId);
@@ -55,7 +66,7 @@
         }
 
         if (window.bootstrap?.Offcanvas) {
-            const offcanvasEl = document.getElementById('archix-row-editor');
+            const offcanvasEl = document.getElementById(ids.offcanvasId);
             const inst = window.bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl);
             inst.show();
         }
@@ -85,7 +96,6 @@
 
     function getReturnContext(tableId) {
         const state = getState(tableId);
-
         const input = document.getElementById(`${tableId}-searchInput`);
         const search = (input?.value ?? '').toString();
 
@@ -107,7 +117,6 @@
         return Number.isFinite(n) && n > 0 ? n : null;
     }
 
-    // Grid -> Record (Issue #32/#43)
     function editItem(tableId, id) {
         const state = getState(tableId);
         const canEdit = !!state?.isFormOpenEnabled;
@@ -136,7 +145,7 @@
             const needle = String(id);
             const index = state.data.findIndex(x => String(x?.id) === needle);
             if (index > -1) state.data.splice(index, 1);
-            applyAllFilters(tableId);
+            applyFilterPipeline(tableId);
         }
     }
 
@@ -252,16 +261,25 @@
         setShowingInfo(tableId);
     }
 
-    function applyAllFilters(tableId) {
-        const state = getState(tableId); if (!state) return;
-
+    function baseSearchFilter(state) {
+        const tableId = state.tableId;
         const input = document.getElementById(`${tableId}-searchInput`);
         const term = (input?.value ?? '').toLocaleLowerCase('tr-TR');
 
-        state.filteredData = state.data.filter(item => {
+        return state.data.filter(item => {
             if (!term) return true;
             return Object.values(item || {}).some(v => String(v ?? '').toLocaleLowerCase('tr-TR').includes(term));
         });
+    }
+
+    function applyFilterPipeline(tableId) {
+        const state = getState(tableId); if (!state) return;
+
+        if (typeof state.applyFilterPipeline === 'function') {
+            state.filteredData = state.applyFilterPipeline(state);
+        } else {
+            state.filteredData = baseSearchFilter({ ...state, tableId });
+        }
 
         state.currentPage = 1;
         render(tableId);
@@ -273,7 +291,7 @@
         if (input.dataset.archixBound === '1') return;
         input.dataset.archixBound = '1';
 
-        input.addEventListener('input', () => applyAllFilters(tableId));
+        input.addEventListener('input', () => applyFilterPipeline(tableId));
     }
 
     function bindItemsPerPage(tableId) {
@@ -295,6 +313,7 @@
         if (!tableId || !Array.isArray(data) || !Array.isArray(columns)) return;
 
         states[tableId] = {
+            tableId,
             data: data.map(row => ({ ...row })),
             filteredData: data.map(row => ({ ...row })),
             columns,
@@ -317,6 +336,24 @@
     window.resetAllFilters = window.resetAllFilters || function (tableId) {
         const input = document.getElementById(`${tableId}-searchInput`);
         if (input) input.value = '';
-        applyAllFilters(tableId);
+
+        const s = states[tableId];
+        if (s) {
+            s.headerFilters = {};
+            s.textFilters = {};
+            s.slicerSelections = {};
+            s.activeSlicerColumns = [];
+            s.sort = null;
+        }
+
+        applyFilterPipeline(tableId);
+
+        if (typeof window.__archixGridAfterReset === 'function') {
+            window.__archixGridAfterReset(tableId);
+        }
     };
+
+    window.__archixGridGetState = window.__archixGridGetState || function (tableId) { return states[tableId]; };
+    window.__archixGridRender = window.__archixGridRender || function (tableId) { render(tableId); };
+    window.__archixGridApplyFilters = window.__archixGridApplyFilters || function (tableId) { applyFilterPipeline(tableId); };
 })(window);

@@ -1,4 +1,4 @@
-ï»¿'use strict';
+'use strict';
 
 (function (window) {
     const states = {};
@@ -12,34 +12,45 @@
 
     function getState(tableId) { return states[tableId]; }
 
-    function ensureRowEditorShell() {
-        if (document.getElementById('archix-row-editor')) return;
+    function getRowEditorIds(tableId) {
+        const safe = String(tableId || 'dsgrid');
+        return {
+            offcanvasId: `archix-row-editor-${safe}`,
+            titleId: `archix-row-editor-title-${safe}`,
+            bodyId: `archix-row-editor-body-${safe}`
+        };
+    }
+
+    function ensureRowEditorShell(tableId) {
+        const ids = getRowEditorIds(tableId);
+        if (document.getElementById(ids.offcanvasId)) return;
 
         const el = document.createElement('div');
         el.innerHTML = `
-<div class="offcanvas offcanvas-end" tabindex="-1" id="archix-row-editor" aria-labelledby="archix-row-editor-title">
+<div class="offcanvas offcanvas-end" tabindex="-1" id="${ids.offcanvasId}" aria-labelledby="${ids.titleId}">
   <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="archix-row-editor-title">KayÄ±t DetayÄ±</h5>
+    <h5 class="offcanvas-title" id="${ids.titleId}">Kayýt Detayý</h5>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Kapat"></button>
   </div>
   <div class="offcanvas-body">
-    <div id="archix-row-editor-body"></div>
+    <div id="${ids.bodyId}"></div>
   </div>
 </div>`;
         document.body.appendChild(el.firstElementChild);
     }
 
     function showRowEditor(tableId, row) {
-        ensureRowEditorShell();
+        ensureRowEditorShell(tableId);
 
-        const body = document.getElementById('archix-row-editor-body');
+        const ids = getRowEditorIds(tableId);
+        const body = document.getElementById(ids.bodyId);
         if (!body) return;
 
         const state = getState(tableId);
         const cols = state?.columns || [];
 
         if (!row || cols.length === 0) {
-            body.innerHTML = '<div class="text-muted">GÃ¶sterilecek alan yok.</div>';
+            body.innerHTML = '<div class="text-muted">Gösterilecek alan yok.</div>';
         } else {
             body.innerHTML = cols.map(c => {
                 const key = c.field;
@@ -55,7 +66,7 @@
         }
 
         if (window.bootstrap?.Offcanvas) {
-            const offcanvasEl = document.getElementById('archix-row-editor');
+            const offcanvasEl = document.getElementById(ids.offcanvasId);
             const inst = window.bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl);
             inst.show();
         }
@@ -85,7 +96,6 @@
 
     function getReturnContext(tableId) {
         const state = getState(tableId);
-
         const input = document.getElementById(`${tableId}-searchInput`);
         const search = (input?.value ?? '').toString();
 
@@ -107,7 +117,6 @@
         return Number.isFinite(n) && n > 0 ? n : null;
     }
 
-    // Grid -> Record (Issue #32/#43)
     function editItem(tableId, id) {
         const state = getState(tableId);
         const canEdit = !!state?.isFormOpenEnabled;
@@ -115,7 +124,7 @@
 
         const reportDatasetId = getSelectedReportDatasetId(tableId);
         if (!reportDatasetId) {
-            alert('Dataset seÃ§ilmedi. Ã–nce dataset seÃ§ip raporu Ã§alÄ±ÅŸtÄ±rÄ±n.');
+            alert('Dataset seçilmedi. Önce dataset seçip raporu çalýþtýrýn.');
             return;
         }
 
@@ -131,12 +140,12 @@
     }
 
     function deleteItem(tableId, id) {
-        if (confirm(`ID ${id} numaralÄ± kaydÄ± silmek istediÄŸinizden emin misiniz?`)) {
+        if (confirm(`ID ${id} numaralý kaydý silmek istediðinizden emin misiniz?`)) {
             const state = getState(tableId); if (!state) return;
             const needle = String(id);
             const index = state.data.findIndex(x => String(x?.id) === needle);
             if (index > -1) state.data.splice(index, 1);
-            applyAllFilters(tableId);
+            applyFilterPipeline(tableId);
         }
     }
 
@@ -153,13 +162,13 @@
 
         const total = state.filteredData.length;
         if (total === 0) {
-            el.textContent = 'GÃ¶steriliyor: 0-0 / 0';
+            el.textContent = 'Gösteriliyor: 0-0 / 0';
             return;
         }
 
         const start = (state.currentPage - 1) * state.itemsPerPage + 1;
         const end = Math.min(state.currentPage * state.itemsPerPage, total);
-        el.textContent = `GÃ¶steriliyor: ${start}-${end} / ${total}`;
+        el.textContent = `Gösteriliyor: ${start}-${end} / ${total}`;
     }
 
     function renderPagination(tableId) {
@@ -191,7 +200,7 @@
         };
 
         ul.innerHTML = '';
-        ul.appendChild(mk('â€¹', state.currentPage - 1, state.currentPage === 1, false));
+        ul.appendChild(mk('‹', state.currentPage - 1, state.currentPage === 1, false));
 
         const maxButtons = 7;
         let start = Math.max(1, state.currentPage - Math.floor(maxButtons / 2));
@@ -202,7 +211,7 @@
             ul.appendChild(mk(String(p), p, false, p === state.currentPage));
         }
 
-        ul.appendChild(mk('â€º', state.currentPage + 1, state.currentPage === pageCount, false));
+        ul.appendChild(mk('›', state.currentPage + 1, state.currentPage === pageCount, false));
     }
 
     function renderActionsCell(tableId, row) {
@@ -213,10 +222,10 @@
         const canEdit = !!state.isFormOpenEnabled;
 
         let html = '<td class="action-buttons">';
-        html += `<button type="button" class="btn btn-sm btn-outline-primary" onclick="viewItem('${tableId}','${id}')" title="GÃ¶rÃ¼ntÃ¼le"><i class="bi bi-eye"></i></button>`;
+        html += `<button type="button" class="btn btn-sm btn-outline-primary" onclick="viewItem('${tableId}','${id}')" title="Görüntüle"><i class="bi bi-eye"></i></button>`;
 
         if (canEdit) {
-            html += `<button type="button" class="btn btn-sm btn-outline-secondary" onclick="editItem('${tableId}','${id}')" title="DeÄŸiÅŸtir"><i class="bi bi-pencil"></i></button>`;
+            html += `<button type="button" class="btn btn-sm btn-outline-secondary" onclick="editItem('${tableId}','${id}')" title="Deðiþtir"><i class="bi bi-pencil"></i></button>`;
         }
 
         html += `<button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteItem('${tableId}','${id}')" title="Sil"><i class="bi bi-trash"></i></button>`;
@@ -252,16 +261,25 @@
         setShowingInfo(tableId);
     }
 
-    function applyAllFilters(tableId) {
-        const state = getState(tableId); if (!state) return;
-
+    function baseSearchFilter(state) {
+        const tableId = state.tableId;
         const input = document.getElementById(`${tableId}-searchInput`);
         const term = (input?.value ?? '').toLocaleLowerCase('tr-TR');
 
-        state.filteredData = state.data.filter(item => {
+        return state.data.filter(item => {
             if (!term) return true;
             return Object.values(item || {}).some(v => String(v ?? '').toLocaleLowerCase('tr-TR').includes(term));
         });
+    }
+
+    function applyFilterPipeline(tableId) {
+        const state = getState(tableId); if (!state) return;
+
+        if (typeof state.applyFilterPipeline === 'function') {
+            state.filteredData = state.applyFilterPipeline(state);
+        } else {
+            state.filteredData = baseSearchFilter({ ...state, tableId });
+        }
 
         state.currentPage = 1;
         render(tableId);
@@ -273,7 +291,7 @@
         if (input.dataset.archixBound === '1') return;
         input.dataset.archixBound = '1';
 
-        input.addEventListener('input', () => applyAllFilters(tableId));
+        input.addEventListener('input', () => applyFilterPipeline(tableId));
     }
 
     function bindItemsPerPage(tableId) {
@@ -295,6 +313,7 @@
         if (!tableId || !Array.isArray(data) || !Array.isArray(columns)) return;
 
         states[tableId] = {
+            tableId,
             data: data.map(row => ({ ...row })),
             filteredData: data.map(row => ({ ...row })),
             columns,
@@ -317,6 +336,24 @@
     window.resetAllFilters = window.resetAllFilters || function (tableId) {
         const input = document.getElementById(`${tableId}-searchInput`);
         if (input) input.value = '';
-        applyAllFilters(tableId);
+
+        const s = states[tableId];
+        if (s) {
+            s.headerFilters = {};
+            s.textFilters = {};
+            s.slicerSelections = {};
+            s.activeSlicerColumns = [];
+            s.sort = null;
+        }
+
+        applyFilterPipeline(tableId);
+
+        if (typeof window.__archixGridAfterReset === 'function') {
+            window.__archixGridAfterReset(tableId);
+        }
     };
+
+    window.__archixGridGetState = window.__archixGridGetState || function (tableId) { return states[tableId]; };
+    window.__archixGridRender = window.__archixGridRender || function (tableId) { render(tableId); };
+    window.__archixGridApplyFilters = window.__archixGridApplyFilters || function (tableId) { applyFilterPipeline(tableId); };
 })(window);

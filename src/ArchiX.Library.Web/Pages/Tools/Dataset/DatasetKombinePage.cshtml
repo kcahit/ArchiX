@@ -1,0 +1,50 @@
+﻿@page "/Tools/Dataset/Kombine"
+@model ArchiX.Library.Web.Pages.Tools.Dataset.DatasetKombinePageModel
+@using System
+@using System.Linq
+@using System.Collections.Generic
+@using ArchiX.Library.Web.ViewModels.Dataset
+@using ArchiX.Library.Web.ViewModels.Grid
+@{
+    ViewData["Title"] = "Dataset Kombine";
+    Layout = "~/Templates/Modern/Pages/Shared/_Layout.cshtml";
+
+    IReadOnlyList<GridColumnDefinition> columns = (Model.Columns != null && Model.Columns.Count > 0)
+        ? Model.Columns
+        : new List<GridColumnDefinition>
+        {
+            new("id", "ID", "number"),
+            new("name", "İsim"),
+            new("department", "Departman"),
+            new("position", "Pozisyon"),
+            new("city", "Şehir"),
+            new("salary", "Maaş", "number"),
+            new("status", "Durum")
+        };
+
+    IEnumerable<IDictionary<string, object?>> rows = (Model.Rows != null && Model.Rows.Any())
+        ? Model.Rows
+        : Model.SampleData.Select(x => (IDictionary<string, object?>)new Dictionary<string, object?>
+        {
+            ["id"] = x.Id,
+            ["name"] = x.Name,
+            ["department"] = x.Department,
+            ["position"] = x.Position,
+            ["city"] = x.City,
+            ["salary"] = x.Salary,
+            ["status"] = x.Status
+        }).ToList();
+
+    var vm = new DatasetKombineViewModel
+    {
+        InstanceId = "dskombine",
+        DatasetOptions = Model.DatasetOptions,
+        SelectedReportDatasetId = Model.SelectedReportDatasetId,
+        Columns = columns,
+        Rows = rows,
+        TotalRecords = 0,
+        RunReportEndpoint = "/Tools/Dataset/Kombine?handler=Run"
+    };
+}
+
+@await Component.InvokeAsync("DatasetKombine", vm)

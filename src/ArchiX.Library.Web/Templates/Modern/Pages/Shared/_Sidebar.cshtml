@@ -37,6 +37,13 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" href="/Tools/Dataset/Kombine" target="_blank" rel="noopener">
+                                <i class="bi bi-intersect"></i>
+                                Dataset Kombine
+                                <i class="bi bi-box-arrow-up-right ms-1" style="font-size: 0.8em;"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="/Tools/Dataset/Record" target="_blank" rel="noopener">
                                 <i class="bi bi-ui-checks-grid"></i>
                                 Dataset Record
@@ -153,6 +160,87 @@
     document.addEventListener('DOMContentLoaded', function () {
         const sidebar = document.getElementById('sidebar');
 
+        const LS_KEY = {
+            collapsed: 'archix.sidebar.collapsed',
+            openMenus: 'archix.sidebar.openMenus'
+        };
+
+        function readOpenMenus() {
+            try {
+                const raw = localStorage.getItem(LS_KEY.openMenus);
+                if (!raw) return [];
+                const arr = JSON.parse(raw);
+                return Array.isArray(arr) ? arr : [];
+            } catch {
+                return [];
+            }
+        }
+
+        function writeOpenMenus(ids) {
+            try {
+                localStorage.setItem(LS_KEY.openMenus, JSON.stringify(ids || []));
+            } catch { }
+        }
+
+        function isCollapsedStored() {
+            try { return localStorage.getItem(LS_KEY.collapsed) === '1'; } catch { return false; }
+        }
+
+        function setCollapsedStored(v) {
+            try { localStorage.setItem(LS_KEY.collapsed, v ? '1' : '0'); } catch { }
+        }
+
+        function syncCollapseIcon() {
+            const sidebarCollapseToggle = document.getElementById('sidebarCollapseToggle');
+            if (!sidebarCollapseToggle || !sidebar) return;
+
+            const icon = sidebarCollapseToggle.querySelector('i');
+            if (!icon) return;
+
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            icon.classList.toggle('bi-chevron-left', !isCollapsed);
+            icon.classList.toggle('bi-chevron-right', isCollapsed);
+        }
+
+        // Restore sidebar collapsed state
+        if (sidebar && isCollapsedStored()) {
+            sidebar.classList.add('collapsed');
+        }
+        syncCollapseIcon();
+
+        // Restore open collapse menus
+        const openMenus = readOpenMenus();
+        for (let i = 0; i < openMenus.length; i++) {
+            const id = openMenus[i];
+            const el = document.getElementById(id);
+            if (el) el.classList.add('show');
+
+            const toggle = document.querySelector(`[href="#${id}"][data-bs-toggle="collapse"]`);
+            if (toggle) toggle.setAttribute('aria-expanded', 'true');
+        }
+
+        // Track collapse menu open/close (bootstrap collapse events)
+        document.querySelectorAll('.collapse[id]').forEach(function (c) {
+            c.addEventListener('shown.bs.collapse', function (e) {
+                const ids = readOpenMenus();
+                const id = e.target && e.target.id;
+                if (!id) return;
+                if (ids.indexOf(id) === -1) ids.push(id);
+                writeOpenMenus(ids);
+            });
+
+            c.addEventListener('hidden.bs.collapse', function (e) {
+                const ids = readOpenMenus();
+                const id = e.target && e.target.id;
+                if (!id) return;
+                const next = ids.filter(x => x !== id);
+                writeOpenMenus(next);
+
+                const toggle = document.querySelector(`[href="#${id}"][data-bs-toggle="collapse"]`);
+                if (toggle) toggle.setAttribute('aria-expanded', 'false');
+            });
+        });
+
         // Mobile (<=768): CSS expects #sidebar.active
         const sidebarToggle = document.getElementById('sidebarToggle');
         if (sidebarToggle && sidebar) {
@@ -166,14 +254,8 @@
         if (sidebarCollapseToggle && sidebar) {
             sidebarCollapseToggle.addEventListener('click', function () {
                 sidebar.classList.toggle('collapsed');
-
-                // set icon deterministically
-                const icon = sidebarCollapseToggle.querySelector('i');
-                if (icon) {
-                    const isCollapsed = sidebar.classList.contains('collapsed');
-                    icon.classList.toggle('bi-chevron-left', !isCollapsed);
-                    icon.classList.toggle('bi-chevron-right', isCollapsed);
-                }
+                setCollapsedStored(sidebar.classList.contains('collapsed'));
+                syncCollapseIcon();
             });
         }
     });
