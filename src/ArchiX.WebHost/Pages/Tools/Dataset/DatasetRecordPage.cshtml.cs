@@ -1,5 +1,6 @@
 ﻿using ArchiX.Library.Abstractions.Reports;
 using ArchiX.Library.Web.Abstractions.Reports;
+using ArchiX.Library.Web.Services.Grid;
 using ArchiX.Library.Web.ViewModels.Grid;
 
 using Microsoft.AspNetCore.Mvc;
@@ -145,10 +146,10 @@ public sealed class DatasetRecordPageModel : PageModel
 
     private static string BuildBackUrl(string? returnContext)
     {
-        if (string.IsNullOrWhiteSpace(returnContext))
+        if (!GridReturnContextCodec.TryDecode(returnContext, out _))
             return "/Tools/Dataset/Grid";
 
-        return "/Tools/Dataset/Grid?returnContext=" + Uri.EscapeDataString(returnContext);
+        return "/Tools/Dataset/Grid?returnContext=" + Uri.EscapeDataString(returnContext!);
     }
 
     private void LoadFakeCustomer()

@@ -1,8 +1,6 @@
-﻿using System.Text;
-using System.Text.Json;
-
-using ArchiX.Library.Abstractions.Reports;
+﻿using ArchiX.Library.Abstractions.Reports;
 using ArchiX.Library.Web.Abstractions.Reports;
+using ArchiX.Library.Web.Services.Grid;
 using ArchiX.Library.Web.ViewModels.Grid;
 
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +10,8 @@ namespace ArchiX.Library.Web.Pages.Tools.Dataset;
 
 public sealed class DatasetGridPageModel : PageModel
 {
+    private const string ParamPrefix = "p_";
+
     private readonly IReportDatasetExecutor _executor;
     private readonly IReportDatasetOptionService _optionsSvc;
 
@@ -88,25 +88,12 @@ public sealed class DatasetGridPageModel : PageModel
 
     private void TryRestoreGridContext(string? returnContext)
     {
-        if (string.IsNullOrWhiteSpace(returnContext))
+        if (!GridReturnContextCodec.TryDecode(returnContext, out var ctx) || ctx is null)
             return;
 
-        try
-        {
-            var json = Encoding.UTF8.GetString(Convert.FromBase64String(returnContext));
-            var ctx = JsonSerializer.Deserialize<GridReturnContextViewModel>(json);
-
-            if (ctx is null)
-                return;
-
-            RestoredSearch = ctx.Search;
-            RestoredPage = ctx.Page;
-            RestoredItemsPerPage = ctx.ItemsPerPage;
-        }
-        catch
-        {
-            // fail-safe: context bozuksa ignore
-        }
+        RestoredSearch = ctx.Search;
+        RestoredPage = ctx.Page;
+        RestoredItemsPerPage = ctx.ItemsPerPage;
     }
 
     private async Task TryLoadDatasetAsync(int reportDatasetId, IReadOnlyDictionary<string, string?>? parameters, CancellationToken ct)
@@ -138,8 +125,6 @@ public sealed class DatasetGridPageModel : PageModel
             Rows = [];
         }
     }
-
-    private const string ParamPrefix = "p_";
 
     private static Dictionary<string, string?> ExtractParametersFromForm(Microsoft.AspNetCore.Http.IFormCollection form)
     {

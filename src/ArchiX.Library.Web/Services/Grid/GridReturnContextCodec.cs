@@ -7,9 +7,14 @@ namespace ArchiX.Library.Web.Services.Grid;
 
 public static class GridReturnContextCodec
 {
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
     public static string Encode(GridReturnContextViewModel ctx)
     {
-        var json = JsonSerializer.Serialize(ctx);
+        var json = JsonSerializer.Serialize(ctx, JsonOptions);
         return Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
     }
 
@@ -21,7 +26,7 @@ public static class GridReturnContextCodec
         try
         {
             var json = Encoding.UTF8.GetString(Convert.FromBase64String(value));
-            ctx = JsonSerializer.Deserialize<GridReturnContextViewModel>(json);
+            ctx = JsonSerializer.Deserialize<GridReturnContextViewModel>(json, JsonOptions);
             return ctx is not null;
         }
         catch
