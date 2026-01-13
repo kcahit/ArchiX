@@ -17,7 +17,7 @@
 	<!-- ***  NUGET PAKETLERI  *** -->
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="9.0.0" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.*" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.12" PrivateAssets="all" />
 	</ItemGroup>
 
 	<!-- ********************* ARCHIX WEBHOST ÖZEL YAPILANDIRMA ********************* -->

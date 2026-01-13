@@ -1,4 +1,4 @@
-/* ========================================
+ï»¿/* ========================================
    GRID/TABLE PAGE - COMPLETELY FIXED VERSION
    ======================================== */
 
@@ -126,14 +126,21 @@ body.grid-page {
     overflow-y: auto;
 }
 
-#slicerContainer {
-    display: flex;
-    flex-wrap: wrap;
+[id$='-slicerContainer'] {
+    display: grid;
+    grid-template-columns: repeat(5, 180px);
     gap: 10px;
     max-height: 370px;
-    overflow-x: auto;
-    overflow-y: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     align-content: flex-start;
+}
+
+/* Force 5 slicers per row (6th goes to next line)
+   5 * 180px + 4 * 10px gap = 940px total row width */
+.grid-slicer-card {
+    width: 180px;
+    flex: 0 0 180px;
 }
 
 .grid-no-slicer {
@@ -170,7 +177,7 @@ body.grid-page {
     font-size: 0.65rem;
     font-weight: 700;
     min-width: 22px;
-    display: none; /* varsayýlan gizli, filtre varsa JS açýyor */
+    display: none; /* varsayÄ±lan gizli, filtre varsa JS aÃ§Ä±yor */
     text-align: center;
     margin-left: 4px;
 }
@@ -196,6 +203,113 @@ body.grid-page {
     font-size: 0.75rem;
     padding: 4px 10px;
     white-space: nowrap;
+}
+
+/* --- SLICER / COLUMN LIST STYLES (RESTORED) --- */
+.column-check {
+    padding: 3px 6px;
+    margin-bottom: 1px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.7rem;
+    background: white;
+    color: #333;
+    border: 1px solid #ddd;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.column-check.is-active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.column-check.has-selection {
+    background: var(--warning-color);
+    color: #000;
+    border-color: var(--warning-color);
+}
+
+.column-check:not(.is-active):not(.has-selection):hover {
+    background: #f0f0f0;
+}
+
+.column-check label {
+    cursor: pointer;
+    margin: 0;
+    font-size: 0.7rem;
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.column-check input {
+    width: 12px;
+    height: 12px;
+    margin-right: 6px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.grid-slicer-card {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 8px;
+    background: #f8f9fa;
+    width: 180px;
+    flex: 0 0 180px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.grid-slicer-card h6 {
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--primary-color);
+    padding: 2px 4px;
+    border-radius: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.grid-slicer-card.has-filter h6 {
+    background: var(--warning-color);
+    color: #000;
+}
+
+.slicer-items {
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.slicer-item {
+    padding: 3px 6px;
+    margin-bottom: 1px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.7rem;
+    background: white;
+    color: #333;
+    border: 1px solid #ddd;
+    transition: all 0.2s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.slicer-item.is-selected {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.slicer-item:not(.is-selected):hover {
+    background: #f0f0f0;
 }
 
 .table-header {

@@ -339,11 +339,12 @@
 
         const s = states[tableId];
         if (s) {
-            s.headerFilters = {};
+            // keep in sync with `archix.grid.interactions.js` state keys
+            s.headerFilterMode = {};
+            s.headerListFilters = {};
             s.textFilters = {};
             s.slicerSelections = {};
             s.activeSlicerColumns = [];
-            s.sort = null;
         }
 
         applyFilterPipeline(tableId);

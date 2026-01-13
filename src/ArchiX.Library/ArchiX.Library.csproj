@@ -37,46 +37,46 @@
 		<PackageReference Include="Isopoh.Cryptography.Argon2" Version="2.0.0" />
 
 		<!-- EF Core -->
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.11" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.11" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.11" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.11">
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.12" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.12" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.12" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.12">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.11">
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.12">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 
 		<!-- Config / Options / DI -->
-		<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.11" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.11" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.11" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.11" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.11" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.11" />
-		<PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" Version="9.0.11" />
-		<PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="9.0.11" />
-		<PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="9.0.11" />
-		<PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.11" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.11" />
-		<PackageReference Include="Microsoft.Extensions.Options" Version="9.0.11" />
-		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.11" />
-		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.11" />
-		<PackageReference Include="Microsoft.Extensions.Http" Version="9.0.11" />
-		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.11" />
-		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="9.0.11" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.12" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.12" />
+		<PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" Version="9.0.12" />
+		<PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="9.0.12" />
+		<PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="9.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Options" Version="9.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="9.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="9.0.12" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="OpenTelemetry" Version="1.13.0" />
-		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.13.0" />
-		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.13.0" />
+		<PackageReference Include="OpenTelemetry" Version="1.14.0" />
+		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.14.0" />
+		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.14.0" />
 
-		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.12.0" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.12.0" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.12.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.14.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.14.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.14.0" />
 
 		<!-- prerelease -->
 		<PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.12.0-beta.2" />

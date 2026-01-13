@@ -1,4 +1,4 @@
-'use strict';
+ï»¿'use strict';
 
 (function (window) {
     const states = {};
@@ -29,7 +29,7 @@
         el.innerHTML = `
 <div class="offcanvas offcanvas-end" tabindex="-1" id="${ids.offcanvasId}" aria-labelledby="${ids.titleId}">
   <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="${ids.titleId}">Kayýt Detayý</h5>
+    <h5 class="offcanvas-title" id="${ids.titleId}">KayÄ±t DetayÄ±</h5>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Kapat"></button>
   </div>
   <div class="offcanvas-body">
@@ -50,7 +50,7 @@
         const cols = state?.columns || [];
 
         if (!row || cols.length === 0) {
-            body.innerHTML = '<div class="text-muted">Gösterilecek alan yok.</div>';
+            body.innerHTML = '<div class="text-muted">GÃ¶sterilecek alan yok.</div>';
         } else {
             body.innerHTML = cols.map(c => {
                 const key = c.field;
@@ -124,7 +124,7 @@
 
         const reportDatasetId = getSelectedReportDatasetId(tableId);
         if (!reportDatasetId) {
-            alert('Dataset seçilmedi. Önce dataset seçip raporu çalýþtýrýn.');
+            alert('Dataset seÃ§ilmedi. Ã–nce dataset seÃ§ip raporu Ã§alÄ±ÅŸtÄ±rÄ±n.');
             return;
         }
 
@@ -140,7 +140,7 @@
     }
 
     function deleteItem(tableId, id) {
-        if (confirm(`ID ${id} numaralý kaydý silmek istediðinizden emin misiniz?`)) {
+        if (confirm(`ID ${id} numaralÄ± kaydÄ± silmek istediÄŸinizden emin misiniz?`)) {
             const state = getState(tableId); if (!state) return;
             const needle = String(id);
             const index = state.data.findIndex(x => String(x?.id) === needle);
@@ -162,13 +162,13 @@
 
         const total = state.filteredData.length;
         if (total === 0) {
-            el.textContent = 'Gösteriliyor: 0-0 / 0';
+            el.textContent = 'GÃ¶steriliyor: 0-0 / 0';
             return;
         }
 
         const start = (state.currentPage - 1) * state.itemsPerPage + 1;
         const end = Math.min(state.currentPage * state.itemsPerPage, total);
-        el.textContent = `Gösteriliyor: ${start}-${end} / ${total}`;
+        el.textContent = `GÃ¶steriliyor: ${start}-${end} / ${total}`;
     }
 
     function renderPagination(tableId) {
@@ -200,7 +200,7 @@
         };
 
         ul.innerHTML = '';
-        ul.appendChild(mk('‹', state.currentPage - 1, state.currentPage === 1, false));
+        ul.appendChild(mk('â€¹', state.currentPage - 1, state.currentPage === 1, false));
 
         const maxButtons = 7;
         let start = Math.max(1, state.currentPage - Math.floor(maxButtons / 2));
@@ -211,7 +211,7 @@
             ul.appendChild(mk(String(p), p, false, p === state.currentPage));
         }
 
-        ul.appendChild(mk('›', state.currentPage + 1, state.currentPage === pageCount, false));
+        ul.appendChild(mk('â€º', state.currentPage + 1, state.currentPage === pageCount, false));
     }
 
     function renderActionsCell(tableId, row) {
@@ -222,10 +222,10 @@
         const canEdit = !!state.isFormOpenEnabled;
 
         let html = '<td class="action-buttons">';
-        html += `<button type="button" class="btn btn-sm btn-outline-primary" onclick="viewItem('${tableId}','${id}')" title="Görüntüle"><i class="bi bi-eye"></i></button>`;
+        html += `<button type="button" class="btn btn-sm btn-outline-primary" onclick="viewItem('${tableId}','${id}')" title="GÃ¶rÃ¼ntÃ¼le"><i class="bi bi-eye"></i></button>`;
 
         if (canEdit) {
-            html += `<button type="button" class="btn btn-sm btn-outline-secondary" onclick="editItem('${tableId}','${id}')" title="Deðiþtir"><i class="bi bi-pencil"></i></button>`;
+            html += `<button type="button" class="btn btn-sm btn-outline-secondary" onclick="editItem('${tableId}','${id}')" title="DeÄŸiÅŸtir"><i class="bi bi-pencil"></i></button>`;
         }
 
         html += `<button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteItem('${tableId}','${id}')" title="Sil"><i class="bi bi-trash"></i></button>`;
@@ -339,11 +339,12 @@
 
         const s = states[tableId];
         if (s) {
-            s.headerFilters = {};
+            // keep in sync with `archix.grid.interactions.js` state keys
+            s.headerFilterMode = {};
+            s.headerListFilters = {};
             s.textFilters = {};
             s.slicerSelections = {};
             s.activeSlicerColumns = [];
-            s.sort = null;
         }
 
         applyFilterPipeline(tableId);
