@@ -78,7 +78,7 @@
         try {
             const json = JSON.stringify(obj);
             return btoa(unescape(encodeURIComponent(json)));
-        } catch (e) {
+        } catch {
             return '';
         }
     }
@@ -96,14 +96,38 @@
         });
     }
 
-    // Issue #36 / 1.2.3 + 1.2.6
+    function getSelectedReportDatasetId(tableId) {
+        const container = document.getElementById(`${tableId}-container`);
+        const raw = container?.getAttribute('data-reportdatasetid')
+            || container?.getAttribute('data-reportDatasetId')
+            || container?.dataset?.reportdatasetid
+            || container?.dataset?.reportDatasetId;
+
+        const n = parseInt(raw || '', 10);
+        return Number.isFinite(n) && n > 0 ? n : null;
+    }
+
+    // Grid -> Record (Issue #32/#43)
     function editItem(tableId, id) {
+        const state = getState(tableId);
+        const canEdit = !!state?.isFormOpenEnabled;
+        if (!canEdit) return;
+
+        const reportDatasetId = getSelectedReportDatasetId(tableId);
+        if (!reportDatasetId) {
+            alert('Dataset seçilmedi. Önce dataset seçip raporu çalıştırın.');
+            return;
+        }
+
         const returnContext = getReturnContext(tableId);
 
-        const url = `/Raporlar/FormRecordDetail?id=${encodeURIComponent(id ?? '')}`
-            + (returnContext ? `&returnContext=${encodeURIComponent(returnContext)}` : '');
+        const qs = new URLSearchParams();
+        qs.set('ReportDatasetId', String(reportDatasetId));
+        if (id !== undefined && id !== null && String(id).length > 0) qs.set('RowId', String(id));
+        if (returnContext) qs.set('ReturnContext', returnContext);
+        qs.set('HasRecordOperations', '1');
 
-        window.location.href = url;
+        window.location.href = `/Tools/Dataset/Record?${qs.toString()}`;
     }
 
     function deleteItem(tableId, id) {
@@ -191,7 +215,6 @@
         let html = '<td class="action-buttons">';
         html += `<button type="button" class="btn btn-sm btn-outline-primary" onclick="viewItem('${tableId}','${id}')" title="Görüntüle"><i class="bi bi-eye"></i></button>`;
 
-        // REQUIREMENT: IsFormOpenEnabled=0 => do NOT render Edit/Değiştir.
         if (canEdit) {
             html += `<button type="button" class="btn btn-sm btn-outline-secondary" onclick="editItem('${tableId}','${id}')" title="Değiştir"><i class="bi bi-pencil"></i></button>`;
         }
@@ -286,15 +309,11 @@
         render(tableId);
     }
 
-    // Public API used by Razor component
     window.initGridTable = initGridTable;
-
-    // Actions (used by generated buttons)
     window.viewItem = viewItem;
     window.editItem = editItem;
     window.deleteItem = deleteItem;
 
-    // Hooks referenced by markup (safe defaults)
     window.resetAllFilters = window.resetAllFilters || function (tableId) {
         const input = document.getElementById(`${tableId}-searchInput`);
         if (input) input.value = '';

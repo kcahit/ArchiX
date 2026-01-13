@@ -8,33 +8,42 @@ using ArchiX.Library.Web.ViewModels.Grid;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace ArchiX.Library.Web.Templates.Modern.Pages.Raporlar;
+namespace ArchiX.Library.Web.Pages.Tools.Dataset;
 
-public class GridListeModel : PageModel
+public sealed class DatasetGridPageModel : PageModel
 {
     private readonly IReportDatasetExecutor _executor;
     private readonly IReportDatasetOptionService _optionsSvc;
 
-    public GridListeModel(IReportDatasetExecutor executor, IReportDatasetOptionService optionsSvc)
+    public DatasetGridPageModel(IReportDatasetExecutor executor, IReportDatasetOptionService optionsSvc)
     {
         _executor = executor;
         _optionsSvc = optionsSvc;
     }
 
-    public IReadOnlyList<GridColumnDefinition> Columns { get; private set; } = new List<GridColumnDefinition>();
+    public IReadOnlyList<GridColumnDefinition> Columns { get; private set; } = [];
     public IEnumerable<IDictionary<string, object?>> Rows { get; private set; } = [];
 
     public IReadOnlyList<ReportDatasetOptionViewModel> DatasetOptions { get; private set; } = [];
     public int? SelectedReportDatasetId { get; private set; }
+
+    // Issue #36 parametresi (default=0)
+    public int IsFormOpenEnabled { get; private set; } = 0;
 
     // state restore (UI init için)
     public string? RestoredSearch { get; private set; }
     public int? RestoredPage { get; private set; }
     public int? RestoredItemsPerPage { get; private set; }
 
-    public async Task OnGetAsync([FromQuery] int? reportDatasetId, [FromQuery] string? returnContext, CancellationToken ct)
+    public async Task OnGetAsync(
+        [FromQuery] int? reportDatasetId,
+        [FromQuery] string? returnContext,
+        [FromQuery] int? isFormOpenEnabled,
+        CancellationToken ct)
     {
         DatasetOptions = await _optionsSvc.GetApprovedOptionsAsync(ct);
+
+        IsFormOpenEnabled = (isFormOpenEnabled ?? 0) == 1 ? 1 : 0;
 
         TryRestoreGridContext(returnContext);
 

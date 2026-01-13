@@ -26,10 +26,14 @@
 		<Content Include="Properties\launchSettings.json" />
 		<None Include="C:\_git\ArchiX\Dev\ArchiX\src\ArchiX.WebHost\.editorconfig" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Pages\Templates\Modern\Pages\Shared\Components\DatasetSelector\" />
+	  <Folder Include="Pages\Templates\Modern\Pages\Shared\Components\GridTable\" />
+	  <Folder Include="Pages\Templates\Modern\Pages\Shared\Components\GridToolbar\" />
+	</ItemGroup>
 
 	<!-- Merkez kopyalama altyapısı (Library.Web) -->
-	<Import Project="..\ArchiX.Library.Web\build\ArchiX.Library.Web.CopyToHost.targets"
-			Condition="Exists('..\ArchiX.Library.Web\build\ArchiX.Library.Web.CopyToHost.targets')" />
+	<Import Project="..\ArchiX.Library.Web\build\ArchiX.Library.Web.CopyToHost.targets" Condition="Exists('..\ArchiX.Library.Web\build\ArchiX.Library.Web.CopyToHost.targets')" />
 
 	<!-- *** BUILD: CLEAN İŞLEMİ *** -->
 	<Target Name="CleanCopiedFiles" BeforeTargets="Clean">

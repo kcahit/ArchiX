@@ -12,21 +12,21 @@ Bu revize, `docs/#32 Dashboard Sol Menuden Sayfa Acma Kurallari.md` (Revize-1) d
 
 ### 0.1 Eski → Yeni isim eşleştirmesi
 0.1.1. Page (Tool/Host)
-- `GridListe` → `DatasetGrid`
-- `FormRecordDetail` (eski FormRecord) → `DatasetRecord`
+- `GridListe` → `DatasetGridPage`
+- `FormRecordDetail` (eski FormRecord) → `DatasetRecordPage`
 
 0.1.2. Component (UI)
-- `GridTable` → `DatasetGridTable`
-- (Record ekranı UI) → `DatasetRecordForm`
-- `DatasetSelector` → `DatasetSelector`
+- `GridTable` → `DatasetGridViewComponent`
+- (Record ekranı UI) → `DatasetRecordViewComponent`
+- `DatasetSelector` → `DatasetSelectorViewComponent` (zaten bu isim repo’da var, değiştirme)
 
 0.1.3. Dizin standardı
 - Tool sayfaları: `Pages/Tools/Dataset`
 - UI component’leri: `Shared/Components/Dataset`
 
 0.1.4. Route / URL standardı (hard contract)
-- `DatasetGrid` route: `/Tools/Dataset/Grid`
-- `DatasetRecord` route: `/Tools/Dataset/Record`
+- `DatasetGridPage` route: `/Tools/Dataset/Grid`
+- `DatasetRecordPage` route: `/Tools/Dataset/Record`
 
 ---
 
@@ -202,17 +202,17 @@ Bu revize, `docs/#32 Dashboard Sol Menuden Sayfa Acma Kurallari.md` (Revize-1) d
 
 # Yapılacak İşler (Revize-3 sırası)
 
-- İş Sıra No: 1  ==> (github Issue NO: ___)
+  - İş Sıra No: 1  ==> (github Issue NO: #43)
   - (Zorunlu) Rename/move + route hard contract geçişi.
   - `_Sidebar` linkleri güncelleme.
   - `DatasetSelector` RunEndpoint güncelleme.
   - Grid → Record yönlendirme güncelleme.
   - Record back link üretimi + state restore.
 
-- İş Sıra No: 2  ==> (github Issue NO: ___)
+  - İş Sıra No: 2  ==> (github Issue NO: #44)
   - `ReturnContext` standardının net uygulanması (encode/decode + restore).
 
-- İş Sıra No: 3  ==> (github Issue NO: ___)
+- İş Sıra No: 3  ==> (github Issue NO: #45)
   - Multi-instance izolasyon işleri:
     - Offcanvas/Modal id’lerini InstanceId’li hale getirme
     - JS state map’lerini InstanceId’ye göre izole etme

@@ -1,0 +1,88 @@
+﻿@page "/Tools/Dataset/Grid"
+@model ArchiX.Library.Web.Pages.Tools.Dataset.DatasetGridPageModel
+@using ArchiX.Library.Web.ViewModels.Grid
+@{
+    ViewData["Title"] = "Dataset Grid";
+    Layout = "~/Templates/Modern/Pages/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/lib/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="~/css/modern/main.css" />
+    <link rel="stylesheet" href="~/css/archix.reports.header.css" />
+}
+
+@await Component.InvokeAsync("DatasetGrid", new GridTableViewModel
+{
+    Id = "dsgrid",
+    Title = "Dataset Grid",
+    SearchPlaceholder = "Genel arama...",
+    Columns = Model.Columns,
+    Rows = Model.Rows,
+    Toolbar = new GridToolbarViewModel
+    {
+        Id = "dsgrid",
+        TotalRecords = 0,
+        SearchPlaceholder = "Genel arama...",
+        ShowAdvancedSearch = true,
+        ShowExport = true,
+        IncludeAdvancedSearchPanel = true,
+
+        ShowDatasetSelector = true,
+        DatasetOptions = Model.DatasetOptions,
+        SelectedReportDatasetId = Model.SelectedReportDatasetId,
+        RunReportEndpoint = "/Tools/Dataset/Grid?handler=Run",
+        RunReportText = "Raporla",
+        DatasetPlaceholder = "Rapor seçin...",
+
+        IsFormOpenEnabled = Model.IsFormOpenEnabled
+    }
+})
+
+<div id="dsgrid-restoreCtx"
+     data-search="@((Model.RestoredSearch ?? string.Empty))"
+     data-itemsperpage="@((Model.RestoredItemsPerPage ?? 0).ToString())"
+     data-page="@((Model.RestoredPage ?? 0).ToString())"
+     style="display:none"></div>
+
+<script>
+    (function () {
+        var tableId = 'dsgrid';
+        var el = document.getElementById(tableId + '-restoreCtx');
+        if (!el) return;
+
+        var restoredSearch = el.getAttribute('data-search') || '';
+        var restoredItemsPerPage = parseInt(el.getAttribute('data-itemsperpage') || '0', 10);
+        var restoredPage = parseInt(el.getAttribute('data-page') || '0', 10);
+
+        if (restoredSearch && restoredSearch.length > 0) {
+            var input = document.getElementById(tableId + '-searchInput');
+            if (input) {
+                input.value = restoredSearch;
+                try { input.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) { }
+            }
+        }
+
+        if (restoredItemsPerPage && restoredItemsPerPage > 0) {
+            var sel = document.getElementById(tableId + '-itemsPerPageSelect');
+            if (sel) {
+                sel.value = String(restoredItemsPerPage);
+                try { sel.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) { }
+            }
+        }
+
+        if (restoredPage && restoredPage > 1) {
+            var ul = document.getElementById(tableId + '-pagination');
+            if (ul) {
+                var links = ul.querySelectorAll('a.page-link');
+                for (var i = 0; i < links.length; i++) {
+                    if ((links[i].textContent || '').trim() === String(restoredPage)) {
+                        links[i].click();
+                        break;
+                    }
+                }
+            }
+        }
+    })();
+</script>

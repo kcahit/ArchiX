@@ -1,9 +1,8 @@
-﻿@page "/Raporlar/GridListe"
-@model ArchiX.Library.Web.Templates.Modern.Pages.Raporlar.GridListeModel
+﻿@page "/Tools/Dataset/Grid"
+@model ArchiX.Library.Web.Pages.Tools.Dataset.DatasetGridPageModel
 @using ArchiX.Library.Web.ViewModels.Grid
-
 @{
-    ViewData["Title"] = "Raporlar";
+    ViewData["Title"] = "Dataset Grid";
     Layout = "~/Templates/Modern/Pages/Shared/_Layout.cshtml";
 }
 
@@ -14,16 +13,16 @@
     <link rel="stylesheet" href="~/css/archix.reports.header.css" />
 }
 
-@await Component.InvokeAsync("GridTable", new GridTableViewModel
+@await Component.InvokeAsync("DatasetGrid", new GridTableViewModel
 {
-    Id = "gridListe",
-    Title = "Raporlar",
+    Id = "dsgrid",
+    Title = "Dataset Grid",
     SearchPlaceholder = "Genel arama...",
     Columns = Model.Columns,
     Rows = Model.Rows,
     Toolbar = new GridToolbarViewModel
     {
-        Id = "gridListe",
+        Id = "dsgrid",
         TotalRecords = 0,
         SearchPlaceholder = "Genel arama...",
         ShowAdvancedSearch = true,
@@ -33,13 +32,15 @@
         ShowDatasetSelector = true,
         DatasetOptions = Model.DatasetOptions,
         SelectedReportDatasetId = Model.SelectedReportDatasetId,
-        RunReportEndpoint = "/Raporlar/GridListe?handler=Run",
+        RunReportEndpoint = "/Tools/Dataset/Grid?handler=Run",
         RunReportText = "Raporla",
-        DatasetPlaceholder = "Rapor seçin..."
+        DatasetPlaceholder = "Rapor seçin...",
+
+        IsFormOpenEnabled = Model.IsFormOpenEnabled
     }
 })
 
-<div id="gridListe-restoreCtx"
+<div id="dsgrid-restoreCtx"
      data-search="@((Model.RestoredSearch ?? string.Empty))"
      data-itemsperpage="@((Model.RestoredItemsPerPage ?? 0).ToString())"
      data-page="@((Model.RestoredPage ?? 0).ToString())"
@@ -47,7 +48,7 @@
 
 <script>
     (function () {
-        var tableId = 'gridListe';
+        var tableId = 'dsgrid';
         var el = document.getElementById(tableId + '-restoreCtx');
         if (!el) return;
 

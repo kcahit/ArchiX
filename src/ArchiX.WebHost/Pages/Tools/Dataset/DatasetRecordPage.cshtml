@@ -1,0 +1,117 @@
+﻿@page "/Tools/Dataset/Record"
+@model ArchiX.Library.Web.Pages.Tools.Dataset.DatasetRecordPageModel
+@{
+    ViewData["Title"] = "Dataset Record";
+    Layout = "~/Templates/Modern/Pages/Shared/_Layout.cshtml";
+
+    var backUrl = Model.BackToGridUrl;
+    var hasOps = Model.HasRecordOperations;
+    var isNew = Model.IsNew;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/modern/main.css">
+}
+
+<div class="container py-4">
+
+    <div class="d-flex align-items-center justify-content-between mb-2">
+        <a class="btn btn-outline-secondary btn-sm" href="@backUrl">
+            <i class="bi bi-arrow-left"></i> Listeye Dön
+        </a>
+
+        <div class="d-flex align-items-center gap-2">
+            @if (hasOps)
+            {
+                <button type="button" class="btn btn-primary btn-sm" id="btnDegistir">
+                    <i class="bi bi-check2-circle"></i> Değiştir
+                </button>
+
+                @if (!isNew)
+                {
+                    <button type="button" class="btn btn-danger btn-sm" id="btnSil">
+                        <i class="bi bi-trash"></i> Sil
+                    </button>
+                }
+            }
+
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="btnKapat">
+                <i class="bi bi-x-circle"></i> Kapat
+            </button>
+        </div>
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-header d-flex align-items-center gap-2">
+            <i class="bi bi-person-vcard"></i>
+            <span class="fw-semibold">Record (fake)</span>
+        </div>
+        <div class="card-body">
+            <form class="row g-3" id="formDetail">
+                <div class="col-md-3">
+                    <label class="form-label">ID</label>
+                    <input class="form-control" value="@(Model.Customer?.Id?.ToString() ?? string.Empty)" readonly />
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label">Ad Soyad</label>
+                    <input class="form-control" value="@(Model.Customer?.Name ?? string.Empty)" readonly />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Telefon</label>
+                    <input class="form-control" value="@(Model.Customer?.Phone ?? string.Empty)" readonly />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    <input class="form-control" value="@(Model.Customer?.Email ?? string.Empty)" readonly />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Şehir</label>
+                    <input class="form-control" value="@(Model.Customer?.City ?? string.Empty)" readonly />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Vergi No</label>
+                    <input class="form-control" value="@(Model.Customer?.TaxNumber ?? string.Empty)" readonly />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Durum</label>
+                    <input class="form-control" value="@(Model.Customer?.Status ?? string.Empty)" readonly />
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Adres</label>
+                    <textarea class="form-control" rows="2" readonly>@(Model.Customer?.Address ?? string.Empty)</textarea>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="dsrec-ctx"
+     data-backurl="@backUrl"
+     data-hasops="@((hasOps ? "1" : "0"))"
+     data-isnew="@((isNew ? "1" : "0"))"
+     style="display:none"></div>
+
+<div class="modal fade" id="closeConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Değişiklikleri kaydetmek ister misiniz?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+                Form üzerinde değişiklik var. Ne yapmak istersiniz?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnModalEvet">Evet</button>
+                <button type="button" class="btn btn-outline-secondary" id="btnModalHayir">Hayır</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" id="btnModalIptal">İptal</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/archix.datasetrecord.js"></script>

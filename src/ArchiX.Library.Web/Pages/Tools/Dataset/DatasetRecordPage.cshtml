@@ -1,18 +1,10 @@
-﻿@page "/Raporlar/FormRecordDetail"
-@model ArchiX.Library.Web.Templates.Modern.Pages.Raporlar.FormModel
-@using ArchiX.Library.Web.ViewModels.Grid
+﻿@page "/Tools/Dataset/Record"
+@model ArchiX.Library.Web.Pages.Tools.Dataset.DatasetRecordPageModel
 @{
-    ViewData["Title"] = "Form Detay";
+    ViewData["Title"] = "Dataset Record";
     Layout = "~/Templates/Modern/Pages/Shared/_Layout.cshtml";
 
-    var datasetOptions = new List<ReportDatasetOptionViewModel>
-    {
-        new(1, "Müşteri Kartı (Örnek)"),
-        new(2, "Müşteri Kartı (Örnek-2)"),
-        new(3, "Müşteri Kartı (Örnek-3)")
-    };
-
-    var backUrl = Model.BackToGridUrl ?? "/Raporlar/GridListe";
+    var backUrl = Model.BackToGridUrl;
     var hasOps = Model.HasRecordOperations;
     var isNew = Model.IsNew;
 }
@@ -50,22 +42,10 @@
         </div>
     </div>
 
-    @await Component.InvokeAsync("DatasetSelector", new DatasetSelectorViewModel
-    {
-        Id = "musteriForm",
-        IsVisible = true,
-        Options = datasetOptions,
-        SelectedReportDatasetId = null,
-        RunEndpoint = "/Raporlar/FormRecordDetail?handler=Run",
-        RunText = "Raporla",
-        Placeholder = "Müşteri dataset seçin...",
-        Mode = DatasetSelectorMode.FormSingleRow
-        })
-
     <div class="card mt-3">
         <div class="card-header d-flex align-items-center gap-2">
             <i class="bi bi-person-vcard"></i>
-            <span class="fw-semibold">Form (fake)</span>
+            <span class="fw-semibold">Record (fake)</span>
         </div>
         <div class="card-body">
             <form class="row g-3" id="formDetail">
@@ -109,9 +89,10 @@
     </div>
 </div>
 
-<div id="formRecordDetail-ctx"
+<div id="dsrec-ctx"
      data-backurl="@backUrl"
      data-hasops="@((hasOps ? "1" : "0"))"
+     data-isnew="@((isNew ? "1" : "0"))"
      style="display:none"></div>
 
 <div class="modal fade" id="closeConfirmModal" tabindex="-1" aria-hidden="true">
@@ -133,4 +114,4 @@
     </div>
 </div>
 
-<script src="~/js/archix.formrecorddetail"></script>
+<script src="~/js/archix.datasetrecord.js"></script>

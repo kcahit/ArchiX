@@ -10,9 +10,9 @@ public sealed class DatasetSelectorViewComponent : ViewComponent
     {
         if (string.IsNullOrWhiteSpace(model.Id))
         {
-            model.Id = "gridTable";
+            model.Id = "dsgrid";
         }
 
-        return View("~/Templates/Modern/Pages/Shared/Components/DatasetSelector/Default.cshtml", model);
+        return View("~/Templates/Modern/Pages/Shared/Components/Dataset/DatasetSelector/Default.cshtml", model);
     }
 }

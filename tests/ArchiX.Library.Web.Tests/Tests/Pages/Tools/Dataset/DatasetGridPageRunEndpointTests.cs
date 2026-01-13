@@ -1,6 +1,6 @@
 ﻿using ArchiX.Library.Abstractions.Reports;
 using ArchiX.Library.Web.Abstractions.Reports;
-using ArchiX.Library.Web.Templates.Modern.Pages.Raporlar;
+using ArchiX.Library.Web.Pages.Tools.Dataset;
 using ArchiX.Library.Web.ViewModels.Grid;
 
 using Microsoft.AspNetCore.Mvc;
@@ -8,9 +8,9 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 using Xunit;
 
-namespace ArchiX.Library.Web.Tests.Tests.Templates.Modern.Pages.Raporlar;
+namespace ArchiX.Library.Web.Tests.Tests.Pages.Tools.Dataset;
 
-public sealed class GridListeRunEndpointTests
+public sealed class DatasetGridPageRunEndpointTests
 {
     [Fact]
     public async Task OnPostRunAsync_Should_Return_Page_When_Executor_Succeeds()
@@ -18,7 +18,7 @@ public sealed class GridListeRunEndpointTests
         var executor = new FakeOkExecutor();
         var optionsSvc = new FakeOptionsService(allowId: 1);
 
-        var page = new GridListeModel(executor, optionsSvc);
+        var page = new DatasetGridPageModel(executor, optionsSvc);
 
         var result = await page.OnPostRunAsync(reportDatasetId: 1, ct: default);
 
@@ -33,7 +33,7 @@ public sealed class GridListeRunEndpointTests
         var executor = new FakeThrowingExecutor();
         var optionsSvc = new FakeOptionsService(allowId: 1);
 
-        var page = new GridListeModel(executor, optionsSvc);
+        var page = new DatasetGridPageModel(executor, optionsSvc);
 
         var result = await page.OnPostRunAsync(reportDatasetId: 1, ct: default);
 
@@ -50,7 +50,7 @@ public sealed class GridListeRunEndpointTests
         var executor = new FakeOkExecutor();
         var optionsSvc = new FakeOptionsService(allowId: 1);
 
-        var page = new GridListeModel(executor, optionsSvc);
+        var page = new DatasetGridPageModel(executor, optionsSvc);
 
         var result = await page.OnPostRunAsync(reportDatasetId: 0, ct: default);
 

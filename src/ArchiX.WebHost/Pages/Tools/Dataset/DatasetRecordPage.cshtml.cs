@@ -1,49 +1,78 @@
 ﻿using ArchiX.Library.Abstractions.Reports;
+using ArchiX.Library.Web.Abstractions.Reports;
+using ArchiX.Library.Web.ViewModels.Grid;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace ArchiX.Library.Web.Templates.Modern.Pages.Raporlar;
+namespace ArchiX.WebHost.Pages.Tools.Dataset;
 
-public sealed class FormModel : PageModel
+public sealed class DatasetRecordPageModel : PageModel
 {
     private readonly IReportDatasetExecutor _executor;
+    private readonly IReportDatasetOptionService _optionsSvc;
 
-    public FormModel(IReportDatasetExecutor executor)
+    public DatasetRecordPageModel(IReportDatasetExecutor executor, IReportDatasetOptionService optionsSvc)
     {
         _executor = executor;
+        _optionsSvc = optionsSvc;
     }
 
     public CustomerViewModel? Customer { get; private set; }
 
+    public IReadOnlyList<ReportDatasetOptionViewModel> DatasetOptions { get; private set; } = [];
+    public int? SelectedReportDatasetId { get; private set; }
+
+    // Record ekranında selector daima gizli.
+    public bool IsDatasetSelectorVisible { get; private set; } = false;
+
     // Issue #36 parametreleri (default=0)
     public bool HasRecordOperations { get; private set; } = false;
 
-    // Yeni kayıt modu (Karar-3/1.2.8)
+    // Yeni kayıt modu: rowId yoksa new.
     public bool IsNew { get; private set; } = false;
 
     // Grid state dönüş linki
     public string? ReturnContext { get; private set; }
-    public string BackToGridUrl { get; private set; } = "/Raporlar/GridListe";
+    public string BackToGridUrl { get; private set; } = "/Tools/Dataset/Grid";
 
-    public void OnGet([FromQuery] string? returnContext, [FromQuery] int? hasRecordOperations, [FromQuery] string? mode)
+    public async Task OnGetAsync(
+        [FromQuery] int? reportDatasetId,
+        [FromQuery] string? rowId,
+        [FromQuery] string? returnContext,
+        [FromQuery] int? hasRecordOperations,
+        CancellationToken ct)
     {
+        DatasetOptions = await _optionsSvc.GetApprovedOptionsAsync(ct);
+
         ReturnContext = returnContext;
         BackToGridUrl = BuildBackUrl(returnContext);
 
         HasRecordOperations = (hasRecordOperations ?? 0) == 1;
-        IsNew = string.Equals(mode, "new", StringComparison.OrdinalIgnoreCase);
+        IsNew = string.IsNullOrWhiteSpace(rowId);
+
+        SelectedReportDatasetId = (reportDatasetId.HasValue && reportDatasetId.Value > 0) ? reportDatasetId.Value : null;
 
         LoadFakeCustomer();
     }
 
-    public async Task<IActionResult> OnPostRunAsync([FromQuery] int reportDatasetId, [FromQuery] string? returnContext, CancellationToken ct)
+    public async Task<IActionResult> OnPostRunAsync(
+        [FromForm] int reportDatasetId,
+        [FromQuery] string? rowId,
+        [FromQuery] string? returnContext,
+        CancellationToken ct)
     {
         ReturnContext = returnContext;
         BackToGridUrl = BuildBackUrl(returnContext);
 
         if (reportDatasetId <= 0)
             return new BadRequestResult();
+
+        DatasetOptions = await _optionsSvc.GetApprovedOptionsAsync(ct);
+        if (!DatasetOptions.Any(x => x.Id == reportDatasetId))
+            return new BadRequestResult();
+
+        SelectedReportDatasetId = reportDatasetId;
 
         try
         {
@@ -90,7 +119,6 @@ public sealed class FormModel : PageModel
         }
     }
 
-    // Issue #36 / 1.2.4: Backend enforce
     public IActionResult OnPostUpdate([FromQuery] int? hasRecordOperations)
     {
         HasRecordOperations = (hasRecordOperations ?? 0) == 1;
@@ -98,15 +126,13 @@ public sealed class FormModel : PageModel
         if (!HasRecordOperations)
             return new BadRequestResult();
 
-        // Şimdilik fake update
         return new OkResult();
     }
 
-    // Issue #36 / 1.2.4 + 1.2.8: Backend enforce (new modda silme yok)
-    public IActionResult OnPostDelete([FromQuery] int? hasRecordOperations, [FromQuery] string? mode)
+    public IActionResult OnPostDelete([FromQuery] int? hasRecordOperations, [FromQuery] string? rowId)
     {
         HasRecordOperations = (hasRecordOperations ?? 0) == 1;
-        IsNew = string.Equals(mode, "new", StringComparison.OrdinalIgnoreCase);
+        IsNew = string.IsNullOrWhiteSpace(rowId);
 
         if (!HasRecordOperations)
             return new BadRequestResult();
@@ -114,16 +140,15 @@ public sealed class FormModel : PageModel
         if (IsNew)
             return new BadRequestResult();
 
-        // Şimdilik fake delete
         return new OkResult();
     }
 
     private static string BuildBackUrl(string? returnContext)
     {
         if (string.IsNullOrWhiteSpace(returnContext))
-            return "/Raporlar/GridListe";
+            return "/Tools/Dataset/Grid";
 
-        return "/Raporlar/GridListe?returnContext=" + Uri.EscapeDataString(returnContext);
+        return "/Tools/Dataset/Grid?returnContext=" + Uri.EscapeDataString(returnContext);
     }
 
     private void LoadFakeCustomer()

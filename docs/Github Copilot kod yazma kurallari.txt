@@ -29,6 +29,7 @@ En Ömenlisi: en çok 4. a ve b maddelerine dikkat et.hep unutuyorsun benşm iç
 #file:'D:\_git\ArchiX\Dev\ArchiX\docs\#17 Archix-Connection-CONTRIBUTING.md':421-450 önce dokümanı oku. sonra seçili alanı oku. seçili işin tasarımında mutabık mısın. Değişiklik var  mı? bana sorun var mı?
 bir de var olan tüm kodlara bak ona göre karar ver
 
+-----------
 
 Analiz/Tasarım dokümanı oluşturulma kuralları:
 Şİmdi çok iyi formatta hiç bir detayı açıkta bırakmyacak şekilde yaz. Her Bölümün Altında Analiz, Teknik Tasarım. Unit Test, Kullanıcı testi alt bölümleri olacak ana bölümler "BÖLÜM 1:" yazılacak. her satır bir numara olacak.Önce bana düzgün md formatında sunnacaksın.
@@ -51,6 +52,8 @@ Yapılacak işler numarasız yazaca. altı bu şekilde numaralı olacak
 
 Kod tamam ama test bekliyor → sadece #17 yaz (kapanmaz).
 Tamamlandı ve merge edilecek → Fixes #17 yaz (kapanır).
+-----------
+
 
 PR açıklamasında kapatma → daha temiz yöntem.
 Benzer anahtar kelimeler:

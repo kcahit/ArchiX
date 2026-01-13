@@ -1,10 +1,11 @@
 ﻿'use strict';
 
 (function () {
-    function initFormRecordDetail() {
-        var ctxEl = document.getElementById('formRecordDetail-ctx');
-        var backUrl = ctxEl ? (ctxEl.getAttribute('data-backurl') || '/Raporlar/GridListe') : '/Raporlar/GridListe';
+    function initDatasetRecord() {
+        var ctxEl = document.getElementById('dsrec-ctx');
+        var backUrl = ctxEl ? (ctxEl.getAttribute('data-backurl') || '/Tools/Dataset/Grid') : '/Tools/Dataset/Grid';
         var hasOps = ctxEl ? (ctxEl.getAttribute('data-hasops') === '1') : false;
+        var isNew = ctxEl ? (ctxEl.getAttribute('data-isnew') === '1') : false;
 
         var isDirty = false;
 
@@ -33,6 +34,7 @@
         if (btnSil) {
             btnSil.addEventListener('click', function () {
                 if (!hasOps) return;
+                if (isNew) return;
                 if (confirm('Silmek istediginize emin misiniz?')) {
                     isDirty = false;
                     alert('Sil (fake) tamamlandi.');
@@ -78,8 +80,8 @@
     }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initFormRecordDetail);
+        document.addEventListener('DOMContentLoaded', initDatasetRecord);
     } else {
-        initFormRecordDetail();
+        initDatasetRecord();
     }
 })();

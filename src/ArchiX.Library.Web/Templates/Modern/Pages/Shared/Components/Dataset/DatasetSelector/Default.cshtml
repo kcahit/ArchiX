@@ -72,13 +72,11 @@
                     body.set('reportDatasetId', v);
 
                     // (opsiyonel) Sayfada mevcutsa p_* prefix'li form alanlarını aynı POST'a ekle.
-                    // Not: Şu an sayfalarda p_* input olmayabilir; bu sadece #11 uyumluluğu için hazır.
                     var inputs = document.querySelectorAll('input[name^="p_"], select[name^="p_"], textarea[name^="p_"]');
                     for (var i = 0; i < inputs.length; i++) {
                         var el = inputs[i];
                         if (!el || !el.name) continue;
 
-                        // checkbox/radio temel desteği
                         if ((el.type === 'checkbox' || el.type === 'radio') && !el.checked) continue;
 
                         body.set(el.name, (el.value ?? ''));
