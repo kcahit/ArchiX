@@ -161,11 +161,19 @@ body.grid-page {
 }
 
 .active-filter-toggle {
-    background: var(--primary-gradient);
-    color: white;
+    background: #4b6bfb;
+    color: #fff;
+    border: 1px solid #3a58d6;
     font-size: 0.85rem;
     padding: 8px 16px;
     border-radius: 6px;
+}
+
+/* Active Filters header: expanded (open) state */
+.active-filter-toggle:not(.collapsed) {
+    background: #4b6bfb;
+    color: #ffc107;
+    border: 1px solid #3a58d6;
 }
 
 /* Grid template filter styles */

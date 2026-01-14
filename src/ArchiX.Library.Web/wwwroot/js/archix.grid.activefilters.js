@@ -6,55 +6,9 @@
 
 (function (window) {
     function ensureStyles() {
-        if (document.getElementById('archix-active-filter-styles')) return;
-        const style = document.createElement('style');
-        style.id = 'archix-active-filter-styles';
-        style.textContent = `
-            .filter-summary-accordion .accordion-button.filter-accordion-btn {
-                background:#ffc107 !important;
-                color:#4b6bfb !important;
-                font-weight:700;
-                font-size:0.9rem;
-                line-height:1.1;
-                box-shadow:none !important;
-                border:1px solid #e6b800;
-                border-radius:6px;
-                padding:6px 10px;
-                gap:8px;
-            }
-            .filter-summary-accordion .accordion-button.filter-accordion-btn.collapsed {
-                background:#ffc107 !important;
-                color:#4b6bfb !important;
-            }
-            .filter-summary-accordion .accordion-button.filter-accordion-btn:not(.collapsed) {
-                background:#ffc107 !important;
-                color:#4b6bfb !important;
-                box-shadow:none !important;
-            }
-            .filter-summary-accordion .accordion-button.filter-accordion-btn:focus {
-                box-shadow:none !important;
-                color:#4b6bfb !important;
-            }
-            .filter-summary-accordion .accordion-button.filter-accordion-btn::after {
-                filter: invert(34%) sepia(63%) saturate(2175%) hue-rotate(214deg) brightness(94%) contrast(92%);
-            }
-            .filter-summary-accordion .filter-summary-badge {
-                background:#ffc107 !important;
-                color:#4b6bfb !important;
-                font-weight:700;
-                border:1px solid #e6b800;
-            }
-            .filter-summary-accordion .accordion-body .filter-tag {
-                font-size:0.7rem;
-                font-weight:600;
-                background:#4b6bfb;
-                color:#fff;
-                padding:4px 8px;
-                border-radius:4px;
-                display:inline-block;
-            }
-        `;
-        document.head.appendChild(style);
+        // Styles were moved to `wwwroot/css/modern/03-components/accordion.css`.
+        // Keep this function to avoid changing call sites.
+        return;
     }
 
     function sanitizeId(key) {

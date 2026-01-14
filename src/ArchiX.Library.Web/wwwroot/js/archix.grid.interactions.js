@@ -257,7 +257,12 @@
 
         const mode = s.headerFilterMode[field] || 'list';
 
-        const allValues = Array.from(new Set((s.data || []).map(r => r?.[field]).map(v => String(v ?? ''))))
+        // IMPORTANT:
+        // Header filter dropdown values should be affected by other active filters
+        // (same behavior as slicers). Therefore compute available values from
+        // current filtered dataset, excluding this column's own filter.
+        const availableData = computeFilteredData(tableId, { excludeHeaderField: field, excludeSlicerColumn: field });
+        const allValues = Array.from(new Set((availableData || []).map(r => r?.[field]).map(v => String(v ?? ''))))
             .sort((a, b) => a.localeCompare(b, 'tr-TR'));
 
         const isNumeric = allValues.length > 0 && allValues.every(v => v.trim() !== '' && !Number.isNaN(Number(v)));
@@ -418,6 +423,10 @@
 
         const mode = s.headerFilterMode?.[field] || 'list';
 
+        // Recompute available values under current filter context.
+        // (Must be in scope here; not shared from buildFilterDropdown.)
+        const availableData = computeFilteredData(tableId, { excludeHeaderField: field, excludeSlicerColumn: field });
+
         if (mode === 'number') {
             const op = dd.querySelector(`#${tableId}-text-operator-${cssSafe(field)}`)?.value;
             const v1 = dd.querySelector(`#${tableId}-text-value-${cssSafe(field)}`)?.value ?? '';
@@ -441,7 +450,9 @@
                 }
             });
 
-            const all = Array.from(new Set((s.data || []).map(r => r?.[field]).map(v => String(v ?? ''))));
+            // Compare against currently available values (other filters applied)
+            // so "Select All" semantics remain correct.
+            const all = Array.from(new Set((availableData || []).map(r => r?.[field]).map(v => String(v ?? ''))));
             if (selectedValues.length === 0 || selectedValues.length === all.length) {
                 if (s.headerListFilters) delete s.headerListFilters[field];
             } else {
@@ -489,12 +500,14 @@
             }
 
             for (const [field, values] of Object.entries(listFilters)) {
+                if (opts.excludeHeaderField && field === opts.excludeHeaderField) continue;
                 if (!values || values.length === 0) continue;
                 const v = String(row?.[field] ?? '');
                 if (!values.map(String).includes(v)) return false;
             }
 
             for (const [field, f] of Object.entries(textFilters)) {
+                if (opts.excludeHeaderField && field === opts.excludeHeaderField) continue;
                 if (!f) continue;
                 const valRaw = row?.[field];
                 const itemValue = String(valRaw ?? '').toLocaleLowerCase('tr-TR');

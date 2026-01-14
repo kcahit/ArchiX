@@ -1,4 +1,4 @@
-/* ========================================
+ï»¿/* ========================================
    MAIN CSS - Import All Modules
    Modern Template - ArchiX.Library.Web
    ======================================== */
@@ -20,6 +20,7 @@
 
 /* 03 - COMPONENTS: Reusable UI components */
 @import url('./03-components/buttons.css');
+@import url('./03-components/accordion.css');
 @import url('./03-components/forms.css');
 @import url('./03-components/cards.css');
 @import url('./03-components/tables.css');
@@ -53,7 +54,7 @@
    ======================================== */
 /*
 wwwroot/css/
-??? shared/ (Tüm template'ler için ortak)
+??? shared/ (TÃ¼m template'ler iÃ§in ortak)
 ?   ??? normalize.css
 ?   ??? bootstrap-utilities.css
 ??? modern/

@@ -1,0 +1,120 @@
+﻿/* Shared accordion styles for ArchiX Modern theme.
+   Contains a compact variant used by Grid "Aktif Filtreler" dynamic accordions.
+*/
+
+/* Active Filters (dynamic per-column accordions)
+   - background always blue
+   - collapsed: white text
+   - expanded: yellow text
+   - compact sizing similar to "Hepsini Aç/Kapat" */
+
+/* Kombine page accordions: Pivot Analiz / Detaylı Liste
+   - background always blue
+   - collapsed: white text
+   - expanded: yellow text */
+
+.archix-accordion-primary .accordion-button {
+    background: #4b6bfb;
+    border: 1px solid #3a58d6;
+    box-shadow: none;
+}
+
+.archix-accordion-primary .accordion-button.collapsed {
+    color: #fff;
+}
+
+.archix-accordion-primary .accordion-button:not(.collapsed) {
+    color: #ffc107;
+}
+
+.archix-accordion-primary .accordion-button:focus {
+    box-shadow: none;
+}
+
+.archix-accordion-primary .accordion-button::after {
+    filter: none;
+}
+
+.archix-accordion-primary .accordion-button.collapsed::after {
+    filter: brightness(0) invert(1);
+}
+
+.archix-accordion-primary .accordion-button:not(.collapsed)::after {
+    filter: brightness(0) saturate(100%) invert(84%) sepia(55%) saturate(1963%) hue-rotate(345deg) brightness(103%) contrast(103%);
+}
+
+.filter-summary-accordion {
+    margin-bottom: 6px;
+}
+
+.filter-summary-accordion .accordion-button.filter-accordion-btn {
+    background: #4b6bfb !important;
+    border: 1px solid #3a58d6;
+    font-weight: 700;
+    font-size: 0.75rem;
+    line-height: 1.05;
+    box-shadow: none !important;
+    border-radius: 6px;
+    padding: 4px 10px;
+    gap: 8px;
+    min-height: 30px;
+}
+
+.filter-summary-accordion .accordion-button.filter-accordion-btn.collapsed {
+    color: #fff !important;
+}
+
+.filter-summary-accordion .accordion-button.filter-accordion-btn:not(.collapsed) {
+    color: #ffc107 !important;
+}
+
+.filter-summary-accordion .accordion-button.filter-accordion-btn:focus {
+    box-shadow: none !important;
+}
+
+/* caret colors */
+.filter-summary-accordion .accordion-button.filter-accordion-btn::after {
+    filter: none;
+}
+
+.filter-summary-accordion .accordion-button.filter-accordion-btn.collapsed::after {
+    filter: brightness(0) invert(1);
+}
+
+.filter-summary-accordion .accordion-button.filter-accordion-btn:not(.collapsed)::after {
+    filter: brightness(0) saturate(100%) invert(84%) sepia(55%) saturate(1963%) hue-rotate(345deg) brightness(103%) contrast(103%);
+}
+
+.filter-summary-accordion .filter-summary-badge {
+    font-weight: 700;
+    border-radius: 10px;
+    padding: 2px 6px;
+}
+
+.filter-summary-accordion .accordion-button.filter-accordion-btn .filter-summary-badge {
+    background: #fff !important;
+    color: #4b6bfb !important;
+    border: 1px solid rgba(255, 255, 255, 0.75);
+}
+
+.filter-summary-accordion .accordion-body.filter-accordion-body {
+    padding: 6px 8px;
+}
+
+.filter-summary-accordion .accordion-body .filter-tag {
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: #4b6bfb;
+    color: #fff;
+    padding: 3px 8px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 2px 4px 2px 0;
+}
+
+.filter-summary-accordion .accordion-body .filter-tag i {
+    cursor: pointer;
+    opacity: 0.85;
+}
