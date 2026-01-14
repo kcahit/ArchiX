@@ -36,7 +36,7 @@
     let group = state.detailById.get(groupId);
     if (!group) {
       // Create group as a normal tab first
-      const fakeTitle = title;
+      const fakeTitle = groupId.replace(/^g_/, '').replaceAll('_', ' / ');
       // Create empty group tab
       const id = groupId;
       const tabLi = document.createElement('li');
@@ -377,7 +377,8 @@
       method: 'GET',
       headers: {
         'X-ArchiX-Tab': '1',
-        'X-Requested-With': 'XMLHttpRequest'
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'text/html'
       },
       credentials: 'same-origin'
     });
@@ -541,8 +542,9 @@
       if (config.enableNestedTabs) {
         const menuPath = a.getAttribute('data-archix-menu');
         if (menuPath) {
-          const group = menuPath.split('/')[0];
-          const groupId = `g_${group}`;
+          const parts = menuPath.split('/').filter(Boolean);
+          const group = parts.slice(0, 2).join('/');
+          const groupId = `g_${group.replaceAll('/', '_')}`;
           openNestedTab({ groupId, url: href, title });
           return;
         }
@@ -643,6 +645,19 @@
   function init() {
     const h = ensureHost();
     if (!h) return;
+
+    // If the layout rendered normal page content via RenderBody(), hide it once TabHost takes over.
+    // This prevents "double UI" (full page + tabbed page) and keeps only the tabbed work area visible.
+    try {
+      const main = h.host.closest('main');
+      if (main) {
+        Array.from(main.children).forEach(el => {
+          if (el !== h.host && el instanceof HTMLElement) {
+            el.style.display = 'none';
+          }
+        });
+      }
+    } catch { }
 
     interceptClicks();
     bindTabHostEvents();

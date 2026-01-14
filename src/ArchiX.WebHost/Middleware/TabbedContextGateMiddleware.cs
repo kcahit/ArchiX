@@ -16,9 +16,17 @@ public sealed class TabbedContextGateMiddleware
 
     public async Task Invoke(HttpContext context)
     {
+        // Only guard GET navigations.
+        if (!HttpMethods.IsGet(context.Request.Method))
+        {
+            await _next(context);
+            return;
+        }
+
         // Only guard Razor Pages navigations (HTML). API/JSON requests are not in scope here.
-        var acceptsHtml = context.Request.Headers.Accept.Any(v => v.Contains("text/html", StringComparison.OrdinalIgnoreCase))
-            || string.IsNullOrWhiteSpace(context.Request.Headers.Accept);
+        var accept = context.Request.Headers.Accept.ToString();
+        var acceptsHtml = accept.Contains("text/html", StringComparison.OrdinalIgnoreCase)
+            || string.IsNullOrWhiteSpace(accept);
 
         if (!acceptsHtml)
         {
@@ -30,10 +38,30 @@ public sealed class TabbedContextGateMiddleware
         var path = context.Request.Path.Value ?? string.Empty;
         if (path.Equals("/", StringComparison.OrdinalIgnoreCase)
             || path.StartsWith("/Login", StringComparison.OrdinalIgnoreCase)
-            || path.StartsWith("/Error", StringComparison.OrdinalIgnoreCase))
+            || path.StartsWith("/Error", StringComparison.OrdinalIgnoreCase)
+            || path.StartsWith("/Admin", StringComparison.OrdinalIgnoreCase)
+            || path.StartsWith("/Dashboard", StringComparison.OrdinalIgnoreCase))
         {
             await _next(context);
             return;
+        }
+
+        // After a successful login, a redirect to a local ReturnUrl may not carry the tab header.
+        // Treat same-origin Referer or explicit ReturnUrl-based navigations as "in-app" to avoid false positives.
+        var hasReturnUrl = context.Request.Query.ContainsKey("returnUrl")
+            || context.Request.Query.ContainsKey("ReturnUrl");
+
+        // If it's a direct browser navigation, we only block when there is a Referer from our own site absent.
+        // This prevents false positives after login redirects.
+        var hasSameOriginReferer = false;
+        if (context.Request.Headers.TryGetValue("Referer", out var refererVals))
+        {
+            var referer = refererVals.ToString();
+            if (Uri.TryCreate(referer, UriKind.Absolute, out var r)
+                && string.Equals(r.Host, context.Request.Host.Host, StringComparison.OrdinalIgnoreCase))
+            {
+                hasSameOriginReferer = true;
+            }
         }
 
         // If request comes from TabHost, header must exist.
@@ -48,7 +76,14 @@ public sealed class TabbedContextGateMiddleware
             return;
         }
 
-        // Direct URL navigation: return a minimal HTML response with only Close button.
+        // If user is navigating inside the app (same-origin referer), do not hard-block.
+        if (hasSameOriginReferer || hasReturnUrl)
+        {
+            await _next(context);
+            return;
+        }
+
+        // Direct URL navigation: show a minimal response card (Close only).
         context.Response.StatusCode = StatusCodes.Status200OK;
         context.Response.ContentType = "text/html; charset=utf-8";
 
@@ -68,9 +103,10 @@ public sealed class TabbedContextGateMiddleware
   <div class=\"container mt-4\">
     <div class=\"card shadow-sm\">
       <div class=\"card-body\">
-        <h5 class=\"card-title\">Uyarý</h5>
+        <h5 class=\"card-title\">Ýþlem tamamlanamadý (200)</h5>
         <p class=\"card-text\">{{message}}</p>
-        <div class=\"mt-3\">
+        <hr />
+        <div class=\"d-flex gap-2 flex-wrap\">
           <button type=\"button\" class=\"btn btn-secondary\" onclick=\"history.back()\">Kapat</button>
         </div>
         <div class=\"mt-2 small text-muted\">TraceId: <code>{{traceId}}</code></div>

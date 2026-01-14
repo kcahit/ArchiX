@@ -30,24 +30,21 @@
                 <div class="collapse" id="toolsDatasetMenu">
                     <ul class="nav flex-column ms-3">
                         <li class="nav-item">
-                            <a class="nav-link" href="/Tools/Dataset/Grid" target="_blank" rel="noopener">
+                            <a class="nav-link" href="/Tools/Dataset/Grid" data-archix-menu="Tools/Dataset/Grid">
                                 <i class="bi bi-list-check"></i>
                                 Dataset Grid
-                                <i class="bi bi-box-arrow-up-right ms-1" style="font-size: 0.8em;"></i>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/Tools/Dataset/Kombine" target="_blank" rel="noopener">
+                            <a class="nav-link" href="/Tools/Dataset/Kombine" data-archix-menu="Tools/Dataset/Kombine">
                                 <i class="bi bi-intersect"></i>
                                 Dataset Kombine
-                                <i class="bi bi-box-arrow-up-right ms-1" style="font-size: 0.8em;"></i>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/Tools/Dataset/Record" target="_blank" rel="noopener">
+                            <a class="nav-link" href="/Tools/Dataset/Record" data-archix-menu="Tools/Dataset/Record">
                                 <i class="bi bi-ui-checks-grid"></i>
                                 Dataset Record
-                                <i class="bi bi-box-arrow-up-right ms-1" style="font-size: 0.8em;"></i>
                             </a>
                         </li>
                     </ul>
@@ -66,21 +63,18 @@
                 <div class="collapse" id="definitionsMenu">
                     <ul class="nav flex-column ms-3">
                         <li class="nav-item">
-                            <a class="nav-link" href="/Definitions/Application" target="_blank" rel="noopener noreferrer">
+                            <a class="nav-link" href="/Definitions/Application" data-archix-menu="Definitions/Application">
                                 Application
-                                <i class="bi bi-box-arrow-up-right ms-1" style="font-size: 0.8em;"></i>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/Definitions/Parameters" target="_blank" rel="noopener noreferrer">
+                            <a class="nav-link" href="/Definitions/Parameters" data-archix-menu="Definitions/Parameters">
                                 Parameters
-                                <i class="bi bi-box-arrow-up-right ms-1" style="font-size: 0.8em;"></i>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/Definitions/Datasets" target="_blank" rel="noopener noreferrer">
+                            <a class="nav-link" href="/Definitions/Datasets" data-archix-menu="Definitions/Datasets">
                                 Datasets
-                                <i class="bi bi-box-arrow-up-right ms-1" style="font-size: 0.8em;"></i>
                             </a>
                         </li>
                     </ul>
@@ -110,13 +104,13 @@
 
                             <div class="collapse" id="adminSecurityMenu">
                                 <ul class="nav flex-column ms-3">
-                                    <li class="nav-item"><a class="nav-link" href="/Admin/Security/Index" target="_blank" rel="noopener noreferrer">Index aaa</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="/Admin/Security/Blacklist" target="_blank" rel="noopener noreferrer">Blacklist</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="/Admin/Security/PolicySettings" target="_blank" rel="noopener noreferrer">PolicySettings</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="/Admin/Security/PasswordPolicy" target="_blank" rel="noopener noreferrer">PasswordPolicy</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="/Admin/Security/AuditTrail" target="_blank" rel="noopener noreferrer">AuditTrail</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="/Admin/Security/PasswordHistory" target="_blank" rel="noopener noreferrer">PasswordHistory</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="/Admin/Security/PolicyTest" target="_blank" rel="noopener noreferrer">PolicyTest</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="/Admin/Security/Index">Index aaa</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="/Admin/Security/Blacklist">Blacklist</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="/Admin/Security/PolicySettings">PolicySettings</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="/Admin/Security/PasswordPolicy">PasswordPolicy</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="/Admin/Security/AuditTrail">AuditTrail</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="/Admin/Security/PasswordHistory">PasswordHistory</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="/Admin/Security/PolicyTest">PolicyTest</a></li>
                                 </ul>
                             </div>
                         </li>
@@ -132,7 +126,7 @@
 
                             <div class="collapse" id="adminReportsMenu">
                                 <ul class="nav flex-column ms-3">
-                                    <li class="nav-item"><a class="nav-link" href="/Admin/Reports/DatasetParameters" target="_blank" rel="noopener noreferrer">DatasetParameters</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="/Admin/Reports/DatasetParameters">DatasetParameters</a></li>
                                 </ul>
                             </div>
                         </li>
@@ -258,5 +252,13 @@
                 syncCollapseIcon();
             });
         }
+
+        // Keep sidebar open state stable when clicking navigation links.
+        // Prevent accidental collapse toggles / bubbling into bootstrap collapse handlers.
+        document.querySelectorAll('#sidebar a.nav-link[href^="/"]:not([data-bs-toggle])').forEach(function (a) {
+            a.addEventListener('click', function (e) {
+                e.stopPropagation();
+            }, true);
+        });
     });
 </script>

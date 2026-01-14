@@ -92,13 +92,13 @@ builder.Services.AddArchiXPolicies();
 var app = builder.Build();
 
 // ✅ EXCEPTION HANDLING
-if (app.Environment.IsDevelopment())
+app.UseExceptionHandler("/Error");
+
+// Also handle non-exception HTTP status codes (404 etc.) through the same Razor Error page.
+app.UseStatusCodePagesWithReExecute("/Error", "?statusCode={0}");
+
+if (!app.Environment.IsDevelopment())
 {
-    app.UseDeveloperExceptionPage();
-}
-else
-{
-    app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
 
