@@ -206,19 +206,19 @@ Unit Test: `6.13`, `6.14`, `6.15`, `6.16`, `6.19`
 Kapsadığı kararlar: `6.11`, `6.12`, `6.9`, `6.10`
 Unit Test: `6.17`, `6.18`, `6.19`
 
-8.5 Response Card Standardı + Copy (Github Issue No: #51 )==> tamamlandı.
+8.5 Response Card Standardı + Copy (Github Issue No: #51 )==> tamamlandı.==> tamamlandı.
 Kapsadığı kararlar: `4.1`, `4.2`, `4.3`
 Unit Test: `4.4`, `4.5`, `4.6`
 
-8.6 requireTabContext Gate (Desktop davranışı) (Github Issue No: #52 )
+8.6 requireTabContext Gate (Desktop davranışı) (Github Issue No: #52 ) ==> tamamlandı.
 Kapsadığı kararlar: `5.5`, `5.6`
 Unit Test: `5.9`
 
-8.7 DB Parametre Seed + Okuma/Parse (HasData dahil) (Github Issue No: #53 )
+8.7 DB Parametre Seed + Okuma/Parse (HasData dahil) (Github Issue No: #53 ) ==> tamamlandı.
 Kapsadığı kararlar: `7.0`, `7.1`, `7.2`, `7.3`, `7.3.1`, `7.3.2`, `7.3.3`
 '7.0' migration kodu yazmayacağız. EF Core ile Auto-Migration yapılacak. Update-Database komutu ile DB şeması güncellenecek.
 Unit Test: `7.4`, `7.5`, `7.6`
 
-8.8 Nested Tabs (Sidebar Hiyerarşisi ile Birebir) (Github Issue No: #54 )
+8.8 Nested Tabs (Sidebar Hiyerarşisi ile Birebir) (Github Issue No: #54 ) ==> tamamlandı.
 Kapsadığı kararlar: `3.1`, `3.2`
 Unit Test: `3.3`, `3.4`, `3.5`

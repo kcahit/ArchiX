@@ -11,8 +11,168 @@
     maxOpenTabs: 15,
     maxTabReachedMessage: 'Açýk tab sayýsý 15 limitine geldi. Lütfen açýk tablardan birini kapatýnýz.',
     tabAutoCloseMinutes: 10,
-    autoCloseWarningSeconds: 30
+    autoCloseWarningSeconds: 30,
+    enableNestedTabs: true
   };
+
+  function createNestedHost(parentPane, groupId) {
+    const host = document.createElement('div');
+    host.className = 'mt-2';
+    host.setAttribute('data-archix-nested-host', '1');
+    host.setAttribute('data-group-id', groupId);
+    host.innerHTML = `
+      <ul class="nav nav-tabs" role="tablist" data-archix-nested-tabs="1"></ul>
+      <div class="tab-content border border-top-0" data-archix-nested-panes="1"></div>
+    `;
+    parentPane.appendChild(host);
+    return host;
+  }
+
+  function openNestedTab({ groupId, url, title }) {
+    const h = ensureHost();
+    if (!h) return;
+
+    // Ensure group tab exists in root host
+    let group = state.detailById.get(groupId);
+    if (!group) {
+      // Create group as a normal tab first
+      const fakeTitle = title;
+      // Create empty group tab
+      const id = groupId;
+      const tabLi = document.createElement('li');
+      tabLi.className = 'nav-item';
+
+      const tabA = document.createElement('a');
+      tabA.className = 'nav-link';
+      tabA.href = '#';
+      tabA.setAttribute('role', 'tab');
+      tabA.setAttribute('data-tab-id', id);
+      tabA.innerHTML = `
+        <span class="archix-tab-title">${escapeHtml(fakeTitle)}</span>
+        <button type="button" class="btn btn-sm btn-link ms-2 p-0 archix-tab-close" aria-label="Kapat" title="Kapat">&times;</button>
+      `;
+
+      tabLi.appendChild(tabA);
+
+      const pane = document.createElement('div');
+      pane.className = 'tab-pane fade';
+      pane.setAttribute('role', 'tabpanel');
+      pane.setAttribute('data-tab-id', id);
+      pane.innerHTML = `<div class="p-2" data-archix-group-pane="1"></div>`;
+
+      h.tabs.appendChild(tabLi);
+      h.panes.appendChild(pane);
+
+      state.tabs.push({ id, url: null, title: fakeTitle, isGroup: true });
+      state.detailById.set(id, {
+        id,
+        url: null,
+        title: fakeTitle,
+        openedAt: Date.now(),
+        lastActivatedAt: Date.now(),
+        isDirty: false,
+        warnedAt: null,
+        isGroup: true
+      });
+
+      const inner = pane.querySelector('[data-archix-group-pane="1"]');
+      if (inner) createNestedHost(inner, id);
+
+      activateTab(id);
+    } else {
+      activateTab(groupId);
+    }
+
+    const groupPane = qs(`.tab-pane[data-tab-id="${CSS.escape(groupId)}"] [data-archix-nested-host="1"]`);
+    if (!groupPane) {
+      // fail-closed
+      openTab({ url, title });
+      return;
+    }
+
+    const nestedTabs = qs('[data-archix-nested-tabs="1"]', groupPane);
+    const nestedPanes = qs('[data-archix-nested-panes="1"]', groupPane);
+    if (!nestedTabs || !nestedPanes) {
+      openTab({ url, title });
+      return;
+    }
+
+    const childId = newId();
+    const childTitle = nextUniqueTitle(title);
+
+    const tabLi = document.createElement('li');
+    tabLi.className = 'nav-item';
+    const tabA = document.createElement('a');
+    tabA.className = 'nav-link';
+    tabA.href = '#';
+    tabA.setAttribute('role', 'tab');
+    tabA.setAttribute('data-nested-tab-id', childId);
+    tabA.innerHTML = `
+      <span class="archix-tab-title">${escapeHtml(childTitle)}</span>
+      <button type="button" class="btn btn-sm btn-link ms-2 p-0 archix-nested-close" aria-label="Kapat" title="Kapat">&times;</button>
+    `;
+    tabLi.appendChild(tabA);
+
+    const pane = document.createElement('div');
+    pane.className = 'tab-pane fade';
+    pane.setAttribute('role', 'tabpanel');
+    pane.setAttribute('data-nested-tab-id', childId);
+    pane.innerHTML = `<div class="p-3 text-muted">Yükleniyor...</div>`;
+
+    nestedTabs.appendChild(tabLi);
+    nestedPanes.appendChild(pane);
+
+    const activateNested = (id) => {
+      qsa('.nav-link[data-nested-tab-id]', nestedTabs).forEach(a => {
+        const isActive = a.getAttribute('data-nested-tab-id') === id;
+        a.classList.toggle('active', isActive);
+        a.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
+      qsa('.tab-pane[data-nested-tab-id]', nestedPanes).forEach(p => {
+        const isActive = p.getAttribute('data-nested-tab-id') === id;
+        p.classList.toggle('show', isActive);
+        p.classList.toggle('active', isActive);
+      });
+    };
+
+    nestedTabs.addEventListener('click', e => {
+      const target = e.target;
+      if (!(target instanceof Element)) return;
+      const closeBtn = target.closest('.archix-nested-close');
+      const link = target.closest('.nav-link[data-nested-tab-id]');
+      const id = (link && link.getAttribute('data-nested-tab-id')) || null;
+      if (!id) return;
+      e.preventDefault();
+
+      if (closeBtn) {
+        const li = link?.closest('li');
+        if (li) li.remove();
+        const p = qs(`.tab-pane[data-nested-tab-id="${CSS.escape(id)}"]`, nestedPanes);
+        if (p) p.remove();
+        const remaining = qsa('.nav-link[data-nested-tab-id]', nestedTabs);
+        if (remaining.length > 0) {
+          activateNested(remaining[remaining.length - 1].getAttribute('data-nested-tab-id'));
+        }
+        return;
+      }
+
+      activateNested(id);
+    }, { once: true });
+
+    activateNested(childId);
+
+    loadContent(url).then(result => {
+      if (!result.ok) {
+        pane.innerHTML = `<div class="p-3"><div class="alert alert-danger">Yükleme hatasý (${result.status}).</div></div>`;
+        return;
+      }
+      const html = result.text;
+      let content = html;
+      const m = /<body[^>]*>([\s\S]*?)<\/body>/i.exec(html);
+      if (m && m[1]) content = m[1];
+      pane.innerHTML = `<div class="archix-tab-content">${content}</div>`;
+    });
+  }
 
   const selectors = {
     host: '#archix-tabhost',
@@ -376,6 +536,18 @@
       e.preventDefault();
 
       const title = (a.textContent || '').trim() || a.getAttribute('title') || href;
+
+      // Nested tabs: only if enabled and sidebar provides hierarchy metadata.
+      if (config.enableNestedTabs) {
+        const menuPath = a.getAttribute('data-archix-menu');
+        if (menuPath) {
+          const group = menuPath.split('/')[0];
+          const groupId = `g_${group}`;
+          openNestedTab({ groupId, url: href, title });
+          return;
+        }
+      }
+
       openTab({ url: href, title });
     });
   }
