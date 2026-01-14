@@ -2,12 +2,16 @@
   const state = {
     tabs: [],
     activeId: null,
-    seqByTitleBase: new Map()
+    seqByTitleBase: new Map(),
+    lastActivityAt: Date.now(),
+    detailById: new Map() // { id, url, title, openedAt, lastActivatedAt, isDirty, warnedAt }
   };
 
   const config = {
     maxOpenTabs: 15,
-    maxTabReachedMessage: 'Açýk tab sayýsý 15 limitine geldi. Lütfen açýk tablardan birini kapatýnýz.'
+    maxTabReachedMessage: 'Açýk tab sayýsý 15 limitine geldi. Lütfen açýk tablardan birini kapatýnýz.',
+    tabAutoCloseMinutes: 10,
+    autoCloseWarningSeconds: 30
   };
 
   const selectors = {
@@ -101,6 +105,8 @@
     if (!h) return;
 
     state.activeId = id;
+    const d = state.detailById.get(id);
+    if (d) d.lastActivatedAt = Date.now();
 
     qsa('.nav-link[data-tab-id]', h.tabs).forEach(a => {
       const isActive = a.getAttribute('data-tab-id') === id;
@@ -152,6 +158,15 @@
     h.panes.appendChild(pane);
 
     state.tabs.push({ id, url, title: uniqueTitle });
+    state.detailById.set(id, {
+      id,
+      url,
+      title: uniqueTitle,
+      openedAt: Date.now(),
+      lastActivatedAt: Date.now(),
+      isDirty: false,
+      warnedAt: null
+    });
     activateTab(id);
 
     try {
@@ -182,6 +197,7 @@
 
     const tab = state.tabs[idx];
     state.tabs.splice(idx, 1);
+    state.detailById.delete(id);
 
     const link = qs(`.nav-link[data-tab-id="${CSS.escape(id)}"]`, h.tabs);
     const li = link?.closest('li');
@@ -233,6 +249,45 @@
     });
   }
 
+  function touchActivity() {
+    state.lastActivityAt = Date.now();
+  }
+
+  function initIdleTracking() {
+    // Decision 6.5.1: pointerdown, pointermove, keydown, wheel, scroll
+    const opts = { passive: true, capture: true };
+    window.addEventListener('pointerdown', touchActivity, opts);
+    window.addEventListener('pointermove', touchActivity, opts);
+    window.addEventListener('keydown', touchActivity, opts);
+    window.addEventListener('wheel', touchActivity, opts);
+    window.addEventListener('scroll', touchActivity, opts);
+  }
+
+  function getInactiveTabs() {
+    return state.tabs.filter(t => t.id !== state.activeId);
+  }
+
+  function getInactiveIdleMs() {
+    return Date.now() - state.lastActivityAt;
+  }
+
+  function tickAutoCloseWarnings() {
+    // Scope: only inactive tabs (Decision 6.6.1)
+    const idleMs = getInactiveIdleMs();
+    const warnMs = config.tabAutoCloseMinutes * 60 * 1000 - config.autoCloseWarningSeconds * 1000;
+    if (idleMs < warnMs) return;
+
+    // Warn once per inactive tab per idle window.
+    const now = Date.now();
+    for (const t of getInactiveTabs()) {
+      const d = state.detailById.get(t.id);
+      if (!d) continue;
+      if (d.warnedAt && (now - d.warnedAt) < 10_000) continue;
+      d.warnedAt = now;
+      showToast(`"${d.title}" sekmesi ${config.autoCloseWarningSeconds} sn sonra kapanacak.`);
+    }
+  }
+
   function bindTabHostEvents() {
     const h = ensureHost();
     if (!h) return;
@@ -264,6 +319,10 @@
 
     interceptClicks();
     bindTabHostEvents();
+    initIdleTracking();
+
+    // Warning ticker: lightweight interval.
+    window.setInterval(tickAutoCloseWarnings, 1000);
 
     // open default home tab
     openTab({ url: '/Dashboard', title: 'Home/Dashboard' });

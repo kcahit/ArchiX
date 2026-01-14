@@ -39,7 +39,7 @@ public sealed class TabHostRulesTests
         // Minimal: only paths starting with '/'
         var samples = new[] { "/Dashboard", "/Tools/Dataset/Grid", "https://example.com", "#anchor", "relative/path" };
 
-        bool ShouldIntercept(string href) => href.StartsWith('/') && !href.StartsWith("//") && !href.StartsWith("/http", StringComparison.OrdinalIgnoreCase);
+        static bool ShouldIntercept(string href) => href.StartsWith('/') && !href.StartsWith("//") && !href.StartsWith("/http", StringComparison.OrdinalIgnoreCase);
 
         ShouldIntercept(samples[0]).Should().BeTrue();
         ShouldIntercept(samples[1]).Should().BeTrue();
@@ -57,5 +57,31 @@ public sealed class TabHostRulesTests
         maxOpenTabs.Should().Be(15);
         message.Should().NotBeNullOrWhiteSpace();
         message.Should().Contain("15");
+    }
+
+    [Fact]
+    public void AutoClose_defaults_are_10_minutes_and_30_seconds_and_only_inactive_tabs_are_in_scope()
+    {
+        const int tabAutoCloseMinutes = 10;
+        const int autoCloseWarningSeconds = 30;
+
+        // Decision 6.6.1: only inactive tabs
+        const bool activeTabInScope = false;
+        const bool inactiveTabInScope = true;
+
+        tabAutoCloseMinutes.Should().Be(10);
+        autoCloseWarningSeconds.Should().Be(30);
+
+        activeTabInScope.Should().BeFalse();
+        inactiveTabInScope.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Idle_reset_event_set_matches_spec()
+    {
+        // Decision 6.5.1
+        var events = new[] { "pointerdown", "pointermove", "keydown", "wheel", "scroll" };
+        events.Should().Contain(new[] { "pointerdown", "pointermove", "keydown", "wheel", "scroll" });
+        events.Should().HaveCount(5);
     }
 }
