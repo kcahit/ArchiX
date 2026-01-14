@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
 namespace ArchiX.Library.Entities
@@ -23,7 +23,7 @@ namespace ArchiX.Library.Entities
         public string? Value { get; set; }
         public string? Template { get; set; }
 
-        [Required, MaxLength(500)]
+        [Required, MaxLength(1000)]
         public string Description { get; set; } = string.Empty;
 
         [Timestamp]
