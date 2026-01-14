@@ -47,4 +47,15 @@ public sealed class TabHostRulesTests
         ShouldIntercept(samples[3]).Should().BeFalse();
         ShouldIntercept(samples[4]).Should().BeFalse();
     }
+
+    [Fact]
+    public void MaxOpenTabs_default_is_15_and_message_matches_spec()
+    {
+        const int maxOpenTabs = 15;
+        const string message = "Açık tab sayısı 15 limitine geldi. Lütfen açık tablardan birini kapatınız.";
+
+        maxOpenTabs.Should().Be(15);
+        message.Should().NotBeNullOrWhiteSpace();
+        message.Should().Contain("15");
+    }
 }

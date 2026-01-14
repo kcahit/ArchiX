@@ -5,6 +5,11 @@
     seqByTitleBase: new Map()
   };
 
+  const config = {
+    maxOpenTabs: 15,
+    maxTabReachedMessage: 'Açýk tab sayýsý 15 limitine geldi. Lütfen açýk tablardan birini kapatýnýz.'
+  };
+
   const selectors = {
     host: '#archix-tabhost',
     tabs: '#archix-tabhost-tabs',
@@ -113,6 +118,11 @@
   async function openTab({ url, title }) {
     const h = ensureHost();
     if (!h) return;
+
+    if (state.tabs.length >= config.maxOpenTabs) {
+      showToast(config.maxTabReachedMessage);
+      return;
+    }
 
     const id = newId();
     const uniqueTitle = nextUniqueTitle(title);
