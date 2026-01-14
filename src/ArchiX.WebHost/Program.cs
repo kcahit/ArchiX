@@ -17,6 +17,7 @@ using ArchiX.Library.Web.Configuration;
 using ArchiX.Library.Web.Mapping;
 using ArchiX.Library.Web.Security;
 using ArchiX.Library.Web.Security.Authorization;
+using ArchiX.WebHost.Middleware;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -112,6 +113,9 @@ await ArchiX.Library.Runtime.Connections.ConnectionStringsStartup.EnsureSeedAsyn
 
 // ✅ Static Files (Symbolic link sayesinde css/ erişilebilir)
 app.UseStaticFiles();
+
+// #52 requireTabContext gate (UX)
+app.UseMiddleware<TabbedContextGateMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();

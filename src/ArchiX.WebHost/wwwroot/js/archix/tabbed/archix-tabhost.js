@@ -28,6 +28,52 @@
     return (title || 'Tab').trim().replace(/\s+/g, ' ');
   }
 
+  function bindResponseCardActions() {
+    document.addEventListener('click', e => {
+      const t = e.target;
+      if (!(t instanceof Element)) return;
+      const btn = t.closest('[data-archix-action]');
+      if (!btn) return;
+
+      const action = btn.getAttribute('data-archix-action');
+      if (!action) return;
+
+      if (action === 'close-tab') {
+        e.preventDefault();
+        if (state.activeId) closeTab(state.activeId);
+        return;
+      }
+
+      if (action === 'copy-trace') {
+        e.preventDefault();
+        const trace = btn.getAttribute('data-archix-trace') || '';
+        const msg = btn.getAttribute('data-archix-message') || '';
+        const payload = `TraceId: ${trace}\nMesaj: ${msg}`;
+
+        if (navigator.clipboard?.writeText) {
+          navigator.clipboard.writeText(payload).then(
+            () => showToast('Kopyalandý.'),
+            () => showToast('Kopyalama baþarýsýz.')
+          );
+        } else {
+          try {
+            const ta = document.createElement('textarea');
+            ta.value = payload;
+            ta.style.position = 'fixed';
+            ta.style.left = '-10000px';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            ta.remove();
+            showToast('Kopyalandý.');
+          } catch {
+            showToast('Kopyalama baþarýsýz.');
+          }
+        }
+      }
+    });
+  }
+
   function showAutoClosePrompt(tabId) {
     const d = state.detailById.get(tabId);
     if (!d) return;
@@ -428,6 +474,7 @@
 
     interceptClicks();
     bindTabHostEvents();
+    bindResponseCardActions();
     initIdleTracking();
 
     // Warning ticker: lightweight interval.

@@ -202,11 +202,11 @@ Unit Test: `2.9`
 Kapsadığı kararlar: `6.3`, `6.4`, `6.5`, `6.6`, `6.7`, `6.8`, `6.10`
 Unit Test: `6.13`, `6.14`, `6.15`, `6.16`, `6.19`
 
-8.4 Dirty Merkezi Mimari + Auto-close Aksiyon Seti (Github Issue No: #50 )
+8.4 Dirty Merkezi Mimari + Auto-close Aksiyon Seti (Github Issue No: #50 )==> tamamlandı.
 Kapsadığı kararlar: `6.11`, `6.12`, `6.9`, `6.10`
 Unit Test: `6.17`, `6.18`, `6.19`
 
-8.5 Response Card Standardı + Copy (Github Issue No: #51 )
+8.5 Response Card Standardı + Copy (Github Issue No: #51 )==> tamamlandı.
 Kapsadığı kararlar: `4.1`, `4.2`, `4.3`
 Unit Test: `4.4`, `4.5`, `4.6`
 
