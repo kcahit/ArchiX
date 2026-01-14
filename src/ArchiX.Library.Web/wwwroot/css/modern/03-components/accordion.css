@@ -17,6 +17,14 @@
     background: #4b6bfb;
     border: 1px solid #3a58d6;
     box-shadow: none;
+    padding: 4px 10px !important;
+    font-size: 0.85rem !important;
+    line-height: 1.05 !important;
+    min-height: 30px !important;
+}
+
+.archix-accordion-primary .accordion-body {
+    padding: 10px;
 }
 
 .archix-accordion-primary .accordion-button.collapsed {
@@ -24,7 +32,7 @@
 }
 
 .archix-accordion-primary .accordion-button:not(.collapsed) {
-    color: #ffc107;
+    color: #fff;
 }
 
 .archix-accordion-primary .accordion-button:focus {
@@ -65,7 +73,7 @@
 }
 
 .filter-summary-accordion .accordion-button.filter-accordion-btn:not(.collapsed) {
-    color: #ffc107 !important;
+    color: #fff !important;
 }
 
 .filter-summary-accordion .accordion-button.filter-accordion-btn:focus {

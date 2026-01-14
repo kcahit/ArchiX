@@ -5,12 +5,6 @@
 // This file is intentionally small to debug the "opens but doesn't close" issue.
 
 (function (window) {
-    function ensureStyles() {
-        // Styles were moved to `wwwroot/css/modern/03-components/accordion.css`.
-        // Keep this function to avoid changing call sites.
-        return;
-    }
-
     function sanitizeId(key) {
         return String(key || '').replace(/[^a-zA-Z0-9_-]/g, '');
     }
@@ -26,8 +20,6 @@
         const tagsContainer = document.getElementById(`${tableId}-filterTags`);
         const filterCountSpan = document.getElementById(`${tableId}-filterCount`);
         if (!container || !tagsContainer || !filterCountSpan) return;
-
-        ensureStyles();
 
         if (!filters || filters.length === 0) {
             container.style.display = 'none';
