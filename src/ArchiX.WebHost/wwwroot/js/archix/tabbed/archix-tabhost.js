@@ -28,6 +28,89 @@
     return (title || 'Tab').trim().replace(/\s+/g, ' ');
   }
 
+  function showAutoClosePrompt(tabId) {
+    const d = state.detailById.get(tabId);
+    if (!d) return;
+
+    const c = qs(selectors.toast);
+    if (!c) return;
+
+    const el = document.createElement('div');
+    el.className = 'toast text-bg-warning border-0';
+    el.setAttribute('role', 'alert');
+    el.setAttribute('aria-live', 'assertive');
+    el.setAttribute('aria-atomic', 'true');
+    el.setAttribute('data-archix-autoclose', '1');
+    el.setAttribute('data-tab-id', tabId);
+
+    const hasDirty = !!d.isDirty;
+    el.innerHTML = `
+      <div class="toast-header text-bg-warning border-0">
+        <strong class="me-auto">Otomatik Kapatma</strong>
+        <small>Tab: ${escapeHtml(d.title)}</small>
+        <button type="button" class="btn-close ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        <div class="mb-2">"${escapeHtml(d.title)}" sekmesi kapatýlacak.</div>
+        <div class="mb-2 d-flex align-items-center gap-2">
+          <label class="form-label m-0" for="archixDeferMinutes_${escapeHtml(tabId)}">Erteleme (dk)</label>
+          <input class="form-control form-control-sm" style="width:90px" type="number" min="1" max="${config.tabAutoCloseMinutes}" value="${config.tabAutoCloseMinutes}" id="archixDeferMinutes_${escapeHtml(tabId)}" />
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+          <button type="button" class="btn btn-sm btn-light" data-action="defer">Kapatmayý Ertele</button>
+          ${hasDirty ? '<button type="button" class="btn btn-sm btn-danger" data-action="closeNoSave">Kaydetmeden Kapat</button>' : ''}
+          <button type="button" class="btn btn-sm btn-primary" data-action="focus">Sayfayý Aç</button>
+        </div>
+      </div>`;
+
+    c.appendChild(el);
+
+    const doRemove = () => el.remove();
+    el.addEventListener('hidden.bs.toast', doRemove);
+
+    el.addEventListener('click', e => {
+      const t = e.target;
+      if (!(t instanceof Element)) return;
+      const btn = t.closest('button[data-action]');
+      if (!btn) return;
+
+      const action = btn.getAttribute('data-action');
+      const input = el.querySelector('input[type="number"]');
+      let minutes = config.tabAutoCloseMinutes;
+      if (input) {
+        const v = Number.parseInt(input.value, 10);
+        if (!Number.isNaN(v)) minutes = v;
+      }
+      if (minutes < 1) minutes = 1;
+      if (minutes > config.tabAutoCloseMinutes) minutes = config.tabAutoCloseMinutes;
+
+      if (action === 'defer') {
+        // Reset idle window from now.
+        state.lastActivityAt = Date.now() - Math.max(0, (config.tabAutoCloseMinutes - minutes)) * 60 * 1000;
+      }
+
+      if (action === 'focus') {
+        activateTab(tabId);
+      }
+
+      if (action === 'closeNoSave') {
+        closeTab(tabId);
+      }
+
+      if (window.bootstrap?.Toast) {
+        const toast = window.bootstrap.Toast.getOrCreateInstance(el);
+        toast.hide();
+      } else {
+        doRemove();
+      }
+    });
+
+    if (window.bootstrap?.Toast) {
+      const toast = new window.bootstrap.Toast(el, { autohide: false });
+      toast.show();
+    }
+  }
+
   function nextUniqueTitle(titleBase) {
     const base = normalizeTitleBase(titleBase);
     const next = (state.seqByTitleBase.get(base) || 0) + 1;
@@ -183,6 +266,8 @@
       if (m && m[1]) content = m[1];
 
       pane.innerHTML = `<div class="archix-tab-content">${content}</div>`;
+
+      bindDirtyTrackingForPane(id, pane);
     } catch {
       pane.innerHTML = `<div class="p-3"><div class="alert alert-danger">Ýçerik yüklenemedi.</div></div>`;
     }
@@ -284,8 +369,32 @@
       if (!d) continue;
       if (d.warnedAt && (now - d.warnedAt) < 10_000) continue;
       d.warnedAt = now;
-      showToast(`"${d.title}" sekmesi ${config.autoCloseWarningSeconds} sn sonra kapanacak.`);
+      showAutoClosePrompt(t.id);
     }
+  }
+
+  function bindDirtyTrackingForPane(tabId, pane) {
+    // Decision 6.11.x: only record screens for now.
+    const d = state.detailById.get(tabId);
+    if (!d) return;
+    if (!/\/Tools\/Dataset\/Record/i.test(d.url)) return;
+
+    const markDirty = () => {
+      const dd = state.detailById.get(tabId);
+      if (dd) dd.isDirty = true;
+    };
+
+    pane.addEventListener('input', e => {
+      const t = e.target;
+      if (!(t instanceof Element)) return;
+      if (t.matches('input,select,textarea')) markDirty();
+    }, true);
+
+    pane.addEventListener('change', e => {
+      const t = e.target;
+      if (!(t instanceof Element)) return;
+      if (t.matches('input,select,textarea')) markDirty();
+    }, true);
   }
 
   function bindTabHostEvents() {

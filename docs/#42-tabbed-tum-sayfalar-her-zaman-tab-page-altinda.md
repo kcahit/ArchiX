@@ -190,15 +190,15 @@
 
 ## 8) Yapılacak İşler (İş Sırası — Yapılış Sırası)
 
-8.1 Tab Host Shell + Navigation Intercept (Github Issue No: #47)
+8.1 Tab Host Shell + Navigation Intercept (Github Issue No: #47) ==> tamamlandı.
 Kapsadığı kararlar: `2.1`, `2.2`, `2.3`, `2.4`
 Unit Test: `2.6`, `2.7`, `2.8`
 
-8.2 Max Tab Limit Enforcement + Uyarı (Github Issue No: #48)
+8.2 Max Tab Limit Enforcement + Uyarı (Github Issue No: #48) ==> tamamlandı.
 Kapsadığı kararlar: `2.5`, `6.1`, `6.2`, `7.2 (tabbed.maxOpenTabs)`, `7.3.2 (onMaxTabReached)`
 Unit Test: `2.9`
 
-8.3 Auto-close Timer + Idle Reset + Warning UI (Github Issue No: #49 )
+8.3 Auto-close Timer + Idle Reset + Warning UI (Github Issue No: #49 ) ==> tamamlandı.
 Kapsadığı kararlar: `6.3`, `6.4`, `6.5`, `6.6`, `6.7`, `6.8`, `6.10`
 Unit Test: `6.13`, `6.14`, `6.15`, `6.16`, `6.19`
 

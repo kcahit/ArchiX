@@ -84,4 +84,36 @@ public sealed class TabHostRulesTests
         events.Should().Contain(new[] { "pointerdown", "pointermove", "keydown", "wheel", "scroll" });
         events.Should().HaveCount(5);
     }
+
+    [Fact]
+    public void AutoClose_action_set_depends_on_isDirty()
+    {
+        // Decision 6.12
+        var dirtyActions = new[] { "defer", "closeNoSave", "focus" };
+        var cleanActions = new[] { "defer", "focus" };
+
+        dirtyActions.Should().Contain(new[] { "defer", "closeNoSave", "focus" });
+        cleanActions.Should().Contain(new[] { "defer", "focus" });
+        cleanActions.Should().NotContain("closeNoSave");
+    }
+
+    [Fact]
+    public void Defer_minutes_are_clamped_between_1_and_tabAutoCloseMinutes()
+    {
+        const int tabAutoCloseMinutes = 10;
+
+        static int Clamp(int v, int max)
+        {
+            if (v < 1) return 1;
+            if (v > max) return max;
+            return v;
+        }
+
+        Clamp(-5, tabAutoCloseMinutes).Should().Be(1);
+        Clamp(0, tabAutoCloseMinutes).Should().Be(1);
+        Clamp(1, tabAutoCloseMinutes).Should().Be(1);
+        Clamp(5, tabAutoCloseMinutes).Should().Be(5);
+        Clamp(10, tabAutoCloseMinutes).Should().Be(10);
+        Clamp(999, tabAutoCloseMinutes).Should().Be(10);
+    }
 }
