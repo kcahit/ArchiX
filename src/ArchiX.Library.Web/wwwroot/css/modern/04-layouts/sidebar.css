@@ -140,7 +140,7 @@
 .main-content {
     margin-left: 260px;
     margin-top: 60px;
-    padding: 16px;
+    padding: 0;
     min-height: calc(100vh - 60px);
     transition: all 0.3s;
 }

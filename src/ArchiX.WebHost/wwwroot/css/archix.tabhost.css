@@ -7,6 +7,15 @@
     padding-bottom: 0.35rem;
 }
 
+/* Align tab host tighter with the content area */
+.main-content #archix-tabhost {
+    margin-left: 0;
+}
+
+.main-content #archix-tabhost-tabs {
+    margin-left: 0;
+}
+
 #archix-tabhost-tabs .archix-tab-close,
 #archix-tabhost [data-archix-nested-tabs="1"] .archix-nested-close {
     text-decoration: none;

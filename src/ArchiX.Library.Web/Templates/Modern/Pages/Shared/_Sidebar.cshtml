@@ -20,7 +20,7 @@
 
             <!-- Tools / Dataset (Collapsible) - default CLOSED -->
             <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#toolsDatasetMenu"
+                <a class="nav-link" data-bs-toggle="collapse" href="#toolsDatasetMenu" data-archix-group="Tools/Dataset"
                    role="button" aria-expanded="false" aria-controls="toolsDatasetMenu">
                     <i class="bi bi-table"></i>
                     Dataset Tools
@@ -53,7 +53,7 @@
 
             <!-- Definitions (Tanımlar) - Admin üstünde - default CLOSED -->
             <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#definitionsMenu"
+                <a class="nav-link" data-bs-toggle="collapse" href="#definitionsMenu" data-archix-group="Definitions"
                    role="button" aria-expanded="false" aria-controls="definitionsMenu">
                     <i class="bi bi-folder2-open"></i>
                     Definitions
@@ -83,7 +83,7 @@
 
             <!-- Admin Menu - default CLOSED -->
             <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#adminMenu"
+                <a class="nav-link" data-bs-toggle="collapse" href="#adminMenu" data-archix-group="Admin"
                    role="button" aria-expanded="false" aria-controls="adminMenu">
                     <i class="bi bi-tools"></i>
                     Admin
@@ -95,7 +95,7 @@
 
                         <!-- Admin / Security - default CLOSED -->
                         <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="collapse" href="#adminSecurityMenu"
+                            <a class="nav-link" data-bs-toggle="collapse" href="#adminSecurityMenu" data-archix-group="Admin/Security"
                                role="button" aria-expanded="false" aria-controls="adminSecurityMenu">
                                 <i class="bi bi-shield-lock-fill"></i>
                                 Security
@@ -117,7 +117,7 @@
 
                         <!-- Admin / Reports - default CLOSED -->
                         <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="collapse" href="#adminReportsMenu"
+                            <a class="nav-link" data-bs-toggle="collapse" href="#adminReportsMenu" data-archix-group="Admin/Reports"
                                role="button" aria-expanded="false" aria-controls="adminReportsMenu">
                                 <i class="bi bi-graph-up"></i>
                                 Reports
@@ -126,7 +126,7 @@
 
                             <div class="collapse" id="adminReportsMenu">
                                 <ul class="nav flex-column ms-3">
-                                    <li class="nav-item"><a class="nav-link" href="/Admin/Reports/DatasetParameters">DatasetParameters</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="/Admin/Reports/DatasetParameters" data-archix-menu="Admin/Reports/DatasetParameters">DatasetParameters</a></li>
                                 </ul>
                             </div>
                         </li>
@@ -170,11 +170,50 @@
             }
         }
 
+        function forceAllMenusClosedOnLoad() {
+            // Force-close any open collapses on first load.
+            // This ensures a consistent default of "all closed" including nested levels.
+            document.querySelectorAll('#sidebar .collapse.show').forEach(function (c) {
+                c.classList.remove('show');
+                const id = c.id;
+                if (!id) return;
+                const toggle = document.querySelector(`#sidebar [href="#${id}"][data-bs-toggle="collapse"]`);
+                if (toggle) toggle.setAttribute('aria-expanded', 'false');
+            });
+        }
+
         function writeOpenMenus(ids) {
             try {
                 localStorage.setItem(LS_KEY.openMenus, JSON.stringify(ids || []));
             } catch { }
         }
+
+        function applyStoredMenus() {
+            const openMenus = readOpenMenus();
+            document.querySelectorAll('.collapse[id]').forEach(function (c) {
+                const id = c.id;
+                if (!id) return;
+
+                const shouldBeOpen = openMenus.indexOf(id) !== -1;
+
+                // IMPORTANT: restoring state must not trigger Bootstrap collapse transitions.
+                // Otherwise, when TabHost opens a tab and we re-apply sidebar state, the user sees
+                // a visible close/open flicker.
+                c.classList.toggle('show', shouldBeOpen);
+
+                const toggle = document.querySelector(`[href="#${id}"][data-bs-toggle="collapse"]`);
+                if (toggle) toggle.setAttribute('aria-expanded', shouldBeOpen ? 'true' : 'false');
+            });
+
+            const shouldBeCollapsed = isCollapsedStored();
+            sidebar.classList.toggle('collapsed', shouldBeCollapsed);
+            syncCollapseIcon();
+        }
+
+        // Expose a stable API for other scripts (TabHost) to re-apply sidebar state.
+        window.ArchiX = window.ArchiX || {};
+        window.ArchiX.Sidebar = window.ArchiX.Sidebar || {};
+        window.ArchiX.Sidebar.restoreState = applyStoredMenus;
 
         function isCollapsedStored() {
             try { return localStorage.getItem(LS_KEY.collapsed) === '1'; } catch { return false; }
@@ -196,26 +235,23 @@
             icon.classList.toggle('bi-chevron-right', isCollapsed);
         }
 
-        // Restore sidebar collapsed state
-        if (sidebar && isCollapsedStored()) {
-            sidebar.classList.add('collapsed');
-        }
-        syncCollapseIcon();
-
-        // Restore open collapse menus
-        const openMenus = readOpenMenus();
-        for (let i = 0; i < openMenus.length; i++) {
-            const id = openMenus[i];
-            const el = document.getElementById(id);
-            if (el) el.classList.add('show');
-
-            const toggle = document.querySelector(`[href="#${id}"][data-bs-toggle="collapse"]`);
-            if (toggle) toggle.setAttribute('aria-expanded', 'true');
-        }
+        // Initial state: always start with all menus closed.
+        // Any persisted open menu state can cause partially-open (2nd level) UI on first load.
+        try { writeOpenMenus([]); } catch { }
+        try { forceAllMenusClosedOnLoad(); } catch { }
 
         // Track collapse menu open/close (bootstrap collapse events)
         document.querySelectorAll('.collapse[id]').forEach(function (c) {
             c.addEventListener('shown.bs.collapse', function (e) {
+                // Only persist when the user explicitly toggled via a sidebar collapse header.
+                // If some other script/interaction triggers collapse, we immediately restore stored state.
+                const active = document.activeElement;
+                const fromSidebarToggle = !!(active && active instanceof Element && active.closest('#sidebar') && active.hasAttribute('data-bs-toggle'));
+                if (!fromSidebarToggle) {
+                    try { applyStoredMenus(); } catch { }
+                    return;
+                }
+
                 const ids = readOpenMenus();
                 const id = e.target && e.target.id;
                 if (!id) return;
@@ -224,6 +260,13 @@
             });
 
             c.addEventListener('hidden.bs.collapse', function (e) {
+                const active = document.activeElement;
+                const fromSidebarToggle = !!(active && active instanceof Element && active.closest('#sidebar') && active.hasAttribute('data-bs-toggle'));
+                if (!fromSidebarToggle) {
+                    try { applyStoredMenus(); } catch { }
+                    return;
+                }
+
                 const ids = readOpenMenus();
                 const id = e.target && e.target.id;
                 if (!id) return;
@@ -253,12 +296,7 @@
             });
         }
 
-        // Keep sidebar open state stable when clicking navigation links.
-        // Prevent accidental collapse toggles / bubbling into bootstrap collapse handlers.
-        document.querySelectorAll('#sidebar a.nav-link[href^="/"]:not([data-bs-toggle])').forEach(function (a) {
-            a.addEventListener('click', function (e) {
-                e.stopPropagation();
-            }, true);
-        });
+        // Intentionally do not force sidebar state on every link click here.
+        // TabHost intercepts navigation globally; restoring state in both places can cause flicker.
     });
 </script>

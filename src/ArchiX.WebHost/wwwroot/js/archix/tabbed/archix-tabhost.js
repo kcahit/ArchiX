@@ -7,6 +7,70 @@
     detailById: new Map() // { id, url, title, openedAt, lastActivatedAt, isDirty, warnedAt }
   };
 
+  const pinned = {
+    homeUrl: '/Dashboard',
+    homeTitle: 'Dashboard'
+  };
+
+  function isPinnedUrl(url) {
+    if (!url) return false;
+    return String(url).toLowerCase() === pinned.homeUrl.toLowerCase();
+  }
+
+  function isPinnedTabId(id) {
+    const d = state.detailById.get(id);
+    return !!d && isPinnedUrl(d.url);
+  }
+
+  function isGroupTabId(id) {
+    const d = state.detailById.get(id);
+    return !!d && !!d.isGroup;
+  }
+
+  function closeGroupTabAndChildren(groupId) {
+    const h = ensureHost();
+    if (!h) return;
+
+    // Remove tab record
+    const idx = state.tabs.findIndex(t => t.id === groupId);
+    if (idx >= 0) state.tabs.splice(idx, 1);
+    state.detailById.delete(groupId);
+
+    // Remove tab element
+    const link = qs(`.nav-link[data-tab-id="${CSS.escape(groupId)}"]`, h.tabs);
+    const li = link?.closest('li');
+    if (li) li.remove();
+
+    // Remove pane (contains nested host and all children)
+    const pane = qs(`.tab-pane[data-tab-id="${CSS.escape(groupId)}"]`, h.panes);
+    if (pane) pane.remove();
+
+    // Activate previous tab if any
+    if (state.tabs.length > 0) {
+      const next = state.tabs[Math.min(idx - 1, state.tabs.length - 1)];
+      activateTab(next.id);
+    } else {
+      openTab({ url: pinned.homeUrl, title: pinned.homeTitle });
+    }
+  }
+
+  function copyTextCompat(payload) {
+    if (navigator.clipboard?.writeText) {
+      return navigator.clipboard.writeText(payload);
+    }
+
+    return Promise.reject(new Error('Clipboard API is not available.'));
+  }
+
+  function getNavGroupTitleFromSidebar(groupKey) {
+    // groupKey is expected like: "Tools/Dataset" or "Admin/Reports"
+    const sel = `#sidebar a[data-bs-toggle="collapse"][data-archix-group="${CSS.escape(groupKey)}"]`;
+    const el = qs(sel);
+    if (!el) return null;
+    const t = (el.textContent || '').trim();
+    return t.length > 0 ? t : null;
+  }
+
   const config = {
     maxOpenTabs: 15,
     maxTabReachedMessage: 'Açýk tab sayýsý 15 limitine geldi. Lütfen açýk tablardan birini kapatýnýz.',
@@ -32,11 +96,17 @@
     const h = ensureHost();
     if (!h) return;
 
+    // Stabilize sidebar state before nested tab DOM mutations.
+    try {
+      window.ArchiX?.Sidebar?.restoreState?.();
+    } catch { }
+
     // Ensure group tab exists in root host
     let group = state.detailById.get(groupId);
     if (!group) {
       // Create group as a normal tab first
-      const fakeTitle = groupId.replace(/^g_/, '').replaceAll('_', ' / ');
+      const groupKey = groupId.replace(/^g_/, '').replaceAll('_', '/');
+      const fakeTitle = getNavGroupTitleFromSidebar(groupKey) || groupKey;
       // Create empty group tab
       const id = groupId;
       const tabLi = document.createElement('li');
@@ -78,7 +148,7 @@
       const inner = pane.querySelector('[data-archix-group-pane="1"]');
       if (inner) createNestedHost(inner, id);
 
-      activateTab(id);
+    activateTab(id);
     } else {
       activateTab(groupId);
     }
@@ -144,6 +214,11 @@
       if (!id) return;
       e.preventDefault();
 
+      // Ensure sidebar state doesn't change as a side effect of opening a tab.
+      try {
+        window.ArchiX?.Sidebar?.restoreState?.();
+      } catch { }
+
       if (closeBtn) {
         const li = link?.closest('li');
         if (li) li.remove();
@@ -152,25 +227,37 @@
         const remaining = qsa('.nav-link[data-nested-tab-id]', nestedTabs);
         if (remaining.length > 0) {
           activateNested(remaining[remaining.length - 1].getAttribute('data-nested-tab-id'));
+        } else {
+          // If last nested tab is closed, close its owning group tab as well.
+          closeTab(groupId);
         }
         return;
       }
 
       activateNested(id);
-    }, { once: true });
+    });
 
     activateNested(childId);
 
-    loadContent(url).then(result => {
+    loadContent(url).then(async result => {
       if (!result.ok) {
         pane.innerHTML = `<div class="p-3"><div class="alert alert-danger">Yükleme hatasý (${result.status}).</div></div>`;
         return;
       }
-      const html = result.text;
+      const html = await result.text;
       let content = html;
       const m = /<body[^>]*>([\s\S]*?)<\/body>/i.exec(html);
       if (m && m[1]) content = m[1];
       pane.innerHTML = `<div class="archix-tab-content">${content}</div>`;
+
+      // Some flows still cause sidebar collapse side-effects after async DOM updates.
+      // Re-apply stored sidebar state once the content is in place.
+      try {
+        window.ArchiX?.Sidebar?.restoreState?.();
+      } catch { }
+
+      // Dirty tracking (and future hooks) inside nested panes too.
+      bindDirtyTrackingForPane(childId, pane);
     });
   }
 
@@ -210,26 +297,10 @@
         const msg = btn.getAttribute('data-archix-message') || '';
         const payload = `TraceId: ${trace}\nMesaj: ${msg}`;
 
-        if (navigator.clipboard?.writeText) {
-          navigator.clipboard.writeText(payload).then(
-            () => showToast('Kopyalandý.'),
-            () => showToast('Kopyalama baþarýsýz.')
-          );
-        } else {
-          try {
-            const ta = document.createElement('textarea');
-            ta.value = payload;
-            ta.style.position = 'fixed';
-            ta.style.left = '-10000px';
-            document.body.appendChild(ta);
-            ta.select();
-            document.execCommand('copy');
-            ta.remove();
-            showToast('Kopyalandý.');
-          } catch {
-            showToast('Kopyalama baþarýsýz.');
-          }
-        }
+        copyTextCompat(payload).then(
+          () => showToast('Kopyalandý.'),
+          () => showToast('Kopyalama desteklenmiyor. Tarayýcý izinlerini kontrol edin.')
+        );
       }
     });
   }
@@ -415,13 +486,19 @@
     const h = ensureHost();
     if (!h) return;
 
+    // Stabilize sidebar state before TabHost manipulates the DOM.
+    try {
+      window.ArchiX?.Sidebar?.restoreState?.();
+    } catch { }
+
     if (state.tabs.length >= config.maxOpenTabs) {
       showToast(config.maxTabReachedMessage);
       return;
     }
 
     const id = newId();
-    const uniqueTitle = nextUniqueTitle(title);
+    const isPinned = isPinnedUrl(url);
+    const uniqueTitle = isPinned ? pinned.homeTitle : nextUniqueTitle(title);
 
     const tabLi = document.createElement('li');
     tabLi.className = 'nav-item';
@@ -433,7 +510,7 @@
     tabA.setAttribute('data-tab-id', id);
     tabA.innerHTML = `
       <span class="archix-tab-title">${escapeHtml(uniqueTitle)}</span>
-      <button type="button" class="btn btn-sm btn-link ms-2 p-0 archix-tab-close" aria-label="Kapat" title="Kapat">&times;</button>
+      ${isPinned ? '' : '<button type="button" class="btn btn-sm btn-link ms-2 p-0 archix-tab-close" aria-label="Kapat" title="Kapat">&times;</button>'}
     `;
 
     tabLi.appendChild(tabA);
@@ -455,7 +532,8 @@
       openedAt: Date.now(),
       lastActivatedAt: Date.now(),
       isDirty: false,
-      warnedAt: null
+       warnedAt: null,
+       isPinned
     });
     activateTab(id);
 
@@ -474,6 +552,11 @@
 
       pane.innerHTML = `<div class="archix-tab-content">${content}</div>`;
 
+      // Re-apply sidebar state after async DOM updates.
+      try {
+        window.ArchiX?.Sidebar?.restoreState?.();
+      } catch { }
+
       bindDirtyTrackingForPane(id, pane);
     } catch {
       pane.innerHTML = `<div class="p-3"><div class="alert alert-danger">Ýçerik yüklenemedi.</div></div>`;
@@ -483,6 +566,15 @@
   function closeTab(id) {
     const h = ensureHost();
     if (!h) return;
+
+    // Only Dashboard is non-closable.
+    if (isPinnedTabId(id)) return;
+
+    // If a group/root tab is closed, remove the whole nested host with children.
+    if (isGroupTabId(id)) {
+      closeGroupTabAndChildren(id);
+      return;
+    }
 
     const idx = state.tabs.findIndex(t => t.id === id);
     if (idx < 0) return;
@@ -503,8 +595,8 @@
       const next = state.tabs[Math.min(idx - 1, state.tabs.length - 1)];
       activateTab(next.id);
     } else {
-      // No tabs left: open Home/Dashboard
-      openTab({ url: '/Dashboard', title: 'Home/Dashboard' });
+      // No tabs left: ensure Home/Dashboard exists (pinned)
+      openTab({ url: pinned.homeUrl, title: pinned.homeTitle });
     }
   }
 
@@ -668,7 +760,7 @@
     window.setInterval(tickAutoCloseWarnings, 1000);
 
     // open default home tab
-    openTab({ url: '/Dashboard', title: 'Home/Dashboard' });
+    openTab({ url: pinned.homeUrl, title: pinned.homeTitle });
   }
 
   window.ArchiX = window.ArchiX || {};
