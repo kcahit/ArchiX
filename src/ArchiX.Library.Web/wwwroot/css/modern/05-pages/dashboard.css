@@ -1,4 +1,4 @@
-/* ========================================
+﻿/* ========================================
    DASHBOARD PAGE
    ======================================== */
 
@@ -31,22 +31,7 @@ body.dashboard-page {
     color: var(--color-danger);
 }
 
-.dashboard-layout-row {
-    margin-left: 0;
-    margin-right: 0;
-}
 
-.dashboard-layout-row #content {
-    width: calc(100% - 250px);
-    margin-left: 250px;
-}
-
-@media (max-width: 768px) {
-    .dashboard-layout-row #content {
-        width: 100%;
-        margin-left: 0;
-    }
-}
 
 /* Dashboard Header */
 .dashboard-header {

@@ -1,5 +1,5 @@
 ﻿/* TabHost layout/pinning helpers.
-   Component-level styling is in modern/03-components/archix-tabhost.css */
+   Component-level styling is in modern/03-components/archix-tabhost.css and modern/03-components/tabs.css */
 
 /* Page content should start below the pinned tab bar */
 .archix-work-area {
@@ -30,8 +30,6 @@
     padding-left: 12px; /* inset so first tab text isn't glued to the edge */
 }
 
-
-
 /* Keep panes aligned exactly under the pinned tab bar */
 #archix-tabhost-panes {
     margin-top: 0;
@@ -42,7 +40,3 @@
     padding-left: 12px;
     padding-right: 12px;
 }
-
- 
-
-

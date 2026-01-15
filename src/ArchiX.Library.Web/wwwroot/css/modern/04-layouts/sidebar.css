@@ -138,7 +138,8 @@
 
 /* Main content with sidebar (your layout uses .main-content) */
 .main-content {
-    margin-left: 260px;
+    /* Sidebar width (260px) + small gap (8px ~= 2mm) */
+    margin-left: calc(260px + 8px);
     margin-top: 60px;
     padding: 0;
     min-height: calc(100vh - 60px);
@@ -146,7 +147,8 @@
 }
 
 #sidebar.sidebar.collapsed ~ .main-content {
-    margin-left: 70px;
+    /* Collapsed width (70px) + same small gap */
+    margin-left: calc(70px + 8px);
 }
 
 /* Responsive: off-canvas on small screens */

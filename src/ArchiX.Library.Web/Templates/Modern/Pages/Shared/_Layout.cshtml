@@ -21,7 +21,7 @@
     <!-- Modern Template CSS -->
     <link rel="stylesheet" href="~/css/modern/main.css" asp-append-version="true" />
 
-    <link rel="stylesheet" href="~/css/archix.tabhost.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/tabhost.css" asp-append-version="true" />
 
     @await RenderSectionAsync("Styles", required: false)
 </head>
@@ -57,11 +57,13 @@
                     </div>
                 }
 
-                @RenderBody()
-
-                <div id="archix-tabhost" class="mt-2">
+                <div id="archix-tabhost">
                     <ul id="archix-tabhost-tabs" class="nav nav-tabs" role="tablist"></ul>
                     <div id="archix-tabhost-panes" class="tab-content border border-top-0"></div>
+                </div>
+
+                <div class="archix-work-area">
+                    @RenderBody()
                 </div>
             </main>
         </div>

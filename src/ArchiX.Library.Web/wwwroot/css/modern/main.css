@@ -24,9 +24,11 @@
 @import url('./03-components/forms.css');
 @import url('./03-components/cards.css');
 @import url('./03-components/tables.css');
+@import url('./03-components/tabs.css');
 @import url('./03-components/filters.css');
 @import url('./03-components/pagination.css');
 @import url('./03-components/badges.css');
+@import url('./03-components/tabhost.css');
 
 /* 04 - LAYOUTS: Page structure & layouts */
 @import url('./04-layouts/header.css');

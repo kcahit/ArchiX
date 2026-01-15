@@ -1,13 +1,13 @@
-/* ============================================
-   GLOBAL STYLES - Genel Yapý (Modern Template)
+ï»¿/* ============================================
+   GLOBAL STYLES - Genel YapÄ± (Modern Template)
    ============================================ */
 
-/* Responsive Font System - Otomatik ekran boyutu algýlama */
+/* Responsive Font System - Otomatik ekran boyutu algÄ±lama */
 html {
     font-size: 16px; /* Base font size */
 }
 
-/* Büyük ekranlar (Desktop 1920px+) */
+/* BÃ¼yÃ¼k ekranlar (Desktop 1920px+) */
 @media (min-width: 1920px) {
     html {
         font-size: 17px;
@@ -35,7 +35,7 @@ html {
     }
 }
 
-/* Text Selection - Tüm sayfalarda seçili metin görünür olsun */
+/* Text Selection - TÃ¼m sayfalarda seÃ§ili metin gÃ¶rÃ¼nÃ¼r olsun */
 *::selection {
     background-color: #667eea !important;
     color: #ffffff !important;
@@ -49,9 +49,9 @@ html {
 }
 
 /* ============================================
-   BODY - YATAY SCROLL (TÜM MODERN TEMPLATE SAYFALARI)
-   - overflow-x: auto ? Ýçerik geniþ ise scroll, deðilse gizli
-   - Çözünürlük deðiþikliðine otomatik uyum
+   BODY - YATAY SCROLL (TÃœM MODERN TEMPLATE SAYFALARI)
+   - overflow-x: auto ? Ä°Ã§erik geniÅŸ ise scroll, deÄŸilse gizli
+   - Ã‡Ã¶zÃ¼nÃ¼rlÃ¼k deÄŸiÅŸikliÄŸine otomatik uyum
    ============================================ */
 body {
     font-family: var(--font-family-primary);
@@ -59,7 +59,7 @@ body {
     line-height: var(--line-height-normal);
     color: var(--text-primary);
     
-    /* YATAY SCROLL - Otomatik (Ýçerik geniþ ise göster) */
+    /* YATAY SCROLL - Otomatik (Ä°Ã§erik geniÅŸ ise gÃ¶ster) */
     overflow-x: auto !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch; /* iOS smooth scroll */
@@ -68,7 +68,7 @@ body {
     min-height: 100vh;
 }
 
-/* Modern Scroll Bar - Body için (Tüm Modern Template Sayfalarý) */
+/* Modern Scroll Bar - Body iÃ§in (TÃ¼m Modern Template SayfalarÄ±) */
 body::-webkit-scrollbar {
     height: 12px;
     width: 12px;
@@ -88,7 +88,7 @@ body::-webkit-scrollbar-thumb:hover {
     background: #5568d3;
 }
 
-/* Login, Grid ve Pivot sayfalarý için mor gradient background */
+/* Login, Grid ve Pivot sayfalarÄ± iÃ§in mor gradient background */
 body.login-page,
 body.grid-page,
 body.pivot-page {
@@ -134,27 +134,9 @@ body.pivot-page {
     }
 }
 
-.container-fluid {
-    width: 100%;
-    padding-right: var(--spacing-md);
-    padding-left: var(--spacing-md);
-    margin-right: auto;
-    margin-left: auto;
-}
-
-/* Row & Col */
-.row {
-    display: flex;
-    flex-wrap: wrap;
-    margin-right: calc(var(--spacing-md) * -1);
-    margin-left: calc(var(--spacing-md) * -1);
-}
-
-.col {
-    flex: 1 0 0%;
-    padding-right: var(--spacing-md);
-    padding-left: var(--spacing-md);
-}
+/* NOTE: Do not override Bootstrap grid primitives (.container-fluid/.row/.col).
+   These rules caused layout alignment issues (sidebar vs content) by fighting Bootstrap's gutters.
+   Keep spacing utilities in separate classes instead. */
 
 /* Section */
 .section {
@@ -236,11 +218,11 @@ body.pivot-page {
 }
 
 /* ============================================
-   VALIDATION & ALERTS - Açýk Mavi Override
-   Bootstrap CSS'i override etmek için çok spesifik seçici
+   VALIDATION & ALERTS - AÃ§Ä±k Mavi Override
+   Bootstrap CSS'i override etmek iÃ§in Ã§ok spesifik seÃ§ici
    ============================================ */
 
-/* DAHA SPESÝFÝK - Bootstrap'tan öncelikli */
+/* DAHA SPESÄ°FÄ°K - Bootstrap'tan Ã¶ncelikli */
 html body .alert.alert-danger,
 body .alert.alert-danger,
 .login-form .alert-danger,
@@ -250,7 +232,7 @@ form .alert-danger {
     border-color: #667eea !important;
 }
 
-/* Tüm validation text'leri açýk mavi */
+/* TÃ¼m validation text'leri aÃ§Ä±k mavi */
 html body .text-danger,
 body .text-danger {
     color: #667eea !important;
