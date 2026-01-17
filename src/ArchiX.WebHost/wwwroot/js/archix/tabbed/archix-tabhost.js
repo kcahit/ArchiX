@@ -1,3 +1,6 @@
+ï»¿// Copied from `src/ArchiX.WebHost/wwwroot/js/archix/tabbed/archix-tabhost.js` and extended.
+// Source of truth must be `src/ArchiX.Library.Web` because WebHost `wwwroot` is wiped during build.
+
 (() => {
   const state = {
     tabs: [],
@@ -11,6 +14,10 @@
     homeUrl: '/Dashboard',
     homeTitle: 'Dashboard'
   };
+
+  function getNavigationMode() {
+    return window.ArchiX?.UiOptions?.navigationMode || 'Tabbed';
+  }
 
   function isPinnedUrl(url) {
     if (!url) return false;
@@ -63,7 +70,6 @@
   }
 
   function getNavGroupTitleFromSidebar(groupKey) {
-    // groupKey is expected like: "Tools/Dataset" or "Admin/Reports"
     const sel = `#sidebar a[data-bs-toggle="collapse"][data-archix-group="${CSS.escape(groupKey)}"]`;
     const el = qs(sel);
     if (!el) return null;
@@ -73,7 +79,7 @@
 
   const config = {
     maxOpenTabs: 15,
-    maxTabReachedMessage: 'Açýk tab sayýsý 15 limitine geldi. Lütfen açýk tablardan birini kapatýnýz.',
+    maxTabReachedMessage: 'AÃ§Ä±k tab sayÄ±sÄ± 15 limitine geldi. LÃ¼tfen aÃ§Ä±k tablardan birini kapatÄ±nÄ±z.',
     tabAutoCloseMinutes: 10,
     autoCloseWarningSeconds: 30,
     enableNestedTabs: true
@@ -92,6 +98,247 @@
     return host;
   }
 
+  function isInSidebar(el) {
+    return !!(el && el.closest && el.closest('#sidebar'));
+  }
+
+  function getSidebarLinkTitle(a, href) {
+    const t = (a?.textContent || '').trim();
+    return t || a?.getAttribute('title') || href;
+  }
+
+  function getSidebarGroupChainFromDom(a) {
+    const chain = [];
+    if (!(a instanceof Element)) return chain;
+
+    const collapses = [];
+    let cur = a.parentElement;
+    while (cur) {
+      if (cur instanceof Element && cur.classList && cur.classList.contains('collapse')) {
+        collapses.push(cur);
+      }
+      cur = cur.parentElement;
+      if (cur && cur.id === 'sidebar') break;
+    }
+
+    collapses.reverse();
+
+    for (const c of collapses) {
+      const id = c.getAttribute('id');
+      if (!id) continue;
+      const header = document.querySelector(`#sidebar a[data-bs-toggle="collapse"][href="#${CSS.escape(id)}"]`);
+      if (!header) continue;
+      const g = header.getAttribute('data-archix-group');
+      if (!g) continue;
+      if (!chain.includes(g)) chain.push(g);
+    }
+
+    return chain;
+  }
+
+  function getGroupChainForLink(a) {
+    const byDom = getSidebarGroupChainFromDom(a);
+    if (byDom.length > 0) return byDom;
+
+    const menuPath = a.getAttribute('data-archix-menu');
+    if (!menuPath) return [];
+
+    const parts = String(menuPath).split('/').filter(Boolean);
+    const chain = [];
+
+    for (let i = 0; i < parts.length - 1; i++) {
+      chain.push(parts.slice(0, i + 1).join('/'));
+    }
+
+    return chain;
+  }
+
+  function ensureRootGroupTab(groupKey) {
+    const h = ensureHost();
+    if (!h) return null;
+
+    const groupId = `g_${groupKey.replaceAll('/', '_')}`;
+    if (state.detailById.get(groupId)) return groupId;
+
+    const title = getNavGroupTitleFromSidebar(groupKey) || groupKey;
+
+    const tabLi = document.createElement('li');
+    tabLi.className = 'nav-item';
+
+    const tabA = document.createElement('a');
+    tabA.className = 'nav-link';
+    tabA.href = '#';
+    tabA.setAttribute('role', 'tab');
+    tabA.setAttribute('data-tab-id', groupId);
+    tabA.innerHTML = `
+      <span class="archix-tab-title">${escapeHtml(title)}</span>
+      <button type="button" class="btn btn-sm btn-link ms-2 p-0 archix-tab-close" aria-label="Kapat" title="Kapat">&times;</button>
+    `;
+
+    tabLi.appendChild(tabA);
+
+    const pane = document.createElement('div');
+    pane.className = 'tab-pane fade';
+    pane.setAttribute('role', 'tabpanel');
+    pane.setAttribute('data-tab-id', groupId);
+    pane.innerHTML = `<div class="p-2" data-archix-group-pane="1"></div>`;
+
+    h.tabs.appendChild(tabLi);
+    h.panes.appendChild(pane);
+
+    state.tabs.push({ id: groupId, url: null, title, isGroup: true });
+    state.detailById.set(groupId, {
+      id: groupId,
+      url: null,
+      title,
+      openedAt: Date.now(),
+      lastActivatedAt: Date.now(),
+      isDirty: false,
+      warnedAt: null,
+      isGroup: true
+    });
+
+    const inner = pane.querySelector('[data-archix-group-pane="1"]');
+    if (inner) createNestedHost(inner, groupId);
+
+    return groupId;
+  }
+
+  function ensureNestedGroupTab(parentGroupId, groupKey) {
+    const parentPaneHost = qs(`.tab-pane[data-tab-id="${CSS.escape(parentGroupId)}"] [data-archix-nested-host="1"]`);
+    if (!parentPaneHost) return null;
+
+    const nestedTabs = qs('[data-archix-nested-tabs="1"]', parentPaneHost);
+    const nestedPanes = qs('[data-archix-nested-panes="1"]', parentPaneHost);
+    if (!nestedTabs || !nestedPanes) return null;
+
+    const groupId = `g_${groupKey.replaceAll('/', '_')}`;
+    const existing = qs(`.nav-link[data-tab-id="${CSS.escape(groupId)}"]`, nestedTabs);
+    if (existing) return groupId;
+
+    const title = getNavGroupTitleFromSidebar(groupKey) || groupKey;
+
+    const li = document.createElement('li');
+    li.className = 'nav-item';
+
+    const a = document.createElement('a');
+    a.className = 'nav-link';
+    a.href = '#';
+    a.setAttribute('role', 'tab');
+    a.setAttribute('data-tab-id', groupId);
+    a.innerHTML = `
+      <span class="archix-tab-title">${escapeHtml(title)}</span>
+      <button type="button" class="btn btn-sm btn-link ms-2 p-0 archix-nested-close" aria-label="Kapat" title="Kapat">&times;</button>
+    `;
+
+    li.appendChild(a);
+    nestedTabs.appendChild(li);
+
+    const pane = document.createElement('div');
+    pane.className = 'tab-pane fade';
+    pane.setAttribute('role', 'tabpanel');
+    pane.setAttribute('data-tab-id', groupId);
+    pane.innerHTML = `<div class="p-2" data-archix-group-pane="1"></div>`;
+
+    nestedPanes.appendChild(pane);
+
+    const inner = pane.querySelector('[data-archix-group-pane="1"]');
+    if (inner) createNestedHost(inner, groupId);
+
+    if (!nestedTabs.hasAttribute('data-archix-group-bound')) {
+      nestedTabs.setAttribute('data-archix-group-bound', '1');
+      nestedTabs.addEventListener('click', e => {
+        const target = e.target;
+        if (!(target instanceof Element)) return;
+        const closeBtn = target.closest('.archix-nested-close');
+        const link = target.closest('.nav-link[data-tab-id]');
+        const id = (link && link.getAttribute('data-tab-id')) || null;
+        if (!id) return;
+        e.preventDefault();
+
+        if (closeBtn) {
+          const li2 = link?.closest('li');
+          if (li2) li2.remove();
+          const p2 = qs(`.tab-pane[data-tab-id="${CSS.escape(id)}"]`, nestedPanes);
+          if (p2) p2.remove();
+          return;
+        }
+
+        qsa('.nav-link[data-tab-id]', nestedTabs).forEach(a2 => {
+          const isActive = a2.getAttribute('data-tab-id') === id;
+          a2.classList.toggle('active', isActive);
+          a2.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+        qsa('.tab-pane[data-tab-id]', nestedPanes).forEach(p2 => {
+          const isActive = p2.getAttribute('data-tab-id') === id;
+          p2.classList.toggle('show', isActive);
+          p2.classList.toggle('active', isActive);
+        });
+      });
+    }
+
+    return groupId;
+  }
+
+  function activateNestedGroup(parentGroupId, groupId) {
+    const parentPaneHost = qs(`.tab-pane[data-tab-id="${CSS.escape(parentGroupId)}"] [data-archix-nested-host="1"]`);
+    if (!parentPaneHost) return;
+
+    const nestedTabs = qs('[data-archix-nested-tabs="1"]', parentPaneHost);
+    const nestedPanes = qs('[data-archix-nested-panes="1"]', parentPaneHost);
+    if (!nestedTabs || !nestedPanes) return;
+
+    qsa('.nav-link[data-tab-id]', nestedTabs).forEach(a => {
+      const isActive = a.getAttribute('data-tab-id') === groupId;
+      a.classList.toggle('active', isActive);
+      a.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+    qsa('.tab-pane[data-tab-id]', nestedPanes).forEach(p => {
+      const isActive = p.getAttribute('data-tab-id') === groupId;
+      p.classList.toggle('show', isActive);
+      p.classList.toggle('active', isActive);
+    });
+  }
+
+  function openByGroupChain({ groups, url, title }) {
+    const rootGroupKey = groups[0];
+    const rootGroupId = ensureRootGroupTab(rootGroupKey);
+    if (!rootGroupId) {
+      openTab({ url, title });
+      return;
+    }
+
+    activateTab(rootGroupId);
+
+    let currentGroupId = rootGroupId;
+    for (let i = 1; i < groups.length; i++) {
+      const gk = groups[i];
+      const childGroupId = ensureNestedGroupTab(currentGroupId, gk);
+      if (!childGroupId) break;
+      activateNestedGroup(currentGroupId, childGroupId);
+      currentGroupId = childGroupId;
+    }
+
+    // Open leaf tab under the deepest group tab in the chain.
+    openNestedTab({ groupId: currentGroupId, url, title });
+  }
+
+  function newId() {
+    return 't_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+  }
+
+  function normalizeTitleBase(title) {
+    return (title || 'Tab').trim().replace(/\s+/g, ' ');
+  }
+
+  function nextUniqueTitle(titleBase) {
+    const base = normalizeTitleBase(titleBase);
+    const next = (state.seqByTitleBase.get(base) || 0) + 1;
+    state.seqByTitleBase.set(base, next);
+    if (next === 1) return base;
+    return `${base}_${String(next - 1).padStart(3, '0')}`;
+  }
+
   function openNestedTab({ groupId, url, title }) {
     const h = ensureHost();
     if (!h) return;
@@ -101,62 +348,26 @@
       window.ArchiX?.Sidebar?.restoreState?.();
     } catch { }
 
-    // Ensure group tab exists in root host
-    let group = state.detailById.get(groupId);
+    // Ensure group tab exists in root host.
+    // IMPORTANT: only the first level group should be a root tab.
+    // Nested groups must live inside their parent group's nested host.
+    const group = state.detailById.get(groupId);
     if (!group) {
-      // Create group as a normal tab first
-      const groupKey = groupId.replace(/^g_/, '').replaceAll('_', '/');
-      const fakeTitle = getNavGroupTitleFromSidebar(groupKey) || groupKey;
-      // Create empty group tab
-      const id = groupId;
-      const tabLi = document.createElement('li');
-      tabLi.className = 'nav-item';
-
-      const tabA = document.createElement('a');
-      tabA.className = 'nav-link';
-      tabA.href = '#';
-      tabA.setAttribute('role', 'tab');
-      tabA.setAttribute('data-tab-id', id);
-      tabA.innerHTML = `
-        <span class="archix-tab-title">${escapeHtml(fakeTitle)}</span>
-        <button type="button" class="btn btn-sm btn-link ms-2 p-0 archix-tab-close" aria-label="Kapat" title="Kapat">&times;</button>
-      `;
-
-      tabLi.appendChild(tabA);
-
-      const pane = document.createElement('div');
-      pane.className = 'tab-pane fade';
-      pane.setAttribute('role', 'tabpanel');
-      pane.setAttribute('data-tab-id', id);
-      pane.innerHTML = `<div class="p-2" data-archix-group-pane="1"></div>`;
-
-      h.tabs.appendChild(tabLi);
-      h.panes.appendChild(pane);
-
-      state.tabs.push({ id, url: null, title: fakeTitle, isGroup: true });
-      state.detailById.set(id, {
-        id,
-        url: null,
-        title: fakeTitle,
-        openedAt: Date.now(),
-        lastActivatedAt: Date.now(),
-        isDirty: false,
-        warnedAt: null,
-        isGroup: true
-      });
-
-      const inner = pane.querySelector('[data-archix-group-pane="1"]');
-      if (inner) createNestedHost(inner, id);
-
-    activateTab(id);
-    } else {
-      activateTab(groupId);
+      // If we got here without the group being created via group-chain logic, fail-closed.
+      openTab({ url, title });
+      return;
     }
 
-    const groupPane = qs(`.tab-pane[data-tab-id="${CSS.escape(groupId)}"] [data-archix-nested-host="1"]`);
+    activateTab(groupId);
+
+    // Find nested host for this groupId.
+    // Root group tab uses host panes, nested group tabs live inside their parent's nested panes.
+    const groupPane =
+      qs(`.tab-pane[data-tab-id="${CSS.escape(groupId)}"] [data-archix-nested-host="1"]`) ||
+      qs(`.tab-pane[data-tab-id="${CSS.escape(groupId)}"] [data-archix-nested-host="1"]`, h.panes);
+
     if (!groupPane) {
-      // fail-closed
-      openTab({ url, title });
+      // If group pane is not found, do not open leaf at root (prevents "Index aaa" jumping).
       return;
     }
 
@@ -187,7 +398,7 @@
     pane.className = 'tab-pane fade';
     pane.setAttribute('role', 'tabpanel');
     pane.setAttribute('data-nested-tab-id', childId);
-    pane.innerHTML = `<div class="p-3 text-muted">Yükleniyor...</div>`;
+    pane.innerHTML = `<div class="p-3 text-muted">YÃ¼kleniyor...</div>`;
 
     nestedTabs.appendChild(tabLi);
     nestedPanes.appendChild(pane);
@@ -205,43 +416,45 @@
       });
     };
 
-    nestedTabs.addEventListener('click', e => {
-      const target = e.target;
-      if (!(target instanceof Element)) return;
-      const closeBtn = target.closest('.archix-nested-close');
-      const link = target.closest('.nav-link[data-nested-tab-id]');
-      const id = (link && link.getAttribute('data-nested-tab-id')) || null;
-      if (!id) return;
-      e.preventDefault();
+    if (!nestedTabs.hasAttribute('data-archix-bound')) {
+      nestedTabs.setAttribute('data-archix-bound', '1');
+      nestedTabs.addEventListener('click', e => {
+        const target = e.target;
+        if (!(target instanceof Element)) return;
+        const closeBtn = target.closest('.archix-nested-close');
+        const link = target.closest('.nav-link[data-nested-tab-id]');
+        const id = (link && link.getAttribute('data-nested-tab-id')) || null;
+        if (!id) return;
+        e.preventDefault();
 
-      // Ensure sidebar state doesn't change as a side effect of opening a tab.
-      try {
-        window.ArchiX?.Sidebar?.restoreState?.();
-      } catch { }
+        // Ensure sidebar state doesn't change as a side effect of opening a tab.
+        try {
+          window.ArchiX?.Sidebar?.restoreState?.();
+        } catch { }
 
-      if (closeBtn) {
-        const li = link?.closest('li');
-        if (li) li.remove();
-        const p = qs(`.tab-pane[data-nested-tab-id="${CSS.escape(id)}"]`, nestedPanes);
-        if (p) p.remove();
-        const remaining = qsa('.nav-link[data-nested-tab-id]', nestedTabs);
-        if (remaining.length > 0) {
-          activateNested(remaining[remaining.length - 1].getAttribute('data-nested-tab-id'));
-        } else {
-          // If last nested tab is closed, close its owning group tab as well.
-          closeTab(groupId);
+        if (closeBtn) {
+          const li = link?.closest('li');
+          if (li) li.remove();
+          const p = qs(`.tab-pane[data-nested-tab-id="${CSS.escape(id)}"]`, nestedPanes);
+          if (p) p.remove();
+          const remaining = qsa('.nav-link[data-nested-tab-id]', nestedTabs);
+          if (remaining.length > 0) {
+            activateNested(remaining[remaining.length - 1].getAttribute('data-nested-tab-id'));
+          } else {
+            closeTab(groupId);
+          }
+          return;
         }
-        return;
-      }
 
-      activateNested(id);
-    });
+        activateNested(id);
+      });
+    }
 
     activateNested(childId);
 
     loadContent(url).then(async result => {
       if (!result.ok) {
-        pane.innerHTML = `<div class="p-3"><div class="alert alert-danger">Yükleme hatasý (${result.status}).</div></div>`;
+        pane.innerHTML = `<div class="p-3"><div class="alert alert-danger">YÃ¼kleme hatasÄ± (${result.status}).</div></div>`;
         return;
       }
       const html = await result.text;
@@ -250,13 +463,8 @@
       if (m && m[1]) content = m[1];
       pane.innerHTML = `<div class="archix-tab-content">${content}</div>`;
 
-      // Some flows still cause sidebar collapse side-effects after async DOM updates.
-      // Re-apply stored sidebar state once the content is in place.
-      try {
-        window.ArchiX?.Sidebar?.restoreState?.();
-      } catch { }
+      try { window.ArchiX?.Sidebar?.restoreState?.(); } catch { }
 
-      // Dirty tracking (and future hooks) inside nested panes too.
       bindDirtyTrackingForPane(childId, pane);
     });
   }
@@ -270,10 +478,6 @@
 
   function qs(sel, root = document) { return root.querySelector(sel); }
   function qsa(sel, root = document) { return Array.from(root.querySelectorAll(sel)); }
-
-  function normalizeTitleBase(title) {
-    return (title || 'Tab').trim().replace(/\s+/g, ' ');
-  }
 
   function bindResponseCardActions() {
     document.addEventListener('click', e => {
@@ -298,8 +502,8 @@
         const payload = `TraceId: ${trace}\nMesaj: ${msg}`;
 
         copyTextCompat(payload).then(
-          () => showToast('Kopyalandý.'),
-          () => showToast('Kopyalama desteklenmiyor. Tarayýcý izinlerini kontrol edin.')
+          () => showToast('KopyalandÄ±.'),
+          () => showToast('Kopyalama desteklenmiyor. TarayÄ±cÄ± izinlerini kontrol edin.')
         );
       }
     });
@@ -328,15 +532,15 @@
         <button type="button" class="btn-close ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
       <div class="toast-body">
-        <div class="mb-2">"${escapeHtml(d.title)}" sekmesi kapatýlacak.</div>
+        <div class="mb-2">"${escapeHtml(d.title)}" sekmesi kapatÄ±lacak.</div>
         <div class="mb-2 d-flex align-items-center gap-2">
           <label class="form-label m-0" for="archixDeferMinutes_${escapeHtml(tabId)}">Erteleme (dk)</label>
           <input class="form-control form-control-sm" style="width:90px" type="number" min="1" max="${config.tabAutoCloseMinutes}" value="${config.tabAutoCloseMinutes}" id="archixDeferMinutes_${escapeHtml(tabId)}" />
         </div>
         <div class="d-flex gap-2 flex-wrap">
-          <button type="button" class="btn btn-sm btn-light" data-action="defer">Kapatmayý Ertele</button>
+          <button type="button" class="btn btn-sm btn-light" data-action="defer">KapatmayÄ± Ertele</button>
           ${hasDirty ? '<button type="button" class="btn btn-sm btn-danger" data-action="closeNoSave">Kaydetmeden Kapat</button>' : ''}
-          <button type="button" class="btn btn-sm btn-primary" data-action="focus">Sayfayý Aç</button>
+          <button type="button" class="btn btn-sm btn-primary" data-action="focus">SayfayÄ± AÃ§</button>
         </div>
       </div>`;
 
@@ -362,7 +566,6 @@
       if (minutes > config.tabAutoCloseMinutes) minutes = config.tabAutoCloseMinutes;
 
       if (action === 'defer') {
-        // Reset idle window from now.
         state.lastActivityAt = Date.now() - Math.max(0, (config.tabAutoCloseMinutes - minutes)) * 60 * 1000;
       }
 
@@ -388,27 +591,6 @@
     }
   }
 
-  function nextUniqueTitle(titleBase) {
-    const base = normalizeTitleBase(titleBase);
-    const next = (state.seqByTitleBase.get(base) || 0) + 1;
-    state.seqByTitleBase.set(base, next);
-    if (next === 1) return base;
-    return `${base}_${String(next - 1).padStart(3, '0')}`;
-  }
-
-  function ensureHost() {
-    const host = qs(selectors.host);
-    if (!host) return null;
-    const tabs = qs(selectors.tabs, host);
-    const panes = qs(selectors.panes, host);
-    if (!tabs || !panes) return null;
-    return { host, tabs, panes };
-  }
-
-  function newId() {
-    return 't_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
-  }
-
   function showToast(message) {
     const c = qs(selectors.toast);
     if (!c) return;
@@ -424,7 +606,6 @@
       </div>`;
     c.appendChild(el);
 
-    // bootstrap toast
     if (window.bootstrap?.Toast) {
       const t = new window.bootstrap.Toast(el, { delay: 4000 });
       el.addEventListener('hidden.bs.toast', () => el.remove());
@@ -461,6 +642,15 @@
     };
   }
 
+  function ensureHost() {
+    const host = qs(selectors.host);
+    if (!host) return null;
+    const tabs = qs(selectors.tabs, host);
+    const panes = qs(selectors.panes, host);
+    if (!tabs || !panes) return null;
+    return { host, tabs, panes };
+  }
+
   function activateTab(id) {
     const h = ensureHost();
     if (!h) return;
@@ -486,7 +676,6 @@
     const h = ensureHost();
     if (!h) return;
 
-    // Stabilize sidebar state before TabHost manipulates the DOM.
     try {
       window.ArchiX?.Sidebar?.restoreState?.();
     } catch { }
@@ -519,7 +708,7 @@
     pane.className = 'tab-pane fade';
     pane.setAttribute('role', 'tabpanel');
     pane.setAttribute('data-tab-id', id);
-    pane.innerHTML = `<div class="p-3 text-muted">Yükleniyor...</div>`;
+    pane.innerHTML = `<div class="p-3 text-muted">YÃ¼kleniyor...</div>`;
 
     h.tabs.appendChild(tabLi);
     h.panes.appendChild(pane);
@@ -532,19 +721,19 @@
       openedAt: Date.now(),
       lastActivatedAt: Date.now(),
       isDirty: false,
-       warnedAt: null,
-       isPinned
+      warnedAt: null,
+      isPinned
     });
+
     activateTab(id);
 
     try {
       const result = await loadContent(url);
       if (!result.ok) {
-        pane.innerHTML = `<div class="p-3"><div class="alert alert-danger">Yükleme hatasý (${result.status}).</div></div>`;
+        pane.innerHTML = `<div class="p-3"><div class="alert alert-danger">YÃ¼kleme hatasÄ± (${result.status}).</div></div>`;
         return;
       }
 
-      // Render response inside tab. Expect full HTML; we take body if present.
       const html = result.text;
       let content = html;
       const m = /<body[^>]*>([\s\S]*?)<\/body>/i.exec(html);
@@ -552,14 +741,13 @@
 
       pane.innerHTML = `<div class="archix-tab-content">${content}</div>`;
 
-      // Re-apply sidebar state after async DOM updates.
       try {
         window.ArchiX?.Sidebar?.restoreState?.();
       } catch { }
 
       bindDirtyTrackingForPane(id, pane);
     } catch {
-      pane.innerHTML = `<div class="p-3"><div class="alert alert-danger">Ýçerik yüklenemedi.</div></div>`;
+      pane.innerHTML = `<div class="p-3"><div class="alert alert-danger">Ä°Ã§erik yÃ¼klenemedi.</div></div>`;
     }
   }
 
@@ -567,10 +755,8 @@
     const h = ensureHost();
     if (!h) return;
 
-    // Only Dashboard is non-closable.
     if (isPinnedTabId(id)) return;
 
-    // If a group/root tab is closed, remove the whole nested host with children.
     if (isGroupTabId(id)) {
       closeGroupTabAndChildren(id);
       return;
@@ -579,7 +765,6 @@
     const idx = state.tabs.findIndex(t => t.id === id);
     if (idx < 0) return;
 
-    const tab = state.tabs[idx];
     state.tabs.splice(idx, 1);
     state.detailById.delete(id);
 
@@ -590,12 +775,10 @@
     const pane = qs(`.tab-pane[data-tab-id="${CSS.escape(id)}"]`, h.panes);
     if (pane) pane.remove();
 
-    // Activate previous tab if any
     if (state.tabs.length > 0) {
       const next = state.tabs[Math.min(idx - 1, state.tabs.length - 1)];
       activateTab(next.id);
     } else {
-      // No tabs left: ensure Home/Dashboard exists (pinned)
       openTab({ url: pinned.homeUrl, title: pinned.homeTitle });
     }
   }
@@ -626,18 +809,17 @@
       // only intercept app links
       if (!href.startsWith('/')) return;
 
+      if (getNavigationMode() !== 'Tabbed') return;
+
       e.preventDefault();
 
-      const title = (a.textContent || '').trim() || a.getAttribute('title') || href;
+      const title = getSidebarLinkTitle(a, href);
 
-      // Nested tabs: only if enabled and sidebar provides hierarchy metadata.
-      if (config.enableNestedTabs) {
-        const menuPath = a.getAttribute('data-archix-menu');
-        if (menuPath) {
-          const parts = menuPath.split('/').filter(Boolean);
-          const group = parts.slice(0, 2).join('/');
-          const groupId = `g_${group.replaceAll('/', '_')}`;
-          openNestedTab({ groupId, url: href, title });
+      // Sidebar: build nested hierarchy based on sidebar DOM (or data-archix-menu fallback)
+      if (config.enableNestedTabs && isInSidebar(a)) {
+        const groups = getGroupChainForLink(a);
+        if (groups.length > 0) {
+          openByGroupChain({ groups, url: href, title });
           return;
         }
       }
@@ -651,7 +833,6 @@
   }
 
   function initIdleTracking() {
-    // Decision 6.5.1: pointerdown, pointermove, keydown, wheel, scroll
     const opts = { passive: true, capture: true };
     window.addEventListener('pointerdown', touchActivity, opts);
     window.addEventListener('pointermove', touchActivity, opts);
@@ -669,12 +850,10 @@
   }
 
   function tickAutoCloseWarnings() {
-    // Scope: only inactive tabs (Decision 6.6.1)
     const idleMs = getInactiveIdleMs();
     const warnMs = config.tabAutoCloseMinutes * 60 * 1000 - config.autoCloseWarningSeconds * 1000;
     if (idleMs < warnMs) return;
 
-    // Warn once per inactive tab per idle window.
     const now = Date.now();
     for (const t of getInactiveTabs()) {
       const d = state.detailById.get(t.id);
@@ -686,7 +865,6 @@
   }
 
   function bindDirtyTrackingForPane(tabId, pane) {
-    // Decision 6.11.x: only record screens for now.
     const d = state.detailById.get(tabId);
     if (!d) return;
     if (!/\/Tools\/Dataset\/Record/i.test(d.url)) return;
@@ -738,8 +916,6 @@
     const h = ensureHost();
     if (!h) return;
 
-    // If the layout rendered normal page content via RenderBody(), hide it once TabHost takes over.
-    // This prevents "double UI" (full page + tabbed page) and keeps only the tabbed work area visible.
     try {
       const main = h.host.closest('main');
       if (main) {
@@ -756,10 +932,8 @@
     bindResponseCardActions();
     initIdleTracking();
 
-    // Warning ticker: lightweight interval.
     window.setInterval(tickAutoCloseWarnings, 1000);
 
-    // open default home tab
     openTab({ url: pinned.homeUrl, title: pinned.homeTitle });
   }
 

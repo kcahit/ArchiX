@@ -360,9 +360,14 @@
 
     activateTab(groupId);
 
-    const groupPane = qs(`.tab-pane[data-tab-id="${CSS.escape(groupId)}"] [data-archix-nested-host="1"]`);
+    // Find nested host for this groupId.
+    // Root group tab uses host panes, nested group tabs live inside their parent's nested panes.
+    const groupPane =
+      qs(`.tab-pane[data-tab-id="${CSS.escape(groupId)}"] [data-archix-nested-host="1"]`) ||
+      qs(`.tab-pane[data-tab-id="${CSS.escape(groupId)}"] [data-archix-nested-host="1"]`, h.panes);
+
     if (!groupPane) {
-      openTab({ url, title });
+      // If group pane is not found, do not open leaf at root (prevents "Index aaa" jumping).
       return;
     }
 
