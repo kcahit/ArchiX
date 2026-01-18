@@ -16,6 +16,8 @@
   };
 
   function getNavigationMode() {
+    // Source-of-truth is UI/TabbedOptions (seeded in DB) which defaults to Tabbed.
+    // Client can override by setting window.ArchiX.UiOptions.navigationMode.
     return window.ArchiX?.UiOptions?.navigationMode || 'Tabbed';
   }
 
@@ -944,14 +946,21 @@
     const h = ensureHost();
     if (!h) return;
 
+    // Only take over the page when Tabbed navigation is explicitly enabled.
+    if (getNavigationMode() !== 'Tabbed') return;
+
+    // IMPORTANT:
+    // In the Modern layout, the tab host lives inside the content column together with
+    // `.archix-work-area` (static full-page render target).
+    // When Tabbed mode is enabled we must hide ONLY that static work area,
+    // not the entire page or other layout containers.
     try {
-      const main = h.host.closest('main');
-      if (main) {
-        Array.from(main.children).forEach(el => {
-          if (el !== h.host && el instanceof HTMLElement) {
-            el.style.display = 'none';
-          }
-        });
+      const root = h.host.parentElement;
+      if (root) {
+        const workArea = root.querySelector('.archix-work-area');
+        if (workArea instanceof HTMLElement) {
+          workArea.style.display = 'none';
+        }
       }
     } catch { }
 

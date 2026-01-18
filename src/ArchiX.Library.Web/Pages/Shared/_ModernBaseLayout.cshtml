@@ -1,0 +1,30 @@
+﻿@using Microsoft.AspNetCore.Mvc.ViewFeatures
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@{
+    var requestToken = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="RequestVerificationToken" content="@requestToken" />
+    <title>@ViewData["Title"] - ArchiX</title>
+
+    <link rel="stylesheet" href="~/css/modern/04-layouts/archix-shell.css" asp-append-version="true" />
+
+    @await RenderSectionAsync("Head", required: false)
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="archix-shell">
+    @await RenderSectionAsync("Header", required: true)
+
+    <main role="main" class="archix-shell-main">
+        @RenderBody()
+    </main>
+
+    @await RenderSectionAsync("Footer", required: true)
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

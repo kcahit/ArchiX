@@ -138,11 +138,13 @@
 
 /* Main content with sidebar (your layout uses .main-content) */
 .main-content {
-    /* Sidebar width (260px) + small gap (8px ~= 2mm) */
+    /* Inside the Modern shell, page scrolling happens on the base <main>.
+       The sidebar is fixed; content is offset by sidebar (x) and navbar (y). */
     margin-left: calc(260px + 8px);
     margin-top: 60px;
     padding: 0;
-    min-height: calc(100vh - 60px);
+    height: calc(100% - 60px);
+    overflow: visible;
     transition: all 0.3s;
 }
 
