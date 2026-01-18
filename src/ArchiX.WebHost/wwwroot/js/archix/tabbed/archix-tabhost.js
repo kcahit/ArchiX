@@ -34,6 +34,18 @@
     return !!d && !!d.isGroup;
   }
 
+  function normalizeGroupKey(groupKey) {
+    return String(groupKey || '').trim().replace(/^\/+|\/+$/g, '');
+  }
+
+  // IMPORTANT: group tab ids must be unique per full group path.
+  // Using only the last segment (or a short key) causes id collisions across nesting levels,
+  // which breaks 3+ level hierarchies.
+  function groupTabDomIdForKey(groupKey) {
+    const k = normalizeGroupKey(groupKey);
+    return `g_${k.replaceAll('/', '__')}`;
+  }
+
   function closeGroupTabAndChildren(groupId) {
     const h = ensureHost();
     if (!h) return;
@@ -157,10 +169,11 @@
     const h = ensureHost();
     if (!h) return null;
 
-    const groupId = `g_${groupKey.replaceAll('/', '_')}`;
+    const groupId = groupTabDomIdForKey(groupKey);
     if (state.detailById.get(groupId)) return groupId;
 
-    const title = getNavGroupTitleFromSidebar(groupKey) || groupKey;
+    const normalizedKey = normalizeGroupKey(groupKey);
+    const title = getNavGroupTitleFromSidebar(normalizedKey) || normalizedKey;
 
     const tabLi = document.createElement('li');
     tabLi.className = 'nav-item';
@@ -186,7 +199,7 @@
     h.tabs.appendChild(tabLi);
     h.panes.appendChild(pane);
 
-    state.tabs.push({ id: groupId, url: null, title, isGroup: true });
+    state.tabs.push({ id: groupId, url: null, title, isGroup: true, groupKey: normalizedKey });
     state.detailById.set(groupId, {
       id: groupId,
       url: null,
@@ -195,7 +208,8 @@
       lastActivatedAt: Date.now(),
       isDirty: false,
       warnedAt: null,
-      isGroup: true
+      isGroup: true,
+      groupKey: normalizedKey
     });
 
     const inner = pane.querySelector('[data-archix-group-pane="1"]');
@@ -212,11 +226,12 @@
     const nestedPanes = qs('[data-archix-nested-panes="1"]', parentPaneHost);
     if (!nestedTabs || !nestedPanes) return null;
 
-    const groupId = `g_${groupKey.replaceAll('/', '_')}`;
+    const groupId = groupTabDomIdForKey(groupKey);
     const existing = qs(`.nav-link[data-tab-id="${CSS.escape(groupId)}"]`, nestedTabs);
     if (existing) return groupId;
 
-    const title = getNavGroupTitleFromSidebar(groupKey) || groupKey;
+    const normalizedKey = normalizeGroupKey(groupKey);
+    const title = getNavGroupTitleFromSidebar(normalizedKey) || normalizedKey;
 
     const li = document.createElement('li');
     li.className = 'nav-item';
@@ -244,6 +259,21 @@
 
     const inner = pane.querySelector('[data-archix-group-pane="1"]');
     if (inner) createNestedHost(inner, groupId);
+
+    // Track group in global state so deeper leaves can resolve the correct pane/host.
+    if (!state.detailById.get(groupId)) {
+      state.detailById.set(groupId, {
+        id: groupId,
+        url: null,
+        title,
+        openedAt: Date.now(),
+        lastActivatedAt: Date.now(),
+        isDirty: false,
+        warnedAt: null,
+        isGroup: true,
+        groupKey: normalizedKey
+      });
+    }
 
     if (!nestedTabs.hasAttribute('data-archix-group-bound')) {
       nestedTabs.setAttribute('data-archix-group-bound', '1');
@@ -358,25 +388,23 @@
       return;
     }
 
-    activateTab(groupId);
-
-    // Find nested host for this groupId.
-    // Root group tab uses host panes, nested group tabs live inside their parent's nested panes.
-    const groupPane =
-      qs(`.tab-pane[data-tab-id="${CSS.escape(groupId)}"] [data-archix-nested-host="1"]`) ||
-      qs(`.tab-pane[data-tab-id="${CSS.escape(groupId)}"] [data-archix-nested-host="1"]`, h.panes);
-
-    if (!groupPane) {
-      // If group pane is not found, do not open leaf at root (prevents "Index aaa" jumping).
-      return;
+    // Do not force nested groups into root tabs.
+    // Root activation is handled by `openByGroupChain`. Here we only render the leaf into the group's nested host.
+    if (groupId === state.activeId) {
+      // ok
     }
 
-    const nestedTabs = qs('[data-archix-nested-tabs="1"]', groupPane);
-    const nestedPanes = qs('[data-archix-nested-panes="1"]', groupPane);
-    if (!nestedTabs || !nestedPanes) {
-      openTab({ url, title });
-      return;
-    }
+    // Resolve the exact pane node belonging to this groupId.
+    // We search within the TabHost root only (not whole document), and prefer the *deepest* match.
+    const candidates = qsa(`.tab-pane[data-tab-id="${CSS.escape(groupId)}"]`, h.host);
+    const paneNode = candidates.length > 0 ? candidates[candidates.length - 1] : null;
+
+    const groupPaneHost = paneNode ? qs('[data-archix-nested-host="1"]', paneNode) : null;
+    if (!groupPaneHost) return; 
+
+    const nestedTabs = qs('[data-archix-nested-tabs="1"]', groupPaneHost);
+    const nestedPanes = qs('[data-archix-nested-panes="1"]', groupPaneHost);
+    if (!nestedTabs || !nestedPanes) return; 
 
     const childId = newId();
     const childTitle = nextUniqueTitle(title);
