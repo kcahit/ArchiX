@@ -17,6 +17,12 @@
     width: 100%;
 }
 
+/* Full-bleed inside the Bootstrap column (defensive against any remaining column padding) */
+.main-content #archix-tabhost {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}
+
 /* Keep the tabs flush to the left edge */
 #archix-tabhost-tabs {
     margin: 0;
@@ -42,4 +48,11 @@
     padding-left: 0 !important;
     margin-left: 0 !important;
     box-sizing: border-box;
+}
+
+/* TabHost injects page HTML into `.archix-tab-content`. Any left padding here creates a persistent seam
+   even when tabs/panes are flush. Remove left padding only in tabbed mode. */
+#archix-tabhost-panes .archix-tab-content {
+    padding-left: 0 !important;
+    margin-left: 0 !important;
 }

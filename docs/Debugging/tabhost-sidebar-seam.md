@@ -43,6 +43,76 @@ Bu doküman, TabHost’un sol kenarının sidebar ile tam hizalanmaması ("seam"
 
 **Gözlenen:** Kullanıcı: “olmadı”
 
+---
+
+## 14) Runtime ölçüm (F12) ile gerçek “gap” kaynağını yakalama (layoutProbe)
+**Zaman:** 2026-01-19
+
+Bu noktadan sonra statik CSS/markup bakarak ilerlemek mümkün olmadı. Sorunun gerçekten 1–2px mi, yoksa daha büyük bir offset mi olduğunu görmek için çalışma zamanı (runtime) ölçüm alındı.
+
+### Kurulum
+- Modern template `_Layout.cshtml` içine opsiyonel bir probe enjekte edildi.
+- Aktifleştirme: URL’e `?layoutProbe=1` eklenerek.
+
+### Adımlar (tarayıcı tarafı)
+1. Normal sayfayı aç (***view-source değil***):
+   - `https://localhost:57277/Dashboard?layoutProbe=1`
+2. `F12` → `Console`
+3. Console’da şu log satırını bul:
+   - `[ArchiX layoutProbe] TabHost/Sidebar metrics`
+4. Açıp `seam` içindeki değerleri kontrol et.
+
+> Not: `view-source:https://...` ekranında script çalışmadığı için Console “not available” benzeri durumlar görülebilir. Ölçüm mutlaka normal sayfada yapılmalı.
+
+### Ölçüm Sonucu (kritik bulgu)
+- `#sidebar.right = 260`
+- `.main-content.left = 318`
+- `#archix-tabhost.left = 318`
+- `gapPx = 58`
+
+Yani görülen problem 1–2px “seam” değil; TabHost’un içinde olduğu `.main-content` bloğu sidebar’dan **58px** daha sağdan başlıyor.
+
+### Kök Neden
+`.main-content` üzerinde Bootstrap class’ı vardı:
+
+- `class="col-md-9 ms-sm-auto col-lg-10 main-content h-100"`
+
+Buradaki `ms-sm-auto` → `margin-left: auto` uyguladığı için `.main-content` beklenmedik şekilde sağa itiliyor.
+Bu, Modern CSS’teki `.main-content { margin-left: 260px; }` kuralı ile çakışıp toplamda büyük bir offset üretiyor.
+
+### Uygulanan Fix
+Modern layout’ta `ms-sm-auto` kaldırıldı:
+
+- `class="col-md-9 col-lg-10 main-content h-100"`
+
+Değişiklik uygulanan dosyalar:
+- `src/ArchiX.Library.Web/Templates/Modern/Pages/Shared/_Layout.cshtml`
+- `src/ArchiX.WebHost/Pages/Templates/Modern/Pages/Shared/_Layout.cshtml`
+
+**Beklenen:** `.main-content.left` değeri `260` olmalı, dolayısıyla `gapPx` ≈ `0` olmalı.
+
+### 13) Remove left padding from TabHost-injected `.archix-tab-content`
+**Zaman:** 2026-01-19
+
+**Dosya / Değişiklik:**
+- `src/ArchiX.Library.Web/wwwroot/css/tabhost.css`
+  - `#archix-tabhost-panes .archix-tab-content { padding-left:0 !important; margin-left:0 !important; }`
+
+**Beklenen:** Seam aslında TabHost’un inject ettiği wrapper’ın (`.archix-tab-content`) padding’inden geliyorsa, sol boşluk tamamen kaybolsun.
+
+**Gözlenen:** Kullanıcı: “olmadı”
+
+### 12) Force full-bleed TabHost container inside `.main-content`
+**Zaman:** 2026-01-19
+
+**Dosya / Değişiklik:**
+- `src/ArchiX.Library.Web/wwwroot/css/tabhost.css`
+  - `.main-content #archix-tabhost`: `margin-left:0 !important`, `padding-left:0 !important`
+
+**Beklenen:** Bootstrap column/padding artık TabHost’u içeriden başlatamasın; tab strip sidebar kenarına tam yanaşsın.
+
+**Gözlenen:** Kullanıcı: “olmadı”
+
 ### 11) Remove all outer borders from TabHost panes container
 **Zaman:** 2026-01-19
 
@@ -52,7 +122,7 @@ Bu doküman, TabHost’un sol kenarının sidebar ile tam hizalanmaması ("seam"
 
 **Beklenen:** Pane container hiç border çizmediği için (top dahil) seam kalmasın; border’lar içerideki card/grid container’lardan gelsin.
 
-**Gözlenen:** (bekleniyor)
+**Gözlenen:** Kullanıcı: “olmadı”
 
 ### 1) Body scroll yönetimi ile seam/scroll ilişkisi
 **Dosyalar:**

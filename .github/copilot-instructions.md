@@ -11,6 +11,17 @@
 ## Project-Specific Rules
 ### Quick decision rules (critical)
 
+- 3 deneme sonrası teşhis + dokümantasyon (kritik):
+  - Aynı issue/task için 3 deneme yapılıp kullanıcı hâlâ "olmadı" diyorsa, kör denemeyi durdur.
+  - Frontend (Razor Pages / CSS / JS) için:
+    - Mutlaka runtime incelemeye geç: `F12` (Elements/Console/Network), computed styles, box model, `getBoundingClientRect()`.
+    - Gerekirse sayfa kaynağını doğrula: `Ctrl+U` (View Source) ile hangi layout/script/css gerçekten render edilmiş kontrol et.
+  - Backend için:
+    - Mutlaka runtime teşhise geç: log/exception/stack trace, minimal repro, gerekiyorsa küçük test/diagnostic kodu.
+  - 3. denemeden sonra mutlaka `docs/Debugging/` altında bu issue/task için tek bir markdown günlük dosyası oluştur ya da mevcutsa devam ettir.
+    - Format örneği: `docs/Debugging/tabhost-sidebar-seam.md`.
+    - İçerik: kronolojik denemeler, değişiklik (dosya + selector/function), beklenen etki, gözlenen sonuç ("olmadı"), varsa runtime ölçümler ve nihai kök neden.
+
 - Debug logging (required):
   - Create `docs/Debugging/` if missing.
   - Keep **one** markdown log per issue/task under `docs/Debugging/`.

@@ -1,6 +1,21 @@
 ﻿@{
     Layout = "~/Pages/Shared/_ModernBaseLayout.cshtml";
     var pageTitle = ViewData["Title"]?.ToString() ?? "ArchiX";
+
+    var layoutProbeEnabled = false;
+    try
+    {
+        var raw = Context?.Request?.Query["layoutProbe"].ToString();
+        if (!string.IsNullOrWhiteSpace(raw))
+        {
+            raw = raw.Trim();
+            layoutProbeEnabled = raw == "1" || raw.Equals("true", StringComparison.OrdinalIgnoreCase) || raw.Equals("yes", StringComparison.OrdinalIgnoreCase);
+        }
+    }
+    catch
+    {
+        layoutProbeEnabled = false;
+    }
 }
 
 @section Head {
@@ -34,7 +49,7 @@
     <div class="row dashboard-layout-row g-0">
         @await Html.PartialAsync("Templates/Modern/Pages/Shared/_Sidebar")
 
-        <div class="col-md-9 ms-sm-auto col-lg-10 main-content h-100">
+        <div class="col-md-9 col-lg-10 main-content h-100">
             @if (TempData["StatusMessage"] != null)
             {
                 <div class="alert alert-info alert-dismissible fade show mt-3" role="alert">
@@ -76,6 +91,12 @@
 
     <script src="~/js/archix/ui-options.js" asp-append-version="true"></script>
     <script src="~/js/archix/tabbed/archix-tabhost.js" asp-append-version="true"></script>
+
+    @if (layoutProbeEnabled)
+    {
+        <!-- ArchiX layoutProbe enabled (Templates/Modern/Pages/Shared/_Layout.cshtml) -->
+        <script src="~/js/dev/archix-layout-probe.js" asp-append-version="true"></script>
+    }
 
     @await RenderSectionAsync("Scripts", required: false)
 }
