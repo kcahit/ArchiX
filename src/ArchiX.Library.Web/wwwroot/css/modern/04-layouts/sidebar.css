@@ -23,12 +23,13 @@
     position: fixed;
     top: 60px;
     left: 0;
-    width: 260px;
+    box-sizing: border-box;
+    width: var(--archix-sidebar-width, 260px);
     height: calc(100vh - 60px);
 
     background: #2c3e50;
     color: #ecf0f1;
-    border-right: 1px solid #34495e;
+    border-right: 0;
 
     padding-top: 0;
     overflow-y: auto;
@@ -97,7 +98,7 @@
 
 /* Collapsed state */
 #sidebar.sidebar.collapsed {
-    width: 70px;
+    width: var(--archix-sidebar-collapsed-width, 70px);
 }
 
 /* When collapsed: hide title, keep toggle centered */
@@ -140,9 +141,14 @@
 .main-content {
     /* Inside the Modern shell, page scrolling happens on the base <main>.
        The sidebar is fixed; content is offset by sidebar (x) and navbar (y). */
-    margin-left: calc(260px + 8px);
+    margin-left: var(--archix-sidebar-width, 260px);
     margin-top: 60px;
-    padding: 0;
+    padding-left: 0;
+    padding-right: 0;
+    --bs-gutter-x: 0;
+    --bs-gutter-y: 0;
+    border-left: 0;
+    box-sizing: border-box;
     height: auto;
     overflow: visible;
     transition: all 0.3s;
@@ -150,7 +156,7 @@
 
 #sidebar.sidebar.collapsed ~ .main-content {
     /* Collapsed width (70px) + same small gap */
-    margin-left: calc(70px + 8px);
+    margin-left: var(--archix-sidebar-collapsed-width, 70px);
 }
 
 /* Responsive: off-canvas on small screens */

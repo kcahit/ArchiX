@@ -34,15 +34,15 @@
 		<!-- Copy -->
 		<Copy SourceFiles="@(_AxLibWwwrootFiles)"
 			  DestinationFiles="@(_AxLibWwwrootFiles->'$(_AxHostWwwrootDir)%(RecursiveDir)%(Filename)%(Extension)')"
-			  SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+			  SkipUnchangedFiles="false" OverwriteReadOnlyFiles="true" />
 
 		<Copy SourceFiles="@(_AxLibPagesFiles)"
 			  DestinationFiles="@(_AxLibPagesFiles->'$(_AxHostPagesDir)%(RecursiveDir)%(Filename)%(Extension)')"
-			  SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+			  SkipUnchangedFiles="false" OverwriteReadOnlyFiles="true" />
 
 		<Copy SourceFiles="@(_AxLibTemplatesFiles)"
 			  DestinationFiles="@(_AxLibTemplatesFiles->'$(_AxHostTemplatesDir)%(RecursiveDir)%(Filename)%(Extension)')"
-			  SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+			  SkipUnchangedFiles="false" OverwriteReadOnlyFiles="true" />
 
 		<!-- Namespace rewrite (PageModels) -->
 		<ItemGroup>

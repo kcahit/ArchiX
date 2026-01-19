@@ -11,6 +11,13 @@
 ## Project-Specific Rules
 ### Quick decision rules (critical)
 
+- Debug logging (required):
+  - Create `docs/Debugging/` if missing.
+  - Keep **one** markdown log per issue/task under `docs/Debugging/`.
+  - When the user says **"olmadı"** for the same issue/task, append a short entry to that same log.
+  - Entry format: timestamp (local), what changed (file + selector/function), expected effect, observed result ("olmadı").
+  - Continue with the next attempt without asking the user.
+
 - Katman seçimi:
   - `src/ArchiX.Library` = core (host bağımsız).
   - `src/ArchiX.Library.Web` = web-specific library (core üstüne).

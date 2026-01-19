@@ -30,8 +30,8 @@
 
  
     
-<div class="container-fluid h-100">
-    <div class="row dashboard-layout-row">
+<div class="container-fluid h-100 px-0">
+    <div class="row dashboard-layout-row g-0">
         @await Html.PartialAsync("Templates/Modern/Pages/Shared/_Sidebar")
 
         <div class="col-md-9 ms-sm-auto col-lg-10 main-content h-100">
@@ -53,7 +53,7 @@
 
             <div id="archix-tabhost">
                 <ul id="archix-tabhost-tabs" class="nav nav-tabs" role="tablist"></ul>
-                <div id="archix-tabhost-panes" class="tab-content border border-top-0"></div>
+                <div id="archix-tabhost-panes" class="tab-content"></div>
             </div>
 
             <div class="archix-work-area">

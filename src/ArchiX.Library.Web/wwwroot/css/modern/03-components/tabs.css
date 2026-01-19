@@ -5,4 +5,7 @@
 /* TabHost uses Bootstrap nav-tabs. Keep the visual rules under components. */
 #archix-tabhost-tabs.nav-tabs {
     border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+    border-left: 0;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
 }

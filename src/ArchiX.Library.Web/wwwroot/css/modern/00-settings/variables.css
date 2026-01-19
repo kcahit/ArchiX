@@ -1,8 +1,10 @@
-/* ============================================
+﻿/* ============================================
    CSS VARIABLES - Tüm Projede Kullanılacak
    ============================================ */
 
 :root {
+    --archix-sidebar-width: 260px;
+    --archix-sidebar-collapsed-width: 70px;
     /* ===== RENKLER ===== */
     --primary-color: #667eea;
     --secondary-color: #764ba2;
