@@ -23,3 +23,12 @@ body.archix-shell > .archix-shell-main {
     overflow: auto;
     min-height: 0;
 }
+
+/* Defensive: if theme CSS sets body overflow, keep the contract for the shell only */
+body.archix-shell {
+    overflow: hidden !important;
+}
+
+body.archix-shell > .archix-shell-main {
+    overflow: auto !important;
+}

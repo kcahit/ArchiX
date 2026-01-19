@@ -143,7 +143,7 @@
     margin-left: calc(260px + 8px);
     margin-top: 60px;
     padding: 0;
-    height: calc(100% - 60px);
+    height: auto;
     overflow: visible;
     transition: all 0.3s;
 }

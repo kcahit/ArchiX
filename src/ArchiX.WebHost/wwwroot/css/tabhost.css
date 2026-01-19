@@ -1,27 +1,19 @@
 ﻿/* TabHost layout/pinning helpers.
    Component-level styling is in modern/03-components/archix-tabhost.css and modern/03-components/tabs.css */
 
-/* Page content should start below the pinned tab bar */
+/* When TabHost is in normal flow (not fixed), no padding compensation is needed. */
 .archix-work-area {
-    padding-top: 44px;
+    padding-top: 0;
 }
 
-/* Pin TabHost to the viewport and align it with the content area defined by sidebar.css.
-   This prevents any page CSS / Bootstrap grid from pushing it around. */
+/* TabHost must live inside the shell scroll area (base <main>) so long pages can scroll to the footer.
+   Keep it in normal document flow; only navbar/sidebar are fixed. */
 #archix-tabhost {
-    position: fixed;
-    top: 60px; /* navbar height */
-    left: calc(260px + 8px); /* sidebar width + desired gap */
-    right: 0;
+    position: static;
     margin: 0 !important;
     padding: 0 !important;
-    z-index: 1035;
+    z-index: auto;
     background: transparent;
-}
-
-/* Collapsed sidebar support */
-#sidebar.sidebar.collapsed ~ .main-content #archix-tabhost {
-    left: calc(70px + 8px);
 }
 
 /* Keep the tabs flush to the left edge */

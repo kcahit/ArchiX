@@ -59,32 +59,35 @@ body {
     line-height: var(--line-height-normal);
     color: var(--text-primary);
     
-    /* YATAY SCROLL - Otomatik (İçerik geniş ise göster) */
-    overflow-x: auto !important;
-    overflow-y: auto !important;
+    /* Modern shell contract:
+       - body does NOT scroll
+       - scroll lives in the app shell main (.archix-shell-main)
+       Keep overflow rules off body to prevent page-level scrolling on long grids.
+    */
     -webkit-overflow-scrolling: touch; /* iOS smooth scroll */
+    overflow: auto;
     
     background: #f5f6fa;
     min-height: 100vh;
 }
 
 /* Modern Scroll Bar - Body için (Tüm Modern Template Sayfaları) */
-body::-webkit-scrollbar {
+body.archix-shell > .archix-shell-main::-webkit-scrollbar {
     height: 12px;
     width: 12px;
 }
 
-body::-webkit-scrollbar-track {
+body.archix-shell > .archix-shell-main::-webkit-scrollbar-track {
     background: #f1f1f1;
     border-radius: 10px;
 }
 
-body::-webkit-scrollbar-thumb {
+body.archix-shell > .archix-shell-main::-webkit-scrollbar-thumb {
     background: linear-gradient(90deg, #667eea, #764ba2);
     border-radius: 10px;
 }
 
-body::-webkit-scrollbar-thumb:hover {
+body.archix-shell > .archix-shell-main::-webkit-scrollbar-thumb:hover {
     background: #5568d3;
 }
 
