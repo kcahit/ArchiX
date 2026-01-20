@@ -252,3 +252,43 @@ Değişiklik uygulanan dosyalar:
 - Sorun gerçek bir layout “gap” mi, yoksa iki ayrı border’ın farklı elemanlarda çizilmesiyle oluşan optik bir seam mi?
 - Sidebar sabit (`position: fixed`) + content `margin-left` yaklaşımında subpixel rounding var mı?
 - TabHost’ın sol kenarındaki seam’i üreten gerçek DOM elemanı hangisi? (pane border mı, content wrapper mı, grid container mı?)
+
+---
+
+## ÇÖZÜLDÜ — Root cause + fix özeti
+**Zaman:** 2026-01-19
+
+### Nasıl yakaladık?
+- Statik CSS/markup denemeleri seam’i çözmeyince çalışma zamanı ölçüm gerekti.
+- `?layoutProbe=1` ile sayfaya küçük bir ölçüm script’i enjekte edildi.
+- Normal sayfada (***view-source değil***) `F12 → Console` üzerinden ölçümler okundu.
+
+### Runtime bulgu (gerçek problem)
+Probe ölçümlerinde şu tablo görüldü:
+- `#sidebar.right = 260`
+- `.main-content.left = 318`
+- `#archix-tabhost.left = 318`
+→ `gapPx = 58`
+
+Yani problem 1–2px seam değil; `.main-content` bloğu sidebar’dan **58px** daha sağdan başlıyordu.
+
+### Root cause
+Modern layout’ta `.main-content` kolonunda Bootstrap sınıfı vardı:
+- `ms-sm-auto`
+
+Bu sınıf `margin-left: auto` verdiği için `.main-content` beklenmedik şekilde sağa itiliyor ve Modern CSS’teki `margin-left: 260px` ile çakışarak büyük bir offset üretiyordu.
+
+### Uygulanan fix
+Modern layout’ta `ms-sm-auto` kaldırıldı:
+- Önce: `class="col-md-9 ms-sm-auto col-lg-10 main-content h-100"`
+- Sonra: `class="col-md-9 col-lg-10 main-content h-100"`
+
+Değişiklik:
+- `src/ArchiX.Library.Web/Templates/Modern/Pages/Shared/_Layout.cshtml`
+- `src/ArchiX.WebHost/Pages/Templates/Modern/Pages/Shared/_Layout.cshtml`
+
+### Doğrulama
+- `https://localhost:57277/Dashboard?layoutProbe=1`
+- `F12 → Console` içinde `gapPx` değerinin `0` olması beklenir.
+
+Sonuç: TabHost sidebar’a sola tam yanaştı.

@@ -23,8 +23,6 @@ namespace ArchiX.Library.Web.Templates.Modern.Pages
         {
             const string defaultUrl = "/Dashboard";
 
-            TempData["StatusMessage"] = $"Hos geldiniz, {Input.Email}!";
-
             return SafeRedirect.LocalRedirectOrDefault(this, returnUrl, defaultUrl);
         }
     }

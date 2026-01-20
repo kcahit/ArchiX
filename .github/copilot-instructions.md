@@ -19,7 +19,7 @@
   - Backend için:
     - Mutlaka runtime teşhise geç: log/exception/stack trace, minimal repro, gerekiyorsa küçük test/diagnostic kodu.
   - 3. denemeden sonra mutlaka `docs/Debugging/` altında bu issue/task için tek bir markdown günlük dosyası oluştur ya da mevcutsa devam ettir.
-    - Format örneği: `docs/Debugging/tabhost-sidebar-seam.md`.
+    - Dosya adı formatı: `docs/Debugging/<issue-slug>.md` (kısa, kebab-case).
     - İçerik: kronolojik denemeler, değişiklik (dosya + selector/function), beklenen etki, gözlenen sonuç ("olmadı"), varsa runtime ölçümler ve nihai kök neden.
 
 - Debug logging (required):
