@@ -531,6 +531,44 @@
 
       pane.innerHTML = `<div class="archix-tab-content">${content}</div>`;
 
+      // Re-execute inline scripts (nested tab) with Chart.js cleanup
+      try {
+        const canvases = pane.querySelectorAll('canvas');
+        canvases.forEach(canvas => {
+          const chartId = canvas.getAttribute('id');
+          if (chartId && window.Chart && window.Chart.getChart) {
+            const existing = window.Chart.getChart(chartId);
+            if (existing) {
+              existing.destroy();
+              if (window.ArchiX?.Debug) {
+                console.log('[ArchiX Debug] Nested: Destroyed existing chart:', chartId);
+              }
+            }
+          }
+        });
+      } catch (err) {
+        if (window.ArchiX?.Debug) {
+          console.error('[ArchiX Debug] Nested chart destroy error:', err);
+        }
+      }
+
+      try {
+        const scripts = pane.querySelectorAll('script');
+        scripts.forEach(oldScript => {
+          const newScript = document.createElement('script');
+          if (oldScript.src) {
+            newScript.src = oldScript.src;
+          } else {
+            newScript.textContent = oldScript.textContent;
+          }
+          oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
+      } catch (err) {
+        if (window.ArchiX?.Debug) {
+          console.error('[ArchiX Debug] Nested script re-execute error:', err);
+        }
+      }
+
       try { window.ArchiX?.Sidebar?.restoreState?.(); } catch { }
 
       bindDirtyTrackingForPane(childId, pane);
@@ -854,6 +892,45 @@
 
       pane.innerHTML = `<div class="archix-tab-content">${content}</div>`;
 
+      // Re-execute inline scripts (e.g., Chart.js init in Dashboard)
+      // IMPORTANT: Destroy existing Chart.js instances before re-creating
+      try {
+        const canvases = pane.querySelectorAll('canvas');
+        canvases.forEach(canvas => {
+          const chartId = canvas.getAttribute('id');
+          if (chartId && window.Chart && window.Chart.getChart) {
+            const existing = window.Chart.getChart(chartId);
+            if (existing) {
+              existing.destroy();
+              if (window.ArchiX?.Debug) {
+                console.log('[ArchiX Debug] Destroyed existing chart:', chartId);
+              }
+            }
+          }
+        });
+      } catch (err) {
+        if (window.ArchiX?.Debug) {
+          console.error('[ArchiX Debug] Chart destroy error:', err);
+        }
+      }
+
+      try {
+        const scripts = pane.querySelectorAll('script');
+        scripts.forEach(oldScript => {
+          const newScript = document.createElement('script');
+          if (oldScript.src) {
+            newScript.src = oldScript.src;
+          } else {
+            newScript.textContent = oldScript.textContent;
+          }
+          oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
+      } catch (err) {
+        if (window.ArchiX?.Debug) {
+          console.error('[ArchiX Debug] Script re-execute error:', err);
+        }
+      }
+
       try {
         window.ArchiX?.Sidebar?.restoreState?.();
       } catch { }
@@ -1032,21 +1109,6 @@
     // Only take over the page when Tabbed navigation is explicitly enabled.
     if (getNavigationMode() !== 'Tabbed') return;
 
-    // IMPORTANT:
-    // In the Modern layout, the tab host lives inside the content column together with
-    // `.archix-work-area` (static full-page render target).
-    // When Tabbed mode is enabled we must hide ONLY that static work area,
-    // not the entire page or other layout containers.
-    try {
-      const root = h.host.parentElement;
-      if (root) {
-        const tabMain = root.querySelector('#tab-main');
-        if (tabMain instanceof HTMLElement) {
-          tabMain.style.display = 'none';
-        }
-      }
-    } catch { }
-
     interceptClicks();
     bindTabHostEvents();
     bindResponseCardActions();
@@ -1054,7 +1116,73 @@
 
     window.setInterval(tickAutoCloseWarnings, 1000);
 
-    openTab({ url: pinned.homeUrl, title: pinned.homeTitle });
+    // IMPORTANT: For the initial Dashboard tab, use the statically rendered #tab-main content
+    // instead of fetching it again. This avoids duplicate requests and preserves the initial page state.
+    const root = h.host.parentElement;
+    const tabMain = root ? root.querySelector('#tab-main') : null;
+    
+    if (tabMain && tabMain.innerHTML.trim().length > 0) {
+      // Move static content to the first tab (Dashboard)
+      const id = newId();
+      const uniqueTitle = pinned.homeTitle;
+
+      const tabLi = document.createElement('li');
+      tabLi.className = 'nav-item';
+
+      const tabA = document.createElement('a');
+      tabA.className = 'nav-link';
+      tabA.href = '#';
+      tabA.setAttribute('role', 'tab');
+      tabA.setAttribute('data-tab-id', id);
+      tabA.innerHTML = `<span class="archix-tab-title">${escapeHtml(uniqueTitle)}</span>`;
+      tabLi.appendChild(tabA);
+
+      const pane = document.createElement('div');
+      pane.className = 'tab-pane fade';
+      pane.setAttribute('role', 'tabpanel');
+      pane.setAttribute('data-tab-id', id);
+      pane.innerHTML = `<div class="archix-tab-content">${tabMain.innerHTML}</div>`;
+
+      h.tabs.appendChild(tabLi);
+      h.panes.appendChild(pane);
+
+      state.tabs.push({ id, url: pinned.homeUrl, title: uniqueTitle });
+      state.detailById.set(id, {
+        id,
+        url: pinned.homeUrl,
+        title: uniqueTitle,
+        openedAt: Date.now(),
+        lastActivatedAt: Date.now(),
+        isDirty: false,
+        warnedAt: null,
+        isPinned: true
+      });
+
+      activateTab(id);
+
+      // Hide the static container after moving content
+      tabMain.style.display = 'none';
+
+      // Call Dashboard chart init function if available
+      try {
+        if (typeof window.initDashboardCharts === 'function') {
+          window.initDashboardCharts();
+          if (window.ArchiX?.Debug) {
+            console.log('[ArchiX Debug] Dashboard charts initialized via window.initDashboardCharts()');
+          }
+        }
+      } catch (err) {
+        if (window.ArchiX?.Debug) {
+          console.error('[ArchiX Debug] Dashboard chart init error:', err);
+        }
+      }
+
+      bindDirtyTrackingForPane(id, pane);
+    } else {
+      // Fallback: fetch Dashboard if static content is missing
+      if (tabMain) tabMain.style.display = 'none';
+      openTab({ url: pinned.homeUrl, title: pinned.homeTitle });
+    }
   }
 
   window.ArchiX = window.ArchiX || {};

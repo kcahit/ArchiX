@@ -2,72 +2,87 @@
 @model ArchiX.Library.Web.Templates.Modern.Pages.DashboardModel
 @{
     ViewData["Title"] = "Dashboard";
-    Layout = "Shared/_Layout";  // EKLE
+    Layout = "Shared/_Layout";
 }
 
-<div class="dashboard-header mb-4">
-    <h1 class="page-title">Dashboard</h1>
-    <p class="text-muted">Modern Template - Ana Sayfa</p>
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Dashboard</h2>
+    <div class="text-muted">
+        <i class="bi bi-calendar3"></i> @DateTime.Now.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))
+    </div>
 </div>
 
-<!-- Stats Cards Row -->
-<div class="row g-3 mb-4">
-    <div class="col-md-3">
-        <div class="stat-card">
-            <div class="stat-icon bg-primary">
-                <i class="bi bi-people-fill"></i>
-            </div>
-            <div class="stat-details">
-                <h3 class="stat-value">1,234</h3>
-                <p class="stat-label">Toplam Kullanıcı</p>
-            </div>
-            <div class="stat-trend positive">
-                <i class="bi bi-arrow-up"></i> 12%
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3">
-        <div class="stat-card">
-            <div class="stat-icon bg-success">
-                <i class="bi bi-graph-up"></i>
-            </div>
-            <div class="stat-details">
-                <h3 class="stat-value">567</h3>
-                <p class="stat-label">Aktif Projeler</p>
-            </div>
-            <div class="stat-trend positive">
-                <i class="bi bi-arrow-up"></i> 8%
+<!-- KPI Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-start justify-content-between mb-3">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-3">
+                        <i class="bi bi-people-fill fs-3"></i>
+                    </div>
+                    <span class="badge bg-success bg-opacity-10 text-success border-0 px-3 py-2">
+                        <i class="bi bi-arrow-up"></i> 12%
+                    </span>
+                </div>
+                <h6 class="text-muted text-uppercase small mb-3 fw-normal">Toplam Kullanıcı</h6>
+                <h2 class="mb-1 fw-bold">1,234</h2>
+                <small class="text-muted">Son 30 gün</small>
             </div>
         </div>
     </div>
 
-    <div class="col-md-3">
-        <div class="stat-card">
-            <div class="stat-icon bg-warning">
-                <i class="bi bi-envelope-fill"></i>
-            </div>
-            <div class="stat-details">
-                <h3 class="stat-value">89</h3>
-                <p class="stat-label">Yeni Mesajlar</p>
-            </div>
-            <div class="stat-trend positive">
-                <i class="bi bi-arrow-up"></i> 23%
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-start justify-content-between mb-3">
+                    <div class="bg-success bg-opacity-10 text-success rounded-3 p-3">
+                        <i class="bi bi-graph-up fs-3"></i>
+                    </div>
+                    <span class="badge bg-success bg-opacity-10 text-success border-0 px-3 py-2">
+                        <i class="bi bi-arrow-up"></i> 8%
+                    </span>
+                </div>
+                <h6 class="text-muted text-uppercase small mb-3 fw-normal">Aktif Proje</h6>
+                <h2 class="mb-1 fw-bold">567</h2>
+                <small class="text-muted">Devam eden</small>
             </div>
         </div>
     </div>
 
-    <div class="col-md-3">
-        <div class="stat-card">
-            <div class="stat-icon bg-danger">
-                <i class="bi bi-exclamation-triangle-fill"></i>
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-start justify-content-between mb-3">
+                    <div class="bg-warning bg-opacity-10 text-warning rounded-3 p-3">
+                        <i class="bi bi-clipboard-check fs-3"></i>
+                    </div>
+                    <span class="badge bg-success bg-opacity-10 text-success border-0 px-3 py-2">
+                        <i class="bi bi-arrow-up"></i> 23%
+                    </span>
+                </div>
+                <h6 class="text-muted text-uppercase small mb-3 fw-normal">Tamamlanan</h6>
+                <h2 class="mb-1 fw-bold">89</h2>
+                <small class="text-muted">Bu ay</small>
             </div>
-            <div class="stat-details">
-                <h3 class="stat-value">12</h3>
-                <p class="stat-label">Bekleyen İşler</p>
-            </div>
-            <div class="stat-trend negative">
-                <i class="bi bi-arrow-down"></i> 5%
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-start justify-content-between mb-3">
+                    <div class="bg-danger bg-opacity-10 text-danger rounded-3 p-3">
+                        <i class="bi bi-hourglass-split fs-3"></i>
+                    </div>
+                    <span class="badge bg-danger bg-opacity-10 text-danger border-0 px-3 py-2">
+                        <i class="bi bi-arrow-down"></i> 5%
+                    </span>
+                </div>
+                <h6 class="text-muted text-uppercase small mb-3 fw-normal">Bekleyen</h6>
+                <h2 class="mb-1 fw-bold">12</h2>
+                <small class="text-muted">İşlem gereken</small>
             </div>
         </div>
     </div>
@@ -75,114 +90,330 @@
 
 <!-- Charts Row -->
 <div class="row g-3 mb-4">
-    <div class="col-md-8">
-        <div class="card modern-card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Aylık İstatistikler</h5>
+    <!-- Line Chart -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 pt-3">
+                <h5 class="mb-0">Aylık Performans</h5>
+                <small class="text-muted">Son 6 ay</small>
             </div>
             <div class="card-body">
-                <canvas id="monthlyStatsChart" height="80"></canvas>
+                <canvas id="performanceChart" height="80"></canvas>
             </div>
         </div>
     </div>
 
-    <div class="col-md-4">
-        <div class="card modern-card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Kullanıcı Dağılımı</h5>
+    <!-- Doughnut Chart -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 pt-3">
+                <h5 class="mb-0">Durum Dağılımı</h5>
+                <small class="text-muted">Genel</small>
             </div>
             <div class="card-body">
-                <canvas id="userDistributionChart"></canvas>
+                <canvas id="statusChart"></canvas>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Recent Activities -->
+<!-- Recent Activity Table -->
 <div class="row">
     <div class="col-12">
-        <div class="card modern-card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Son Aktiviteler</h5>
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 pt-3">
+                <h5 class="mb-0">Son Aktiviteler</h5>
             </div>
-            <div class="card-body">
-                <div class="activity-list">
-                    <div class="activity-item">
-                        <div class="activity-icon bg-primary">
-                            <i class="bi bi-person-plus"></i>
-                        </div>
-                        <div class="activity-content">
-                            <p class="activity-text"><strong>Yeni kullanıcı</strong> eklendi</p>
-                            <span class="activity-time">5 dakika önce</span>
-                        </div>
-                    </div>
-                    <div class="activity-item">
-                        <div class="activity-icon bg-success">
-                            <i class="bi bi-check-circle"></i>
-                        </div>
-                        <div class="activity-content">
-                            <p class="activity-text"><strong>Proje tamamlandı</strong></p>
-                            <span class="activity-time">1 saat önce</span>
-                        </div>
-                    </div>
-                    <div class="activity-item">
-                        <div class="activity-icon bg-warning">
-                            <i class="bi bi-exclamation-circle"></i>
-                        </div>
-                        <div class="activity-content">
-                            <p class="activity-text"><strong>Sistem güncellemesi</strong> gerekli</p>
-                            <span class="activity-time">2 saat önce</span>
-                        </div>
-                    </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="border-0">Durum</th>
+                                <th class="border-0">Kullanıcı</th>
+                                <th class="border-0">İşlem</th>
+                                <th class="border-0">Tarih</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="badge bg-success">Tamamlandı</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-2 me-2">
+                                            <i class="bi bi-person-fill"></i>
+                                        </div>
+                                        <span>Ahmet Yılmaz</span>
+                                    </div>
+                                </td>
+                                <td>Proje oluşturma</td>
+                                <td class="text-muted">5 dakika önce</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-warning">Beklemede</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-2 me-2">
+                                            <i class="bi bi-person-fill"></i>
+                                        </div>
+                                        <span>Zeynep Kaya</span>
+                                    </div>
+                                </td>
+                                <td>Rapor hazırlama</td>
+                                <td class="text-muted">1 saat önce</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-info">İşleniyor</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-2 me-2">
+                                            <i class="bi bi-person-fill"></i>
+                                        </div>
+                                        <span>Mehmet Demir</span>
+                                    </div>
+                                </td>
+                                <td>Veri analizi</td>
+                                <td class="text-muted">2 saat önce</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-success">Tamamlandı</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-danger bg-opacity-10 text-danger rounded-circle p-2 me-2">
+                                            <i class="bi bi-person-fill"></i>
+                                        </div>
+                                        <span>Ayşe Şahin</span>
+                                    </div>
+                                </td>
+                                <td>Sistem güncellemesi</td>
+                                <td class="text-muted">3 saat önce</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-danger">İptal</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-secondary bg-opacity-10 text-secondary rounded-circle p-2 me-2">
+                                            <i class="bi bi-person-fill"></i>
+                                        </div>
+                                        <span>Can Arslan</span>
+                                    </div>
+                                </td>
+                                <td>Test işlemi</td>
+                                <td class="text-muted">5 saat önce</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-@section Scripts {
-    <script>
-        // Monthly Stats Chart
-        const monthlyCtx = document.getElementById('monthlyStatsChart');
-        if (monthlyCtx) {
-            new Chart(monthlyCtx, {
+@* Chart.js initialization - CDN loaded in _Layout.cshtml *@
+<script>
+    // Dashboard Chart Initialization (callable from TabHost)
+    window.initDashboardCharts = function() {
+        // Mini Chart 1 - Toplam Kullanıcı (Line)
+        const mini1 = document.getElementById('miniChart1');
+        if (mini1) {
+            if (window.Chart && window.Chart.getChart) {
+                const existing = window.Chart.getChart(mini1);
+                if (existing) existing.destroy();
+            }
+            new Chart(mini1, {
                 type: 'line',
                 data: {
-                    labels: ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz'],
+                    labels: ['', '', '', '', '', '', ''],
                     datasets: [{
-                        label: 'Kullanıcılar',
-                        data: [65, 78, 90, 81, 95, 105],
-                        borderColor: 'rgb(102, 126, 234)',
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                        tension: 0.4
+                        data: [920, 1050, 980, 1120, 1180, 1210, 1234],
+                        borderColor: 'rgb(13, 110, 253)',
+                        backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 0
                     }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false }
+                    }
+                }
+            });
+        }
+
+        // Mini Chart 2 - Aktif Proje (Bar)
+        const mini2 = document.getElementById('miniChart2');
+        if (mini2) {
+            if (window.Chart && window.Chart.getChart) {
+                const existing = window.Chart.getChart(mini2);
+                if (existing) existing.destroy();
+            }
+            new Chart(mini2, {
+                type: 'bar',
+                data: {
+                    labels: ['', '', '', '', '', '', ''],
+                    datasets: [{
+                        data: [480, 520, 510, 540, 555, 560, 567],
+                        backgroundColor: 'rgba(25, 135, 84, 0.6)',
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false }
+                    }
+                }
+            });
+        }
+
+        // Mini Chart 3 - Tamamlanan (Line)
+        const mini3 = document.getElementById('miniChart3');
+        if (mini3) {
+            if (window.Chart && window.Chart.getChart) {
+                const existing = window.Chart.getChart(mini3);
+                if (existing) existing.destroy();
+            }
+            new Chart(mini3, {
+                type: 'line',
+                data: {
+                    labels: ['', '', '', '', '', '', ''],
+                    datasets: [{
+                        data: [65, 72, 68, 78, 82, 85, 89],
+                        borderColor: 'rgb(255, 193, 7)',
+                        backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false }
+                    }
+                }
+            });
+        }
+
+        // Mini Chart 4 - Bekleyen (Bar)
+        const mini4 = document.getElementById('miniChart4');
+        if (mini4) {
+            if (window.Chart && window.Chart.getChart) {
+                const existing = window.Chart.getChart(mini4);
+                if (existing) existing.destroy();
+            }
+            new Chart(mini4, {
+                type: 'bar',
+                data: {
+                    labels: ['', '', '', '', '', '', ''],
+                    datasets: [{
+                        data: [18, 15, 14, 13, 14, 13, 12],
+                        backgroundColor: 'rgba(220, 53, 69, 0.6)',
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false }
+                    }
+                }
+            });
+        }
+
+        // Performance Line Chart
+        const perfCtx = document.getElementById('performanceChart');
+        if (perfCtx) {
+            // Destroy existing chart if present
+            if (window.Chart && window.Chart.getChart) {
+                const existing = window.Chart.getChart(perfCtx);
+                if (existing) existing.destroy();
+            }
+
+            new Chart(perfCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran'],
+                    datasets: [
+                        {
+                            label: 'Gelir',
+                            data: [12000, 19000, 15000, 25000, 22000, 30000],
+                            borderColor: 'rgb(13, 110, 253)',
+                            backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Gider',
+                            data: [8000, 12000, 10000, 15000, 14000, 18000],
+                            borderColor: 'rgb(220, 53, 69)',
+                            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: true,
                     plugins: {
                         legend: {
-                            display: false
+                            position: 'top',
+                            align: 'end'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString('tr-TR') + ' ₺';
+                                }
+                            }
                         }
                     }
                 }
             });
         }
 
-        // User Distribution Chart
-        const distributionCtx = document.getElementById('userDistributionChart');
-        if (distributionCtx) {
-            new Chart(distributionCtx, {
+        // Status Doughnut Chart
+        const statusCtx = document.getElementById('statusChart');
+        if (statusCtx) {
+            // Destroy existing chart if present
+            if (window.Chart && window.Chart.getChart) {
+                const existing = window.Chart.getChart(statusCtx);
+                if (existing) existing.destroy();
+            }
+
+            new Chart(statusCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Aktif', 'Pasif', 'Beklemede'],
+                    labels: ['Tamamlandı', 'Beklemede', 'İşleniyor', 'İptal'],
                     datasets: [{
-                        data: [70, 20, 10],
+                        data: [45, 25, 20, 10],
                         backgroundColor: [
-                            'rgb(102, 126, 234)',
-                            'rgb(118, 75, 162)',
-                            'rgb(255, 193, 7)'
-                        ]
+                            'rgb(25, 135, 84)',
+                            'rgb(255, 193, 7)',
+                            'rgb(13, 202, 240)',
+                            'rgb(220, 53, 69)'
+                        ],
+                        borderWidth: 0
                     }]
                 },
                 options: {
@@ -196,5 +427,12 @@
                 }
             });
         }
-    </script>
-}
+    };
+
+    // Auto-init on page load (for non-TabHost scenarios)
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', window.initDashboardCharts);
+    } else {
+        window.initDashboardCharts();
+    }
+</script>
