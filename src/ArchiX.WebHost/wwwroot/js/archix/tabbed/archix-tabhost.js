@@ -94,8 +94,9 @@
   const config = {
     maxOpenTabs: 15,
     maxTabReachedMessage: 'Açık tab sayısı 15 limitine geldi. Lütfen açık tablardan birini kapatınız.',
-    tabAutoCloseMinutes: 10,
-    autoCloseWarningSeconds: 30,
+    tabAutoCloseSeconds: 15,  // 15 saniye (test için, prod: 600 = 10 dakika)
+    autoCloseWarningSeconds: 5,  // 5 saniye uyarı (test için, prod: 30)
+    tabRequestTimeoutMs: 30000,
     enableNestedTabs: true
   };
 
@@ -644,8 +645,8 @@
       <div class="toast-body">
         <div class="mb-2">"${escapeHtml(d.title)}" sekmesi kapatılacak.</div>
         <div class="mb-2 d-flex align-items-center gap-2">
-          <label class="form-label m-0" for="archixDeferMinutes_${escapeHtml(tabId)}">Erteleme (dk)</label>
-          <input class="form-control form-control-sm" style="width:90px" type="number" min="1" max="${config.tabAutoCloseMinutes}" value="${config.tabAutoCloseMinutes}" id="archixDeferMinutes_${escapeHtml(tabId)}" />
+          <label class="form-label m-0" for="archixDeferSeconds_${escapeHtml(tabId)}">Erteleme (sn)</label>
+          <input class="form-control form-control-sm" style="width:90px" type="number" min="1" max="${config.tabAutoCloseSeconds}" value="${config.tabAutoCloseSeconds}" id="archixDeferSeconds_${escapeHtml(tabId)}" />
         </div>
         <div class="d-flex gap-2 flex-wrap">
           <button type="button" class="btn btn-sm btn-light" data-action="defer">Kapatmayı Ertele</button>
@@ -659,24 +660,38 @@
     const doRemove = () => el.remove();
     el.addEventListener('hidden.bs.toast', doRemove);
 
+    // Auto-close tab after warning timeout if user doesn't interact
+    const autoCloseTimer = setTimeout(() => {
+      closeTab(tabId);
+      if (window.bootstrap?.Toast) {
+        const toast = window.bootstrap.Toast.getOrCreateInstance(el);
+        toast.hide();
+      } else {
+        doRemove();
+      }
+    }, config.autoCloseWarningSeconds * 1000);
+
     el.addEventListener('click', e => {
       const t = e.target;
       if (!(t instanceof Element)) return;
       const btn = t.closest('button[data-action]');
       if (!btn) return;
 
+      // Cancel auto-close timer when user interacts
+      clearTimeout(autoCloseTimer);
+
       const action = btn.getAttribute('data-action');
       const input = el.querySelector('input[type="number"]');
-      let minutes = config.tabAutoCloseMinutes;
+      let seconds = config.tabAutoCloseSeconds;
       if (input) {
         const v = Number.parseInt(input.value, 10);
-        if (!Number.isNaN(v)) minutes = v;
+        if (!Number.isNaN(v)) seconds = v;
       }
-      if (minutes < 1) minutes = 1;
-      if (minutes > config.tabAutoCloseMinutes) minutes = config.tabAutoCloseMinutes;
+      if (seconds < 1) seconds = 1;
+      if (seconds > config.tabAutoCloseSeconds) seconds = config.tabAutoCloseSeconds;
 
       if (action === 'defer') {
-        state.lastActivityAt = Date.now() - Math.max(0, (config.tabAutoCloseMinutes - minutes)) * 60 * 1000;
+        state.lastActivityAt = Date.now() - Math.max(0, (config.tabAutoCloseSeconds - seconds)) * 1000;
       }
 
       if (action === 'focus') {
@@ -735,21 +750,39 @@
   }
 
   async function loadContent(url) {
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'X-ArchiX-Tab': '1',
-        'X-Requested-With': 'XMLHttpRequest',
-        'Accept': 'text/html'
-      },
-      credentials: 'same-origin'
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), config.tabRequestTimeoutMs);
 
-    return {
-      ok: res.ok,
-      status: res.status,
-      text: await res.text()
-    };
+    try {
+      const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'X-ArchiX-Tab': '1',
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'text/html'
+        },
+        credentials: 'same-origin',
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      return {
+        ok: res.ok,
+        status: res.status,
+        text: await res.text()
+      };
+    } catch (err) {
+      clearTimeout(timeoutId);
+      if (err.name === 'AbortError') {
+        return {
+          ok: false,
+          status: 408,
+          text: `<div class="alert alert-warning">İstek zaman aşımına uğradı (${config.tabRequestTimeoutMs / 1000} saniye).</div>`
+        };
+      }
+      throw err;
+    }
   }
 
   function ensureHost() {
@@ -767,7 +800,10 @@
 
     state.activeId = id;
     const d = state.detailById.get(id);
-    if (d) d.lastActivatedAt = Date.now();
+    if (d) {
+      d.lastActivatedAt = Date.now();
+      d.warnedAt = null;  // Clear warning when tab is activated
+    }
 
     qsa('.nav-link[data-tab-id]', h.tabs).forEach(a => {
       const isActive = a.getAttribute('data-tab-id') === id;
@@ -1041,14 +1077,24 @@
 
   function tickAutoCloseWarnings() {
     const idleMs = getInactiveIdleMs();
-    const warnMs = config.tabAutoCloseMinutes * 60 * 1000 - config.autoCloseWarningSeconds * 1000;
+    const warnMs = config.tabAutoCloseSeconds * 1000 - config.autoCloseWarningSeconds * 1000;
+    
+    // DEBUG
+    console.log('[TabHost Debug] Tick:', {
+      idleMs,
+      warnMs,
+      inactiveTabs: getInactiveTabs().length,
+      activeId: state.activeId,
+      navigationMode: getNavigationMode()
+    });
+    
     if (idleMs < warnMs) return;
 
     const now = Date.now();
     for (const t of getInactiveTabs()) {
       const d = state.detailById.get(t.id);
       if (!d) continue;
-      if (d.warnedAt && (now - d.warnedAt) < 10_000) continue;
+      console.log('[TabHost Debug] Showing warning for tab:', t.id, t.title);
       d.warnedAt = now;
       showAutoClosePrompt(t.id);
     }

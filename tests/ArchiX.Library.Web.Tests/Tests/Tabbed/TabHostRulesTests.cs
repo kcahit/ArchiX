@@ -60,16 +60,16 @@ public sealed class TabHostRulesTests
     }
 
     [Fact]
-    public void AutoClose_defaults_are_10_minutes_and_30_seconds_and_only_inactive_tabs_are_in_scope()
+    public void AutoClose_defaults_are_600_seconds_and_30_seconds_and_only_inactive_tabs_are_in_scope()
     {
-        const int tabAutoCloseMinutes = 10;
+        const int tabAutoCloseSeconds = 600;  // 10 dakika = 600 saniye
         const int autoCloseWarningSeconds = 30;
 
         // Decision 6.6.1: only inactive tabs
         const bool activeTabInScope = false;
         const bool inactiveTabInScope = true;
 
-        tabAutoCloseMinutes.Should().Be(10);
+        tabAutoCloseSeconds.Should().Be(600);
         autoCloseWarningSeconds.Should().Be(30);
 
         activeTabInScope.Should().BeFalse();
@@ -98,9 +98,9 @@ public sealed class TabHostRulesTests
     }
 
     [Fact]
-    public void Defer_minutes_are_clamped_between_1_and_tabAutoCloseMinutes()
+    public void Defer_seconds_are_clamped_between_1_and_tabAutoCloseSeconds()
     {
-        const int tabAutoCloseMinutes = 10;
+        const int tabAutoCloseSeconds = 600;  // 10 dakika = 600 saniye
 
         static int Clamp(int v, int max)
         {
@@ -109,11 +109,11 @@ public sealed class TabHostRulesTests
             return v;
         }
 
-        Clamp(-5, tabAutoCloseMinutes).Should().Be(1);
-        Clamp(0, tabAutoCloseMinutes).Should().Be(1);
-        Clamp(1, tabAutoCloseMinutes).Should().Be(1);
-        Clamp(5, tabAutoCloseMinutes).Should().Be(5);
-        Clamp(10, tabAutoCloseMinutes).Should().Be(10);
-        Clamp(999, tabAutoCloseMinutes).Should().Be(10);
+        Clamp(-5, tabAutoCloseSeconds).Should().Be(1);
+        Clamp(0, tabAutoCloseSeconds).Should().Be(1);
+        Clamp(1, tabAutoCloseSeconds).Should().Be(1);
+        Clamp(300, tabAutoCloseSeconds).Should().Be(300);
+        Clamp(600, tabAutoCloseSeconds).Should().Be(600);
+        Clamp(999, tabAutoCloseSeconds).Should().Be(600);
     }
 }

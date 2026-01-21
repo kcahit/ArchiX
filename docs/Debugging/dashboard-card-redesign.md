@@ -87,6 +87,24 @@ Debug dosyasi olusturuldu PC kapatilacak
      - **Xiaomi 17 Pro Max** (Sarı)
 - Result: Pasta tam boy + orantılı, footer 150px boşlukla görünür, yeni nesil flagship telefonlar
 
+---
+
+## 2026-01-22 (Tab Request Timeout Mekanizması)
+- Change: `archix-tabhost.js` -> Tab loading için timeout mekanizması eklendi
+- Expected: Tab yükleme istekleri 30 saniyeden uzun sürerse zaman aşımı hatası gösterilmesi
+- Implemented:
+  1. **Config Parametresi**: `tabRequestTimeoutMs: 30000` (30 saniye)
+  2. **AbortController Kullanımı**: `fetch()` API'sine `signal` parametresi eklendi
+  3. **setTimeout ile Timeout**: Belirtilen süre sonunda `controller.abort()` çağrılıyor
+  4. **Error Handling**: `AbortError` yakalanarak 408 (Request Timeout) status kodu ile kullanıcı dostu hata mesajı dönülüyor
+  5. **Cleanup**: Hem başarılı hem başarısız durumda `clearTimeout()` ile timer temizleniyor
+- Error Message: "İstek zaman aşımına uğradı (30 saniye)."
+- Backend: Zaten `TimeoutHandler.cs` ile 100 saniye timeout mevcut; frontend katmanında daha kısa timeout (30s) ekstra güvenlik sağlıyor
+- Result: ✅ Uzun süren tab yüklemeleri kullanıcıya net hata mesajı ile bildiriliyor, sayfa asılı kalmıyor
+
+
+
+
 
 
 
