@@ -2,6 +2,16 @@
     Layout = "~/Pages/Shared/_ModernBaseLayout.cshtml";
     var pageTitle = ViewData["Title"]?.ToString() ?? "ArchiX";
 
+    var isTabRequest = false;
+    try
+    {
+        isTabRequest = string.Equals(Context?.Request?.Headers["X-ArchiX-Tab"].ToString(), "1", StringComparison.OrdinalIgnoreCase);
+    }
+    catch
+    {
+        isTabRequest = false;
+    }
+
     var layoutProbeEnabled = false;
     try
     {
@@ -38,13 +48,18 @@
 }
 
 @section Header {
-    @await Html.PartialAsync("Templates/Modern/Pages/Shared/_Navbar")
+    @if (!isTabRequest)
+    {
+        @await Html.PartialAsync("Templates/Modern/Pages/Shared/_Navbar")
+    }
 }
 
 
 
  
     
+@if (!isTabRequest)
+{
 <div class="container-fluid h-100 px-0">
     <div class="row dashboard-layout-row g-0">
         @await Html.PartialAsync("Templates/Modern/Pages/Shared/_Sidebar")
@@ -63,26 +78,39 @@
                 <div id="archix-tabhost-panes" class="tab-content"></div>
             </div>
 
-            <div class="archix-work-area">
+            <div id="tab-main" class="archix-work-area px-2">
                 @RenderBody()
             </div>
         </div>
     </div>
 </div>
+}
+else
+{
+    <div id="tab-main" class="archix-work-area px-2">
+        @RenderBody()
+    </div>
+}
 
 @section Footer {
-    @await Html.PartialAsync("Templates/Modern/Pages/Shared/_Footer")
+    @if (!isTabRequest)
+    {
+        @await Html.PartialAsync("Templates/Modern/Pages/Shared/_Footer")
+    }
 }
 
 @section Scripts {
-    <div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
+    @if (!isTabRequest)
+    {
+        <div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
 
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
 
-    <script src="~/js/archix/ui-options.js" asp-append-version="true"></script>
-    <script src="~/js/archix/tabbed/archix-tabhost.js" asp-append-version="true"></script>
+        <script src="~/js/archix/ui-options.js" asp-append-version="true"></script>
+        <script src="~/js/archix/tabbed/archix-tabhost.js" asp-append-version="true"></script>
+    }
 
     @if (layoutProbeEnabled)
     {

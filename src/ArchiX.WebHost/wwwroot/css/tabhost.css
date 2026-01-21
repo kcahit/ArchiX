@@ -1,4 +1,4 @@
-﻿/* TabHost layout/pinning helpers.
+﻿""/* TabHost layout/pinning helpers.
    Component-level styling is in modern/03-components/archix-tabhost.css and modern/03-components/tabs.css */
 
 /* When TabHost is in normal flow (not fixed), no padding compensation is needed. */
@@ -39,6 +39,11 @@
     width: 100%;
 }
 
+/* If Bootstrap/other rules turn panes into a flex container, force normal block flow. */
+#archix-tabhost-panes.tab-content {
+    display: block !important;
+}
+
 /* Keep content readable by reintroducing padding inside tab panes only */
 #archix-tabhost-panes {
     padding-left: 0;
@@ -50,9 +55,21 @@
     box-sizing: border-box;
 }
 
-/* TabHost injects page HTML into `.archix-tab-content`. Any left padding here creates a persistent seam
-   even when tabs/panes are flush. Remove left padding only in tabbed mode. */
+
+/* Tab content root: always fill available width and provide consistent padding/scroll. */
 #archix-tabhost-panes .archix-tab-content {
-    padding-left: 0 !important;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    box-sizing: border-box;
+    padding: 0.75rem 0.75rem 1rem 0.75rem;
+    overflow: auto;
+}
+
+/* Override Bootstrap .container centering inside tabs - all tab content must align consistently (top-left). */
+#archix-tabhost-panes .archix-tab-content .container {
+    max-width: none !important;
     margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100%;
 }

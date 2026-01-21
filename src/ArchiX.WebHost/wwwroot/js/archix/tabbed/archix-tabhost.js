@@ -491,6 +491,35 @@
       let content = html;
       const m = /<body[^>]*>([\s\S]*?)<\/body>/i.exec(html);
       if (m && m[1]) content = m[1];
+
+      // Keep nested tab content consistent with root tabs: extract only the main body, not the full layout.
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        const tabMain = doc.querySelector('#tab-main');
+        if (tabMain) {
+          content = tabMain.innerHTML;
+        } else {
+          const workArea = doc.querySelector('.archix-work-area');
+          if (workArea) {
+            content = workArea.innerHTML;
+          } else {
+            const shellMain = doc.querySelector('main.archix-shell-main') ?? doc.querySelector('main[role="main"]');
+            if (shellMain) {
+              const clone = shellMain.cloneNode(true);
+              if (clone instanceof Element) {
+                clone.querySelector('#archix-tabhost')?.remove();
+                clone.querySelector('#sidebar')?.remove();
+                clone.querySelector('nav.navbar')?.remove();
+                clone.querySelector('footer')?.remove();
+                content = clone.innerHTML;
+              }
+            }
+          }
+        }
+      } catch { }
+
       pane.innerHTML = `<div class="archix-tab-content">${content}</div>`;
 
       try { window.ArchiX?.Sidebar?.restoreState?.(); } catch { }
@@ -545,6 +574,10 @@
 
     const c = qs(selectors.toast);
     if (!c) return;
+
+    // Prevent duplicate toasts for the same tab
+    const existing = c.querySelector(`.toast[data-tab-id="${CSS.escape(tabId)}"]`);
+    if (existing) return;
 
     const el = document.createElement('div');
     el.className = 'toast text-bg-warning border-0';
@@ -769,6 +802,38 @@
       const m = /<body[^>]*>([\s\S]*?)<\/body>/i.exec(html);
       if (m && m[1]) content = m[1];
 
+      // If the fetched page is a full shell/layout, avoid injecting the whole layout into the tab.
+      // Prefer extracting only the page main content (works for Dashboard, Admin, Definitions, etc.).
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        // 1) Preferred: explicit host container
+        const tabMain = doc.querySelector('#tab-main');
+        if (tabMain) {
+          content = tabMain.innerHTML;
+        } else {
+          // 2) Fallback: template work area
+          const workArea = doc.querySelector('.archix-work-area');
+          if (workArea) {
+            content = workArea.innerHTML;
+          } else {
+          // 2) Fallback: use the main shell content, but strip obvious duplicates
+          const shellMain = doc.querySelector('main.archix-shell-main') ?? doc.querySelector('main[role="main"]');
+          if (shellMain) {
+            const clone = shellMain.cloneNode(true);
+            if (clone instanceof Element) {
+              clone.querySelector('#archix-tabhost')?.remove();
+              clone.querySelector('#sidebar')?.remove();
+              clone.querySelector('nav.navbar')?.remove();
+              clone.querySelector('footer')?.remove();
+              content = clone.innerHTML;
+            }
+          }
+          }
+        }
+      } catch { }
+
       pane.innerHTML = `<div class="archix-tab-content">${content}</div>`;
 
       try {
@@ -957,9 +1022,9 @@
     try {
       const root = h.host.parentElement;
       if (root) {
-        const workArea = root.querySelector('.archix-work-area');
-        if (workArea instanceof HTMLElement) {
-          workArea.style.display = 'none';
+        const tabMain = root.querySelector('#tab-main');
+        if (tabMain instanceof HTMLElement) {
+          tabMain.style.display = 'none';
         }
       }
     } catch { }
