@@ -13,10 +13,12 @@ namespace ArchiX.Library.Web.Templates.Modern.Pages
         public LoginInputModel Input { get; set; } = new();
 
         public string? ReturnUrl { get; set; }
+        public string? Reason { get; set; }
 
-        public void OnGet(string? returnUrl = null)
+        public void OnGet(string? returnUrl = null, string? reason = null)
         {
             ReturnUrl = returnUrl;
+            Reason = reason;
         }
 
         public IActionResult OnPost(string? returnUrl = null)

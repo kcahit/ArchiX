@@ -1,5 +1,8 @@
 ﻿@using Microsoft.Extensions.Configuration
+@using Microsoft.Extensions.Options
+@using ArchiX.Library.Web.Configuration
 @inject IConfiguration Configuration
+@inject IOptions<UiTimeoutOptions> TimeoutOptions
 @{
     Layout = "~/Pages/Shared/_ModernBaseLayout.cshtml";
     var pageTitle = ViewData["Title"]?.ToString() ?? "ArchiX";
@@ -112,7 +115,20 @@ else
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
 
+        <script src="~/js/archix/session-guard.js" asp-append-version="true"></script>
         <script src="~/js/archix/ui-options.js" asp-append-version="true"></script>
+        
+        <!-- Inject timeout options from server (DB'den gelecek) -->
+        <script>
+            if (!window.ArchiX) window.ArchiX = {};
+            window.ArchiX.TimeoutOptions = {
+                sessionTimeoutSeconds: @TimeoutOptions.Value.SessionTimeoutSeconds,
+                sessionWarningSeconds: @TimeoutOptions.Value.SessionWarningSeconds,
+                tabRequestTimeoutMs: @TimeoutOptions.Value.TabRequestTimeoutMs,
+                maxOpenTabs: @TimeoutOptions.Value.MaxOpenTabs
+            };
+        </script>
+        
         <script src="~/js/archix/tabbed/archix-tabhost.js" asp-append-version="true"></script>
 
         <!-- Debug mode setup (#55) -->

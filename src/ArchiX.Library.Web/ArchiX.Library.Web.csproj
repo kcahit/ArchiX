@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <Folder Include="Abstractions\Security\" />
+    <Folder Include="Middleware\" />
     <Folder Include="Templates\Modern\Pages\Definitions\" />
     <Folder Include="Views\Shared\Components\LayoutMode\" />
     <Folder Include="wwwroot\images\" />

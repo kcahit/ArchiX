@@ -27,6 +27,9 @@ namespace ArchiX.Library.Web.Configuration
 
             services.AddScoped<ArchiX.Library.Web.Abstractions.Reports.IReportDatasetOptionService, ArchiX.Library.Web.Runtime.Reports.ReportDatasetOptionService>();
 
+            // UI timeout options (şimdilik hard-coded, sonra DB'den gelecek)
+            services.Configure<UiTimeoutOptions>(opts => { });
+
             return services;
         }
     }

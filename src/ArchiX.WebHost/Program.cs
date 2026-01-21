@@ -51,6 +51,7 @@ builder.Services.AddRazorPages(opts =>
         opts.Conventions.AllowAnonymousToFolder("/Admin");
         opts.Conventions.AllowAnonymousToFolder("/Templates");
         opts.Conventions.AllowAnonymousToPage("/Login");
+        opts.Conventions.AllowAnonymousToPage("/Logout");
         opts.Conventions.AllowAnonymousToPage("/Dashboard");
     }
 })

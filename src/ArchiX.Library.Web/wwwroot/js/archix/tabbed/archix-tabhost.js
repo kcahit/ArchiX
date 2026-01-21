@@ -91,14 +91,21 @@
     return t.length > 0 ? t : null;
   }
 
+  // Config: Prioritize server-injected values (from DB), fallback to defaults
+  const serverOptions = window.ArchiX?.TimeoutOptions || {};
+  
+  console.log('[TabHost] Server options:', serverOptions);
+  
   const config = {
-    maxOpenTabs: 15,
-    maxTabReachedMessage: 'Açık tab sayısı 15 limitine geldi. Lütfen açık tablardan birini kapatınız.',
-    tabAutoCloseSeconds: 15,  // 15 saniye (test için, prod: 600 = 10 dakika)
-    autoCloseWarningSeconds: 5,  // 5 saniye uyarı (test için, prod: 30)
-    tabRequestTimeoutMs: 30000,
+    maxOpenTabs: serverOptions.maxOpenTabs || 15,
+    maxTabReachedMessage: 'Açık tab sayısı limitine geldi. Lütfen açık tablardan birini kapatınız.',
+    sessionTimeoutSeconds: serverOptions.sessionTimeoutSeconds || 600,  // DB'den gelecek
+    sessionWarningSeconds: serverOptions.sessionWarningSeconds || 30,   // DB'den gelecek
+    tabRequestTimeoutMs: serverOptions.tabRequestTimeoutMs || 30000,   // DB'den gelecek
     enableNestedTabs: true
   };
+  
+  console.log('[TabHost] Config loaded:', config);
 
   function createNestedHost(parentPane, groupId) {
     const host = document.createElement('div');
@@ -616,43 +623,29 @@
     });
   }
 
-  function showAutoClosePrompt(tabId) {
-    const d = state.detailById.get(tabId);
-    if (!d) return;
-
+  function showSessionWarning() {
     const c = qs(selectors.toast);
     if (!c) return;
 
-    // Prevent duplicate toasts for the same tab
-    const existing = c.querySelector(`.toast[data-tab-id="${CSS.escape(tabId)}"]`);
+    // Prevent duplicate session warnings
+    const existing = c.querySelector('.toast[data-archix-session-warning="1"]');
     if (existing) return;
 
     const el = document.createElement('div');
-    el.className = 'toast text-bg-warning border-0';
+    el.className = 'toast text-bg-danger border-0';
     el.setAttribute('role', 'alert');
     el.setAttribute('aria-live', 'assertive');
     el.setAttribute('aria-atomic', 'true');
-    el.setAttribute('data-archix-autoclose', '1');
-    el.setAttribute('data-tab-id', tabId);
+    el.setAttribute('data-archix-session-warning', '1');
 
-    const hasDirty = !!d.isDirty;
     el.innerHTML = `
-      <div class="toast-header text-bg-warning border-0">
-        <strong class="me-auto">Otomatik Kapatma</strong>
-        <small>Tab: ${escapeHtml(d.title)}</small>
-        <button type="button" class="btn-close ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+      <div class="toast-header text-bg-danger border-0">
+        <strong class="me-auto">Oturum Zaman Aşımı</strong>
+        <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
       <div class="toast-body">
-        <div class="mb-2">"${escapeHtml(d.title)}" sekmesi kapatılacak.</div>
-        <div class="mb-2 d-flex align-items-center gap-2">
-          <label class="form-label m-0" for="archixDeferSeconds_${escapeHtml(tabId)}">Erteleme (sn)</label>
-          <input class="form-control form-control-sm" style="width:90px" type="number" min="1" max="${config.tabAutoCloseSeconds}" value="${config.tabAutoCloseSeconds}" id="archixDeferSeconds_${escapeHtml(tabId)}" />
-        </div>
-        <div class="d-flex gap-2 flex-wrap">
-          <button type="button" class="btn btn-sm btn-light" data-action="defer">Kapatmayı Ertele</button>
-          ${hasDirty ? '<button type="button" class="btn btn-sm btn-danger" data-action="closeNoSave">Kaydetmeden Kapat</button>' : ''}
-          <button type="button" class="btn btn-sm btn-primary" data-action="focus">Sayfayı Aç</button>
-        </div>
+        <div class="mb-2">Oturumunuz ${config.sessionWarningSeconds} saniye içinde sona erecek.</div>
+        <button type="button" class="btn btn-sm btn-light w-100" data-action="stay-logged-in">Oturumda Kal</button>
       </div>`;
 
     c.appendChild(el);
@@ -660,16 +653,16 @@
     const doRemove = () => el.remove();
     el.addEventListener('hidden.bs.toast', doRemove);
 
-    // Auto-close tab after warning timeout if user doesn't interact
-    const autoCloseTimer = setTimeout(() => {
-      closeTab(tabId);
-      if (window.bootstrap?.Toast) {
-        const toast = window.bootstrap.Toast.getOrCreateInstance(el);
-        toast.hide();
-      } else {
-        doRemove();
-      }
-    }, config.autoCloseWarningSeconds * 1000);
+    // Redirect to login after warning timeout if user doesn't interact
+    const logoutTimer = setTimeout(() => {
+      // Clear ALL storage (prevent any page access)
+      sessionStorage.clear();
+      localStorage.clear();
+      
+      // IMMEDIATE FULL PAGE redirect to STATIC HTML LOGOUT PAGE
+      // This bypasses Razor Pages completely and breaks out of tab system
+      window.top.location.href = '/logout.html';
+    }, config.sessionWarningSeconds * 1000);
 
     el.addEventListener('click', e => {
       const t = e.target;
@@ -677,36 +670,18 @@
       const btn = t.closest('button[data-action]');
       if (!btn) return;
 
-      // Cancel auto-close timer when user interacts
-      clearTimeout(autoCloseTimer);
-
       const action = btn.getAttribute('data-action');
-      const input = el.querySelector('input[type="number"]');
-      let seconds = config.tabAutoCloseSeconds;
-      if (input) {
-        const v = Number.parseInt(input.value, 10);
-        if (!Number.isNaN(v)) seconds = v;
-      }
-      if (seconds < 1) seconds = 1;
-      if (seconds > config.tabAutoCloseSeconds) seconds = config.tabAutoCloseSeconds;
-
-      if (action === 'defer') {
-        state.lastActivityAt = Date.now() - Math.max(0, (config.tabAutoCloseSeconds - seconds)) * 1000;
-      }
-
-      if (action === 'focus') {
-        activateTab(tabId);
-      }
-
-      if (action === 'closeNoSave') {
-        closeTab(tabId);
-      }
-
-      if (window.bootstrap?.Toast) {
-        const toast = window.bootstrap.Toast.getOrCreateInstance(el);
-        toast.hide();
-      } else {
-        doRemove();
+      if (action === 'stay-logged-in') {
+        // Cancel logout timer and reset activity
+        clearTimeout(logoutTimer);
+        state.lastActivityAt = Date.now();
+        
+        if (window.bootstrap?.Toast) {
+          const toast = window.bootstrap.Toast.getOrCreateInstance(el);
+          toast.hide();
+        } else {
+          doRemove();
+        }
       }
     });
 
@@ -802,7 +777,6 @@
     const d = state.detailById.get(id);
     if (d) {
       d.lastActivatedAt = Date.now();
-      d.warnedAt = null;  // Clear warning when tab is activated
     }
 
     qsa('.nav-link[data-tab-id]', h.tabs).forEach(a => {
@@ -1032,6 +1006,10 @@
       // ignore explicit new tab
       if (a.getAttribute('target') === '_blank') return;
 
+      // ignore Logout page and static HTML files
+      if (href.toLowerCase().startsWith('/logout')) return;
+      if (href.toLowerCase().endsWith('.html')) return;
+
       // only intercept app links
       if (!href.startsWith('/')) return;
 
@@ -1075,35 +1053,14 @@
     return Date.now() - state.lastActivityAt;
   }
 
-  function tickAutoCloseWarnings() {
-    const idleMs = getInactiveIdleMs();
-    const warnMs = config.tabAutoCloseSeconds * 1000 - config.autoCloseWarningSeconds * 1000;
-    
-    // DEBUG
-    console.log('[TabHost Debug] Tick:', {
-      idleMs,
-      warnMs,
-      inactiveTabs: getInactiveTabs().length,
-      allTabs: state.tabs.length,
-      activeId: state.activeId,
-      navigationMode: getNavigationMode()
-    });
-    
-    if (idleMs < warnMs) return;
+  function tickSessionTimeout() {
+    const idleMs = Date.now() - state.lastActivityAt;
+    const warnMs = config.sessionTimeoutSeconds * 1000 - config.sessionWarningSeconds * 1000;
 
-    const now = Date.now();
-    for (const t of getInactiveTabs()) {
-      // Skip pinned tabs (Dashboard should never auto-close)
-      if (isPinnedTabId(t.id)) {
-        console.log('[TabHost Debug] Skipping pinned tab:', t.id);
-        continue;
-      }
-      
-      const d = state.detailById.get(t.id);
-      if (!d) continue;
-      console.log('[TabHost Debug] Showing warning for tab:', t.id, t.title);
-      d.warnedAt = now;
-      showAutoClosePrompt(t.id);
+    console.log('[TabHost] Tick - idleMs:', idleMs, 'warnMs:', warnMs, 'shouldWarn:', idleMs >= warnMs);
+
+    if (idleMs >= warnMs) {
+      showSessionWarning();
     }
   }
 
@@ -1156,18 +1113,30 @@
   }
 
   function init() {
+    console.log('[TabHost] Init started');
+    
     const h = ensureHost();
-    if (!h) return;
+    if (!h) {
+      console.log('[TabHost] Host not found, aborting');
+      return;
+    }
 
     // Only take over the page when Tabbed navigation is explicitly enabled.
-    if (getNavigationMode() !== 'Tabbed') return;
+    const navMode = getNavigationMode();
+    console.log('[TabHost] Navigation mode:', navMode);
+    
+    if (navMode !== 'Tabbed') {
+      console.log('[TabHost] Not in Tabbed mode, aborting');
+      return;
+    }
 
     interceptClicks();
     bindTabHostEvents();
     bindResponseCardActions();
     initIdleTracking();
 
-    window.setInterval(tickAutoCloseWarnings, 1000);
+    console.log('[TabHost] Starting session timeout interval');
+    window.setInterval(tickSessionTimeout, 1000);
 
     // IMPORTANT: For the initial Dashboard tab, use the statically rendered #tab-main content
     // instead of fetching it again. This avoids duplicate requests and preserves the initial page state.

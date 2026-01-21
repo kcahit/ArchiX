@@ -109,6 +109,9 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
+        // Clear any previous session on login page load
+        sessionStorage.removeItem('archix-session-active');
+
         const togglePassword = document.getElementById('togglePassword');
         const passwordInput = document.getElementById('password');
 
@@ -130,5 +133,13 @@
                 alert(platform + ' ile giriş yapılıyor...');
             });
         });
+
+        // On successful login (form submit), set session active
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.addEventListener('submit', function() {
+                sessionStorage.setItem('archix-session-active', 'true');
+            });
+        }
     </script>
 }

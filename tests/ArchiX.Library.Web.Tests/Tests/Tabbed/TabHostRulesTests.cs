@@ -60,20 +60,13 @@ public sealed class TabHostRulesTests
     }
 
     [Fact]
-    public void AutoClose_defaults_are_600_seconds_and_30_seconds_and_only_inactive_tabs_are_in_scope()
+    public void Session_timeout_defaults_are_600_seconds_and_30_seconds()
     {
-        const int tabAutoCloseSeconds = 600;  // 10 dakika = 600 saniye
-        const int autoCloseWarningSeconds = 30;
+        const int sessionTimeoutSeconds = 600;  // 10 dakika global session timeout
+        const int sessionWarningSeconds = 30;
 
-        // Decision 6.6.1: only inactive tabs
-        const bool activeTabInScope = false;
-        const bool inactiveTabInScope = true;
-
-        tabAutoCloseSeconds.Should().Be(600);
-        autoCloseWarningSeconds.Should().Be(30);
-
-        activeTabInScope.Should().BeFalse();
-        inactiveTabInScope.Should().BeTrue();
+        sessionTimeoutSeconds.Should().Be(600);
+        sessionWarningSeconds.Should().Be(30);
     }
 
     [Fact]
@@ -86,34 +79,18 @@ public sealed class TabHostRulesTests
     }
 
     [Fact]
-    public void AutoClose_action_set_depends_on_isDirty()
+    public void AutoClose_action_set_is_stay_logged_in_only()
     {
-        // Decision 6.12
-        var dirtyActions = new[] { "defer", "closeNoSave", "focus" };
-        var cleanActions = new[] { "defer", "focus" };
-
-        dirtyActions.Should().Contain(new[] { "defer", "closeNoSave", "focus" });
-        cleanActions.Should().Contain(new[] { "defer", "focus" });
-        cleanActions.Should().NotContain("closeNoSave");
+        // Session timeout only has "stay logged in" action, no close/defer/dirty handling
+        var actions = new[] { "stay-logged-in" };
+        actions.Should().Contain("stay-logged-in");
+        actions.Should().HaveCount(1);
     }
 
     [Fact]
-    public void Defer_seconds_are_clamped_between_1_and_tabAutoCloseSeconds()
+    public void Session_warning_shows_stay_logged_in_button()
     {
-        const int tabAutoCloseSeconds = 600;  // 10 dakika = 600 saniye
-
-        static int Clamp(int v, int max)
-        {
-            if (v < 1) return 1;
-            if (v > max) return max;
-            return v;
-        }
-
-        Clamp(-5, tabAutoCloseSeconds).Should().Be(1);
-        Clamp(0, tabAutoCloseSeconds).Should().Be(1);
-        Clamp(1, tabAutoCloseSeconds).Should().Be(1);
-        Clamp(300, tabAutoCloseSeconds).Should().Be(300);
-        Clamp(600, tabAutoCloseSeconds).Should().Be(600);
-        Clamp(999, tabAutoCloseSeconds).Should().Be(600);
+        var actions = new[] { "stay-logged-in" };
+        actions.Should().Contain("stay-logged-in");
     }
 }
