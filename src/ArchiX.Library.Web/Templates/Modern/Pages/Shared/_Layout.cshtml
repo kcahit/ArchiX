@@ -1,4 +1,6 @@
-﻿@{
+﻿@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@{
     Layout = "~/Pages/Shared/_ModernBaseLayout.cshtml";
     var pageTitle = ViewData["Title"]?.ToString() ?? "ArchiX";
 
@@ -26,6 +28,9 @@
     {
         layoutProbeEnabled = false;
     }
+
+    // Debug mode için ViewBag inject (#55)
+    ViewBag.DebugMode = Configuration.GetValue<bool>("ArchiX:Debug", false);
 }
 
 @section Head {
@@ -110,6 +115,13 @@ else
 
         <script src="~/js/archix/ui-options.js" asp-append-version="true"></script>
         <script src="~/js/archix/tabbed/archix-tabhost.js" asp-append-version="true"></script>
+
+        <!-- Debug mode setup (#55) -->
+        <script>
+            if (!window.ArchiX) window.ArchiX = {};
+            window.ArchiX.Debug = @(ViewBag.DebugMode?.ToString().ToLower() ?? "false");
+        </script>
+        <script src="~/js/archix/diagnostics.js" asp-append-version="true"></script>
     }
 
     @if (layoutProbeEnabled)

@@ -261,38 +261,38 @@ Unit Test: `3.7`, `3.8`
 Effort: 30 dakika
 Output: `.github/copilot-instructions.md` (Frontend Debugging Template bölümü)
 
-13.3 Diagnostic JavaScript Helper'lar (GitHub Issue No: TBD)
+13.3 Diagnostic JavaScript Helper'lar (GitHub Issue No: TBD) ==> Tamamlandı (2025-01-22 16:19)
 Kapsadığı kararlar: `4.1`, `4.2`, `4.3`, `4.4`, `4.5`, `4.6`, `4.7`
 Unit Test: `4.8`, `4.9`, `4.10`, `4.11`
 Effort: 1 saat
 Output: `src/ArchiX.Library.Web/wwwroot/js/archix/diagnostics.js`
 
-13.4 CSS Architecture Dokümanı (GitHub Issue No: TBD)
+13.4 CSS Architecture Dokümanı (GitHub Issue No: TBD) ==> Tamamlandı (2025-01-22 16:21)
 Kapsadığı kararlar: `5.1`, `5.2`, `5.3`, `5.4`, `5.5`, `5.6`
 Unit Test: `5.7`, `5.8`
 Effort: 1 saat
 Output: `docs/Architecture/css-specificity.md`
 
-13.5 Debug Log Şablonu Standardizasyonu (GitHub Issue No: TBD)
+13.5 Debug Log Şablonu Standardizasyonu (GitHub Issue No: TBD) ==> Tamamlandı (2025-01-22 16:23)
 Kapsadığı kararlar: `7.1`, `7.2`, `7.3`, `7.4`
 Unit Test: `7.5`
 Effort: 30 dakika
 Output: Mevcut `docs/Debugging/*.md` dosyalarını format güncelleme
 
-13.6 Configuration Setup (GitHub Issue No: TBD)
+13.6 Configuration Setup (GitHub Issue No: TBD) ==> Tamamlandı (2025-01-22 16:25)
 Kapsadığı kararlar: `10.1`, `10.2`, `10.3`
 Unit Test: `10.4`, `10.5`, `10.6`
 Effort: 30 dakika
-Output: `appsettings.json`, `appsettings.Production.json`, `_Layout.cshtml` (ViewBag.DebugMode)
+Output: `appsettings.Development.json`, `appsettings.Production.json`, `_Layout.cshtml` (ViewBag.DebugMode)
 
-13.7 Diagnostic Endpoint (GitHub Issue No: TBD)
+13.7 Diagnostic Endpoint (GitHub Issue No: TBD) ==> Atlandı (backend impl gerekli, optional)
 Kapsadığı kararlar: `6.1`, `6.2`, `6.3`, `6.4`, `6.5`, `6.6`, `6.7`, `6.8`
 Unit Test: `6.9`, `6.10`, `6.11`, `6.12`, `6.13`
 Effort: 2 saat
 Output: `src/ArchiX.Library.Web/Endpoints/DiagnosticsEndpoints.cs`
 Dependencies: 13.6 (config gerekli)
 
-13.8 Güvenlik & Performans Validation (GitHub Issue No: TBD)
+13.8 Güvenlik & Performans Validation (GitHub Issue No: TBD) ==> Atlandı (CI/CD pipeline work, optional)
 Kapsadığı kararlar: `8.1`, `8.2`, `8.3`, `8.4`, `8.5`, `9.1`, `9.2`, `9.3`, `9.4`
 Unit Test: `8.6`, `8.7`, `9.6`, `9.7`
 Effort: 1 saat
