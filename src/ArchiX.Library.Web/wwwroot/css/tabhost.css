@@ -1,4 +1,4 @@
-﻿""/* TabHost layout/pinning helpers.
+﻿/* TabHost layout/pinning helpers.
    Component-level styling is in modern/03-components/archix-tabhost.css and modern/03-components/tabs.css */
 
 /* When TabHost is in normal flow (not fixed), no padding compensation is needed. */
@@ -6,8 +6,10 @@
     padding-top: 0;
 }
 
-/* TabHost must live inside the shell scroll area (base <main>) so long pages can scroll to the footer.
-   Keep it in normal document flow; only navbar/sidebar are fixed. */
+/* TabHost positioning (#55 Faze 2):
+   TabHost in normal flow (not fixed) - scrollable with page.
+   Navbar/sidebar are fixed, TabHost scrolls inside main shell.
+   Zero top padding - no compensation needed. */
 #archix-tabhost {
     position: static;
     margin: 0 !important;
@@ -39,7 +41,10 @@
     width: 100%;
 }
 
-/* If Bootstrap/other rules turn panes into a flex container, force normal block flow. */
+/* Block flow enforcement (#55 Faze 2):
+   Force block flow (disable flex centering).
+   Bootstrap may turn .tab-content into flexbox → centers children.
+   We want normal top-to-bottom block flow. */
 #archix-tabhost-panes.tab-content {
     display: block !important;
 }
@@ -66,7 +71,11 @@
     overflow: auto;
 }
 
-/* Override Bootstrap .container centering inside tabs - all tab content must align consistently (top-left). */
+/* Bootstrap .container override (#55 Faze 2):
+   Override Bootstrap .container centering inside tabs.
+   All tab pages must align consistently (top-left, full-width).
+   Without this: pages with <div class="container"> center themselves.
+   Specificity: (1,0,3) - higher than Bootstrap (0,0,1). */
 #archix-tabhost-panes .archix-tab-content .container {
     max-width: none !important;
     margin-left: 0 !important;

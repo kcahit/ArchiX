@@ -500,10 +500,16 @@
         const tabMain = doc.querySelector('#tab-main');
         if (tabMain) {
           content = tabMain.innerHTML;
+          if (window.ArchiX?.Debug) {
+            console.log('[ArchiX Debug] Nested extract from #tab-main', { url, htmlLength: content.length });
+          }
         } else {
           const workArea = doc.querySelector('.archix-work-area');
           if (workArea) {
             content = workArea.innerHTML;
+            if (window.ArchiX?.Debug) {
+              console.log('[ArchiX Debug] Nested extract from .archix-work-area', { url, htmlLength: content.length });
+            }
           } else {
             const shellMain = doc.querySelector('main.archix-shell-main') ?? doc.querySelector('main[role="main"]');
             if (shellMain) {
@@ -514,6 +520,9 @@
                 clone.querySelector('nav.navbar')?.remove();
                 clone.querySelector('footer')?.remove();
                 content = clone.innerHTML;
+                if (window.ArchiX?.Debug) {
+                  console.log('[ArchiX Debug] Nested extract from main (duplicate removed)', { url, htmlLength: content.length });
+                }
               }
             }
           }
@@ -812,13 +821,19 @@
         const tabMain = doc.querySelector('#tab-main');
         if (tabMain) {
           content = tabMain.innerHTML;
+          if (window.ArchiX?.Debug) {
+            console.log('[ArchiX Debug] Extract from #tab-main', { url, htmlLength: content.length });
+          }
         } else {
           // 2) Fallback: template work area
           const workArea = doc.querySelector('.archix-work-area');
           if (workArea) {
             content = workArea.innerHTML;
+            if (window.ArchiX?.Debug) {
+              console.log('[ArchiX Debug] Extract from .archix-work-area', { url, htmlLength: content.length });
+            }
           } else {
-          // 2) Fallback: use the main shell content, but strip obvious duplicates
+          // 3) Fallback: use the main shell content, but strip obvious duplicates
           const shellMain = doc.querySelector('main.archix-shell-main') ?? doc.querySelector('main[role="main"]');
           if (shellMain) {
             const clone = shellMain.cloneNode(true);
@@ -828,6 +843,9 @@
               clone.querySelector('nav.navbar')?.remove();
               clone.querySelector('footer')?.remove();
               content = clone.innerHTML;
+              if (window.ArchiX?.Debug) {
+                console.log('[ArchiX Debug] Extract from main (duplicate removed)', { url, htmlLength: content.length });
+              }
             }
           }
           }

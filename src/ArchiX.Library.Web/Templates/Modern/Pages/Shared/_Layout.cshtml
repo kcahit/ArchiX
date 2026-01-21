@@ -59,39 +59,38 @@
     }
 }
 
-
-
- 
-    
+@* Layout content (#55 Faze 2): Conditional required for RenderBody() - cannot extract to partial/component *@
 @if (!isTabRequest)
 {
-<div class="container-fluid h-100 px-0">
-    <div class="row dashboard-layout-row g-0">
-        @await Html.PartialAsync("Templates/Modern/Pages/Shared/_Sidebar")
+    @* Full layout mode (direct page access) *@
+    <div class="container-fluid h-100 px-0">
+        <div class="row dashboard-layout-row g-0">
+            @await Html.PartialAsync("Templates/Modern/Pages/Shared/_Sidebar")
 
-        <div class="col-md-9 col-lg-10 main-content h-100">
-            @if (TempData["ErrorMessage"] != null)
-            {
-                <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
-                    @TempData["ErrorMessage"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <div class="col-md-9 col-lg-10 main-content h-100">
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                        @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <div id="archix-tabhost">
+                    <ul id="archix-tabhost-tabs" class="nav nav-tabs" role="tablist"></ul>
+                    <div id="archix-tabhost-panes" class="tab-content"></div>
                 </div>
-            }
 
-            <div id="archix-tabhost">
-                <ul id="archix-tabhost-tabs" class="nav nav-tabs" role="tablist"></ul>
-                <div id="archix-tabhost-panes" class="tab-content"></div>
-            </div>
-
-            <div id="tab-main" class="archix-work-area px-2">
-                @RenderBody()
+                <div id="tab-main" class="archix-work-area px-2">
+                    @RenderBody()
+                </div>
             </div>
         </div>
     </div>
-</div>
 }
 else
 {
+    @* Minimal layout mode (tab request - X-ArchiX-Tab: 1) *@
     <div id="tab-main" class="archix-work-area px-2">
         @RenderBody()
     </div>
@@ -119,7 +118,7 @@ else
         <!-- Debug mode setup (#55) -->
         <script>
             if (!window.ArchiX) window.ArchiX = {};
-            window.ArchiX.Debug = @(ViewBag.DebugMode?.ToString().ToLower() ?? "false");
+            window.ArchiX.Debug = @(ViewBag.DebugMode?.ToString().ToLower() ?? "false")
         </script>
         <script src="~/js/archix/diagnostics.js" asp-append-version="true"></script>
     }

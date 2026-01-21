@@ -355,3 +355,170 @@ Dependencies: 13.9
 17.3 **Documentation Coverage:** Troubleshooting guide kullanım oranı > %80 (team feedback).
 17.4 **Production Incidents:** Diagnostic endpoint abuse/leak = 0.
 17.5 **Performance:** Page load time değişimi < %2 (Faze 1 için).
+
+---
+
+## 18) Faze 2 — Detaylı İş Planı
+
+### 18.1 ViewComponent Refactor
+
+**Amaç:** `_Layout.cshtml` içindeki conditional logic → clean ViewComponent
+
+**Mevcut durum (150 satır):**
+```csharp
+@if (!isTabRequest) {
+    // 80 satır navbar/sidebar/tabhost/footer
+} else {
+    // 5 satır minimal layout
+}
+```
+
+**Hedef:** ViewComponent ile clean separation
+
+**Dosyalar:**
+- `src/ArchiX.Library.Web/ViewComponents/LayoutModeViewComponent.cs` (YENİ)
+- `src/ArchiX.Library.Web/Views/Shared/Components/LayoutMode/Full.cshtml` (YENİ)
+- `src/ArchiX.Library.Web/Views/Shared/Components/LayoutMode/Minimal.cshtml` (YENİ)
+- `src/ArchiX.Library.Web/Templates/Modern/Pages/Shared/_Layout.cshtml` (GÜNCELLENDİ)
+
+**Teknik tasarım:**
+```csharp
+public class LayoutModeViewComponent : ViewComponent
+{
+    public IViewComponentResult Invoke(bool isTabRequest)
+    {
+        return isTabRequest ? View("Minimal") : View("Full");
+    }
+}
+```
+
+**Test:**
+- Snapshot test: Full.cshtml output == mevcut full layout HTML
+- Snapshot test: Minimal.cshtml output == mevcut minimal layout HTML
+- Integration test: Tab fetch → Minimal render
+- Integration test: Direct URL → Full render
+
+---
+
+### 18.2 Extract Chain Console Logging
+
+**Amaç:** `archix-tabhost.js` extract mantığına debug log ekle
+
+**Dosya:** `src/ArchiX.Library.Web/wwwroot/js/archix/tabbed/archix-tabhost.js`
+
+**Ekleme yerleri:**
+1. `openTab()` fonksiyonu → extract chain result
+2. `openNestedTab()` fonksiyonu → extract chain result
+
+**Log format:**
+```javascript
+if (window.ArchiX?.Debug) {
+    console.log('[ArchiX Debug] Extract:', {
+        url: '/Dashboard',
+        selector: '#tab-main',
+        found: true,
+        htmlLength: 12540
+    });
+}
+```
+
+**Konum (örnek):**
+```javascript
+// Line ~810 (openTab içinde)
+const tabMain = doc.querySelector('#tab-main');
+if (tabMain) {
+    content = tabMain.innerHTML;
+    if (window.ArchiX?.Debug) {
+        console.log('[ArchiX Debug] Extract from #tab-main', {
+            url, htmlLength: content.length
+        });
+    }
+}
+```
+
+**Test:**
+- `window.ArchiX.Debug = true` → console log yazılır
+- `window.ArchiX.Debug = false` → console log yazılmaz
+
+---
+
+### 18.3 CSS Audit (Inline Comment)
+
+**Amaç:** `tabhost.css` içindeki kritik kuralları açıkla
+
+**Dosya:** `src/ArchiX.Library.Web/wwwroot/css/tabhost.css`
+
+**Eklenecek comment'ler:**
+
+1. **Line ~10-17:** TabHost positioning
+```css
+/* TabHost in normal flow (not fixed) - scrollable with page.
+   Navbar/sidebar are fixed, TabHost scrolls inside main shell.
+   Zero top padding - no compensation needed. */
+#archix-tabhost { position: static; margin: 0 !important; ... }
+```
+
+2. **Line ~60-67:** Tab content override
+```css
+/* Override Bootstrap .container centering inside tabs.
+   All tab pages must align consistently (top-left, full-width).
+   Without this: pages with <div class="container"> center themselves.
+   Specificity: (1,0,3) - higher than Bootstrap (0,0,1). */
+#archix-tabhost-panes .archix-tab-content .container { ... }
+```
+
+3. **Line ~43-45:** Block flow enforcement
+```css
+/* Force block flow (disable flex centering).
+   Bootstrap may turn .tab-content into flexbox → centers children.
+   We want normal top-to-bottom block flow. */
+#archix-tabhost-panes.tab-content { display: block !important; }
+```
+
+**Test:** Manuel review (comment okunabilirliği)
+
+---
+
+### 18.4 Yapılacak İşler (Faze 2)
+
+18.4.1 ViewComponent Implementation (GitHub Issue No: TBD)
+Kapsadığı kararlar: `11.1`
+Unit Test: `11.6`
+Effort: 2 saat
+Dosyalar:
+- `ViewComponents/LayoutModeViewComponent.cs`
+- `Views/Shared/Components/LayoutMode/Full.cshtml`
+- `Views/Shared/Components/LayoutMode/Minimal.cshtml`
+- `_Layout.cshtml` (refactor)
+
+18.4.2 Console Logging (GitHub Issue No: TBD)
+Kapsadığı kararlar: `11.2`
+Unit Test: `11.7`
+Effort: 1 saat
+Dosyalar:
+- `wwwroot/js/archix/tabbed/archix-tabhost.js`
+
+18.4.3 CSS Audit (GitHub Issue No: TBD)
+Kapsadığı kararlar: `11.3`
+Unit Test: Manuel review
+Effort: 1 saat
+Dosyalar:
+- `wwwroot/css/tabhost.css`
+
+---
+
+### 18.5 Başarı Kriterleri (Faze 2)
+
+18.5.1 `_Layout.cshtml` 150 satırdan 50 satıra düşer.
+18.5.2 Layout değişikliği süresi 30 dk → 15 dk (ViewComponent clean).
+18.5.3 Extract chain debug log production'da yazılmaz (Debug=false).
+18.5.4 CSS değişikliklerinde comment referansı kolaylaşır (inline açıklama).
+18.5.5 Zero regression: Full/Minimal layout HTML identical (snapshot test).
+
+---
+
+### 18.6 Rollback (Faze 2)
+
+18.6.1 ViewComponent hatalıysa → `_Layout.cshtml` eski haline döndür (git revert).
+18.6.2 Console log production'da yazıyorsa → `archix-tabhost.js` eski haline döndür.
+18.6.3 CSS comment'ler karışıklık yaratıyorsa → sil (regression risk yok).
