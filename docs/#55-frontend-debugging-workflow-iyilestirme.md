@@ -249,14 +249,14 @@
 
 ## 13) Yapılacak İşler (İş Sırası — Yapılış Sırası)
 
-13.1 Troubleshooting Guide Hazırlama (GitHub Issue No: TBD) ==> Tamamlandı (2025-01-22 16:15)
+13.1 Troubleshooting Guide Hazırlama (GitHub Issue No: TBD) ==> Tamamlandı (2025-01-22 11:45):
 Kapsadığı kararlar: `2.1`, `2.2`, `2.3`, `2.4`, `2.5`, `2.6`, `2.7`
 Unit Test: `2.8`, `2.9`
 Effort: 1 saat
 Output: `docs/Debugging/frontend-troubleshooting.md`
 
-13.2 Copilot Instructions Güncelleme (GitHub Issue No: TBD)
-Kapsadığı kararlar: `3.1`, `3.2`, `3.3`, `3.4`, `3.5`, `3.6`
+13.2 Copilot Instructions Güncelleme (GitHub Issue No: TBD) ==> Tamamlandı (2025-01-22 12:00):
+Kapsadığı kararlar: `3.1`, `3.2`, `3.3`, `3.4`, `3.5`, `3.6`:
 Unit Test: `3.7`, `3.8`
 Effort: 30 dakika
 Output: `.github/copilot-instructions.md` (Frontend Debugging Template bölümü)
