@@ -1,4 +1,4 @@
-using ArchiX.Library.Context;
+ï»¿using ArchiX.Library.Context;
 using ArchiX.Library.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace ArchiX.Library.Runtime.Security
 {
     /// <summary>
-    /// PasswordPolicy parametre kaydýnýn startup sýrasýnda idempotent insert edilmesi için extension.
+    /// PasswordPolicy parametre kaydÄ±nÄ±n startup sÄ±rasÄ±nda idempotent insert edilmesi iÃ§in extension.
     /// </summary>
     public static class PasswordPolicyStartupExtensions
     {
@@ -43,8 +43,8 @@ namespace ArchiX.Library.Runtime.Security
 """;
 
         /// <summary>
-        /// PasswordPolicy parametresini ApplicationId=1 için kontrol eder; yoksa ekler (idempotent).
-        /// Production'da migration dýþýnda da güvenli baþlatma saðlar.
+        /// PasswordPolicy parametresini ApplicationId=1 iÃ§in kontrol eder; yoksa ekler (idempotent).
+        /// Production'da migration dÄ±ÅŸÄ±nda da gÃ¼venli baÅŸlatma saÄŸlar.
         /// </summary>
         public static async Task EnsurePasswordPolicyParameterAsync(
             this AppDbContext db,
@@ -55,38 +55,61 @@ namespace ArchiX.Library.Runtime.Security
             const string group = "Security";
             const string key = "PasswordPolicy";
 
-            var existing = await db.Parameters
+            var param = await db.Parameters
                 .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.ApplicationId == applicationId 
-                                       && p.Group == group 
-                                       && p.Key == key, ct)
+                .Include(p => p.Applications)
+                .FirstOrDefaultAsync(p => p.Group == group && p.Key == key, ct)
                 .ConfigureAwait(false);
 
-            if (existing != null)
+            var appValue = param?.Applications.FirstOrDefault(a => a.ApplicationId == applicationId);
+
+            if (appValue != null)
             {
                 logger.LogInformation(
-                    "[PasswordPolicy] Parametre kaydý zaten mevcut (AppId={ApplicationId}, Id={Id}).",
-                    applicationId, existing.Id);
+                    "[PasswordPolicy] Parametre deÄŸeri zaten mevcut (AppId={ApplicationId}, ParamId={Id}).",
+                    applicationId, param!.Id);
                 return;
             }
 
-            var param = new Parameter
+            // Parametre tanÄ±mÄ± yoksa oluÅŸtur
+            if (param == null)
             {
+                param = new Parameter
+                {
+                    Group = group,
+                    Key = key,
+                    ParameterDataTypeId = 15, // Json
+                    Description = "Parola politikasÄ± (startup idempotent insert)",
+                    StatusId = 3, // Approved
+                    CreatedBy = 0,
+                    LastStatusBy = 0,
+                    IsProtected = true,
+                    RowId = Guid.NewGuid(),
+                    CreatedAt = DateTimeOffset.UtcNow
+                };
+                db.Parameters.Add(param);
+                await db.SaveChangesAsync(ct).ConfigureAwait(false);
+            }
+
+            // DeÄŸer ekle
+            var paramApp = new ParameterApplication
+            {
+                ParameterId = param.Id,
                 ApplicationId = applicationId,
-                Group = group,
-                Key = key,
-                ParameterDataTypeId = 15, // Json
                 Value = DefaultPolicyJson,
-                Description = "Parola politikasý (startup idempotent insert)",
-                StatusId = 3, // Approved
-                CreatedBy = 0
+                StatusId = 3,
+                CreatedBy = 0,
+                LastStatusBy = 0,
+                IsProtected = true,
+                RowId = Guid.NewGuid(),
+                CreatedAt = DateTimeOffset.UtcNow
             };
 
-            db.Parameters.Add(param);
+            db.ParameterApplications.Add(paramApp);
             await db.SaveChangesAsync(ct).ConfigureAwait(false);
 
             logger.LogInformation(
-                "[PasswordPolicy] Parametre kaydý oluþturuldu (AppId={ApplicationId}, Id={Id}).",
+                "[PasswordPolicy] Parametre deÄŸeri oluÅŸturuldu (AppId={ApplicationId}, ParamId={Id}).",
                 applicationId, param.Id);
         }
     }

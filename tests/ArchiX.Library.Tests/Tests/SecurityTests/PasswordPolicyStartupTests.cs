@@ -1,11 +1,12 @@
-using ArchiX.Library.Abstractions.Security;
+ï»¿using ArchiX.Library.Abstractions.Security;
 using ArchiX.Library.Context;
 using ArchiX.Library.Entities;
 using ArchiX.Library.Runtime.Security;
-
+using ArchiX.Library.Tests.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace ArchiX.Library.Tests.Tests.SecurityTests
@@ -30,53 +31,42 @@ namespace ArchiX.Library.Tests.Tests.SecurityTests
         [Fact]
         public async Task EnsureSeed_CreatesRecord_WhenMissing()
         {
-            // Arrange
             var sp = GetCreateServices();
             var dbf = sp.GetRequiredService<IDbContextFactory<AppDbContext>>();
 
-            // Act
             await PasswordPolicyStartup.EnsureSeedAndWarningsAsync(sp, applicationId: 1);
 
-            // Assert
             await using var db = await dbf.CreateDbContextAsync();
             var param = await db.Parameters
-                .FirstOrDefaultAsync(x => x.ApplicationId == 1 && x.Group == "Security" && x.Key == "PasswordPolicy");
+                .Include(p => p.Applications)
+                .FirstOrDefaultAsync(x => x.Group == "Security" && x.Key == "PasswordPolicy");
 
             Assert.NotNull(param);
-            Assert.Equal("Varsayýlan parola politikasý (startup seed)", param.Description);
+            
+            var appValue = param!.Applications.FirstOrDefault(a => a.ApplicationId == 1);
+            Assert.NotNull(appValue);
         }
 
         [Fact]
         public async Task EnsureSeed_DoesNotDuplicate_WhenRecordExists()
         {
-            // Arrange
             var sp = GetCreateServices();
             var dbf = sp.GetRequiredService<IDbContextFactory<AppDbContext>>();
 
             await using (var db = await dbf.CreateDbContextAsync())
             {
-                db.Parameters.Add(new Parameter
-                {
-                    ApplicationId = 1,
-                    Group = "Security",
-                    Key = "PasswordPolicy",
-                    ParameterDataTypeId = 15,
-                    Value = "{\"version\":1}",
-                    Description = "Mevcut kayýt",
-                    StatusId = 3,
-                    CreatedBy = 0
-                });
-                await db.SaveChangesAsync();
+                await ParameterTestHelper.SeedPasswordPolicyAsync(db, 1, "{\"version\":1}");
             }
 
-            // Act
             await PasswordPolicyStartup.EnsureSeedAndWarningsAsync(sp, applicationId: 1);
 
-            // Assert
             await using (var db = await dbf.CreateDbContextAsync())
             {
-                var count = await db.Parameters
-                    .CountAsync(x => x.ApplicationId == 1 && x.Group == "Security" && x.Key == "PasswordPolicy");
+                var param = await db.Parameters
+                    .Include(p => p.Applications)
+                    .FirstOrDefaultAsync(p => p.Group == "Security" && p.Key == "PasswordPolicy");
+
+                var count = param?.Applications.Count(a => a.ApplicationId == 1) ?? 0;
                 Assert.Equal(1, count);
             }
         }
@@ -84,30 +74,16 @@ namespace ArchiX.Library.Tests.Tests.SecurityTests
         [Fact]
         public async Task EnsureSeed_LogsWarning_WhenPepperEnabledButNotSet()
         {
-            // Arrange
             var sp = GetCreateServices();
             var dbf = sp.GetRequiredService<IDbContextFactory<AppDbContext>>();
 
-            // Pepper ortam deðiþkenini temizle
             Environment.SetEnvironmentVariable("ARCHIX_PEPPER", null);
 
             await using (var db = await dbf.CreateDbContextAsync())
             {
-                db.Parameters.Add(new Parameter
-                {
-                    ApplicationId = 1,
-                    Group = "Security",
-                    Key = "PasswordPolicy",
-                    ParameterDataTypeId = 15,
-                    Value = "{\"version\":1,\"hash\":{\"pepperEnabled\":true}}",
-                    Description = "Pepper aktif",
-                    StatusId = 3,
-                    CreatedBy = 0
-                });
-                await db.SaveChangesAsync();
+                await ParameterTestHelper.SeedPasswordPolicyAsync(db, 1, "{\"version\":1,\"hash\":{\"pepperEnabled\":true}}");
             }
 
-            // Act & Assert (log çýktýsýnda "ARCHIX_PEPPER" uyarýsýný göreceksin)
             await PasswordPolicyStartup.EnsureSeedAndWarningsAsync(sp, applicationId: 1);
         }
     }

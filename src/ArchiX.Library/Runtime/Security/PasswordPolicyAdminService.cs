@@ -62,25 +62,30 @@ internal sealed class PasswordPolicyAdminService : IPasswordPolicyAdminService
 
         await using var db = await _dbFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
         var parameter = await db.Parameters.AsNoTracking()
-            .FirstOrDefaultAsync(p => p.ApplicationId == appId && p.Group == ParameterGroup && p.Key == ParameterKey, ct)
+            .Include(p => p.Applications)
+            .FirstOrDefaultAsync(p => p.Group == ParameterGroup && p.Key == ParameterKey, ct)
             .ConfigureAwait(false);
 
-        if (parameter is null || string.IsNullOrWhiteSpace(parameter.Value))
+        var appValue = parameter?.Applications.FirstOrDefault(a => a.ApplicationId == appId);
+        if (appValue == null && appId != 1)
+            appValue = parameter?.Applications.FirstOrDefault(a => a.ApplicationId == 1);
+
+        if (appValue is null || string.IsNullOrWhiteSpace(appValue.Value))
             return JsonSerializer.Serialize(new PasswordPolicyOptions(), _jsonOptions);
 
         if (PasswordPolicyIntegrityChecker.IsEnabled())
         {
-            if (string.IsNullOrWhiteSpace(parameter.Template))
+            if (string.IsNullOrWhiteSpace(parameter?.Template))
             {
                 _logger.LogWarning("PasswordPolicy integrity signature missing for AppId {AppId}.", appId);
             }
-            else if (!PasswordPolicyIntegrityChecker.VerifySignature(parameter.Value, parameter.Template))
+            else if (!PasswordPolicyIntegrityChecker.VerifySignature(appValue.Value, parameter.Template))
             {
                 throw new InvalidOperationException("PasswordPolicy kaydı bütünlük doğrulamasından geçemedi.");
             }
         }
 
-        return JsonTextFormatter.Pretty(parameter.Value);
+        return JsonTextFormatter.Pretty(appValue.Value);
     }
 
     public async Task UpdateAsync(string json, int applicationId = 1, byte[]? clientRowVersion = null, CancellationToken ct = default)
@@ -112,48 +117,77 @@ internal sealed class PasswordPolicyAdminService : IPasswordPolicyAdminService
             await using var transaction = await db.Database.BeginTransactionAsync(ct).ConfigureAwait(false);
 
             var parameter = await db.Parameters
-                .FirstOrDefaultAsync(p => p.ApplicationId == appId && p.Group == ParameterGroup && p.Key == ParameterKey, ct)
+                .Include(p => p.Applications)
+                .FirstOrDefaultAsync(p => p.Group == ParameterGroup && p.Key == ParameterKey, ct)
                 .ConfigureAwait(false);
 
             var approvedStatusId = ResolveApprovedStatusId(db);
-            var oldJson = parameter?.Value ?? string.Empty;
             var utcNow = DateTimeOffset.UtcNow;
-
+            
+            // Parametre tanımı yoksa oluştur
             if (parameter is null)
             {
                 parameter = new Parameter
                 {
-                    ApplicationId = appId,
                     Group = ParameterGroup,
                     Key = ParameterKey,
                     ParameterDataTypeId = ParameterDataTypeId,
                     Description = "Security.PasswordPolicy",
+                    Template = signature,
                     StatusId = approvedStatusId,
                     CreatedAt = utcNow,
-                    CreatedBy = SystemUserId
+                    CreatedBy = SystemUserId,
+                    LastStatusBy = SystemUserId,
+                    IsProtected = true,
+                    RowId = Guid.NewGuid()
                 };
-
                 db.Parameters.Add(parameter);
+                await db.SaveChangesAsync(ct).ConfigureAwait(false); // Id almak için
+            }
+
+            // ParameterApplication değerini bul veya oluştur
+            var appValue = parameter.Applications.FirstOrDefault(a => a.ApplicationId == appId);
+            var oldJson = appValue?.Value ?? string.Empty;
+
+            if (appValue is null)
+            {
+                appValue = new ParameterApplication
+                {
+                    ParameterId = parameter.Id,
+                    ApplicationId = appId,
+                    Value = minified,
+                    StatusId = approvedStatusId,
+                    CreatedAt = utcNow,
+                    CreatedBy = SystemUserId,
+                    LastStatusBy = SystemUserId,
+                    IsProtected = false,
+                    RowId = Guid.NewGuid()
+                };
+                db.ParameterApplications.Add(appValue);
             }
             else
             {
                 if (clientRowVersion is not null)
                 {
-                    if (parameter.RowVersion is not null &&
-                        !parameter.RowVersion.AsSpan().SequenceEqual(clientRowVersion))
+                    if (appValue.RowVersion is not null &&
+                        !appValue.RowVersion.AsSpan().SequenceEqual(clientRowVersion))
                     {
                         throw new InvalidOperationException("Parola politikası başka bir kullanıcı tarafından güncellenmiştir. Lütfen sayfayı yenileyin.");
                     }
 
-                    db.Entry(parameter)
+                    db.Entry(appValue)
                         .Property(p => p.RowVersion)
                         .OriginalValue = clientRowVersion;
                 }
+                
+                appValue.Value = minified;
+                appValue.StatusId = approvedStatusId;
+                appValue.UpdatedAt = utcNow;
+                appValue.UpdatedBy = SystemUserId;
             }
 
-            parameter.Value = minified;
+            // Template güncelle (parametre seviyesinde)
             parameter.Template = signature;
-            parameter.StatusId = approvedStatusId;
             parameter.UpdatedAt = utcNow;
             parameter.UpdatedBy = SystemUserId;
 

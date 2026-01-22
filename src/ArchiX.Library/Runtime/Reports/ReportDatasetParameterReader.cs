@@ -15,10 +15,13 @@ internal static class ReportDatasetParameterReader
     {
         await using var db = await dbFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
-        return await db.Parameters.AsNoTracking()
-            .Where(p => p.ApplicationId == GlobalApplicationId && p.Group == group && p.Key == key)
-            .Select(p => p.Value)
+        var param = await db.Parameters.AsNoTracking()
+            .Include(p => p.Applications)
+            .Where(p => p.Group == group && p.Key == key)
             .SingleOrDefaultAsync(ct)
             .ConfigureAwait(false);
+
+        var appValue = param?.Applications.FirstOrDefault(a => a.ApplicationId == GlobalApplicationId);
+        return appValue?.Value;
     }
 }

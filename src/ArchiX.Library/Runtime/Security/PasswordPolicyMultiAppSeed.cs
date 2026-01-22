@@ -1,4 +1,4 @@
-using System.Text.Json;
+ï»¿using System.Text.Json;
 using ArchiX.Library.Abstractions.Security;
 using ArchiX.Library.Context;
 using ArchiX.Library.Entities;
@@ -9,14 +9,14 @@ using Microsoft.Extensions.Logging;
 namespace ArchiX.Library.Runtime.Security;
 
 /// <summary>
-/// Birden fazla ApplicationId için baþlangýç PasswordPolicy seed stratejisi (PK-01).
+/// Birden fazla ApplicationId iÃ§in baÅŸlangÄ±Ã§ PasswordPolicy seed stratejisi (PK-01).
 /// </summary>
 public static class PasswordPolicyMultiAppSeed
 {
     private static readonly JsonSerializerOptions JsonOpts = new(JsonSerializerDefaults.Web) { PropertyNameCaseInsensitive = true };
 
     /// <summary>
-    /// Belirtilen ApplicationId listesi için varsayýlan PasswordPolicy parametrelerini oluþturur (idempotent).
+    /// Belirtilen ApplicationId listesi iÃ§in varsayÄ±lan PasswordPolicy parametrelerini oluÅŸturur (idempotent).
     /// </summary>
     public static async Task EnsureForApplicationsAsync(
         AppDbContext db,
@@ -26,17 +26,18 @@ public static class PasswordPolicyMultiAppSeed
     {
         foreach (var appId in applicationIds)
         {
-            var existing = await db.Parameters
+            var param = await db.Parameters
                 .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.ApplicationId == appId 
-                                       && p.Group == "Security" 
-                                       && p.Key == "PasswordPolicy", ct)
+                .Include(p => p.Applications)
+                .FirstOrDefaultAsync(p => p.Group == "Security" && p.Key == "PasswordPolicy", ct)
                 .ConfigureAwait(false);
 
-            if (existing != null)
+            var appValue = param?.Applications.FirstOrDefault(a => a.ApplicationId == appId);
+
+            if (appValue != null)
             {
                 logger.LogInformation(
-                    "[PasswordPolicy] AppId={AppId} için parametre zaten mevcut (Id={Id}).", appId, existing.Id);
+                    "[PasswordPolicy] AppId={AppId} iÃ§in parametre zaten mevcut (ParamId={Id}).", appId, param!.Id);
                 continue;
             }
 
@@ -44,23 +45,44 @@ public static class PasswordPolicyMultiAppSeed
             var raw = JsonSerializer.Serialize(defaultModel, JsonOpts);
             var minified = JsonTextFormatter.Minify(raw);
 
-            var param = new Parameter
+            // Parametre tanÄ±mÄ± yoksa oluÅŸtur
+            if (param == null)
             {
-                ApplicationId = appId,
-                Group = "Security",
-                Key = "PasswordPolicy",
-                ParameterDataTypeId = 15,
-                Value = minified,
-                Description = $"Varsayýlan parola politikasý (multi-app seed, AppId={appId})",
-                StatusId = 3,
-                CreatedBy = 0
-            };
+                param = new Parameter
+                {
+                    Group = "Security",
+                    Key = "PasswordPolicy",
+                    ParameterDataTypeId = 15,
+                    Description = "VarsayÄ±lan parola politikasÄ± (multi-app seed)",
+                    StatusId = 3,
+                    CreatedBy = 0,
+                    LastStatusBy = 0,
+                    IsProtected = true,
+                    RowId = Guid.NewGuid(),
+                    CreatedAt = DateTimeOffset.UtcNow
+                };
+                db.Parameters.Add(param);
+                await db.SaveChangesAsync(ct).ConfigureAwait(false);
+            }
 
-            db.Parameters.Add(param);
+            // DeÄŸer ekle
+            var paramApp = new ParameterApplication
+            {
+                ParameterId = param.Id,
+                ApplicationId = appId,
+                Value = minified,
+                StatusId = 3,
+                CreatedBy = 0,
+                LastStatusBy = 0,
+                IsProtected = false,
+                RowId = Guid.NewGuid(),
+                CreatedAt = DateTimeOffset.UtcNow
+            };
+            db.ParameterApplications.Add(paramApp);
             await db.SaveChangesAsync(ct).ConfigureAwait(false);
 
             logger.LogInformation(
-                "[PasswordPolicy] AppId={AppId} için parametre oluþturuldu (Id={Id}).", appId, param.Id);
+                "[PasswordPolicy] AppId={AppId} iÃ§in parametre oluÅŸturuldu (ParamId={Id}).", appId, param.Id);
         }
     }
 }

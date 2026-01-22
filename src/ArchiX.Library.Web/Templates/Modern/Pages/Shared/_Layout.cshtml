@@ -122,10 +122,9 @@ else
         <script>
             if (!window.ArchiX) window.ArchiX = {};
             window.ArchiX.TimeoutOptions = {
-                sessionTimeoutSeconds: @TimeoutOptions.Value.SessionTimeoutSeconds,
-                sessionWarningSeconds: @TimeoutOptions.Value.SessionWarningSeconds,
-                tabRequestTimeoutMs: @TimeoutOptions.Value.TabRequestTimeoutMs,
-                maxOpenTabs: @TimeoutOptions.Value.MaxOpenTabs
+                sessionTimeoutSeconds: @(TimeoutOptions.Value.SessionTimeoutSeconds),
+                sessionWarningSeconds: @(TimeoutOptions.Value.SessionWarningSeconds),
+                tabRequestTimeoutMs: @(TimeoutOptions.Value.TabRequestTimeoutMs)
             };
         </script>
         

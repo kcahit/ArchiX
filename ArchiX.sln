@@ -8,10 +8,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_NOTLAR", "_NOTLAR", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
 		docs\#17 Archix-Connection-CONTRIBUTING.md = docs\#17 Archix-Connection-CONTRIBUTING.md
-		docs\#42-tabbed-tum-sayfalar-her-zaman-tab-page-altinda.md = docs\#42-tabbed-tum-sayfalar-her-zaman-tab-page-altinda.md
 		docs\#55-frontend-debugging-workflow-iyilestirme.md = docs\#55-frontend-debugging-workflow-iyilestirme.md
+		docs\#57-Parametre-ve-Timeout-Yonetimi-V5.md = docs\#57-Parametre-ve-Timeout-Yonetimi-V5.md
 		.github\copilot-instructions.md = .github\copilot-instructions.md
-		docs\Github Copilot kod yazma kurallari.txt = docs\Github Copilot kod yazma kurallari.txt
 		docs\Yetki-Yonetimi.md = docs\Yetki-Yonetimi.md
 	EndProjectSection
 EndProject

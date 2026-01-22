@@ -1,9 +1,21 @@
-namespace ArchiX.Library.Abstractions.Security
+﻿namespace ArchiX.Library.Abstractions.Security
 {
-    public sealed record AttemptLimiterOptions
+    /// <summary>#57 Güvenlik attempt limiter parametreleri (DB-driven).</summary>
+    public sealed class AttemptLimiterOptions
     {
-        public int MaxAttempts { get; init; } = 5;
-        public TimeSpan Window { get; init; } = TimeSpan.FromMinutes(5);
-        public TimeSpan Cooldown { get; init; } = TimeSpan.FromMinutes(5);
+        /// <summary>Deneme penceresi (saniye). Varsayılan: 600 (10 dakika).</summary>
+        public int Window { get; set; } = 600;
+
+        /// <summary>Maksimum deneme sayısı. Varsayılan: 5.</summary>
+        public int MaxAttempts { get; set; } = 5;
+
+        /// <summary>Cooldown süresi (saniye). Varsayılan: 300 (5 dakika).</summary>
+        public int CooldownSeconds { get; set; } = 300;
+
+        /// <summary>Window'u TimeSpan olarak döndürür.</summary>
+        public TimeSpan GetWindow() => TimeSpan.FromSeconds(Window);
+
+        /// <summary>Cooldown'u TimeSpan olarak döndürür.</summary>
+        public TimeSpan GetCooldown() => TimeSpan.FromSeconds(CooldownSeconds);
     }
 }

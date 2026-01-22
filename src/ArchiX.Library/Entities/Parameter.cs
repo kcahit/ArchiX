@@ -3,8 +3,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ArchiX.Library.Entities
 {
-    /// <summary>Uygulama parametresi. (Group, Key, ApplicationId) benzersizdir.</summary>
-    [Index(nameof(Group), nameof(Key), nameof(ApplicationId), IsUnique = true)]
+    /// <summary>
+    /// Parametre tanımı (master). (Group, Key) benzersizdir.
+    /// Gerçek değerler ParameterApplication'da (detail) tutulur.
+    /// </summary>
+    [Index(nameof(Group), nameof(Key), IsUnique = true)]
     [Index(nameof(ParameterDataTypeId))]
     public sealed class Parameter : BaseEntity
     {
@@ -14,19 +17,16 @@ namespace ArchiX.Library.Entities
         [Required, MaxLength(150)]
         public string Key { get; set; } = null!;
 
-        public int ApplicationId { get; set; }
-        public Application Application { get; set; } = null!;
-
         public int ParameterDataTypeId { get; set; }
         public ParameterDataType DataType { get; set; } = null!;
 
-        public string? Value { get; set; }
+        [MaxLength(1000)]
+        public string? Description { get; set; }
+
+        /// <summary>JSON template/örnek değer (opsiyonel)</summary>
         public string? Template { get; set; }
 
-        [Required, MaxLength(1000)]
-        public string Description { get; set; } = string.Empty;
-
-        [Timestamp]
-        public byte[]? RowVersion { get; set; }
+        // Navigation
+        public ICollection<ParameterApplication> Applications { get; set; } = [];
     }
 }

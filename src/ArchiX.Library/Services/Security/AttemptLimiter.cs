@@ -29,7 +29,9 @@ namespace ArchiX.Library.Services.Security
                 throw new ArgumentException("subjectId is required", nameof(subjectId));
 
             var key = CacheKeyPrefix + subjectId;
-            var absExpire = DateTimeOffset.UtcNow + Max(_opts.Window, _opts.Cooldown);
+            var window = _opts.GetWindow();
+            var cooldown = _opts.GetCooldown();
+            var absExpire = DateTimeOffset.UtcNow + Max(window, cooldown);
 
             var entry = _cache.GetOrCreate(key, e =>
             {
@@ -46,7 +48,7 @@ namespace ArchiX.Library.Services.Security
                     return Task.FromResult(false);
 
                 // Window geçtiyse sıfırla
-                if (now - entry.FirstAt > _opts.Window)
+                if (now - entry.FirstAt > window)
                 {
                     entry.Count = 0;
                     entry.FirstAt = now;
@@ -63,7 +65,7 @@ namespace ArchiX.Library.Services.Security
                 }
 
                 // Limit aşıldı → cooldown
-                entry.BlockUntil = now + _opts.Cooldown;
+                entry.BlockUntil = now + cooldown;
                 _cache.Set(key, entry, absExpire);
                 return Task.FromResult(false);
             }

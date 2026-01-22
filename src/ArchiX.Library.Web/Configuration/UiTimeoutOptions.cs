@@ -1,30 +1,25 @@
 ﻿namespace ArchiX.Library.Web.Configuration
 {
     /// <summary>
-    /// UI timeout ayarları. Normalde DB'deki parametre tablosundan gelir.
-    /// Şu an hard-coded, DB bağlandığında dinamik olacak.
+    /// #57 UI timeout parametreleri (DB-driven).
+    /// Session, warning ve tab request timeout değerleri.
     /// </summary>
     public sealed class UiTimeoutOptions
     {
         /// <summary>
-        /// Global session timeout süresi (saniye). Varsayılan: 150 (2.5 dakika).
+        /// Global session timeout süresi (saniye). Varsayılan: 645.
         /// </summary>
-        public int SessionTimeoutSeconds { get; set; } = 150;
+        public int SessionTimeoutSeconds { get; set; } = 645;
 
         /// <summary>
-        /// Session timeout uyarısı süresi (saniye). Varsayılan: 30.
-        /// Uyarı 120 saniye sonra gösterilecek (150 - 30 = 120).
+        /// Session timeout uyarısı süresi (saniye). Varsayılan: 45.
         /// </summary>
-        public int SessionWarningSeconds { get; set; } = 30;
+        public int SessionWarningSeconds { get; set; } = 45;
 
         /// <summary>
         /// Tab yükleme request timeout süresi (milisaniye). Varsayılan: 30000 (30 saniye).
         /// </summary>
         public int TabRequestTimeoutMs { get; set; } = 30000;
-
-        /// <summary>
-        /// Maksimum açık tab sayısı. Varsayılan: 15.
-        /// </summary>
-        public int MaxOpenTabs { get; set; } = 15;
     }
 }
+

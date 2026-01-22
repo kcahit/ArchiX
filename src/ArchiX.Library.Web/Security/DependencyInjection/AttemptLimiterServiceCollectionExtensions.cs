@@ -13,8 +13,8 @@ public static class AttemptLimiterServiceCollectionExtensions
         var opts = new AttemptLimiterOptions
         {
             MaxAttempts = sect.GetValue<int?>("MaxAttempts") ?? 5,
-            Window = sect.GetValue<TimeSpan?>("Window") ?? TimeSpan.FromMinutes(5),
-            Cooldown = sect.GetValue<TimeSpan?>("Cooldown") ?? TimeSpan.FromMinutes(5),
+            Window = sect.GetValue<int?>("Window") ?? 600, // seconds
+            CooldownSeconds = sect.GetValue<int?>("CooldownSeconds") ?? 300, // seconds
         };
 
         services.AddMemoryCache();

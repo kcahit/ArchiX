@@ -4,12 +4,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ArchiX.Library.Infrastructure.Http
 {
-    /// <summary>HTTP retry/timeout politikaları için ortak seçenekler.</summary>
+    /// <summary>#57 HTTP retry/timeout politikaları (DB-driven).</summary>
     public sealed class HttpPoliciesOptions
     {
-        /// <summary>Maksimum tekrar sayısı (0–10, varsayılan 3).</summary>
+        /// <summary>Maksimum tekrar sayısı (0–10, varsayılan 2).</summary>
         [Range(0, 10)]
-        public int RetryCount { get; init; } = 3;
+        public int RetryCount { get; init; } = 2;
 
         /// <summary>Exponential backoff taban gecikmesi milisaniye (10–60000, varsayılan 200).</summary>
         [Range(10, 60_000)]
@@ -40,3 +40,4 @@ namespace ArchiX.Library.Infrastructure.Http
         }
     }
 }
+

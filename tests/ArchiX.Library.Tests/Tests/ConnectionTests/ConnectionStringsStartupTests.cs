@@ -5,91 +5,57 @@ using Microsoft.EntityFrameworkCore;
 
 using Xunit;
 
-namespace ArchiX.Library.Tests.Tests.ConnectionTests;
-
-public sealed class ConnectionStringsStartupTests
+namespace ArchiX.Library.Tests.Tests.ConnectionTests
 {
-    [Fact]
-    public async Task EnsureSeedAsync_CreatesParameter_WhenEnabledInDevelopment()
+    public class ConnectionStringsStartupTests
     {
-        var prevEnv = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
-        var prevFlag = Environment.GetEnvironmentVariable("ARCHIX_DB_ENABLE_CONNECTIONSTRINGS_SEED");
+        [Fact]
+        public async Task EnsureSeed_CreatesConnectionStrings()
+        {
+            var dbName = $"ConnStrings-{Guid.NewGuid()}";
+            var services = new ServiceCollection();
+            services.AddLogging();
+            services.AddDbContext<AppDbContext>(o => o.UseInMemoryDatabase(dbName));
+            var sp = services.BuildServiceProvider();
 
-        Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", "Development");
-        Environment.SetEnvironmentVariable("ARCHIX_DB_ENABLE_CONNECTIONSTRINGS_SEED", "true");
+            // Environment ayarları
+            Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
+            Environment.SetEnvironmentVariable("ARCHIX_DB_ENABLE_CONNECTIONSTRINGS_SEED", "true");
 
-        try
+            // Seed çalıştır
+            await ConnectionStringsStartup.EnsureSeedAsync(sp);
+
+            // Kontrol et - YENİ bir scope ve context alıyoruz
+            using var scope = sp.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var param = await db.Parameters
+                .Include(p => p.Applications)
+                .FirstOrDefaultAsync(p => p.Group == "ConnectionStrings" && p.Key == "ConnectionStrings");
+
+            Assert.NotNull(param);
+            
+            var appValue = param!.Applications.FirstOrDefault(a => a.ApplicationId == 1);
+            Assert.NotNull(appValue);
+            Assert.Contains("Demo", appValue!.Value);
+        }
+
+        [Fact]
+        public async Task EnsureSeed_SkipsInProduction()
         {
             var services = new ServiceCollection();
             services.AddLogging();
-
-            var dbName = Guid.NewGuid().ToString();
-            services.AddDbContextFactory<AppDbContext>(o => o.UseInMemoryDatabase(dbName));
-
+            services.AddDbContext<AppDbContext>(o => o.UseInMemoryDatabase($"ConnStrings-Prod-{Guid.NewGuid()}"));
             var sp = services.BuildServiceProvider();
 
-            await using (var db = await sp.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContextAsync())
-            {
-                await db.Database.EnsureCreatedAsync();
-            }
-
+            Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Production");
+            
             await ConnectionStringsStartup.EnsureSeedAsync(sp);
 
-            await using (var db2 = await sp.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContextAsync())
-            {
-                var v = await db2.Parameters
-                    .Where(p => p.ApplicationId == 1 && p.Group == "ConnectionStrings" && p.Key == "ConnectionStrings")
-                    .Select(p => p.Value)
-                    .SingleOrDefaultAsync();
-
-                Assert.False(string.IsNullOrWhiteSpace(v));
-            }
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", prevEnv);
-            Environment.SetEnvironmentVariable("ARCHIX_DB_ENABLE_CONNECTIONSTRINGS_SEED", prevFlag);
-        }
-    }
-
-    [Fact]
-    public async Task EnsureSeedAsync_DoesNothing_WhenNotEnabled()
-    {
-        var prevEnv = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
-        var prevFlag = Environment.GetEnvironmentVariable("ARCHIX_DB_ENABLE_CONNECTIONSTRINGS_SEED");
-
-        Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", "Development");
-        Environment.SetEnvironmentVariable("ARCHIX_DB_ENABLE_CONNECTIONSTRINGS_SEED", "false");
-
-        try
-        {
-            var services = new ServiceCollection();
-            services.AddLogging();
-
-            var dbName = Guid.NewGuid().ToString();
-            services.AddDbContextFactory<AppDbContext>(o => o.UseInMemoryDatabase(dbName));
-
-            var sp = services.BuildServiceProvider();
-
-            await using (var db = await sp.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContextAsync())
-            {
-                await db.Database.EnsureCreatedAsync();
-            }
-
-            await ConnectionStringsStartup.EnsureSeedAsync(sp);
-
-            await using (var db2 = await sp.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContextAsync())
-            {
-                var count = await db2.Parameters
-                    .CountAsync(p => p.ApplicationId == 1 && p.Group == "ConnectionStrings" && p.Key == "ConnectionStrings");
-
-                Assert.Equal(0, count);
-            }
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", prevEnv);
-            Environment.SetEnvironmentVariable("ARCHIX_DB_ENABLE_CONNECTIONSTRINGS_SEED", prevFlag);
+            var db = sp.GetRequiredService<AppDbContext>();
+            var count = await db.Parameters.CountAsync(p => p.Group == "ConnectionStrings");
+            
+            Assert.Equal(0, count); // Production'da seed yapılmamalı
         }
     }
 }
+

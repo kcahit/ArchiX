@@ -23,6 +23,7 @@ namespace ArchiX.Library.Context
         public DbSet<ConnectionAudit> ConnectionAudits => Set<ConnectionAudit>();
         public DbSet<ParameterDataType> ParameterDataTypes => Set<ParameterDataType>();
         public DbSet<Parameter> Parameters => Set<Parameter>();
+        public DbSet<ParameterApplication> ParameterApplications => Set<ParameterApplication>();
         public DbSet<Application> Applications => Set<Application>();
         public DbSet<User> Users => Set<User>();
         public DbSet<UserApplication> UserApplications => Set<UserApplication>();
@@ -127,9 +128,17 @@ namespace ArchiX.Library.Context
                 e.HasKey(x => x.Id);
                 e.Property(x => x.Group).IsRequired().HasMaxLength(75);
                 e.Property(x => x.Key).IsRequired().HasMaxLength(150);
-                e.Property(x => x.Description).IsRequired().HasMaxLength(1000);
-                e.HasIndex(x => new { x.Group, x.Key, x.ApplicationId }).IsUnique();
+                e.Property(x => x.Description).HasMaxLength(1000);
+                e.HasIndex(x => new { x.Group, x.Key }).IsUnique();
                 e.HasOne(x => x.DataType).WithMany().HasForeignKey(x => x.ParameterDataTypeId).OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<ParameterApplication>(e =>
+            {
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Value).IsRequired();
+                e.HasIndex(x => new { x.ParameterId, x.ApplicationId }).IsUnique();
+                e.HasOne(x => x.Parameter).WithMany(p => p.Applications).HasForeignKey(x => x.ParameterId).OnDelete(DeleteBehavior.Cascade);
                 e.HasOne(x => x.Application).WithMany().HasForeignKey(x => x.ApplicationId).OnDelete(DeleteBehavior.Restrict);
             });
 
@@ -314,43 +323,216 @@ namespace ArchiX.Library.Context
                 new ParameterDataType { Id = 16, Code = 920, Name = "Secret", Category = "Other", Description = "Encrypted secret", StatusId = 3 }
             );
 
-            // Parameter seeds
+            // Parameter seeds (master - definitions only)
             modelBuilder.Entity<Parameter>().HasData(
                 new Parameter
                 {
                     Id = 1,
                     Group = "TwoFactor",
                     Key = "Options",
-                    ApplicationId = 1,
-                    ParameterDataTypeId = 15,
-                    Value = "{\n  \"defaultChannel\": \"Email\",\n  \"channels\": {\n    \"Sms\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Email\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Authenticator\": { \"digits\": 6, \"periodSeconds\": 30, \"hashAlgorithm\": \"SHA1\" }\n  }\n}",
-                    Template = "{\n  \"defaultChannel\": \"Sms\",\n  \"channels\": {\n    \"Sms\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Email\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Authenticator\": { \"digits\": 6, \"periodSeconds\": 30, \"hashAlgorithm\": \"SHA1\" }\n  }\n}",
+                    ParameterDataTypeId = 15, // JSON
                     Description = "İkili doğrulama varsayılan kanal ve seçenekleri",
-                    StatusId = 3
+                    Template = "{\n  \"defaultChannel\": \"Sms\",\n  \"channels\": {\n    \"Sms\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Email\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Authenticator\": { \"digits\": 6, \"periodSeconds\": 30, \"hashAlgorithm\": \"SHA1\" }\n  }\n}",
+                    StatusId = BaseEntity.ApprovedStatusId,
+                    CreatedBy = 0,
+                    LastStatusBy = 0,
+                    IsProtected = true,
+                    RowId = new Guid("00000000-0000-0000-0000-000000000001"),
+                    CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
                 },
                 new Parameter
                 {
                     Id = 2,
                     Group = "Security",
                     Key = "PasswordPolicy",
-                    ApplicationId = 1,
-                    ParameterDataTypeId = 15,
+                    ParameterDataTypeId = 15, // JSON
                     Description = "Parola politikası ve hash parametreleri",
-                    StatusId = 3,
-                    Value = "{\n  \"version\": 1,\n  \"minLength\": 12,\n  \"maxLength\": 128,\n  \"requireUpper\": true,\n  \"requireLower\": true,\n  \"requireDigit\": true,\n  \"requireSymbol\": true,\n  \"allowedSymbols\": \"!@#$%^&*_-+=:?.,;\",\n  \"minDistinctChars\": 5,\n  \"maxRepeatedSequence\": 3,\n  \"blockList\": [\"password\", \"123456\", \"qwerty\", \"admin\"],\n  \"historyCount\": 10,\n  \"maxPasswordAgeDays\": null,\n  \"lockoutThreshold\": 5,\n  \"lockoutSeconds\": 900,\n  \"hash\": {\n    \"algorithm\": \"Argon2id\",\n    \"memoryKb\": 65536,\n    \"parallelism\": 2,\n    \"iterations\": 3,\n    \"saltLength\": 16,\n    \"hashLength\": 32,\n    \"fallback\": { \"algorithm\": \"PBKDF2-SHA512\", \"iterations\": 210000 },\n    \"pepperEnabled\": true\n  }\n}",
-                    Template = "{\n  \"version\": 1,\n  \"minLength\": 12,\n  \"maxLength\": 128,\n  \"requireUpper\": true,\n  \"requireLower\": true,\n  \"requireDigit\": true,\n  \"requireSymbol\": true,\n  \"allowedSymbols\": \"\",\n  \"minDistinctChars\": 0,\n  \"maxRepeatedSequence\": 0,\n  \"blockList\": [],\n  \"historyCount\": 0,\n  \"lockoutThreshold\": 0,\n  \"lockoutSeconds\": 0,\n  \"hash\": {\n    \"algorithm\": \"Argon2id\",\n    \"memoryKb\": 0,\n    \"parallelism\": 0,\n    \"iterations\": 0,\n    \"saltLength\": 0,\n    \"hashLength\": 0,\n    \"fallback\": { \"algorithm\": \"PBKDF2-SHA512\", \"iterations\": 0 },\n    \"pepperEnabled\": false\n  }\n}"
+                    Template = "{\n  \"version\": 1,\n  \"minLength\": 12,\n  \"maxLength\": 128,\n  \"requireUpper\": true,\n  \"requireLower\": true,\n  \"requireDigit\": true,\n  \"requireSymbol\": true,\n  \"allowedSymbols\": \"\",\n  \"minDistinctChars\": 0,\n  \"maxRepeatedSequence\": 0,\n  \"blockList\": [],\n  \"historyCount\": 0,\n  \"lockoutThreshold\": 0,\n  \"lockoutSeconds\": 0,\n  \"hash\": {\n    \"algorithm\": \"Argon2id\",\n    \"memoryKb\": 0,\n    \"parallelism\": 0,\n    \"iterations\": 0,\n    \"saltLength\": 0,\n    \"hashLength\": 0,\n    \"fallback\": { \"algorithm\": \"PBKDF2-SHA512\", \"iterations\": 0 },\n    \"pepperEnabled\": false\n  }\n}",
+                    StatusId = BaseEntity.ApprovedStatusId,
+                    CreatedBy = 0,
+                    LastStatusBy = 0,
+                    IsProtected = true,
+                    RowId = new Guid("00000000-0000-0000-0000-000000000002"),
+                    CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
                 },
                 new Parameter
                 {
                     Id = 3,
                     Group = "UI",
                     Key = "TabbedOptions",
-                    ApplicationId = 1,
-                    ParameterDataTypeId = 15,
+                    ParameterDataTypeId = 15, // JSON
                     Description = "#42 TabbedOptions JSON. navigationMode=Mod(Tabbed/FullPage); tabbed.maxOpenTabs=Maks tab; tabbed.tabAutoCloseMinutes=Oto kapanış(dk); tabbed.autoCloseWarningSeconds=Uyarı(sn); tabbed.enableNestedTabs=Nested tab; tabbed.requireTabContext=Direct link engeli.",
-                    StatusId = 3,
+                    Template = "{\n  \"version\": 1,\n  \"navigationMode\": \"Tabbed\",\n  \"tabbed\": {\n    \"maxOpenTabs\": 15,\n    \"onMaxTabReached\": {\n      \"behavior\": \"Block\",\n      \"message\": \"Açık tab sayısı 15 limitine geldi. Lütfen açık tablardan birini kapatınız.\"\n    },\n    \"enableNestedTabs\": false,\n    \"requireTabContext\": true,\n    \"tabAutoCloseMinutes\": 10,\n    \"autoCloseWarningSeconds\": 30,\n    \"tabTitleUniqueSuffix\": { \"format\": \"_{000}\", \"start\": 1 }\n  },\n  \"fullPage\": {\n    \"defaultLandingRoute\": \"/Dashboard\",\n    \"openReportsInNewWindow\": false,\n    \"confirmOnUnsavedChanges\": true,\n    \"deepLinkEnabled\": true,\n    \"errorMode\": \"DefaultErrorPage\",\n    \"enableKeepAlive\": true,\n    \"sessionTimeoutWarningSeconds\": 60\n  }\n}",
+                    StatusId = BaseEntity.ApprovedStatusId,
+                    CreatedBy = 0,
+                    LastStatusBy = 0,
+                    IsProtected = true,
+                    RowId = new Guid("00000000-0000-0000-0000-000000000003"),
+                    CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
+                },
+                // #57 yeni parametreler
+                new Parameter
+                {
+                    Id = 4,
+                    Group = "UI",
+                    Key = "TimeoutOptions",
+                    ParameterDataTypeId = 15, // JSON
+                    Description = "#57 UI timeout parametreleri (session, warning, tab request timeout)",
+                    Template = "{\"sessionTimeoutSeconds\":645,\"sessionWarningSeconds\":45,\"tabRequestTimeoutMs\":30000}",
+                    StatusId = BaseEntity.ApprovedStatusId,
+                    CreatedBy = 0,
+                    LastStatusBy = 0,
+                    IsProtected = true,
+                    RowId = new Guid("00000000-0000-0000-0000-000000000004"),
+                    CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
+                },
+                new Parameter
+                {
+                    Id = 5,
+                    Group = "HTTP",
+                    Key = "HttpPoliciesOptions",
+                    ParameterDataTypeId = 15, // JSON
+                    Description = "#57 HTTP retry ve timeout politikaları",
+                    Template = "{\"retryCount\":2,\"baseDelayMs\":200,\"timeoutSeconds\":30}",
+                    StatusId = BaseEntity.ApprovedStatusId,
+                    CreatedBy = 0,
+                    LastStatusBy = 0,
+                    IsProtected = true,
+                    RowId = new Guid("00000000-0000-0000-0000-000000000005"),
+                    CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
+                },
+                new Parameter
+                {
+                    Id = 6,
+                    Group = "Security",
+                    Key = "AttemptLimiterOptions",
+                    ParameterDataTypeId = 15, // JSON
+                    Description = "#57 Güvenlik attempt limiter parametreleri",
+                    Template = "{\"window\":600,\"maxAttempts\":5,\"cooldownSeconds\":300}",
+                    StatusId = BaseEntity.ApprovedStatusId,
+                    CreatedBy = 0,
+                    LastStatusBy = 0,
+                    IsProtected = true,
+                    RowId = new Guid("00000000-0000-0000-0000-000000000006"),
+                    CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
+                },
+                new Parameter
+                {
+                    Id = 7,
+                    Group = "System",
+                    Key = "ParameterRefresh",
+                    ParameterDataTypeId = 15, // JSON
+                    Description = "#57 Parametre cache TTL süreleri",
+                    Template = "{\"uiCacheTtlSeconds\":300,\"httpCacheTtlSeconds\":60,\"securityCacheTtlSeconds\":30}",
+                    StatusId = BaseEntity.ApprovedStatusId,
+                    CreatedBy = 0,
+                    LastStatusBy = 0,
+                    IsProtected = true,
+                    RowId = new Guid("00000000-0000-0000-0000-000000000007"),
+                    CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
+                }
+            );
+
+            // ParameterApplication seeds (detail - actual values)
+            modelBuilder.Entity<ParameterApplication>().HasData(
+                // TwoFactor/Options (Id=1)
+                new ParameterApplication
+                {
+                    Id = 1,
+                    ParameterId = 1,
+                    ApplicationId = 1,
+                    Value = "{\n  \"defaultChannel\": \"Email\",\n  \"channels\": {\n    \"Sms\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Email\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Authenticator\": { \"digits\": 6, \"periodSeconds\": 30, \"hashAlgorithm\": \"SHA1\" }\n  }\n}",
+                    StatusId = BaseEntity.ApprovedStatusId,
+                    CreatedBy = 0,
+                    LastStatusBy = 0,
+                    IsProtected = true,
+                    RowId = new Guid("10000000-0000-0000-0000-000000000001"),
+                    CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
+                },
+                // Security/PasswordPolicy (Id=2)
+                new ParameterApplication
+                {
+                    Id = 2,
+                    ParameterId = 2,
+                    ApplicationId = 1,
+                    Value = "{\n  \"version\": 1,\n  \"minLength\": 12,\n  \"maxLength\": 128,\n  \"requireUpper\": true,\n  \"requireLower\": true,\n  \"requireDigit\": true,\n  \"requireSymbol\": true,\n  \"allowedSymbols\": \"!@#$%^&*_-+=:?.,;\",\n  \"minDistinctChars\": 5,\n  \"maxRepeatedSequence\": 3,\n  \"blockList\": [\"password\", \"123456\", \"qwerty\", \"admin\"],\n  \"historyCount\": 10,\n  \"maxPasswordAgeDays\": null,\n  \"lockoutThreshold\": 5,\n  \"lockoutSeconds\": 900,\n  \"hash\": {\n    \"algorithm\": \"Argon2id\",\n    \"memoryKb\": 65536,\n    \"parallelism\": 2,\n    \"iterations\": 3,\n    \"saltLength\": 16,\n    \"hashLength\": 32,\n    \"fallback\": { \"algorithm\": \"PBKDF2-SHA512\", \"iterations\": 210000 },\n    \"pepperEnabled\": true\n  }\n}",
+                    StatusId = BaseEntity.ApprovedStatusId,
+                    CreatedBy = 0,
+                    LastStatusBy = 0,
+                    IsProtected = true,
+                    RowId = new Guid("10000000-0000-0000-0000-000000000002"),
+                    CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
+                },
+                // UI/TabbedOptions (Id=3)
+                new ParameterApplication
+                {
+                    Id = 3,
+                    ParameterId = 3,
+                    ApplicationId = 1,
                     Value = "{\n  \"version\": 1,\n  \"navigationMode\": \"Tabbed\",\n  \"tabbed\": {\n    \"maxOpenTabs\": 15,\n    \"onMaxTabReached\": {\n      \"behavior\": \"Block\",\n      \"message\": \"Açık tab sayısı 15 limitine geldi. Lütfen açık tablardan birini kapatınız.\"\n    },\n    \"enableNestedTabs\": true,\n    \"requireTabContext\": true,\n    \"tabAutoCloseMinutes\": 10,\n    \"autoCloseWarningSeconds\": 30,\n    \"tabTitleUniqueSuffix\": { \"format\": \"_{000}\", \"start\": 1 }\n  },\n  \"fullPage\": {\n    \"defaultLandingRoute\": \"/Dashboard\",\n    \"openReportsInNewWindow\": false,\n    \"confirmOnUnsavedChanges\": true,\n    \"deepLinkEnabled\": true,\n    \"errorMode\": \"DefaultErrorPage\",\n    \"enableKeepAlive\": true,\n    \"sessionTimeoutWarningSeconds\": 60\n  }\n}",
-                    Template = "{\n  \"version\": 1,\n  \"navigationMode\": \"Tabbed\",\n  \"tabbed\": {\n    \"maxOpenTabs\": 15,\n    \"onMaxTabReached\": {\n      \"behavior\": \"Block\",\n      \"message\": \"Açık tab sayısı 15 limitine geldi. Lütfen açık tablardan birini kapatınız.\"\n    },\n    \"enableNestedTabs\": false,\n    \"requireTabContext\": true,\n    \"tabAutoCloseMinutes\": 10,\n    \"autoCloseWarningSeconds\": 30,\n    \"tabTitleUniqueSuffix\": { \"format\": \"_{000}\", \"start\": 1 }\n  },\n  \"fullPage\": {\n    \"defaultLandingRoute\": \"/Dashboard\",\n    \"openReportsInNewWindow\": false,\n    \"confirmOnUnsavedChanges\": true,\n    \"deepLinkEnabled\": true,\n    \"errorMode\": \"DefaultErrorPage\",\n    \"enableKeepAlive\": true,\n    \"sessionTimeoutWarningSeconds\": 60\n  }\n}"
+                    StatusId = BaseEntity.ApprovedStatusId,
+                    CreatedBy = 0,
+                    LastStatusBy = 0,
+                    IsProtected = true,
+                    RowId = new Guid("10000000-0000-0000-0000-000000000003"),
+                    CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
+                },
+                // #57 yeni parametre değerleri
+                // UI/TimeoutOptions (Id=4)
+                new ParameterApplication
+                {
+                    Id = 4,
+                    ParameterId = 4,
+                    ApplicationId = 1,
+                    Value = "{\"sessionTimeoutSeconds\":645,\"sessionWarningSeconds\":45,\"tabRequestTimeoutMs\":30000}",
+                    StatusId = BaseEntity.ApprovedStatusId,
+                    CreatedBy = 0,
+                    LastStatusBy = 0,
+                    IsProtected = true,
+                    RowId = new Guid("10000000-0000-0000-0000-000000000004"),
+                    CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
+                },
+                // HTTP/HttpPoliciesOptions (Id=5)
+                new ParameterApplication
+                {
+                    Id = 5,
+                    ParameterId = 5,
+                    ApplicationId = 1,
+                    Value = "{\"retryCount\":2,\"baseDelayMs\":200,\"timeoutSeconds\":30}",
+                    StatusId = BaseEntity.ApprovedStatusId,
+                    CreatedBy = 0,
+                    LastStatusBy = 0,
+                    IsProtected = true,
+                    RowId = new Guid("10000000-0000-0000-0000-000000000005"),
+                    CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
+                },
+                // Security/AttemptLimiterOptions (Id=6)
+                new ParameterApplication
+                {
+                    Id = 6,
+                    ParameterId = 6,
+                    ApplicationId = 1,
+                    Value = "{\"window\":600,\"maxAttempts\":5,\"cooldownSeconds\":300}",
+                    StatusId = BaseEntity.ApprovedStatusId,
+                    CreatedBy = 0,
+                    LastStatusBy = 0,
+                    IsProtected = true,
+                    RowId = new Guid("10000000-0000-0000-0000-000000000006"),
+                    CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
+                },
+                // System/ParameterRefresh (Id=7)
+                new ParameterApplication
+                {
+                    Id = 7,
+                    ParameterId = 7,
+                    ApplicationId = 1,
+                    Value = "{\"uiCacheTtlSeconds\":300,\"httpCacheTtlSeconds\":60,\"securityCacheTtlSeconds\":30}",
+                    StatusId = BaseEntity.ApprovedStatusId,
+                    CreatedBy = 0,
+                    LastStatusBy = 0,
+                    IsProtected = true,
+                    RowId = new Guid("10000000-0000-0000-0000-000000000007"),
+                    CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
                 }
             );
 

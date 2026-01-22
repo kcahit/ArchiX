@@ -1,4 +1,4 @@
-using ArchiX.Library.Context;
+﻿using ArchiX.Library.Context;
 
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -42,7 +42,7 @@ IF DB_ID('{dbName}') IS NOT NULL BEGIN ALTER DATABASE [{dbName}] SET SINGLE_USER
         [Fact]
         public async Task EnsureCoreSeedsAndBindAsync_seeds_ParameterDataTypes_and_TwoFactorDefault()
         {
-            // LocalDB sadece Windows'ta mevcut; Linux/macOS CI ortam�nda testi atla.
+            // LocalDB sadece Windows'ta mevcut; Linux/macOS CI ortamında testi atla.
             if (!OperatingSystem.IsWindows())
                 return;
 
@@ -73,16 +73,20 @@ IF DB_ID('{dbName}') IS NOT NULL BEGIN ALTER DATABASE [{dbName}] SET SINGLE_USER
                     foreach (var c in expected)
                         Assert.Contains(c, codes);
 
-                    var tf = await db.Parameters
+                    var tfParam = await db.Parameters
                         .Include(p => p.DataType)
+                        .Include(p => p.Applications)
                         .AsNoTracking()
                         .SingleOrDefaultAsync(p => p.Group == "TwoFactor" && p.Key == "Options");
 
-                    Assert.NotNull(tf);
-                    Assert.Equal("Json", tf!.DataType.Name);
-                    Assert.Contains("\"defaultChannel\": \"Email\"", tf.Value);
-                    Assert.NotNull(tf.Template);
-                    Assert.Equal(3 /*Approved*/, tf.StatusId);
+                    Assert.NotNull(tfParam);
+                    Assert.Equal("Json", tfParam!.DataType.Name);
+                    
+                    var tfValue = tfParam.Applications.FirstOrDefault(a => a.ApplicationId == 1);
+                    Assert.NotNull(tfValue);
+                    Assert.Contains("\"defaultChannel\": \"Email\"", tfValue!.Value);
+                    Assert.NotNull(tfParam.Template);
+                    Assert.Equal(3 /*Approved*/, tfParam.StatusId);
                 }
             }
             finally

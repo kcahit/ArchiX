@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using ArchiX.Library.Abstractions.Security;
 using ArchiX.Library.Context;
 using Microsoft.EntityFrameworkCore;
@@ -34,14 +34,18 @@ namespace ArchiX.Library.Runtime.Security
         private async ValueTask<PasswordPolicyOptions> LoadAsync(int appId, CancellationToken ct)
         {
             await using var db = await _dbFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
-            var entity = await db.Parameters.AsNoTracking()
-                .FirstOrDefaultAsync(x => x.ApplicationId == appId &&
-                                          x.Group == "Security" &&
+            var param = await db.Parameters.AsNoTracking()
+                .Include(p => p.Applications)
+                .FirstOrDefaultAsync(x => x.Group == "Security" &&
                                           x.Key == "PasswordPolicy", ct)
                 .ConfigureAwait(false);
 
+            var appValue = param?.Applications.FirstOrDefault(a => a.ApplicationId == appId);
+            if (appValue == null && appId != 1)
+                appValue = param?.Applications.FirstOrDefault(a => a.ApplicationId == 1);
+
             PasswordPolicyOptions opts;
-            if (entity?.Value is string raw && !string.IsNullOrWhiteSpace(raw))
+            if (appValue?.Value is string raw && !string.IsNullOrWhiteSpace(raw))
             {
                 try
                 {

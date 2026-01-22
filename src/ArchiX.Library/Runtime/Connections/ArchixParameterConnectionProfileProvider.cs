@@ -20,11 +20,14 @@ internal sealed class ArchixParameterConnectionProfileProvider(
 
         await using var db = await dbFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
-        var param = await db.Parameters.AsNoTracking()
-            .Where(p => p.ApplicationId == GlobalApplicationId && p.Group == Group && p.Key == Key)
-            .Select(p => p.Value)
+        var parameter = await db.Parameters.AsNoTracking()
+            .Include(p => p.Applications)
+            .Where(p => p.Group == Group && p.Key == Key)
             .SingleOrDefaultAsync(ct)
             .ConfigureAwait(false);
+
+        var appValue = parameter?.Applications.FirstOrDefault(a => a.ApplicationId == GlobalApplicationId);
+        var param = appValue?.Value;
 
         if (string.IsNullOrWhiteSpace(param))
             throw new InvalidOperationException($"Missing parameter: ApplicationId={GlobalApplicationId}, Group='{Group}', Key='{Key}'.");

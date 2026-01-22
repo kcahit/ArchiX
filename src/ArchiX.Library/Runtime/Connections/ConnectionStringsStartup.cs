@@ -39,11 +39,14 @@ public static class ConnectionStringsStartup
 
         await using var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        var exists = await db.Parameters
-            .AnyAsync(p => p.ApplicationId == GlobalApplicationId && p.Group == Group && p.Key == Key, ct)
+        var param = await db.Parameters
+            .Include(p => p.Applications)
+            .FirstOrDefaultAsync(p => p.Group == Group && p.Key == Key, ct)
             .ConfigureAwait(false);
 
-        if (exists)
+        var appValue = param?.Applications.FirstOrDefault(a => a.ApplicationId == GlobalApplicationId);
+
+        if (appValue != null)
         {
             logger?.LogInformation("ConnectionStrings parameter already exists.");
             return;
@@ -66,19 +69,48 @@ public static class ConnectionStringsStartup
             },
             JsonIndented);
 
-        db.Parameters.Add(new Parameter
+        // Parametre tanımı yoksa oluştur
+        if (param == null)
         {
+            param = new Parameter
+            {
+                Group = Group,
+                Key = Key,
+                ParameterDataTypeId = 15,
+                Description = "Tenant DB connection profiles (alias -> profile JSON)",
+                Template = json,
+                StatusId = BaseEntity.ApprovedStatusId,
+                CreatedBy = 0,
+                LastStatusBy = 0,
+                IsProtected = false,
+                RowId = Guid.NewGuid(),
+                CreatedAt = DateTimeOffset.UtcNow
+            };
+            db.Parameters.Add(param);
+            await db.SaveChangesAsync(ct).ConfigureAwait(false);
+            
+            // SaveChanges sonrası Id oluştu, ama EF tracking'de olan entity'yi kullanmak daha güvenli
+            // Eğer tracking'de değilse tekrar yükleyelim
+            if (param.Id == 0)
+            {
+                param = await db.Parameters
+                    .FirstOrDefaultAsync(p => p.Group == Group && p.Key == Key, ct)
+                    .ConfigureAwait(false);
+            }
+        }
+
+        // Değer ekle
+        db.ParameterApplications.Add(new ParameterApplication
+        {
+            ParameterId = param!.Id,
             ApplicationId = GlobalApplicationId,
-            Group = Group,
-            Key = Key,
-            ParameterDataTypeId = 15,
-            Description = "Tenant DB connection profiles (alias -> profile JSON)",
             Value = json,
-            Template = json,
             StatusId = BaseEntity.ApprovedStatusId,
             CreatedBy = 0,
             LastStatusBy = 0,
-            IsProtected = false
+            IsProtected = false,
+            RowId = Guid.NewGuid(),
+            CreatedAt = DateTimeOffset.UtcNow
         });
 
         await db.SaveChangesAsync(ct).ConfigureAwait(false);

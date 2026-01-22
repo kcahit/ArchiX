@@ -1,4 +1,4 @@
-using System.Text.Json;
+ï»¿using System.Text.Json;
 
 using ArchiX.Library.Abstractions.Security;
 using ArchiX.Library.Context;
@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 namespace ArchiX.Library.Runtime.Security;
 
 /// <summary>
-/// Uygulama açýlýþýnda parola politikasý parametresini yoksa ekler (PK-02) ve pepper uyarýsýný loglar (PK-08).
+/// Uygulama aÃ§Ä±lÄ±ÅŸÄ±nda parola politikasÄ± parametresini yoksa ekler (PK-02) ve pepper uyarÄ±sÄ±nÄ± loglar (PK-08).
 /// </summary>
 public static class PasswordPolicyStartup
 {
@@ -25,41 +25,65 @@ public static class PasswordPolicyStartup
         var dbFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AppDbContext>>();
         await using var db = await dbFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
 
-        var entity = await db.Parameters.AsNoTracking()
-            .FirstOrDefaultAsync(x => x.ApplicationId == applicationId && x.Group == "Security" && x.Key == "PasswordPolicy", ct)
+        var param = await db.Parameters.AsNoTracking()
+            .Include(p => p.Applications)
+            .FirstOrDefaultAsync(x => x.Group == "Security" && x.Key == "PasswordPolicy", ct)
             .ConfigureAwait(false);
 
-        if (entity is null)
+        var appValue = param?.Applications.FirstOrDefault(a => a.ApplicationId == applicationId);
+
+        if (appValue is null)
         {
-            // Varsayýlan modelden JSON üret.
+            // EÄŸer parametre tanÄ±mÄ± da yoksa, hem parametre hem de deÄŸer oluÅŸtur
+            if (param is null)
+            {
+                param = new Parameter
+                {
+                    Group = "Security",
+                    Key = "PasswordPolicy",
+                    ParameterDataTypeId = 15,
+                    Description = "Parola politikasÄ± (startup seed)",
+                    StatusId = 3,
+                    CreatedBy = 0,
+                    LastStatusBy = 0,
+                    IsProtected = true,
+                    RowId = Guid.NewGuid(),
+                    CreatedAt = DateTimeOffset.UtcNow
+                };
+                db.Parameters.Add(param);
+                await db.SaveChangesAsync(ct).ConfigureAwait(false);
+            }
+
+            // VarsayÄ±lan modelden JSON Ã¼ret.
             var defaultModel = new PasswordPolicyOptions();
             var raw = JsonSerializer.Serialize(defaultModel, JsonOpts);
             var minified = JsonTextFormatter.Minify(raw);
 
-            var param = new Parameter
+            var paramApp = new ParameterApplication
             {
+                ParameterId = param.Id,
                 ApplicationId = applicationId,
-                Group = "Security",
-                Key = "PasswordPolicy",
-                ParameterDataTypeId = 15,
                 Value = minified,
-                Description = "Varsayýlan parola politikasý (startup seed)",
                 StatusId = 3,
-                CreatedBy = 0
+                CreatedBy = 0,
+                LastStatusBy = 0,
+                IsProtected = true,
+                RowId = Guid.NewGuid(),
+                CreatedAt = DateTimeOffset.UtcNow
             };
-            db.Parameters.Add(param);
+            db.ParameterApplications.Add(paramApp);
             await db.SaveChangesAsync(ct).ConfigureAwait(false);
-            logger?.LogInformation("PasswordPolicy parametresi eksikti, varsayýlan oluþturuldu (AppId={AppId}).", applicationId);
+            logger?.LogInformation("PasswordPolicy parametresi eksikti, varsayÄ±lan oluÅŸturuldu (AppId={AppId}).", applicationId);
         }
 
-        // PepperEnabled uyarýsý (PK-08)
+        // PepperEnabled uyarÄ±sÄ± (PK-08)
         var provider = scope.ServiceProvider.GetService<IPasswordPolicyProvider>();
         if (provider is not null)
         {
             var policy = await provider.GetAsync(applicationId, ct).ConfigureAwait(false);
             if (policy.Hash.PepperEnabled && string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("ARCHIX_PEPPER")))
             {
-                logger?.LogWarning("PasswordPolicy 'pepperEnabled=true' ancak 'ARCHIX_PEPPER' ortam deðiþkeni tanýmlý deðil. Güvenlik için bir pepper deðeri ayarlayýn.");
+                logger?.LogWarning("PasswordPolicy 'pepperEnabled=true' ancak 'ARCHIX_PEPPER' ortam deÄŸiÅŸkeni tanÄ±mlÄ± deÄŸil. GÃ¼venlik iÃ§in bir pepper deÄŸeri ayarlayÄ±n.");
             }
         }
     }

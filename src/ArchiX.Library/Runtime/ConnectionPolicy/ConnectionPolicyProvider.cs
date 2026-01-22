@@ -63,6 +63,7 @@ namespace ArchiX.Library.Runtime.ConnectionPolicy
             {
                 // Read Parameters instead of ArchiXSettings
                 var settings = db.Parameters
+                                 .Include(p => p.Applications)
                                  .Where(x => x.Group == "ConnectionPolicy")
                                  .AsNoTracking()
                                  .ToList();
@@ -120,19 +121,21 @@ namespace ArchiX.Library.Runtime.ConnectionPolicy
             return options;
         }
 
-        // Helpers now work with Parameter instead of ArchiXSetting
+        // Helpers now work with Parameter + ParameterApplication
         private static void ApplySetting(IReadOnlyList<Parameter> settings, string key, Action<string> apply)
         {
             var item = settings.FirstOrDefault(x => x.Key == key);
-            if (item != null && !string.IsNullOrWhiteSpace(item.Value))
-                apply(item.Value.Trim());
+            var appValue = item?.Applications.FirstOrDefault(a => a.ApplicationId == 1);
+            if (appValue != null && !string.IsNullOrWhiteSpace(appValue.Value))
+                apply(appValue.Value.Trim());
         }
 
         private static void ApplyDelimited(IReadOnlyList<Parameter> settings, string key, Action<string[]> apply)
         {
             var item = settings.FirstOrDefault(x => x.Key == key);
-            if (item != null && !string.IsNullOrWhiteSpace(item.Value))
-                apply(SplitList(item.Value));
+            var appValue = item?.Applications.FirstOrDefault(a => a.ApplicationId == 1);
+            if (appValue != null && !string.IsNullOrWhiteSpace(appValue.Value))
+                apply(SplitList(appValue.Value));
         }
 
         private static string[] SplitList(string raw) =>
