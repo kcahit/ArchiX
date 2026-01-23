@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace ArchiX.Library.Web.ViewComponents.Dataset.DatasetRecord;
+namespace ArchiX.Library.Web.ViewComponents.Dataset;
 
 [ViewComponent(Name = "DatasetRecord")]
 public sealed class DatasetRecordViewComponent : ViewComponent

@@ -39,6 +39,25 @@
             </div>
         }
 
+        @if (Model.ShowDeletedToggle)
+        {
+            <div class="form-check ms-2">
+                <input class="form-check-input" type="checkbox" id="@Model.Id-showDeleted" 
+                       @(Context.Request.Query["includeDeleted"] == "1" ? "checked" : "")
+                       onchange="toggleIncludeDeleted('@Model.Id')">
+                <label class="form-check-label" for="@Model.Id-showDeleted">
+                    Silinmişleri Göster
+                </label>
+            </div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.RecordEndpoint) && Model.IsFormOpenEnabled == 1)
+        {
+            <button class="btn btn-success btn-sm ms-2" onclick="openNewRecord('@Model.Id', '@Model.RecordEndpoint')">
+                <i class="bi bi-plus-circle me-1"></i> Yeni Kayıt
+            </button>
+        }
+
         @if (Model.ShowExport)
         {
             <div class="ms-auto">
@@ -91,3 +110,27 @@
         </div>
     }
 </div>
+
+<script>
+    function toggleIncludeDeleted(gridId) {
+        const checkbox = document.getElementById(`${gridId}-showDeleted`);
+        const url = new URL(window.location.href);
+        if (checkbox && checkbox.checked) {
+            url.searchParams.set('includeDeleted', '1');
+        } else {
+            url.searchParams.delete('includeDeleted');
+        }
+        window.location.href = url.toString();
+    }
+
+    function openNewRecord(gridId, recordEndpoint) {
+        if (window.ArchiX?.TabHost?.openTab) {
+            window.ArchiX.TabHost.openTab({ 
+                url: recordEndpoint, 
+                title: 'Application (Yeni)' 
+            });
+        } else {
+            window.location.href = recordEndpoint;
+        }
+    }
+</script>

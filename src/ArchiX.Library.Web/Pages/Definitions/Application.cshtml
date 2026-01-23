@@ -5,11 +5,18 @@
     Layout = "~/Templates/Modern/Pages/Shared/_Layout.cshtml";
 }
 
-<div class="container py-4">
-    <h1 class="h4 mb-3">Definitions / Application</h1>
-    <div class="card">
-        <div class="card-body">
-            Placeholder page.
-        </div>
+<div id="tab-main">
+    <div id="@Model.Grid.Id-container" class="container py-4">
+        <h1 class="h4 mb-3">Application Tanımları</h1>
+        @await Component.InvokeAsync("DatasetGrid", Model.Grid)
     </div>
 </div>
+
+<script>
+    (function() {
+        const gridState = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Grid, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }));
+        if (window.ArchiX?.Grid?.init) {
+            window.ArchiX.Grid.init(gridState.id, gridState);
+        }
+    })();
+</script>

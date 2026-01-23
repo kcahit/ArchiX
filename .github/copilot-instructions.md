@@ -1,14 +1,35 @@
 ﻿# Copilot Instructions
 
+## İçindekiler
+- Genel Kurallar
+- Kalıcı Çalışma Prensibi
+- Kod Stili
+- Projeye Özel Kurallar
+  - Hızlı Karar Kuralları (kritik)
+  - CopyToHost kuralı
+  - Katman seçimi
+- Frontend Debugging Template (#55)
+
 ## General Guidelines
 - First general instruction
 - Second general instruction
+
+## Kalıcı Çalışma Prensibi (Genel)
+
+- Tahmin/öngörü yapma: Davranış/özellik iddialarını mutlaka mevcut koddan doğrula.
+- Kodda doğrulanamayan konuları kesin bilgi gibi yazma; sadece "öneri" olarak, net şekilde ayrıştırarak sun.
+- Referans doküman yolu bulunamadığında linki/kurali kendiliğinden silme veya başka yere taşıma.
+  - Önce kullanıcıya sor.
+  - Tercih edilen stabil dizin: `docs/_Stable/`.
 
 ## Code Style
 - Use specific formatting rules
 - Follow naming conventions
 
 ## Project-Specific Rules
+
+---
+
 ### Quick decision rules (critical)
 
 - 3 deneme sonrası teşhis + dokümantasyon (kritik):
@@ -29,15 +50,18 @@
   - Entry format: timestamp (local), what changed (file + selector/function), expected effect, observed result ("olmadı").
   - Continue with the next attempt without asking the user.
 
-- Katman seçimi:
-  - `src/ArchiX.Library` = core (host bağımsız).
-  - `src/ArchiX.Library.Web` = web-specific library (core üstüne).
-  - `src/ArchiX.WebHost` = host/test harness (gerçek uygulama simülasyonu).
 
-- `CopyToHost` kuralı:
-  - Bir dosya `src/ArchiX.WebHost` altında görünüyorsa **önce** bunun `CopyToHost` ile kopyalanıp kopyalanmadığını kontrol et.
-  - Kopyalanıyorsa: değişikliği WebHost kopyasında değil, kaynağında yap (çoğunlukla `src/ArchiX.Library.Web/wwwroot/...`; aynı kural diğer kopyalanan `Pages/Templates` içerikleri için de geçerli).
-  - Kısa kontrol: `src/ArchiX.WebHost/ArchiX.WebHost.csproj` içindeki `CleanCopiedFiles` listesinde silinen klasörlerin altı (örn. `Pages`, `Templates`, `wwwroot/js`, `wwwroot/images`, `wwwroot/css/...`) build/clean ile yeniden üretilebilir; bu alanlarda kalıcı edit yapma.
+### Katman seçimi
+
+- `src/ArchiX.Library` = core (host bağımsız).
+- `src/ArchiX.Library.Web` = web-specific library (core üstüne).
+- `src/ArchiX.WebHost` = host/test harness (gerçek uygulama simülasyonu).
+
+### `CopyToHost` kuralı
+
+- Bir dosya `src/ArchiX.WebHost` altında görünüyorsa **önce** bunun `CopyToHost` ile kopyalanıp kopyalanmadığını kontrol et.
+- Kopyalanıyorsa: değişikliği WebHost kopyasında değil, kaynağında yap (çoğunlukla `src/ArchiX.Library.Web/wwwroot/...`; aynı kural diğer kopyalanan `Pages/Templates` içerikleri için de geçerli).
+- Kısa kontrol: `src/ArchiX.WebHost/ArchiX.WebHost.csproj` içindeki `CleanCopiedFiles` listesinde silinen klasörlerin altı (örn. `Pages`, `Templates`, `wwwroot/js`, `wwwroot/images`, `wwwroot/css/...`) build/clean ile yeniden üretilebilir; bu alanlarda kalıcı edit yapma.
 
 ---
 
@@ -129,7 +153,7 @@ Kullanıcı "olmadı" dediğinde **SIRA İLE** şunları sor:
 5. **Network tab'da `X-ArchiX-Tab: 1` var mı?**
 6. **Response boyutu kaç KB?** (10-20 KB mı yoksa 80+ KB mı?)
 
-**3. denemeden sonra** bu 6 sorunun cevabı OLMADAN kod değişikliği YAPMA.
+**3. denemeden sonra** bu 6 sorunun cevabı OLMADAN kod değişikliği YAPMA (işin durumuna göre başka sorular da olabilir).
 
 ---
 
@@ -203,6 +227,32 @@ ArchiX.cssDebugMode();
 
 ### When to Reference Docs
 
-**CSS sorunu:** `docs/Architecture/css-specificity.md` oku/referans ver
-**F12 workflow:** `docs/Debugging/frontend-troubleshooting.md` oku/referans ver
-**Extract mantığı:** `docs/Debugging/frontend-troubleshooting.md` → "Extract Chain" bölümü
+Sabit referanslar (taşınmayacak):
+
+- **CSS sorunu / specificity:** `docs/_Stable/css-specificity.md`
+- **F12 workflow / Extract mantığı:** `docs/_Stable/frontend-troubleshooting.md`
+- **Analiz/Tasarım (Parametre):** `docs/_Stable/#57-Parametre-ve-Timeout-Yonetimi-V5.md`
+- **Analiz/Tasarım (CRUD Ekranı):** `docs/#32-Application-Tanim-Ekrani-V5.md`
+
+---
+
+## Doküman Format Standardı (Analiz/Tasarım)
+
+Tüm analiz/tasarım dokümanları şu yapıda olacak:
+
+### Bölümler (Sıralı)
+1. **ANALİZ**: Amaç, mevcut sistem, bağımlılıklar, kısıtlar
+2. **TASARIM**: Şema, servis/API, validasyon, error handling
+3. **UNIT TEST STRATEJİSİ**: Test senaryoları, edge case'ler
+4. **YAPILACAK İŞLER**: Sıralı iş listesi (bağımlılık referanslarıyla, örn: "→ Tasarım 2.3")
+5. **AÇIK NOKTALAR**: Karar bekleyen konular (cevaplandırılınca ilgili bölüme taşınacak)
+
+### Kurallar
+- Satır numarası yok
+- "Yapılacak İşler" sırası: işin yapılış sırasına göre
+- Her iş yukarıdaki bölümlere referans verecek
+- **Açık Noktalar boşalana kadar kodlamaya geçilmeyecek**
+- Karar alındıktan sonra ilgili madde Açık Noktalar'dan silinip Analiz/Tasarım/Unit Test veya Yapılacak İşler'e taşınacak
+
+Notlar:
+- Issue/task bazlı kısa loglar yine `docs/Debugging/<issue-slug>.md` altında tutulur.

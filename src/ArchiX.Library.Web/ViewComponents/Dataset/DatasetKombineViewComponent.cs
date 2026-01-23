@@ -2,7 +2,7 @@
 
 using Microsoft.AspNetCore.Mvc;
 
-namespace ArchiX.Library.Web.ViewComponents;
+namespace ArchiX.Library.Web.ViewComponents.Dataset;
 
 [ViewComponent(Name = "DatasetKombine")]
 public sealed class DatasetKombineViewComponent : ViewComponent

@@ -55,8 +55,8 @@ builder.Services.AddRazorPages(opts =>
         opts.Conventions.AllowAnonymousToPage("/Dashboard");
     }
 })
-.AddRazorRuntimeCompilation()
-.AddApplicationPart(typeof(ArchiX.Library.Web.ViewComponents.DatasetGridViewComponent).Assembly);
+    .AddRazorRuntimeCompilation()
+    .AddApplicationPart(typeof(ArchiX.Library.Web.ViewComponents.Dataset.DatasetGridViewComponent).Assembly);
 
 builder.Services.AddApplicationMappings();
 builder.Services.AddConnectionPolicyEvaluator();

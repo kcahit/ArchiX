@@ -122,21 +122,40 @@
         const canEdit = !!state?.isFormOpenEnabled;
         if (!canEdit) return;
 
-        const reportDatasetId = getSelectedReportDatasetId(tableId);
-        if (!reportDatasetId) {
-            alert('Dataset seçilmedi. Önce dataset seçip raporu çalıştırın.');
-            return;
+        const recordEndpoint = state?.recordEndpoint;
+
+        if (!recordEndpoint) {
+            // Dataset modunda (mevcut davranış)
+            const reportDatasetId = getSelectedReportDatasetId(tableId);
+            if (!reportDatasetId) {
+                alert('Dataset seçilmedi. Önce dataset seçip raporu çalıştırın.');
+                return;
+            }
+
+            const returnContext = getReturnContext(tableId);
+            const qs = new URLSearchParams();
+            qs.set('ReportDatasetId', String(reportDatasetId));
+            if (id !== undefined && id !== null && String(id).length > 0) qs.set('RowId', String(id));
+            if (returnContext) qs.set('ReturnContext', returnContext);
+            qs.set('HasRecordOperations', '1');
+
+            window.location.href = `/Tools/Dataset/Record?${qs.toString()}`;
+        } else {
+            // Entity modunda (YENİ + TabHost uyumlu)
+            const qs = new URLSearchParams();
+            if (id !== undefined && id !== null && String(id).length > 0) qs.set('id', String(id));
+
+            const url = `${recordEndpoint}?${qs.toString()}`;
+            const title = id ? `Application #${id}` : 'Application (Yeni)';
+
+            // TabHost üzerinden açma
+            if (window.ArchiX?.TabHost?.openTab) {
+                window.ArchiX.TabHost.openTab({ url, title });
+            } else {
+                // Fallback
+                window.location.href = url;
+            }
         }
-
-        const returnContext = getReturnContext(tableId);
-
-        const qs = new URLSearchParams();
-        qs.set('ReportDatasetId', String(reportDatasetId));
-        if (id !== undefined && id !== null && String(id).length > 0) qs.set('RowId', String(id));
-        if (returnContext) qs.set('ReturnContext', returnContext);
-        qs.set('HasRecordOperations', '1');
-
-        window.location.href = `/Tools/Dataset/Record?${qs.toString()}`;
     }
 
     function deleteItem(tableId, id) {

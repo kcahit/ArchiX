@@ -2,7 +2,7 @@
 
 using Microsoft.AspNetCore.Mvc;
 
-namespace ArchiX.Library.Web.ViewComponents;
+namespace ArchiX.Library.Web.ViewComponents.Dataset;
 
 public sealed class DatasetSelectorViewComponent : ViewComponent
 {

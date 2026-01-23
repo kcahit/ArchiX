@@ -32,4 +32,10 @@ public class GridToolbarViewModel
 
     public string RunReportText { get; set; } = "Raporla";
     public string DatasetPlaceholder { get; set; } = "Rapor seçin...";
+
+    // Entity-driven record endpoint (Issue #32)
+    public string? RecordEndpoint { get; set; }
+
+    // Silinmişleri göster checkbox (Issue #32)
+    public bool ShowDeletedToggle { get; set; } = false;
 }
