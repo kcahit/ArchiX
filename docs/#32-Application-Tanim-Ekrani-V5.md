@@ -16,15 +16,17 @@
 
 **Prensipler:**
 - Liste: grid (entity'den dinamik kolon üretimi)
-- Satır aksiyonu: "İncele/Düzenle" → record **tab** içinde açar
-- Toolbar: "Yeni Kayıt" butonu
+- Satır aksiyonu: "İncele/Düzenle" → **GridRecordAccordion** içinde form açar
+- Toolbar: "Yeni Kayıt" butonu → **GridRecordAccordion** içinde form açar
+- **GridRecordAccordion:** Grid üstünde inline accordion (başlangıçta kapalı)
 - CRUD: DB ile çalışan, fiziksel delete yok
 - Soft delete: `StatusId` üzerinden
 - `ApplicationId = 1` silinemez (UI + backend)
 
 **Kapsam:**
 - Liste ekranı: DB'den `Applications` → grid (dinamik kolon)
-- Record ekranı: Create / Update / SoftDelete (DB)
+- **GridRecordAccordion:** Grid üstünde accordion component (record form container)
+- Record form: Create / Update / SoftDelete (DB, accordion içinde render)
 - "Silinmişleri göster" checkbox (toolbar içinde)
 - `ApplicationId=1` koruması (UI + handler)
 
@@ -43,6 +45,13 @@
 - `GridColumnDefinition` → kolon tanımı (Field, Title, DataType, Width...)
 - Grid JS: `src/ArchiX.Library.Web/wwwroot/js/archix.grid.component.js`
 - Toolbar view: `src/ArchiX.Library.Web/Templates/Modern/Pages/Shared/Components/Dataset/GridToolbar/Default.cshtml`
+
+**Accordion Component (Yeni):**
+- **GridRecordAccordion:** Grid üstünde inline form container
+- Bootstrap accordion kullanılacak
+- Başlangıçta collapsed (görünmez)
+- "Yeni Kayıt" / "İncele" tıklanınca expand + içerik fetch/render
+- ViewComponent olarak tasarlanacak
 
 **Soft Delete Altyapısı:**
 - `BaseEntity.SoftDelete(userId)` → `StatusId = 6`
@@ -63,16 +72,20 @@
 - `editItem()` şu an `/Tools/Dataset/Record` + `ReportDatasetId` üzerine kurulu
 - Entity-driven record açmak için grid state'e "record endpoint" kontratı gerekir
 
-**1.3.2 Nav davranışı TabHost ile uyumlu olmalı (Kritik)**
-- Sistem `window.location.href` kullanmaz
-- Grid içinden record açma **TabHost üzerinden** tab içinde açılmalı
-- Koda göre hedef fonksiyon: `openTab({ url, title })`
+**1.3.2 Record açma pattern eksik**
+- Mevcut grid JS modal/tab açıyor
+- **Gereksinim:** Grid üstünde inline accordion içinde form açılmalı
+- Accordion component (GridRecordAccordion) yok, oluşturulmalı
 
-**1.3.3 Delete işlemi client-side**
+**1.3.3 Nav davranışı TabHost ile uyumlu olmalı (Kritik)**
+- Sistem `window.location.href` kullanmaz
+- Grid içinden record açma artık **accordion içinde** olacak (tab değil)
+
+**1.3.4 Delete işlemi client-side**
 - `deleteItem()` şu an sadece `state.data` listesinden siliyor (DB'ye istek yok)
 - Application için DB ile çalışan soft delete handler gerekir
 
-**1.3.4 Entity → Grid model dönüşümü**
+**1.3.5 Entity → Grid model dönüşümü**
 - Kodda "entity class → columns otomatik" gibi helper doğrulanmadı
 - `Columns` ve `Rows` caller tarafından üretilmeli
 
@@ -167,7 +180,149 @@ Toolbar view'unda şu bloklar var:
 2. **Orta:** Search input + Reset butonu
 3. **Sağ:** Advanced Search + **ShowDeletedToggle** + **Yeni Kayıt** + Export dropdown
 
-### 2.3 IncludeDeleted Toggle (Toolbar İçinde)
+### 2.3 GridRecordAccordion Component (Yeni)
+
+**Amaç:**
+- Grid üstünde inline form container
+- Modal/tab yerine accordion içinde record formu göstermek
+- Daha az context switching, sayfa içinde CRUD
+
+**Kontrat:**
+
+**ViewModel:**
+```csharp
+// src/ArchiX.Library.Web/ViewModels/Grid/GridRecordAccordionViewModel.cs
+public class GridRecordAccordionViewModel
+{
+    public string Id { get; set; } = "grid-record-accordion";
+    public string GridId { get; set; } = "dsgrid"; // İlişkili grid ID
+    public bool IsOpen { get; set; } = false; // Başlangıçta kapalı
+    public string Title { get; set; } = "Kayıt Detayı";
+}
+```
+
+**ViewComponent:**
+```csharp
+// src/ArchiX.Library.Web/ViewComponents/Grid/GridRecordAccordionViewComponent.cs
+public class GridRecordAccordionViewComponent : ViewComponent
+{
+    public IViewComponentResult Invoke(GridRecordAccordionViewModel model)
+    {
+        return View("~/Templates/Modern/Pages/Shared/Components/Grid/GridRecordAccordion/Default.cshtml", model);
+    }
+}
+```
+
+**View (Bootstrap Accordion):**
+```cshtml
+@* src/ArchiX.Library.Web/Templates/Modern/Pages/Shared/Components/Grid/GridRecordAccordion/Default.cshtml *@
+@model ArchiX.Library.Web.ViewModels.Grid.GridRecordAccordionViewModel
+
+<div class="accordion mb-3" id="@Model.Id">
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button @(Model.IsOpen ? "" : "collapsed")" 
+                    type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#@Model.Id-body" 
+                    aria-expanded="@(Model.IsOpen ? "true" : "false")">
+                <span id="@Model.Id-title">@Model.Title</span>
+            </button>
+        </h2>
+        <div id="@Model.Id-body" 
+             class="accordion-collapse collapse @(Model.IsOpen ? "show" : "")" 
+             data-bs-parent="#@Model.Id">
+            <div class="accordion-body">
+                <div id="@Model.Id-content" class="grid-record-content">
+                    <!-- İçerik buraya dinamik yüklenecek -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+```
+
+**JS API (Grid JS içinde):**
+```javascript
+// src/ArchiX.Library.Web/wwwroot/js/archix.grid.component.js içine eklenecek
+
+function showRecordInAccordion(gridId, url, title) {
+    const accordionId = `grid-record-accordion-${gridId}`;
+    const contentId = `${accordionId}-content`;
+    const titleEl = document.getElementById(`${accordionId}-title`);
+    const contentEl = document.getElementById(contentId);
+    
+    if (!contentEl) return;
+    
+    // Başlık güncelle
+    if (titleEl) titleEl.textContent = title || 'Kayıt Detayı';
+    
+    // Loading göster
+    contentEl.innerHTML = '<div class="text-center p-3"><div class="spinner-border" role="status"></div></div>';
+    
+    // Accordion'u aç
+    const accordionBody = document.getElementById(`${accordionId}-body`);
+    if (accordionBody && window.bootstrap?.Collapse) {
+        const bsCollapse = window.bootstrap.Collapse.getOrCreateInstance(accordionBody);
+        bsCollapse.show();
+    }
+    
+    // İçerik fetch et
+    fetch(url, {
+        headers: {
+            'X-ArchiX-Tab': '1',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(res => res.text())
+    .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const main = doc.querySelector('#tab-main') || doc.querySelector('.archix-work-area') || doc.querySelector('main');
+        contentEl.innerHTML = main ? main.innerHTML : html;
+        
+        // Form script'lerini yeniden çalıştır
+        const scripts = contentEl.querySelectorAll('script');
+        scripts.forEach(oldScript => {
+            const newScript = document.createElement('script');
+            if (oldScript.src) {
+                newScript.src = oldScript.src;
+            } else {
+                newScript.textContent = oldScript.textContent;
+            }
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
+    })
+    .catch(err => {
+        contentEl.innerHTML = `<div class="alert alert-danger">Hata: ${err.message}</div>`;
+    });
+}
+
+// Global export
+window.showRecordInAccordion = showRecordInAccordion;
+```
+
+**"Yeni Kayıt" butonu çağrısı:**
+```javascript
+function openNewRecord(gridId, recordEndpoint) {
+    showRecordInAccordion(gridId, recordEndpoint, 'Yeni Application');
+}
+```
+
+**"İncele" butonu çağrısı (editItem içinde):**
+```javascript
+if (recordEndpoint) {
+    const url = `${recordEndpoint}?id=${id}`;
+    showRecordInAccordion(tableId, url, `Application #${id}`);
+}
+```
+
+**Sonuç:**
+- Grid üstünde accordion render edilecek
+- "Yeni Kayıt" / "İncele" → accordion expand + form render
+- Tab/modal yerine inline UX
+
+### 2.4 IncludeDeleted Toggle (Toolbar İçinde)
 
 **Kontrat:**
 - `GridToolbarViewModel.ShowDeletedToggle` (yeni, default false)
@@ -232,13 +387,10 @@ Toolbar view'unda şu bloklar var:
         window.location.href = url.toString();
     });
     
-    // Yeni Kayıt butonu (TabHost uyumlu)
+    // Yeni Kayıt butonu → Accordion içinde aç
     function openNewRecord(gridId, recordEndpoint) {
-        if (window.ArchiX?.TabHost?.openTab) {
-            window.ArchiX.TabHost.openTab({ 
-                url: recordEndpoint, 
-                title: 'Application (Yeni)' 
-            });
+        if (window.showRecordInAccordion) {
+            window.showRecordInAccordion(gridId, recordEndpoint, 'Yeni Application');
         } else {
             window.location.href = recordEndpoint;
         }
@@ -251,9 +403,9 @@ Toolbar view'unda şu bloklar var:
 - `ShowDeletedToggle = true` → checkbox render edilir
 - Checkbox değişince `?includeDeleted=1` ile tab içinde yeniden yüklenir
 - Backend'de `IgnoreQueryFilters()`
-- **Yeni Kayıt** butonu da aynı yerde (Export'un solunda)
+- **Yeni Kayıt** butonu accordion içinde form açıyor
 
-### 2.4 Grid → Record (Parametrik + TabHost Uyumlu)
+### 2.5 Grid → Record (Parametrik + Accordion Uyumlu)
 
 **Kontrat:**
 - `GridToolbarViewModel.RecordEndpoint` (yeni, opsiyonel)
@@ -301,18 +453,18 @@ function editItem(tableId, id) {
         
         window.location.href = `/Tools/Dataset/Record?${qs.toString()}`;
     } else {
-        // Entity modunda (YENİ + TabHost uyumlu)
+        // Entity modunda: Accordion içinde aç
         const qs = new URLSearchParams();
         if (id !== undefined && id !== null && String(id).length > 0) qs.set('id', String(id));
         
         const url = `${recordEndpoint}?${qs.toString()}`;
-        const title = id ? `Application #${id}` : 'Application (Yeni)';
+        const title = id ? `Application #${id}` : 'Yeni Application';
         
-        // TabHost üzerinden açma (window.location.href değil)
-        if (window.ArchiX?.TabHost?.openTab) {
-            window.ArchiX.TabHost.openTab({ url, title });
+        // Accordion içinde göster
+        if (window.showRecordInAccordion) {
+            window.showRecordInAccordion(tableId, url, title);
         } else {
-            // Fallback (TabHost yoksa)
+            // Fallback
             window.location.href = url;
         }
     }
@@ -323,11 +475,12 @@ function editItem(tableId, id) {
 
 1. **JSON naming:** `PropertyNamingPolicy = JsonNamingPolicy.CamelCase` ile `RecordEndpoint` → `recordEndpoint` olarak serialize ediliyor
 
-2. **TabHost fonksiyonu:** `window.ArchiX.TabHost.openTab({ url, title })`
-   - Root seviyede yeni tab açar
-   - Tab başlığı dinamik (id varsa "Application #X", yoksa "Application (Yeni)")
+2. **Accordion pattern:** `showRecordInAccordion(gridId, url, title)`
+   - Grid üstünde accordion expand
+   - İçerik fetch + render
+   - Inline UX (modal/tab değil)
 
-### 2.5 Record Ekranı (CRUD)
+### 2.6 Record Ekranı (CRUD)
 
 **URL:** `/Definitions/Application/Record`
 
@@ -506,6 +659,13 @@ public async Task<IActionResult> OnPostDeleteAsync([FromForm] int id, Cancellati
 - `id=1` için delete handler exception
 - UI'da `id=1` için "Sil" butonu render edilmiyor
 
+**3.1.5 `GridRecordAccordionTests.cs`**
+- Accordion başlangıçta collapsed
+- "Yeni Kayıt" tıkla → accordion expand + içerik yükleniyor
+- "İncele" tıkla → accordion expand + içerik (id ile) yükleniyor
+- Accordion header tıkla → collapse
+- Form submit → accordion kapanıyor + grid refresh
+
 ### 3.2 Örnek Test Case'ler
 
 ```csharp
@@ -560,41 +720,49 @@ public async Task OnPostDeleteAsync_ValidId_ShouldSetStatusId6()
 
 ## 4) YAPILACAK İŞLER (Sıralı)
 
-### İş 4.1 — GridToolbarViewModel: RecordEndpoint + ShowDeletedToggle
-- **Bağımlılık:** Tasarım 2.2.2, 2.3
+### İş 4.1 — GridRecordAccordionViewModel + ViewComponent
+- **Bağımlılık:** Tasarım 2.3
+- **Aksiyon:** ViewModel + ViewComponent + View oluştur
+
+### İş 4.2 — GridToolbarViewModel: RecordEndpoint + ShowDeletedToggle
+- **Bağımlılık:** Tasarım 2.4, 2.5
 - **Aksiyon:** `GridToolbarViewModel`'e iki yeni alan ekle
 
-### İş 4.2 — GridToolbar View: Toggle + Yeni Kayıt butonu
-- **Bağımlılık:** İş 4.1, Tasarım 2.3
+### İş 4.3 — GridToolbar View: Toggle + Yeni Kayıt butonu
+- **Bağımlılık:** İş 4.2, Tasarım 2.4
 - **Aksiyon:** Toolbar view'unda checkbox + buton render et (Export'un solunda)
 
-### İş 4.3 — Grid JS: RecordEndpoint + TabHost entegrasyonu
-- **Bağımlılık:** İş 4.1, Tasarım 2.4
-- **Aksiyon:** `editItem()` fonksiyonunu güncelle (TabHost uyumlu)
+### İş 4.4 — Grid JS: showRecordInAccordion fonksiyonu
+- **Bağımlılık:** İş 4.1, Tasarım 2.3
+- **Aksiyon:** `showRecordInAccordion()` fonksiyonu ekle (fetch + render + accordion control)
 
-### İş 4.4 — Application Liste Sayfası
+### İş 4.5 — Grid JS: editItem accordion entegrasyonu
+- **Bağımlılık:** İş 4.4, Tasarım 2.5
+- **Aksiyon:** `editItem()` fonksiyonunu güncelle (accordion pattern)
+
+### İş 4.6 — Application Liste Sayfası + Accordion
 - **Bağımlılık:** İş 4.1, Tasarım 2.2.2
-- **Aksiyon:** Placeholder kaldır, grid üret, `includeDeleted` param, JSON state render
+- **Aksiyon:** Placeholder kaldır, grid üret, **GridRecordAccordion component render et**, `includeDeleted` param
 
-### İş 4.5 — ApplicationFormModel
-- **Bağımlılık:** Tasarım 2.5
+### İş 4.7 — ApplicationFormModel
+- **Bağımlılık:** Tasarım 2.6
 - **Aksiyon:** Form model oluştur (validation attribute'ları ile)
 
-### İş 4.6 — Application Record Page + Handlers
-- **Bağımlılık:** İş 4.5, Tasarım 2.5
+### İş 4.8 — Application Record Page + Handlers
+- **Bağımlılık:** İş 4.7, Tasarım 2.6
 - **Aksiyon:** Page/PageModel oluştur, Create/Update/Delete handlers
 
-### İş 4.7 — Record UI: Buton kuralları + id=1 guard
-- **Bağımlılık:** Tasarım 2.5
+### İş 4.9 — Record UI: Buton kuralları + id=1 guard
+- **Bağımlılık:** Tasarım 2.6
 - **Aksiyon:** Buton render mantığı + backend guard
 
-### İş 4.8 — Unit Testler
-- **Bağımlılık:** İş 4.4–4.7, Unit Test 3
-- **Aksiyon:** Test sınıflarını yaz
+### İş 4.10 — Unit Testler
+- **Bağımlılık:** İş 4.1–4.9, Unit Test 3
+- **Aksiyon:** Test sınıflarını yaz (GridRecordAccordion testleri dahil)
 
-### İş 4.9 — Manuel Test
-- **Bağımlılık:** İş 4.1–4.8
-- **Aksiyon:** Tüm akışı doğrula (liste, yeni, düzenle, sil, toggle)
+### İş 4.11 — Manuel Test
+- **Bağımlılık:** İş 4.1–4.10
+- **Aksiyon:** Tüm akışı doğrula (liste, accordion açma/kapama, yeni, düzenle, sil, toggle)
 
 ---
 
@@ -606,6 +774,9 @@ public async Task OnPostDeleteAsync_ValidId_ShouldSetStatusId6()
 
 ## 6) REFERANSLAR
 
+- **GridRecordAccordion Component:** `src/ArchiX.Library.Web/ViewComponents/Grid/GridRecordAccordionViewComponent.cs` (yeni)
+- **GridRecordAccordion View:** `src/ArchiX.Library.Web/Templates/Modern/Pages/Shared/Components/Grid/GridRecordAccordion/Default.cshtml` (yeni)
+- **GridRecordAccordionViewModel:** `src/ArchiX.Library.Web/ViewModels/Grid/GridRecordAccordionViewModel.cs` (yeni)
 - TabHost JS: `src/ArchiX.Library.Web/wwwroot/js/archix/tabbed/archix-tabhost.js`
 - Grid JS: `src/ArchiX.Library.Web/wwwroot/js/archix.grid.component.js`
 - Toolbar View: `src/ArchiX.Library.Web/Templates/Modern/Pages/Shared/Components/Dataset/GridToolbar/Default.cshtml`
@@ -616,6 +787,7 @@ public async Task OnPostDeleteAsync_ValidId_ShouldSetStatusId6()
 
 ---
 
-**SON GÜNCELLEME:** 24.01.2026 15:35  
-**SORUMLU:** GitHub Copilot (Workspace Agent)  Sonnet 4.5
+**SON GÜNCELLEME:** 24.01.2026 02:00  
+**SORUMLU:** GitHub Copilot (Workspace Agent) Sonnet 4.5  
+**FORMAT:** V5 (SON VERSİYON — GridRecordAccordion pattern ile implementasyona hazır)
 **FORMAT:** V5 (SON VERSİYON — implementasyona hazır)
