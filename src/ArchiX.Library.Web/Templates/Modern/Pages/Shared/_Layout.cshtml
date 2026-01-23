@@ -1,11 +1,20 @@
 ﻿@using Microsoft.Extensions.Configuration
 @using Microsoft.Extensions.Options
+@using Microsoft.Extensions.Logging
 @using ArchiX.Library.Web.Configuration
+@using ArchiX.Library.Services.Parameters
 @inject IConfiguration Configuration
-@inject IOptions<UiTimeoutOptions> TimeoutOptions
+@inject IParameterService ParameterService
 @{
     Layout = "~/Pages/Shared/_ModernBaseLayout.cshtml";
     var pageTitle = ViewData["Title"]?.ToString() ?? "ArchiX";
+
+    // #57 DB'den parametreleri oku (applicationId=1)
+    TabbedOptions? tabbedOptions = null;
+    UiTimeoutOptions? timeoutOptions = null;
+    
+    tabbedOptions = await ParameterService.GetParameterAsync<TabbedOptions>("UI", "TabbedOptions", applicationId: 1);
+    timeoutOptions = await ParameterService.GetParameterAsync<UiTimeoutOptions>("UI", "TimeoutOptions", applicationId: 1);
 
     var isTabRequest = false;
     try
@@ -16,6 +25,7 @@
     {
         isTabRequest = false;
     }
+
 
     var layoutProbeEnabled = false;
     try
@@ -118,14 +128,15 @@ else
         <script src="~/js/archix/session-guard.js" asp-append-version="true"></script>
         <script src="~/js/archix/ui-options.js" asp-append-version="true"></script>
         
-        <!-- Inject timeout options from server (DB'den gelecek) -->
+        <!-- #57 Inject UI parameters from DB -->
         <script>
             if (!window.ArchiX) window.ArchiX = {};
-            window.ArchiX.TimeoutOptions = {
-                sessionTimeoutSeconds: @(TimeoutOptions.Value.SessionTimeoutSeconds),
-                sessionWarningSeconds: @(TimeoutOptions.Value.SessionWarningSeconds),
-                tabRequestTimeoutMs: @(TimeoutOptions.Value.TabRequestTimeoutMs)
-            };
+            
+            // UI/TabbedOptions (DB'den)
+            window.ArchiX.UiOptions = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(tabbedOptions, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }));
+            
+            // UI/TimeoutOptions (DB'den)
+            window.ArchiX.TimeoutOptions = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(timeoutOptions, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }));
         </script>
         
         <script src="~/js/archix/tabbed/archix-tabhost.js" asp-append-version="true"></script>

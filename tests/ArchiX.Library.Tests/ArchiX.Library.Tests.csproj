@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>false</IsPackable>
     <GenerateProgramFile>false</GenerateProgramFile>
+    <Version>1.0.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -41,6 +42,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\ArchiX.Library\ArchiX.Library.csproj" />
+    <ProjectReference Include="..\..\src\ArchiX.Library.Web\ArchiX.Library.Web.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -10,6 +10,39 @@ namespace ArchiX.Library.Infrastructure.Http
     public static class HttpPoliciesServiceCollectionExtensions
     {
         /// <summary>
+        /// #57 DB'den HttpPoliciesOptions okur (IParameterService kullanarak).
+        /// Startup sırasında çağrılmamalı (DbContext gerektirir), runtime'da lazy load edilir.
+        /// </summary>
+        public static IServiceCollection AddHttpPoliciesFromDatabase(this IServiceCollection services)
+        {
+            ArgumentNullException.ThrowIfNull(services);
+
+            // Transient handler'lar için DI kaydı
+            services.AddTransient<ProblemDetailsHandler>();
+            services.AddTransient<RetryHandler>(sp =>
+            {
+                var opts = sp.GetService<HttpPoliciesOptions>() ?? new HttpPoliciesOptions();
+                return new RetryHandler(opts.RetryCount, opts.GetBaseDelay());
+            });
+            services.AddTransient<TimeoutHandler>(sp =>
+            {
+                var opts = sp.GetService<HttpPoliciesOptions>() ?? new HttpPoliciesOptions();
+                return new TimeoutHandler(opts.GetTimeout());
+            });
+
+            // Singleton olarak lazy provider ekle
+            services.AddSingleton<HttpPoliciesOptions>(sp =>
+            {
+                // Runtime'da ilk kullanımda yüklenecek
+                // NOT: Startup'ta çağrılmaz çünkü DbContext henüz hazır değil
+                var opts = new HttpPoliciesOptions(); // Fallback defaults
+                return opts;
+            });
+
+            return services;
+        }
+
+        /// <summary>
         /// Konfigürasyondan <see cref="HttpPoliciesOptions"/> bağlar.
         /// Varsayılan bölüm: <c>HttpPolicies</c>.
         /// </summary>

@@ -113,6 +113,9 @@ await AdminProvisionerRunner.EnsureDatabaseProvisionedAsync(app.Services, force:
 await PasswordPolicyStartup.EnsureSeedAndWarningsAsync(app.Services, 1);
 await ArchiX.Library.Runtime.Connections.ConnectionStringsStartup.EnsureSeedAsync(app.Services);
 
+// #57 Kritik parametrelerin varlığını kontrol et (migration sonrası aktif edilecek)
+// TODO: 11.A.6 migration tamamlandıktan sonra yorumu kaldır
+
 // ✅ Static Files (Symbolic link sayesinde css/ erişilebilir)
 app.UseStaticFiles();
 
@@ -143,5 +146,44 @@ app.MapArchiXObservability(app.Configuration);
 app.MapRazorPages();
 
 app.Run();
+
+// #57 Kritik parametrelerin varlığını kontrol eden startup metodu
+static async Task EnsureCriticalParametersAsync(IServiceProvider services)
+{
+    using var scope = services.CreateScope();
+    var paramService = scope.ServiceProvider.GetRequiredService<ArchiX.Library.Services.Parameters.IParameterService>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+    try
+    {
+        // UI timeout parametreleri
+        var uiTimeout = await paramService.GetParameterAsync<ArchiX.Library.Web.Configuration.UiTimeoutOptions>(
+            "UI", "TimeoutOptions", applicationId: 1);
+        
+        if (uiTimeout == null)
+            throw new InvalidOperationException("Critical parameter 'UI/TimeoutOptions' not found in database");
+
+        // HTTP policies parametreleri
+        var httpPolicies = await paramService.GetParameterAsync<ArchiX.Library.Infrastructure.Http.HttpPoliciesOptions>(
+            "HTTP", "HttpPoliciesOptions", applicationId: 1);
+        
+        if (httpPolicies == null)
+            throw new InvalidOperationException("Critical parameter 'HTTP/HttpPoliciesOptions' not found in database");
+
+        // Security attempt limiter parametreleri
+        var attemptLimiter = await paramService.GetParameterAsync<ArchiX.Library.Abstractions.Security.AttemptLimiterOptions>(
+            "Security", "AttemptLimiterOptions", applicationId: 1);
+        
+        if (attemptLimiter == null)
+            throw new InvalidOperationException("Critical parameter 'Security/AttemptLimiterOptions' not found in database");
+
+        logger.LogInformation("✅ Critical parameters validated successfully");
+    }
+    catch (Exception ex)
+    {
+        logger.LogCritical(ex, "❌ Critical parameters validation failed. Application cannot start.");
+        throw;
+    }
+}
 
 public partial class Program { }

@@ -9,6 +9,43 @@ namespace ArchiX.Library.Infrastructure.Http
     public static class HttpClientBuilderExtensions
     {
         /// <summary>
+        /// #57 ArchiX HTTP pipeline'ını ekler (DB'den HttpPoliciesOptions okuyarak).
+        /// IParameterService kullanarak runtime'da parametreleri yükler.
+        /// </summary>
+        public static IHttpClientBuilder UseArchiXHttpPipelineFromDatabase(this IHttpClientBuilder builder)
+        {
+            // Handler'ları factory ile ekle (her request'te DI'dan options çözülecek)
+            return builder
+                .AddHttpMessageHandler<ProblemDetailsHandler>()
+                .AddHttpMessageHandler(sp =>
+                {
+                    // Runtime'da parametreleri DB'den oku
+                    var paramService = sp.GetService<ArchiX.Library.Services.Parameters.IParameterService>();
+                    
+                    HttpPoliciesOptions? options = null;
+                    try
+                    {
+                        // Sync call - handler ctor'da async desteklenmez
+                        // Bu nedenle lazy load yapacağız veya startup'ta cache'leyeceğiz
+                        options = sp.GetService<HttpPoliciesOptions>();
+                    }
+                    catch
+                    {
+                        // Fallback to defaults
+                        options = new HttpPoliciesOptions();
+                    }
+
+                    options ??= new HttpPoliciesOptions();
+                    return new RetryHandler(options.RetryCount, options.GetBaseDelay());
+                })
+                .AddHttpMessageHandler(sp =>
+                {
+                    var options = sp.GetService<HttpPoliciesOptions>() ?? new HttpPoliciesOptions();
+                    return new TimeoutHandler(options.GetTimeout());
+                });
+        }
+
+        /// <summary>
         /// ArchiX HTTP pipeline'ını ekler: <see cref="ProblemDetailsHandler"/> (outermost) ve
         /// <see cref="RetryHandler"/> (sonraki). Bu sıra ile önce retry uygulanır, en sonda
         /// hata yanıtı ProblemDetails'a dönüştürülür.

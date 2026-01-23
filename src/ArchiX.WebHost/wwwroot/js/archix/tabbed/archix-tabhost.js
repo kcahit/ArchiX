@@ -91,21 +91,29 @@
     return t.length > 0 ? t : null;
   }
 
-  // Config: Prioritize server-injected values (from DB), fallback to defaults
-  const serverOptions = window.ArchiX?.TimeoutOptions || {};
+  // #57 Config: DB'den inject edilen parametreler (fallback to defaults)
+  const uiOptions = window.ArchiX?.UiOptions || {};
+  const timeoutOptions = window.ArchiX?.TimeoutOptions || {};
   
-  console.log('[TabHost] Server options:', serverOptions);
+  console.log('[TabHost] UiOptions (from DB):', uiOptions);
+  console.log('[TabHost] TimeoutOptions (from DB):', timeoutOptions);
   
   const config = {
-    maxOpenTabs: serverOptions.maxOpenTabs || 15,
-    maxTabReachedMessage: 'Açık tab sayısı limitine geldi. Lütfen açık tablardan birini kapatınız.',
-    sessionTimeoutSeconds: serverOptions.sessionTimeoutSeconds || 600,  // DB'den gelecek
-    sessionWarningSeconds: serverOptions.sessionWarningSeconds || 30,   // DB'den gelecek
-    tabRequestTimeoutMs: serverOptions.tabRequestTimeoutMs || 30000,   // DB'den gelecek
-    enableNestedTabs: true
+    // UI/TabbedOptions'dan
+    maxOpenTabs: uiOptions.tabbed?.maxOpenTabs || 15,
+    maxTabReachedMessage: uiOptions.tabbed?.onMaxTabReached?.message || 'Açık tab sayısı limitine geldi. Lütfen açık tablardan birini kapatınız.',
+    enableNestedTabs: uiOptions.tabbed?.enableNestedTabs || false,
+    requireTabContext: uiOptions.tabbed?.requireTabContext !== false, // default: true
+    tabAutoCloseMinutes: uiOptions.tabbed?.tabAutoCloseMinutes || 10,
+    autoCloseWarningSeconds: uiOptions.tabbed?.autoCloseWarningSeconds || 30,
+    
+    // UI/TimeoutOptions'dan
+    sessionTimeoutSeconds: timeoutOptions.sessionTimeoutSeconds || 645,
+    sessionWarningSeconds: timeoutOptions.sessionWarningSeconds || 45,
+    tabRequestTimeoutMs: timeoutOptions.tabRequestTimeoutMs || 30000
   };
   
-  console.log('[TabHost] Config loaded:', config);
+  console.log('[TabHost] Config loaded (DB + fallback):', config);
 
   function createNestedHost(parentPane, groupId) {
     const host = document.createElement('div');

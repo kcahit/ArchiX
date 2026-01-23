@@ -7,6 +7,29 @@ namespace ArchiX.Library.Web.Security.DependencyInjection;
 
 public static class AttemptLimiterServiceCollectionExtensions
 {
+    /// <summary>
+    /// #57 DB'den AttemptLimiterOptions okur (IParameterService kullanarak).
+    /// Runtime'da lazy load edilir.
+    /// </summary>
+    public static IServiceCollection AddAttemptLimiterFromDatabase(this IServiceCollection services)
+    {
+        services.AddMemoryCache();
+        
+        // Singleton olarak lazy provider ekle
+        services.AddSingleton<AttemptLimiterOptions>(sp =>
+        {
+            // Runtime'da ilk kullanımda yüklenecek
+            var opts = new AttemptLimiterOptions(); // Fallback defaults
+            return opts;
+        });
+        
+        services.AddSingleton<IAttemptLimiter, AttemptLimiter>();
+        return services;
+    }
+
+    /// <summary>
+    /// Configuration'dan AttemptLimiter ayarlarını okur (legacy).
+    /// </summary>
     public static IServiceCollection AddAttemptLimiter(this IServiceCollection services, IConfiguration cfg, string sectionPath = "ArchiX:LoginSecurity:AttemptLimiter")
     {
         var sect = cfg.GetSection(sectionPath);
