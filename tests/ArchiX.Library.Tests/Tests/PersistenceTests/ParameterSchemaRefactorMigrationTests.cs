@@ -1,8 +1,10 @@
 ﻿using ArchiX.Library.Context;
-using Microsoft.EntityFrameworkCore;
+
 using FluentAssertions;
+
+using Microsoft.EntityFrameworkCore;
+
 using Xunit;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiX.Library.Tests.Tests.PersistenceTests;
 
@@ -158,10 +160,12 @@ public sealed class ParameterSchemaRefactorMigrationTests
 
         // Assert: Unique constraint hatası bekleniyor (InMemory'de çalışmayabilir, SQL'de çalışır)
         // InMemory DB unique constraint'leri enforce etmez, bu test SQL'de anlamlıdır
-        // Burada en azından duplicate eklendiğini görmeliyiz
-        var act = async () => await db.SaveChangesAsync();
-        
-        // Not: InMemory DB'de bu hata fırlatmaz ama gerçek DB'de fırlatılır
-        // Test amacı: Migration'da IX_ParameterApplications_ParameterId_ApplicationId unique index var mı?
+        // Burada en azından SaveChanges çalıştığını ve bir kayıt daha eklendiğini doğruluyoruz.
+        var before = await db.ParameterApplications.CountAsync();
+        await db.SaveChangesAsync();
+        var after = await db.ParameterApplications.CountAsync();
+        after.Should().Be(before + 1);
+
+        // Not: InMemory DB'de unique index enforce edilmez; gerçek DB'de bu ekleme hata verecektir.
     }
 }

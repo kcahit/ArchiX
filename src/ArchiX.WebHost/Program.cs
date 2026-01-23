@@ -113,8 +113,8 @@ await AdminProvisionerRunner.EnsureDatabaseProvisionedAsync(app.Services, force:
 await PasswordPolicyStartup.EnsureSeedAndWarningsAsync(app.Services, 1);
 await ArchiX.Library.Runtime.Connections.ConnectionStringsStartup.EnsureSeedAsync(app.Services);
 
-// #57 Kritik parametrelerin varlığını kontrol et (migration sonrası aktif edilecek)
-// TODO: 11.A.6 migration tamamlandıktan sonra yorumu kaldır
+// #57 Kritik parametrelerin varlığını kontrol et (fail-fast)
+await EnsureCriticalParametersAsync(app.Services);
 
 // ✅ Static Files (Symbolic link sayesinde css/ erişilebilir)
 app.UseStaticFiles();
@@ -159,23 +159,14 @@ static async Task EnsureCriticalParametersAsync(IServiceProvider services)
         // UI timeout parametreleri
         var uiTimeout = await paramService.GetParameterAsync<ArchiX.Library.Web.Configuration.UiTimeoutOptions>(
             "UI", "TimeoutOptions", applicationId: 1);
-        
-        if (uiTimeout == null)
-            throw new InvalidOperationException("Critical parameter 'UI/TimeoutOptions' not found in database");
 
         // HTTP policies parametreleri
         var httpPolicies = await paramService.GetParameterAsync<ArchiX.Library.Infrastructure.Http.HttpPoliciesOptions>(
             "HTTP", "HttpPoliciesOptions", applicationId: 1);
-        
-        if (httpPolicies == null)
-            throw new InvalidOperationException("Critical parameter 'HTTP/HttpPoliciesOptions' not found in database");
 
         // Security attempt limiter parametreleri
         var attemptLimiter = await paramService.GetParameterAsync<ArchiX.Library.Abstractions.Security.AttemptLimiterOptions>(
             "Security", "AttemptLimiterOptions", applicationId: 1);
-        
-        if (attemptLimiter == null)
-            throw new InvalidOperationException("Critical parameter 'Security/AttemptLimiterOptions' not found in database");
 
         logger.LogInformation("✅ Critical parameters validated successfully");
     }

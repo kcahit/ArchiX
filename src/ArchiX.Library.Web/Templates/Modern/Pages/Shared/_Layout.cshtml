@@ -16,6 +16,13 @@
     tabbedOptions = await ParameterService.GetParameterAsync<TabbedOptions>("UI", "TabbedOptions", applicationId: 1);
     timeoutOptions = await ParameterService.GetParameterAsync<UiTimeoutOptions>("UI", "TimeoutOptions", applicationId: 1);
 
+    var tabbedOptionsJson = System.Text.Json.JsonSerializer.Serialize(
+        tabbedOptions,
+        new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
+    var timeoutOptionsJson = System.Text.Json.JsonSerializer.Serialize(
+        timeoutOptions,
+        new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
+
     var isTabRequest = false;
     try
     {
@@ -133,10 +140,10 @@ else
             if (!window.ArchiX) window.ArchiX = {};
             
             // UI/TabbedOptions (DB'den)
-            window.ArchiX.UiOptions = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(tabbedOptions, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }));
+            window.ArchiX.UiOptions = JSON.parse(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(tabbedOptionsJson)));
             
             // UI/TimeoutOptions (DB'den)
-            window.ArchiX.TimeoutOptions = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(timeoutOptions, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }));
+            window.ArchiX.TimeoutOptions = JSON.parse(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(timeoutOptionsJson)));
         </script>
         
         <script src="~/js/archix/tabbed/archix-tabhost.js" asp-append-version="true"></script>

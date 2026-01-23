@@ -3,10 +3,11 @@ using ArchiX.Library.Context;
 using ArchiX.Library.Infrastructure.Caching;
 using ArchiX.Library.Infrastructure.Parameters;
 using ArchiX.Library.Services.Parameters;
+
 using FluentAssertions;
+
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+
 using Xunit;
 
 namespace ArchiX.Library.Tests.Tests.PersistenceTests;

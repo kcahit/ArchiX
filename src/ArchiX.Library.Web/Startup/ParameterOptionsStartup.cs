@@ -2,7 +2,7 @@
 using ArchiX.Library.Infrastructure.Http;
 using ArchiX.Library.Infrastructure.Parameters;
 using ArchiX.Library.Services.Parameters;
-using ArchiX.Library.Web.Configuration;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
