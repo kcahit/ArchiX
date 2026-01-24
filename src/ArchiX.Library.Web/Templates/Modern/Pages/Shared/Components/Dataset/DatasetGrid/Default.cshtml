@@ -182,29 +182,47 @@
         showActions: @Model.ShowActions.ToString().ToLowerInvariant()
     };
 
+    let retryCount = 0;
+    const MAX_RETRIES = 10;
+
     function initGrid() {
         if (typeof window.initGridTable === 'function') {
-            console.log('[@tableId] Initializing grid with data:', window.gridTables['@tableId']);
+            // RecordEndpoint ve HideDeleteForIds'i ÖNCE set et (initGridTable render yapacak)
+            const tableData = window.gridTables['@tableId'];
+            @if (!string.IsNullOrWhiteSpace(toolbarModel.RecordEndpoint))
+            {
+                <text>tableData.recordEndpoint = '@toolbarModel.RecordEndpoint';</text>
+            }
+            @if (Model.HideDeleteForIds.Any())
+            {
+                <text>tableData.hideDeleteForIds = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.HideDeleteForIds));</text>
+            }
+            
             window.initGridTable(
                 '@tableId',
-                window.gridTables['@tableId'].data,
-                window.gridTables['@tableId'].columns,
-                window.gridTables['@tableId'].showActions,
+                tableData.data,
+                tableData.columns,
+                tableData.showActions,
                 @Html.Raw(isFormOpenEnabledJs)
             );
-                
-            // RecordEndpoint'i state'e ekle (entity-driven modda gerekli)
+            
+            // State'e de kopyala
             const state = window.__archixGridGetState?.('@tableId');
             if (state) {
                 @if (!string.IsNullOrWhiteSpace(toolbarModel.RecordEndpoint))
                 {
-                    <text>state.recordEndpoint = '@toolbarModel.RecordEndpoint';</text>
+                    <text>state.recordEndpoint = tableData.recordEndpoint;</text>
                 }
-                console.log('[@tableId] Grid initialized, state:', state);
+                @if (Model.HideDeleteForIds.Any())
+                {
+                    <text>state.hideDeleteForIds = tableData.hideDeleteForIds;</text>
+                }
             }
         } else {
-            console.error('[@tableId] initGridTable function not found! Retrying in 100ms...');
-            setTimeout(initGrid, 100);
+            retryCount++;
+            if (retryCount < MAX_RETRIES) {
+                setTimeout(initGrid, 100);
+            }
         }
     }
 

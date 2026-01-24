@@ -65,7 +65,7 @@
                             }
                         }
 
-                        <a href="/Definitions/Application" class="btn btn-secondary">Kapat</a>
+                        <button type="button" class="btn btn-secondary" onclick="closeRecordForm()">Kapat</button>
                     </div>
                 </div>
             </div>
@@ -77,10 +77,20 @@
     <partial name="_ValidationScriptsPartial" />
     
     <script>
-        // Form submit'i intercept et (accordion içindeyse)
-        document.querySelector('form')?.addEventListener('submit', function(e) {
-            // Normal submit devam etsin, sadece success sonrası parent refresh
-            // Backend'den X-ArchiX-Reload-Parent header'ı gelirse sayfa reload olacak
-        });
+        function closeRecordForm() {
+            const accordionEl = document.querySelector('.accordion[id^="grid-record-accordion"]');
+            if (accordionEl) {
+                const accordionBody = accordionEl.querySelector('.accordion-collapse');
+                if (accordionBody && window.bootstrap?.Collapse) {
+                    const bsCollapse = window.bootstrap.Collapse.getInstance(accordionBody);
+                    if (bsCollapse) {
+                        bsCollapse.hide();
+                        setTimeout(() => { accordionEl.style.display = 'none'; }, 300);
+                        return;
+                    }
+                }
+            }
+            window.location.href = '/Definitions/Application';
+        }
     </script>
 }

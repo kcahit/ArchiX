@@ -48,6 +48,79 @@ document.getElementById('grid-record-accordion-appgrid')
 openNewRecord('appgrid', '/Definitions/Application/Record')
 ```
 
+---
+
+## 11. SON SORUN: "Silinmişleri Göster" Checkbox - Backend Request YOK
+
+### 2026-01-23 19:15 - SQL Profiler: Transaction Yok
+- Change: toggleIncludeDeleted debug log eklendi
+- Expected: Checkbox tıkla → Backend'e request (`?includeDeleted=1`) → StatusId=6 kayıtlar gelsin
+- Observed: ❌ **SQL Profiler'da transaction YOK** = Backend çağrılmamış!
+- F12 bulguları: (BEKLENİYOR - aşağıda)
+
+**Sorun:**
+- Checkbox işaretleniyor ama backend'e HTTP request GİTMİYOR
+- `toggleIncludeDeleted('appgrid')` fonksiyonu çağrılıyor mu? → Bilinmiyor
+- `TabHost.reloadCurrentTab()` çalışıyor mu? → Bilinmiyor
+- Console'da `[DEBUG]` log'ları var mı? → **Kullanıcı kontrol edecek**
+
+---
+
+## F12 Zorunlu Kontrol (3-Attempt Rule)
+
+### 1. Console'da Ara:
+```
+[DEBUG] toggleIncludeDeleted START
+```
+
+**VARSA:** Log'un tamamını (tüm satırları) kopyala buraya
+**YOKSA:** `toggleIncludeDeleted()` fonksiyonu hiç çağrılmamış = `onchange` event bağlı değil
+
+### 2. Manuel Çağır (Console'a yaz):
+```javascript
+toggleIncludeDeleted('appgrid')
+```
+
+**Sonuç ne oldu?**
+- Console'da log'lar çıktı mı?
+- Network tab'da request gördün mü?
+- Sayfa reload oldu mu?
+
+### 3. Network Tab:
+- Checkbox'ı işaretle
+- Network tab'da (F12) request var mı?
+- Varsa URL ne? (kopyala)
+
+---
+
+## Kök Neden Hipotezleri
+
+1. **onchange event bağlı değil:** Checkbox render ediliyor ama `onchange="toggleIncludeDeleted('appgrid')"` çalışmıyor
+2. **TabHost.reloadCurrentTab() çalışmıyor:** Fonksiyon undefined veya hatalı
+3. **URL yanlış:** `/Dashboard` gibi yanlış URL'e gidiyor (console log gösterecek)
+
+---
+
+## 12. KÖK NEDEN BULUNDU: window.location.pathname = /Dashboard (YANLIŞ!)
+
+### 2026-01-23 19:20 - Console Screenshot'ları
+- Observed: `pathname: "/Dashboard"` (Application tab'ında olmasına rağmen!)
+- Kök Neden: **TabHost içinde `window.location` YANLIŞ!**
+- FIX: TabHost.getCurrentTabUrl() eklendi
+- **SONUÇ: ❌ ÇALIŞMADI - checkbox hâlâ backend'e request göndermiyor**
+
+---
+
+## KALAN SORUNLAR (ÇÖZÜLEMEDİ)
+
+1. **"Silinmişleri Göster" checkbox** → Backend'e request gitmiyor, SQL Profiler'da transaction yok
+2. **ID=1 sil butonu** → Başta görünüyor, filtre yapınca kayboluyor (type mismatch / timing issue)
+
+---
+
+## Sonraki Adım: KOD TEMİZLİĞİ
+Gereksiz debug log'lar, yarım kodlar temizlenecek.
+
 **Network Tab (gerekli):**
 - "Yeni Kayıt" butonuna tıkladığında hangi request gidiyor?
 - URL: ?

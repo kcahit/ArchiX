@@ -23,4 +23,10 @@ public class GridTableViewModel
     public bool ShowToolbar { get; set; } = true;
 
     public GridToolbarViewModel? Toolbar { get; set; }
+
+    /// <summary>
+    /// Entity-specific rule: IDs for which delete button should be hidden.
+    /// Example: ApplicationId=1 (system record).
+    /// </summary>
+    public IReadOnlyList<int> HideDeleteForIds { get; set; } = [];
 }

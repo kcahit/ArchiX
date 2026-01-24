@@ -1,66 +1,38 @@
 ﻿using ArchiX.Library.Context;
+using ArchiX.Library.Web.Pages.Shared;
 using ArchiX.Library.Web.ViewModels.Grid;
-
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 
 namespace ArchiX.WebHost.Pages.Definitions;
 
-public class ApplicationModel : PageModel
+public class ApplicationModel : EntityListPageBase<Library.Entities.Application>
 {
-    private readonly AppDbContext _db;
+    public ApplicationModel(AppDbContext db) : base(db) { }
 
-    public ApplicationModel(AppDbContext db)
+    protected override string EntityName => "Application";
+    protected override string RecordEndpoint => "/Definitions/Application/Record";
+    protected override string GridId => "appgrid"; // Override: "applicationgrid" yerine "appgrid"
+
+    protected override List<GridColumnDefinition> GetColumns() => new()
     {
-        _db = db;
-    }
+        new("Id", "ID", Width: "80px"),
+        new("Code", "Kod", Width: "150px"),
+        new("Name", "Ad", Width: "200px"),
+        new("DefaultCulture", "Dil", Width: "100px"),
+        new("StatusId", "Durum", Width: "100px")
+    };
 
-    public GridTableViewModel Grid { get; set; } = null!;
-
-    public async Task OnGetAsync([FromQuery] int? includeDeleted, CancellationToken ct)
+    protected override Dictionary<string, object?> EntityToRow(Library.Entities.Application entity) => new()
     {
-        var query = _db.Applications.AsQueryable();
+        ["Id"] = entity.Id,
+        ["Code"] = entity.Code,
+        ["Name"] = entity.Name,
+        ["DefaultCulture"] = entity.DefaultCulture,
+        ["StatusId"] = entity.StatusId
+    };
 
-        if (includeDeleted == 1)
-        {
-            query = query.IgnoreQueryFilters();
-        }
-
-        var applications = await query.ToListAsync(ct);
-
-        var columns = new List<GridColumnDefinition>
-        {
-            new("Id", "ID", Width: "80px"),
-            new("Code", "Kod", Width: "150px"),
-            new("Name", "Ad", Width: "200px"),
-            new("DefaultCulture", "Dil", Width: "100px"),
-            new("StatusId", "Durum", Width: "100px")
-        };
-
-        var rows = applications.Select(a => new Dictionary<string, object?>
-        {
-            ["Id"] = a.Id,
-            ["Code"] = a.Code,
-            ["Name"] = a.Name,
-            ["DefaultCulture"] = a.DefaultCulture,
-            ["StatusId"] = a.StatusId
-        }).ToList();
-
-        Grid = new GridTableViewModel
-        {
-            Id = "appgrid",
-            Columns = columns,
-            Rows = rows,
-            ShowActions = true,
-            ShowToolbar = true,
-            Toolbar = new GridToolbarViewModel
-            {
-                TotalRecords = applications.Count,
-                IsFormOpenEnabled = 1,
-                RecordEndpoint = "/Definitions/Application/Record",
-                ShowDeletedToggle = true
-            }
-        };
+    // Application'a özel: ID=1 silinemez
+    protected override bool ShouldHideDeleteButton(Library.Entities.Application entity)
+    {
+        return entity.Id == 1;
     }
 }

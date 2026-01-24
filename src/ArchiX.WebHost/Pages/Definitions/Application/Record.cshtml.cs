@@ -1,136 +1,34 @@
 ﻿using ArchiX.Library.Context;
-using ArchiX.Library.Entities;
+using ArchiX.Library.Web.Pages.Shared;
 using ArchiX.Library.Web.ViewModels.Definitions;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 
 namespace ArchiX.WebHost.Pages.Definitions.Application;
 
-public class RecordModel : PageModel
+public class RecordModel : EntityRecordPageBase<Library.Entities.Application, ApplicationFormModel>
 {
-    private readonly AppDbContext _db;
+    public RecordModel(AppDbContext db) : base(db) { }
 
-    public RecordModel(AppDbContext db)
+    protected override string EntityName => "Application";
+    protected override string ListPageUrl => "/Definitions/Application";
+
+    // Convenience property for view (optional)
+    public Library.Entities.Application? Application => Entity;
+
+    protected override ApplicationFormModel EntityToForm(Library.Entities.Application entity) => new()
     {
-        _db = db;
-    }
+        Code = entity.Code,
+        Name = entity.Name,
+        DefaultCulture = entity.DefaultCulture,
+        TimeZoneId = entity.TimeZoneId,
+        Description = entity.Description
+    };
 
-    public bool IsNew { get; set; }
-
-    public Library.Entities.Application? Application { get; set; }
-
-    [BindProperty]
-    public ApplicationFormModel Form { get; set; } = new();
-
-    public async Task OnGetAsync([FromQuery] int? id, CancellationToken ct)
+    protected override void ApplyFormToEntity(ApplicationFormModel form, Library.Entities.Application entity)
     {
-        IsNew = id == null || id == 0;
-
-        if (!IsNew)
-        {
-            var app = await _db.Applications
-                .FirstOrDefaultAsync(a => a.Id == id, ct);
-
-            if (app == null)
-            {
-                Response.StatusCode = 404;
-                return;
-            }
-
-            Application = app;
-            Form = new ApplicationFormModel
-            {
-                Code = app.Code,
-                Name = app.Name,
-                DefaultCulture = app.DefaultCulture,
-                TimeZoneId = app.TimeZoneId,
-                Description = app.Description
-            };
-        }
-    }
-
-    public async Task<IActionResult> OnPostCreateAsync(CancellationToken ct)
-    {
-        if (!ModelState.IsValid)
-            return Page();
-
-        var app = new Library.Entities.Application
-        {
-            Code = Form.Code,
-            Name = Form.Name,
-            DefaultCulture = Form.DefaultCulture,
-            TimeZoneId = Form.TimeZoneId,
-            Description = Form.Description
-        };
-
-        // Audit: TODO - gerçek userId alınmalı
-        app.MarkCreated(userId: 1);
-        _db.Applications.Add(app);
-        await _db.SaveChangesAsync(ct);
-
-        // Accordion içinden çağrılmışsa parent'ı refresh et
-        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-        {
-            Response.Headers["X-ArchiX-Reload-Parent"] = "1";
-            return Content("<script>if(window.parent){window.parent.location.reload();}</script>", "text/html");
-        }
-
-        // Liste sayfasına dön
-        return RedirectToPage("/Definitions/Application");
-    }
-
-    public async Task<IActionResult> OnPostUpdateAsync([FromForm] int id, CancellationToken ct)
-    {
-        if (!ModelState.IsValid)
-            return Page();
-
-        var app = await _db.Applications.FirstOrDefaultAsync(a => a.Id == id, ct);
-        if (app == null) return NotFound();
-
-        app.Code = Form.Code;
-        app.Name = Form.Name;
-        app.DefaultCulture = Form.DefaultCulture;
-        app.TimeZoneId = Form.TimeZoneId;
-        app.Description = Form.Description;
-
-        // Audit: TODO - gerçek userId alınmalı
-        app.MarkUpdated(userId: 1);
-
-        await _db.SaveChangesAsync(ct);
-
-        // Accordion içinden çağrılmışsa parent'ı refresh et
-        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-        {
-            Response.Headers["X-ArchiX-Reload-Parent"] = "1";
-            return Content("<script>if(window.parent){window.parent.location.reload();}</script>", "text/html");
-        }
-
-        return RedirectToPage("/Definitions/Application");
-    }
-
-    public async Task<IActionResult> OnPostDeleteAsync([FromForm] int id, CancellationToken ct)
-    {
-        if (id == 1)
-        {
-            ModelState.AddModelError(string.Empty, "Sistem kaydı (ID=1) silinemez.");
-            return Page();
-        }
-
-        var app = await _db.Applications.FirstOrDefaultAsync(a => a.Id == id, ct);
-        if (app == null) return NotFound();
-
-        // Audit: TODO - gerçek userId alınmalı
-        app.SoftDelete(userId: 1);
-        await _db.SaveChangesAsync(ct);
-
-        // Accordion içinden çağrılmışsa parent'ı refresh et
-        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-        {
-            Response.Headers["X-ArchiX-Reload-Parent"] = "1";
-            return Content("<script>if(window.parent){window.parent.location.reload();}</script>", "text/html");
-        }
-
-        return RedirectToPage("/Definitions/Application");
+        entity.Code = form.Code;
+        entity.Name = form.Name;
+        entity.DefaultCulture = form.DefaultCulture;
+        entity.TimeZoneId = form.TimeZoneId;
+        entity.Description = form.Description;
     }
 }

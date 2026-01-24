@@ -10,6 +10,7 @@ public class ApplicationModel : EntityListPageBase<Library.Entities.Application>
 
     protected override string EntityName => "Application";
     protected override string RecordEndpoint => "/Definitions/Application/Record";
+    protected override string GridId => "appgrid"; // Override: "applicationgrid" yerine "appgrid"
 
     protected override List<GridColumnDefinition> GetColumns() => new()
     {
@@ -28,5 +29,11 @@ public class ApplicationModel : EntityListPageBase<Library.Entities.Application>
         ["DefaultCulture"] = entity.DefaultCulture,
         ["StatusId"] = entity.StatusId
     };
+
+    // Application'a özel: ID=1 silinemez
+    protected override bool ShouldHideDeleteButton(Library.Entities.Application entity)
+    {
+        return entity.Id == 1;
+    }
 }
 

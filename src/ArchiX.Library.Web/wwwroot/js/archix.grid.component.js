@@ -262,8 +262,10 @@
         const state = getState(tableId);
         if (!state?.showActions) return '';
 
-        const id = row?.id;
+        // ID field name: "id" veya "Id" (case-insensitive)
+        const id = row?.id || row?.Id;
         const canEdit = !!state.isFormOpenEnabled;
+        const hideDeleteForIds = state?.hideDeleteForIds || [];
 
         let html = '<td class="action-buttons">';
         html += `<button type="button" class="btn btn-sm btn-outline-primary" onclick="viewItem('${tableId}','${id}')" title="Görüntüle"><i class="bi bi-eye"></i></button>`;
@@ -272,7 +274,13 @@
             html += `<button type="button" class="btn btn-sm btn-outline-secondary" onclick="editItem('${tableId}','${id}')" title="Değiştir"><i class="bi bi-pencil"></i></button>`;
         }
 
-        html += `<button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteItem('${tableId}','${id}')" title="Sil"><i class="bi bi-trash"></i></button>`;
+        // Entity-specific delete button hiding (e.g., ApplicationId=1)
+        // Type-safe check: id might be string or number
+        const numericId = typeof id === 'number' ? id : parseInt(id, 10);
+        if (!hideDeleteForIds.includes(numericId)) {
+            html += `<button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteItem('${tableId}','${id}')" title="Sil"><i class="bi bi-trash"></i></button>`;
+        }
+        
         html += '</td>';
         return html;
     }
@@ -356,6 +364,9 @@
     function initGridTable(tableId, data, columns, showActions = false, isFormOpenEnabled = false) {
         if (!tableId || !Array.isArray(data) || !Array.isArray(columns)) return;
 
+        // Mevcut gridTables'dan meta bilgileri al (recordEndpoint, hideDeleteForIds)
+        const tableMeta = window.gridTables?.[tableId] || {};
+
         states[tableId] = {
             tableId,
             data: data.map(row => ({ ...row })),
@@ -365,6 +376,9 @@
             isFormOpenEnabled: !!isFormOpenEnabled,
             currentPage: 1,
             itemsPerPage: 10,
+            // Meta bilgileri state'e kopyala
+            recordEndpoint: tableMeta.recordEndpoint,
+            hideDeleteForIds: tableMeta.hideDeleteForIds || []
         };
 
         bindSearch(tableId);

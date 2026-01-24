@@ -1238,6 +1238,13 @@
       if (!pane) return;
       
       loadContent(targetUrl, pane, activeId, detail.title);
+    },
+    getCurrentTabUrl: function() {
+      const activeId = state.activeId;
+      if (!activeId) return null;
+      
+      const detail = state.detailById.get(activeId);
+      return detail ? detail.url : null;
     }
   };
 

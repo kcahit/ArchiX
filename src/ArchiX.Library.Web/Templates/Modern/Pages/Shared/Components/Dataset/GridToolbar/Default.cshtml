@@ -114,20 +114,31 @@
 <script>
     function toggleIncludeDeleted(gridId) {
         const checkbox = document.getElementById(`${gridId}-showDeleted`);
-        const currentUrl = window.location.pathname + window.location.search;
-        const url = new URL(currentUrl, window.location.origin);
+        if (!checkbox) return;
         
-        if (checkbox && checkbox.checked) {
-            url.searchParams.set('includeDeleted', '1');
-        } else {
-            url.searchParams.delete('includeDeleted');
+        let currentPath = window.location.pathname;
+        if (window.ArchiX?.TabHost?.getCurrentTabUrl) {
+            const tabUrl = window.ArchiX.TabHost.getCurrentTabUrl();
+            if (tabUrl) {
+                const url = new URL(tabUrl, window.location.origin);
+                currentPath = url.pathname;
+            }
         }
         
-        // TabHost içindeyse tab reload, değilse normal navigation
-        if (window.ArchiX?.TabHost?.reloadCurrentTab) {
-            window.ArchiX.TabHost.reloadCurrentTab(url.pathname + url.search);
+        const params = new URLSearchParams(window.location.search);
+        
+        if (checkbox.checked) {
+            params.set('includeDeleted', '1');
         } else {
-            window.location.href = url.toString();
+            params.delete('includeDeleted');
+        }
+        
+        const newUrl = params.toString() ? `${currentPath}?${params.toString()}` : currentPath;
+        
+        if (window.ArchiX?.TabHost?.reloadCurrentTab) {
+            window.ArchiX.TabHost.reloadCurrentTab(newUrl);
+        } else {
+            window.location.href = newUrl;
         }
     }
 
