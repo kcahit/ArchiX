@@ -114,21 +114,26 @@
 <script>
     function toggleIncludeDeleted(gridId) {
         const checkbox = document.getElementById(`${gridId}-showDeleted`);
-        const url = new URL(window.location.href);
+        const currentUrl = window.location.pathname + window.location.search;
+        const url = new URL(currentUrl, window.location.origin);
+        
         if (checkbox && checkbox.checked) {
             url.searchParams.set('includeDeleted', '1');
         } else {
             url.searchParams.delete('includeDeleted');
         }
-        window.location.href = url.toString();
+        
+        // TabHost içindeyse tab reload, değilse normal navigation
+        if (window.ArchiX?.TabHost?.reloadCurrentTab) {
+            window.ArchiX.TabHost.reloadCurrentTab(url.pathname + url.search);
+        } else {
+            window.location.href = url.toString();
+        }
     }
 
     function openNewRecord(gridId, recordEndpoint) {
-        if (window.ArchiX?.TabHost?.openTab) {
-            window.ArchiX.TabHost.openTab({ 
-                url: recordEndpoint, 
-                title: 'Application (Yeni)' 
-            });
+        if (window.showRecordInAccordion) {
+            window.showRecordInAccordion(gridId, recordEndpoint, 'Yeni Application');
         } else {
             window.location.href = recordEndpoint;
         }

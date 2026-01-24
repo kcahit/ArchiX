@@ -1,0 +1,86 @@
+﻿@page "/Definitions/Application/Record"
+@model ArchiX.Library.Web.Pages.Definitions.Application.RecordModel
+@{
+    ViewData["Title"] = Model.IsNew ? "Yeni Application" : "Application Düzenle";
+    Layout = "~/Templates/Modern/Pages/Shared/_Layout.cshtml";
+}
+
+<div id="tab-main">
+<div class="container py-4">
+    <h1 class="h4 mb-3">@ViewData["Title"]</h1>
+
+    <form method="post">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+            
+        <div class="card">
+            <div class="card-body">
+                @if (!Model.IsNew)
+                {
+                    <input type="hidden" name="id" value="@Model.Application!.Id" />
+                }
+
+                    <div class="mb-3">
+                        <label asp-for="Form.Code" class="form-label">Kod</label>
+                        <input asp-for="Form.Code" class="form-control" />
+                        <span asp-validation-for="Form.Code" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Form.Name" class="form-label">Ad</label>
+                        <input asp-for="Form.Name" class="form-control" />
+                        <span asp-validation-for="Form.Name" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Form.DefaultCulture" class="form-label">Varsayılan Dil</label>
+                        <input asp-for="Form.DefaultCulture" class="form-control" />
+                        <span asp-validation-for="Form.DefaultCulture" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Form.TimeZoneId" class="form-label">Zaman Dilimi</label>
+                        <input asp-for="Form.TimeZoneId" class="form-control" />
+                        <span asp-validation-for="Form.TimeZoneId" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Form.Description" class="form-label">Açıklama</label>
+                        <textarea asp-for="Form.Description" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Form.Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        @if (Model.IsNew)
+                        {
+                            <button type="submit" asp-page-handler="Create" class="btn btn-primary">Kaydet</button>
+                        }
+                        else
+                        {
+                            <button type="submit" asp-page-handler="Update" class="btn btn-primary">Güncelle</button>
+
+                            @if (Model.Application?.Id != 1)
+                            {
+                                <button type="submit" asp-page-handler="Delete" class="btn btn-danger"
+                                        onclick="return confirm('ID @Model.Application?.Id numaralı kaydı silmek istediğinizden emin misiniz?')">Sil</button>
+                            }
+                        }
+
+                        <a href="/Definitions/Application" class="btn btn-secondary">Kapat</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        // Form submit'i intercept et (accordion içindeyse)
+        document.querySelector('form')?.addEventListener('submit', function(e) {
+            // Normal submit devam etsin, sadece success sonrası parent refresh
+            // Backend'den X-ArchiX-Reload-Parent header'ı gelirse sayfa reload olacak
+        });
+    </script>
+}

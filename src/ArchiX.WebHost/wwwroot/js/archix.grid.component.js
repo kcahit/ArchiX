@@ -141,16 +141,16 @@
 
             window.location.href = `/Tools/Dataset/Record?${qs.toString()}`;
         } else {
-            // Entity modunda (YENİ + TabHost uyumlu)
+            // Entity modunda: Accordion içinde aç
             const qs = new URLSearchParams();
             if (id !== undefined && id !== null && String(id).length > 0) qs.set('id', String(id));
 
             const url = `${recordEndpoint}?${qs.toString()}`;
-            const title = id ? `Application #${id}` : 'Application (Yeni)';
+            const title = id ? `Application #${id}` : 'Yeni Application';
 
-            // TabHost üzerinden açma
-            if (window.ArchiX?.TabHost?.openTab) {
-                window.ArchiX.TabHost.openTab({ url, title });
+            // Accordion içinde göster
+            if (window.showRecordInAccordion) {
+                window.showRecordInAccordion(tableId, url, title);
             } else {
                 // Fallback
                 window.location.href = url;
@@ -159,12 +159,37 @@
     }
 
     function deleteItem(tableId, id) {
-        if (confirm(`ID ${id} numaralı kaydı silmek istediğinizden emin misiniz?`)) {
-            const state = getState(tableId); if (!state) return;
-            const needle = String(id);
-            const index = state.data.findIndex(x => String(x?.id) === needle);
-            if (index > -1) state.data.splice(index, 1);
-            applyFilterPipeline(tableId);
+        const state = getState(tableId);
+        if (!state) return;
+        
+        const recordEndpoint = state?.recordEndpoint;
+        
+        if (!recordEndpoint) {
+            // Dataset modunda (client-side delete)
+            if (confirm(`ID ${id} numaralı kaydı silmek istediğinizden emin misiniz?`)) {
+                const needle = String(id);
+                const index = state.data.findIndex(x => String(x?.id) === needle);
+                if (index > -1) state.data.splice(index, 1);
+                applyFilterPipeline(tableId);
+            }
+        } else {
+            // Entity modunda: Backend'e soft delete isteği gönder
+            if (id === 1) {
+                alert('Sistem kaydı (ID=1) silinemez.');
+                return;
+            }
+            
+            if (confirm(`ID ${id} numaralı kaydı silmek istediğinizden emin misiniz?`)) {
+                // Record sayfasını accordion içinde aç → kullanıcı orada "Sil" butonuna basacak
+                // Ya da doğrudan backend'e DELETE isteği gönder (AJAX)
+                // Şimdilik record sayfasını açalım
+                if (window.showRecordInAccordion) {
+                    const url = `${recordEndpoint}?id=${id}`;
+                    window.showRecordInAccordion(tableId, url, `Application #${id}`);
+                } else {
+                    window.location.href = `${recordEndpoint}?id=${id}`;
+                }
+            }
         }
     }
 
@@ -376,4 +401,63 @@
     window.__archixGridGetState = window.__archixGridGetState || function (tableId) { return states[tableId]; };
     window.__archixGridRender = window.__archixGridRender || function (tableId) { render(tableId); };
     window.__archixGridApplyFilters = window.__archixGridApplyFilters || function (tableId) { applyFilterPipeline(tableId); };
+
+    // GridRecordAccordion support
+    function showRecordInAccordion(gridId, url, title) {
+        const accordionId = `grid-record-accordion-${gridId}`;
+        const contentId = `${accordionId}-content`;
+        const titleEl = document.getElementById(`${accordionId}-title`);
+        const contentEl = document.getElementById(contentId);
+        const accordionContainer = document.getElementById(accordionId);
+
+        if (!contentEl || !accordionContainer) return;
+
+        // Accordion container'ı görünür yap
+        accordionContainer.style.display = 'block';
+
+        // Başlık güncelle
+        if (titleEl) titleEl.textContent = title || 'Kayıt Detayı';
+
+        // Loading göster
+        contentEl.innerHTML = '<div class="text-center p-3"><div class="spinner-border" role="status"></div></div>';
+
+        // Accordion'u aç
+        const accordionBody = document.getElementById(`${accordionId}-body`);
+        if (accordionBody && window.bootstrap?.Collapse) {
+            const bsCollapse = window.bootstrap.Collapse.getOrCreateInstance(accordionBody);
+            bsCollapse.show();
+        }
+
+        // İçerik fetch et
+        fetch(url, {
+            headers: {
+                'X-ArchiX-Tab': '1',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(res => res.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const main = doc.querySelector('#tab-main') || doc.querySelector('.archix-work-area') || doc.querySelector('main');
+            contentEl.innerHTML = main ? main.innerHTML : html;
+
+            // Form script'lerini yeniden çalıştır
+            const scripts = contentEl.querySelectorAll('script');
+            scripts.forEach(oldScript => {
+                const newScript = document.createElement('script');
+                if (oldScript.src) {
+                    newScript.src = oldScript.src;
+                } else {
+                    newScript.textContent = oldScript.textContent;
+                }
+                oldScript.parentNode.replaceChild(newScript, oldScript);
+            });
+        })
+        .catch(err => {
+            contentEl.innerHTML = `<div class="alert alert-danger">Hata: ${err.message}</div>`;
+        });
+    }
+
+    window.showRecordInAccordion = showRecordInAccordion;
 })(window);

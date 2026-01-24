@@ -6,6 +6,12 @@
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     <RazorLangVersion>Latest</RazorLangVersion>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Templates\Modern\Pages\Definitions\**" />
+    <Content Remove="Templates\Modern\Pages\Definitions\**" />
+    <EmbeddedResource Remove="Templates\Modern\Pages\Definitions\**" />
+    <None Remove="Templates\Modern\Pages\Definitions\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ArchiX.Library\ArchiX.Library.csproj" />
@@ -23,8 +29,6 @@
   <ItemGroup>
     <Folder Include="Abstractions\Security\" />
     <Folder Include="Middleware\" />
-    <Folder Include="Templates\Modern\Pages\Definitions\" />
-    <Folder Include="ViewModels\Definitions\" />
     <Folder Include="Views\Shared\Components\LayoutMode\" />
     <Folder Include="wwwroot\images\" />
   </ItemGroup>

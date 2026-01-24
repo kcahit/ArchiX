@@ -8,15 +8,16 @@
 <div id="tab-main">
     <div id="@Model.Grid.Id-container" class="container py-4">
         <h1 class="h4 mb-3">Application Tanımları</h1>
+        
+        @* GridRecordAccordion: Grid üstünde accordion (başlangıçta kapalı) *@
+        @await Component.InvokeAsync("GridRecordAccordion", new ArchiX.Library.Web.ViewModels.Grid.GridRecordAccordionViewModel
+        {
+            Id = $"grid-record-accordion-{Model.Grid.Id}",
+            GridId = Model.Grid.Id ?? "appgrid",
+            IsOpen = false,
+            Title = "Kayıt Detayı"
+        })
+        
         @await Component.InvokeAsync("DatasetGrid", Model.Grid)
     </div>
 </div>
-
-<script>
-    (function() {
-        const gridState = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Grid, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }));
-        if (window.ArchiX?.Grid?.init) {
-            window.ArchiX.Grid.init(gridState.id, gridState);
-        }
-    })();
-</script>

@@ -1,0 +1,24 @@
+﻿@model ArchiX.Library.Web.ViewModels.Grid.GridRecordAccordionViewModel
+
+<div class="accordion mb-3" id="@Model.Id" style="display: none;">
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button @(Model.IsOpen ? "" : "collapsed")" 
+                    type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#@Model.Id-body" 
+                    aria-expanded="@(Model.IsOpen ? "true" : "false")">
+                <span id="@Model.Id-title">@Model.Title</span>
+            </button>
+        </h2>
+        <div id="@Model.Id-body" 
+             class="accordion-collapse collapse @(Model.IsOpen ? "show" : "")" 
+             data-bs-parent="#@Model.Id">
+            <div class="accordion-body">
+                <div id="@Model.Id-content" class="grid-record-content">
+                    <!-- İçerik buraya dinamik yüklenecek -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

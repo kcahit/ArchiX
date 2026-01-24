@@ -1218,7 +1218,27 @@
   window.ArchiX = window.ArchiX || {};
   window.ArchiX.TabHost = {
     init,
-    openTab
+    openTab,
+    reloadCurrentTab: function(newUrl) {
+      const h = ensureHost();
+      if (!h) return;
+      
+      const activeId = state.activeId;
+      if (!activeId) return;
+      
+      const detail = state.detailById.get(activeId);
+      if (!detail) return;
+      
+      // URL güncelle (opsiyonel)
+      const targetUrl = newUrl || detail.url;
+      detail.url = targetUrl;
+      
+      // Pane'i bul ve içeriği yeniden yükle
+      const pane = document.querySelector(`.tab-pane[data-tab-id="${activeId}"]`);
+      if (!pane) return;
+      
+      loadContent(targetUrl, pane, activeId, detail.title);
+    }
   };
 
   document.addEventListener('DOMContentLoaded', init);
