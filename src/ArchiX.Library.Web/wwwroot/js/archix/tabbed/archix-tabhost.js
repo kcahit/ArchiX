@@ -1220,27 +1220,51 @@
     init,
     openTab,
     reloadCurrentTab: async function(newUrl) {
+      console.log('[TabHost] reloadCurrentTab BAŞLADI');
+      
       const h = ensureHost();
-      if (!h) return;
+      if (!h) {
+        console.log('[TabHost] ERROR: ensureHost() null döndü');
+        return;
+      }
       
       const activeId = state.activeId;
-      if (!activeId) return;
+      console.log('[TabHost] Aktif tab ID:', activeId);
+      
+      if (!activeId) {
+        console.log('[TabHost] ERROR: activeId yok');
+        return;
+      }
       
       const detail = state.detailById.get(activeId);
-      if (!detail) return;
+      console.log('[TabHost] Aktif tab detail:', detail);
+      
+      if (!detail) {
+        console.log('[TabHost] ERROR: detail bulunamadı');
+        return;
+      }
       
       // URL güncelle (opsiyonel)
       const targetUrl = newUrl || detail.url;
+      console.log('[TabHost] Target URL:', targetUrl);
       detail.url = targetUrl;
       
       // Pane'i bul ve içeriği yeniden yükle
       const pane = document.querySelector(`.tab-pane[data-tab-id="${activeId}"]`);
-      if (!pane) return;
+      console.log('[TabHost] Pane bulundu:', !!pane);
+      
+      if (!pane) {
+        console.log('[TabHost] ERROR: Pane bulunamadı');
+        return;
+      }
       
       pane.innerHTML = '<div class="p-3 text-muted">Yenileniyor...</div>';
       
       try {
+        console.log('[TabHost] loadContent çağrılıyor:', targetUrl);
         const result = await loadContent(targetUrl);
+        console.log('[TabHost] loadContent sonuç:', result.ok, result.status);
+        
         if (!result.ok) {
           pane.innerHTML = `<div class="p-3"><div class="alert alert-danger">Yükleme hatası (${result.status}).</div></div>`;
           return;
@@ -1257,17 +1281,25 @@
           const doc = parser.parseFromString(html, 'text/html');
           const tabMain = doc.querySelector('#tab-main');
           if (tabMain) {
+            console.log('[TabHost] Extract: #tab-main bulundu');
             content = tabMain.innerHTML;
           } else {
             const workArea = doc.querySelector('.archix-work-area');
-            if (workArea) content = workArea.innerHTML;
+            if (workArea) {
+              console.log('[TabHost] Extract: .archix-work-area bulundu');
+              content = workArea.innerHTML;
+            } else {
+              console.log('[TabHost] Extract: fallback (body content)');
+            }
           }
         } catch { }
 
         pane.innerHTML = content;
+        console.log('[TabHost] Pane içeriği güncellendi');
 
         // Re-run scripts
         const scripts = pane.querySelectorAll('script');
+        console.log('[TabHost] Script sayısı:', scripts.length);
         scripts.forEach(oldScript => {
           const newScript = document.createElement('script');
           if (oldScript.src) {
@@ -1277,7 +1309,120 @@
           }
           oldScript.parentNode.replaceChild(newScript, oldScript);
         });
+        
+        console.log('[TabHost] reloadCurrentTab BİTTİ');
       } catch (err) {
+        console.error('[TabHost] ERROR:', err);
+        pane.innerHTML = `<div class="p-3"><div class="alert alert-danger">Hata: ${err.message}</div></div>`;
+      }
+    },
+    reloadTabById: async function(tabId, newUrl) {
+      console.log('[TabHost] reloadTabById BAŞLADI, tabId:', tabId);
+      
+      const h = ensureHost();
+      if (!h) {
+        console.log('[TabHost] ERROR: ensureHost() null döndü');
+        return;
+      }
+      
+      // Nested tab ID mi kontrol et (data-nested-tab-id)
+      let pane = document.querySelector(`.tab-pane[data-nested-tab-id="${CSS.escape(tabId)}"]`);
+      let detail = null;
+      let targetUrl = newUrl;
+      
+      if (pane) {
+        console.log('[TabHost] Nested tab bulundu (data-nested-tab-id)');
+        // Nested tab'lar state.detailById'de yok, URL'i parent group'tan alalım
+        // veya pane'in load'dan kalan URL'ini kullan (şimdilik newUrl kullanacağız)
+        if (!targetUrl) {
+          // Nested tab için URL bulunamadı - parent group'un child tab'ını bulup URL'ini al
+          console.log('[TabHost] Nested tab için URL null, parent group URL bulunuyor...');
+          // Fallback: Pane'in içindeki #tab-main veya workarea'nın data attribute'ünden URL alabilir misin?
+          // Şimdilik: Nested tab için URL zorunlu
+        }
+      } else {
+        // Normal tab (data-tab-id)
+        pane = document.querySelector(`.tab-pane[data-tab-id="${CSS.escape(tabId)}"]`);
+        detail = state.detailById.get(tabId);
+        console.log('[TabHost] Normal tab aranıyor (data-tab-id)');
+        console.log('[TabHost] Tab detail:', detail);
+        
+        if (!detail) {
+          console.log('[TabHost] ERROR: Tab detail bulunamadı (ID:', tabId, ')');
+          return;
+        }
+        
+        targetUrl = newUrl || detail.url;
+      }
+      
+      console.log('[TabHost] Target URL:', targetUrl);
+      console.log('[TabHost] Pane bulundu:', !!pane);
+      
+      if (!pane) {
+        console.log('[TabHost] ERROR: Pane bulunamadı (ID:', tabId, ')');
+        return;
+      }
+      
+      if (!targetUrl) {
+        console.log('[TabHost] ERROR: Target URL null (nested tab için URL gerekli)');
+        return;
+      }
+      
+      pane.innerHTML = '<div class="p-3 text-muted">Yenileniyor...</div>';
+      
+      try {
+        console.log('[TabHost] loadContent çağrılıyor:', targetUrl);
+        const result = await loadContent(targetUrl);
+        console.log('[TabHost] loadContent sonuç:', result.ok, result.status);
+        
+        if (!result.ok) {
+          pane.innerHTML = `<div class="p-3"><div class="alert alert-danger">Yükleme hatası (${result.status}).</div></div>`;
+          return;
+        }
+
+        const html = result.text;
+        let content = html;
+        const m = /<body[^>]*>([\s\S]*?)<\/body>/i.exec(html);
+        if (m && m[1]) content = m[1];
+
+        // Extract main content
+        try {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const tabMain = doc.querySelector('#tab-main');
+          if (tabMain) {
+            console.log('[TabHost] Extract: #tab-main bulundu');
+            content = tabMain.innerHTML;
+          } else {
+            const workArea = doc.querySelector('.archix-work-area');
+            if (workArea) {
+              console.log('[TabHost] Extract: .archix-work-area bulundu');
+              content = workArea.innerHTML;
+            } else {
+              console.log('[TabHost] Extract: fallback (body content)');
+            }
+          }
+        } catch { }
+
+        pane.innerHTML = content;
+        console.log('[TabHost] Pane içeriği güncellendi');
+
+        // Re-run scripts
+        const scripts = pane.querySelectorAll('script');
+        console.log('[TabHost] Script sayısı:', scripts.length);
+        scripts.forEach(oldScript => {
+          const newScript = document.createElement('script');
+          if (oldScript.src) {
+            newScript.src = oldScript.src;
+          } else {
+            newScript.textContent = oldScript.textContent;
+          }
+          oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
+        
+        console.log('[TabHost] reloadTabById BİTTİ');
+      } catch (err) {
+        console.error('[TabHost] ERROR:', err);
         pane.innerHTML = `<div class="p-3"><div class="alert alert-danger">Hata: ${err.message}</div></div>`;
       }
     },
