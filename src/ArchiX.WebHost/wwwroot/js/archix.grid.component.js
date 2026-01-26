@@ -3,6 +3,21 @@
 (function (window) {
     const states = {};
 
+    function getCsrfToken() {
+        const cookie = document.cookie.split('; ').find(x => x.startsWith('ax.af='));
+        if (cookie) {
+            return decodeURIComponent(cookie.substring('ax.af='.length));
+        }
+
+        // Fallback: meta tag (RequestVerificationToken)
+        const meta = document.querySelector('meta[name="RequestVerificationToken"]');
+        if (meta?.content) {
+            return meta.content;
+        }
+
+        return '';
+    }
+
     const escapeHtml = (value) => String(value ?? '')
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
@@ -88,7 +103,10 @@
     function encodeReturnContext(obj) {
         try {
             const json = JSON.stringify(obj);
-            return btoa(unescape(encodeURIComponent(json)));
+            // btoa() requires binary string, use TextEncoder for proper UTF-8 handling
+            const utf8Bytes = new TextEncoder().encode(json);
+            const binaryString = String.fromCharCode(...utf8Bytes);
+            return btoa(binaryString);
         } catch {
             return '';
         }
@@ -159,12 +177,21 @@
     }
 
     function deleteItem(tableId, id) {
+        console.log('[Grid deleteItem] ÇAĞRILDI - tableId:', tableId, 'id:', id);
+        
         const state = getState(tableId);
-        if (!state) return;
+        if (!state) {
+            console.error('[Grid deleteItem] State bulunamadı!');
+            return;
+        }
+        
+        console.log('[Grid deleteItem] State:', state);
+        console.log('[Grid deleteItem] recordEndpoint:', state.recordEndpoint);
         
         const recordEndpoint = state?.recordEndpoint;
         
         if (!recordEndpoint) {
+            console.log('[Grid deleteItem] recordEndpoint YOK - client-side delete');
             // Dataset modunda (client-side delete)
             if (confirm(`ID ${id} numaralı kaydı silmek istediğinizden emin misiniz?`)) {
                 const needle = String(id);
@@ -173,23 +200,81 @@
                 applyFilterPipeline(tableId);
             }
         } else {
-            // Entity modunda: Backend'e soft delete isteği gönder
+            console.log('[Grid deleteItem] recordEndpoint VAR - AJAX delete başlıyor');
+            
+            // Entity modunda: Backend'e AJAX soft delete isteği gönder
             if (id === 1) {
+                console.log('[Grid deleteItem] ID=1 silinemez');
                 alert('Sistem kaydı (ID=1) silinemez.');
                 return;
             }
             
-            if (confirm(`ID ${id} numaralı kaydı silmek istediğinizden emin misiniz?`)) {
-                // Record sayfasını accordion içinde aç → kullanıcı orada "Sil" butonuna basacak
-                // Ya da doğrudan backend'e DELETE isteği gönder (AJAX)
-                // Şimdilik record sayfasını açalım
-                if (window.showRecordInAccordion) {
-                    const url = `${recordEndpoint}?id=${id}`;
-                    window.showRecordInAccordion(tableId, url, `Application #${id}`);
-                } else {
-                    window.location.href = `${recordEndpoint}?id=${id}`;
-                }
+            if (!confirm(`ID ${id} numaralı kaydı silmek istediğinizden emin misiniz?`)) {
+                console.log('[Grid deleteItem] Kullanıcı iptal etti');
+                return; // Kullanıcı iptal etti
             }
+            
+            console.log('[Grid deleteItem] DELETE request başlıyor - ID:', id);
+            
+            // AJAX DELETE request
+            const formData = new FormData();
+            formData.append('id', id);
+
+            const headers = {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-ArchiX-Tab': '1'
+            };
+            const csrf = getCsrfToken();
+            if (csrf) {
+                headers['X-CSRF-TOKEN'] = csrf;
+                formData.append('__RequestVerificationToken', csrf);
+            }
+
+            fetch(`${recordEndpoint}?handler=Delete`, {
+                method: 'POST',
+                body: formData,
+                headers,
+                credentials: 'include' // CSRF cookie (ax.af) gönderilsin
+            })
+            .then(res => {
+                console.log('[Grid deleteItem] DELETE response:', res.status, res.ok);
+                
+                if (res.status === 404) {
+                    alert('Kayıt bulunamadı. Muhtemelen daha önce silinmiş.');
+                    // Grid'i yine de refresh et (silinmiş kayıt kaybolsun)
+                    if (window.refreshGrid) window.refreshGrid(tableId);
+                    return;
+                }
+                
+                if (!res.ok) {
+                    return res.text().then(text => {
+                        console.error('[Grid deleteItem] DELETE error response:', text);
+                        alert('Silme işlemi başarısız oldu.');
+                    });
+                }
+                
+                // Success: Grid'i refresh et (list page'den data çek)
+                console.log('[Grid deleteItem] DELETE başarılı - Grid refresh ediliyor...');
+
+                // recordEndpoint `/Definitions/Application/Record` → list page `/Definitions/Application`
+                const listUrl = typeof recordEndpoint === 'string'
+                    ? recordEndpoint.replace(/\/Record$/i, '')
+                    : undefined;
+
+                if (window.refreshGrid) {
+                    window.refreshGrid(tableId, listUrl).then(success => {
+                        if (!success) {
+                            console.warn('[Grid deleteItem] Grid refresh başarısız (fallback yok, tab kaybolmasın).');
+                        }
+                    });
+                } else {
+                    console.warn('[Grid deleteItem] refreshGrid fonksiyonu yok (fallback yok, tab kaybolmasın).');
+                }
+            })
+            .catch(err => {
+                console.error('[Grid deleteItem] DELETE request failed:', err);
+                alert('Silme işlemi sırasında bir hata oluştu: ' + err.message);
+            });
         }
     }
 
@@ -415,6 +500,90 @@
     window.__archixGridGetState = window.__archixGridGetState || function (tableId) { return states[tableId]; };
     window.__archixGridRender = window.__archixGridRender || function (tableId) { render(tableId); };
     window.__archixGridApplyFilters = window.__archixGridApplyFilters || function (tableId) { applyFilterPipeline(tableId); };
+
+    /**
+     * Refresh grid data from server (for CRUD operations)
+     * @param {string} tableId - Grid table ID
+     * @param {string} dataUrl - Optional data URL (defaults to current page)
+     */
+    window.refreshGrid = window.refreshGrid || function (tableId, dataUrl) {
+        const state = getState(tableId);
+        if (!state) {
+            console.warn('[Grid] refreshGrid: State not found for tableId:', tableId);
+            return Promise.reject(new Error('Grid state not found'));
+        }
+
+        console.log('[Grid] Refreshing grid:', tableId);
+
+        // Data URL: mevcut sayfa URL'i veya özel URL
+        const url = dataUrl || window.location.pathname + window.location.search;
+
+        return fetch(url, {
+            headers: {
+                'X-ArchiX-Tab': '1',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(res => {
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return res.text();
+        })
+        .then(html => {
+            console.log('[Grid] Response HTML alındı, parse ediliyor...');
+            
+            // Parse HTML ve #tab-main içinden grid data'sını extract et
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Script tag'lardan güncel data'yı al
+            const scripts = doc.querySelectorAll('script');
+            console.log('[Grid] Bulunan script sayısı:', scripts.length);
+            let newData = null;
+            
+            for (const script of scripts) {
+                const content = script.textContent || '';
+                // window.gridTables['tableId'] = { data: [...] } pattern'ini ara
+                const match = content.match(/window\.gridTables\s*\[\s*['"](.*?)['"]\s*\]\s*=\s*\{[\s\S]*?data:\s*(\[[\s\S]*?\]),/);
+                
+                if (match) {
+                    console.log('[Grid] Match bulundu - tableId:', match[1], 'aranan:', tableId);
+                }
+                
+                if (match && match[1] === tableId) {
+                    try {
+                        // JSON parse et
+                        console.log('[Grid] Parsing data...');
+                        newData = JSON.parse(match[2]);
+                        console.log('[Grid] Parsed new data:', newData.length, 'rows');
+                        break;
+                    } catch (e) {
+                        console.error('[Grid] Failed to parse grid data:', e);
+                    }
+                }
+            }
+
+            if (newData) {
+                // State'i güncelle
+                state.data = newData.map(row => ({ ...row }));
+                state.filteredData = newData.map(row => ({ ...row }));
+                
+                // Filtreleri yeniden uygula (mevcut filtreler korunur)
+                applyFilterPipeline(tableId);
+                
+                console.log('[Grid] Grid refreshed successfully');
+                return true;
+            } else {
+                console.warn('[Grid] Could not extract new data from response');
+                // Fallback: Sayfa reload (son çare)
+                return false;
+            }
+        })
+        .catch(err => {
+            console.error('[Grid] Refresh failed:', err);
+            return false;
+        });
+    };
+
 
     // GridRecordAccordion support
     function showRecordInAccordion(gridId, url, title) {

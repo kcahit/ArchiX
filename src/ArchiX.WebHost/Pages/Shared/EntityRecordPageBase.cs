@@ -67,60 +67,171 @@ public abstract class EntityRecordPageBase<TEntity, TFormModel> : PageModel
 
     public virtual async Task<IActionResult> OnPostCreateAsync(CancellationToken ct)
     {
-        if (!ModelState.IsValid)
+        try
         {
-            IsNew = true;
-            return Page();
+            Console.WriteLine($"[{EntityName}] OnPostCreateAsync BAŞLADI");
+            
+            if (!ModelState.IsValid)
+            {
+                Console.WriteLine($"[{EntityName}] ModelState INVALID");
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    Console.WriteLine($"[{EntityName}] Validation Error: {error.ErrorMessage}");
+                }
+                IsNew = true;
+                return Page();
+            }
+
+            var entity = new TEntity();
+            ApplyFormToEntity(Form, entity);
+
+            // TODO: Get real userId from HttpContext.User
+            entity.MarkCreated(userId: 1);
+            Db.Set<TEntity>().Add(entity);
+            
+            Console.WriteLine($"[{EntityName}] SaveChangesAsync çağrılıyor...");
+            var affected = await Db.SaveChangesAsync(ct);
+            Console.WriteLine($"[{EntityName}] SaveChangesAsync tamamlandı - {affected} satır etkilendi");
+
+            return HandlePostSuccessRedirect();
         }
-
-        var entity = new TEntity();
-        ApplyFormToEntity(Form, entity);
-
-        // TODO: Get real userId from HttpContext.User
-        entity.MarkCreated(userId: 1);
-        Db.Set<TEntity>().Add(entity);
-        await Db.SaveChangesAsync(ct);
-
-        return HandlePostSuccessRedirect();
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{EntityName}] OnPostCreateAsync EXCEPTION: {ex.GetType().Name} - {ex.Message}");
+            
+            // AJAX request ise JSON error döndür
+            if (Request.Headers.XRequestedWith == "XMLHttpRequest" || 
+                Request.Headers["X-ArchiX-Tab"] == "1")
+            {
+                return StatusCode(500, new { success = false, message = "Kayıt oluşturulurken bir hata oluştu." });
+            }
+            
+            // Normal request ise Error page'e yönlendir
+            throw; // Global exception handler yakalayacak
+        }
     }
 
     public virtual async Task<IActionResult> OnPostUpdateAsync([FromForm] int id, CancellationToken ct)
     {
-        if (!ModelState.IsValid)
+        try
         {
-            await OnGetAsync(id, ct);
-            return Page();
+            Console.WriteLine($"[{EntityName}] OnPostUpdateAsync BAŞLADI - ID: {id}");
+            
+            if (!ModelState.IsValid)
+            {
+                Console.WriteLine($"[{EntityName}] ModelState INVALID");
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    Console.WriteLine($"[{EntityName}] Validation Error: {error.ErrorMessage}");
+                }
+                await OnGetAsync(id, ct);
+                return Page();
+            }
+
+            var entity = await Db.Set<TEntity>().FirstOrDefaultAsync(e => e.Id == id, ct);
+            if (entity == null)
+            {
+                Console.WriteLine($"[{EntityName}] Entity NOT FOUND - ID: {id}");
+                
+                // AJAX request ise JSON döndür
+                if (Request.Headers.XRequestedWith == "XMLHttpRequest" || 
+                    Request.Headers["X-ArchiX-Tab"] == "1")
+                {
+                    return NotFound(new { success = false, message = "Kayıt bulunamadı." });
+                }
+                
+                return NotFound();
+            }
+
+            Console.WriteLine($"[{EntityName}] Entity bulundu - ID: {entity.Id}");
+            ApplyFormToEntity(Form, entity);
+
+            // TODO: Get real userId from HttpContext.User
+            entity.MarkUpdated(userId: 1);
+
+            Console.WriteLine($"[{EntityName}] SaveChangesAsync çağrılıyor...");
+            var affected = await Db.SaveChangesAsync(ct);
+            Console.WriteLine($"[{EntityName}] SaveChangesAsync tamamlandı - {affected} satır etkilendi");
+            
+            return HandlePostSuccessRedirect();
         }
-
-        var entity = await Db.Set<TEntity>().FirstOrDefaultAsync(e => e.Id == id, ct);
-        if (entity == null) return NotFound();
-
-        ApplyFormToEntity(Form, entity);
-
-        // TODO: Get real userId from HttpContext.User
-        entity.MarkUpdated(userId: 1);
-
-        await Db.SaveChangesAsync(ct);
-        return HandlePostSuccessRedirect();
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{EntityName}] OnPostUpdateAsync EXCEPTION: {ex.GetType().Name} - {ex.Message}");
+            
+            // AJAX request ise JSON error döndür
+            if (Request.Headers.XRequestedWith == "XMLHttpRequest" || 
+                Request.Headers["X-ArchiX-Tab"] == "1")
+            {
+                return StatusCode(500, new { success = false, message = "Kayıt güncellenirken bir hata oluştu." });
+            }
+            
+            // Normal request ise Error page'e yönlendir
+            throw; // Global exception handler yakalayacak
+        }
     }
 
     public virtual async Task<IActionResult> OnPostDeleteAsync([FromForm] int id, CancellationToken ct)
     {
-        if (id == 1)
+        try
         {
-            ModelState.AddModelError(string.Empty, $"Sistem kaydı (ID=1) silinemez.");
-            await OnGetAsync(id, ct);
-            return Page();
+            Console.WriteLine($"[{EntityName}] OnPostDeleteAsync BAŞLADI - ID: {id}");
+            
+            if (id == 1)
+            {
+                Console.WriteLine($"[{EntityName}] Sistem kaydı (ID=1) silinemez");
+                ModelState.AddModelError(string.Empty, $"Sistem kaydı (ID=1) silinemez.");
+                
+                // AJAX request ise JSON döndür
+                if (Request.Headers.XRequestedWith == "XMLHttpRequest" || 
+                    Request.Headers["X-ArchiX-Tab"] == "1")
+                {
+                    return BadRequest(new { success = false, message = "Sistem kaydı silinemez." });
+                }
+                
+                await OnGetAsync(id, ct);
+                return Page();
+            }
+
+            var entity = await Db.Set<TEntity>().FirstOrDefaultAsync(e => e.Id == id, ct);
+            if (entity == null)
+            {
+                Console.WriteLine($"[{EntityName}] Entity NOT FOUND - ID: {id} (muhtemelen zaten silinmiş)");
+                
+                // AJAX request ise 404 JSON döndür
+                if (Request.Headers.XRequestedWith == "XMLHttpRequest" || 
+                    Request.Headers["X-ArchiX-Tab"] == "1")
+                {
+                    return NotFound(new { success = false, message = "Kayıt bulunamadı. Muhtemelen daha önce silinmiş." });
+                }
+                
+                return NotFound();
+            }
+
+            Console.WriteLine($"[{EntityName}] Entity bulundu - ID: {entity.Id}, soft delete yapılıyor...");
+            // TODO: Get real userId from HttpContext.User
+            entity.SoftDelete(userId: 1);
+            
+            Console.WriteLine($"[{EntityName}] SaveChangesAsync çağrılıyor...");
+            var affected = await Db.SaveChangesAsync(ct);
+            Console.WriteLine($"[{EntityName}] SaveChangesAsync tamamlandı - {affected} satır etkilendi");
+
+            return HandlePostSuccessRedirect();
         }
-
-        var entity = await Db.Set<TEntity>().FirstOrDefaultAsync(e => e.Id == id, ct);
-        if (entity == null) return NotFound();
-
-        // TODO: Get real userId from HttpContext.User
-        entity.SoftDelete(userId: 1);
-        await Db.SaveChangesAsync(ct);
-
-        return HandlePostSuccessRedirect();
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{EntityName}] OnPostDeleteAsync EXCEPTION: {ex.GetType().Name} - {ex.Message}");
+            
+            // AJAX request ise JSON error döndür
+            if (Request.Headers.XRequestedWith == "XMLHttpRequest" || 
+                Request.Headers["X-ArchiX-Tab"] == "1")
+            {
+                return StatusCode(500, new { success = false, message = "Kayıt silinirken bir hata oluştu." });
+            }
+            
+            // Normal request ise Error page'e yönlendir
+            throw; // Global exception handler yakalayacak
+        }
     }
 
     /// <summary>
@@ -128,13 +239,17 @@ public abstract class EntityRecordPageBase<TEntity, TFormModel> : PageModel
     /// </summary>
     protected virtual IActionResult HandlePostSuccessRedirect()
     {
+        Console.WriteLine($"[{EntityName}] HandlePostSuccessRedirect - X-Requested-With: {Request.Headers.XRequestedWith}, X-ArchiX-Tab: {Request.Headers["X-ArchiX-Tab"]}");
+        
         // Accordion içinden çağrılmışsa sadece 200 OK dön (frontend reload yapacak)
-        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || 
+        if (Request.Headers.XRequestedWith == "XMLHttpRequest" || 
             Request.Headers["X-ArchiX-Tab"] == "1")
         {
+            Console.WriteLine($"[{EntityName}] AJAX request - OkResult döndürülüyor");
             return new OkResult();
         }
 
+        Console.WriteLine($"[{EntityName}] Normal request - RedirectToPage: {ListPageUrl}");
         return RedirectToPage(ListPageUrl);
     }
 }

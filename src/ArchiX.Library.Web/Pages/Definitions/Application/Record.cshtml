@@ -82,6 +82,13 @@
                 return;
             }
 
+            // ✅ FIX: Event listener zaten eklenmiş mi kontrol et
+            if (form.dataset.handlerAttached === 'true') {
+                console.log('[Record Form INIT] Handler zaten eklenmiş, atlanıyor');
+                return;
+            }
+            
+            form.dataset.handlerAttached = 'true';
             let isSubmitting = false;
 
             // Track form changes
@@ -107,15 +114,27 @@
 
                 const formData = new FormData(form);
                 const submitButton = e.submitter;
-                if (submitButton && submitButton.name) {
-                    formData.append(submitButton.name, submitButton.value || '');
-                }
-
-                // AJAX submit
-                console.log('[Record Form] Submit başlıyor...');
-                console.log('[Record Form] Aktif tab:', window.ArchiX?.TabHost?.getCurrentTabUrl?.());
                 
-                fetch(form.action || window.location.href, {
+                // ✅ FIX: Button'da formaction varsa direkt kullan
+                let targetUrl = form.action || window.location.pathname;
+                
+                if (submitButton) {
+                    // Razor asp-page-handler="Update" → HTML'de formaction="/path?handler=Update" olur
+                    if (submitButton.hasAttribute('formaction')) {
+                        targetUrl = submitButton.getAttribute('formaction');
+                        console.log('[Record Form] formaction bulundu:', targetUrl);
+                    }
+                    
+                    // FormData'ya button name/value ekle (gerekirse)
+                    if (submitButton.name) {
+                        formData.append(submitButton.name, submitButton.value || '');
+                    }
+                }
+                
+                console.log('[Record Form] Submit başlıyor...');
+                console.log('[Record Form] Target URL:', targetUrl);
+                
+                fetch(targetUrl, {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -126,74 +145,55 @@
                 .then(res => {
                     console.log('[Record Form] Response:', res.status, res.ok);
                     if (res.ok) {
-                        // Success: accordion'u kapat ve parent tab'ı reload et
+                        // Success: Accordion'u kapat
                         console.log('[Record Form] Success - accordion kapatılıyor...');
                         
-                        // Accordion'u kapat
                         const accordionBody = accordionEl.querySelector('.accordion-collapse');
                         if (accordionBody && window.bootstrap?.Collapse) {
                             const bsCollapse = window.bootstrap.Collapse.getInstance(accordionBody);
-                            if (bsCollapse) bsCollapse.hide();
+                            if (bsCollapse) {
+                                bsCollapse.hide();
+                            }
                         }
                         
-                        // Accordion'un içinde olduğu tab pane'i bul
-                        let parentPane = accordionEl.closest('.tab-pane[data-tab-id]');
-                        console.log('[Record Form] Parent pane bulundu:', !!parentPane);
+                        // Accordion'u gizle
+                        setTimeout(() => {
+                            accordionEl.style.display = 'none';
+                            form.reset();
+                            form.setAttribute('data-form-dirty', 'false');
+                        }, 300);
                         
-                        if (parentPane) {
-                            let tabId = parentPane.getAttribute('data-tab-id');
-                            console.log('[Record Form] Parent tab ID:', tabId);
-                            
-                            // Eğer group tab ise (g_ ile başlıyorsa), içindeki aktif child tab'ı bul
-                            if (tabId && tabId.startsWith('g_')) {
-                                console.log('[Record Form] Group tab tespit edildi, aktif child arıyor...');
-                                
-                                // Nested panes container'ı bul
-                                const nestedPanes = parentPane.querySelector('[data-archix-nested-panes]');
-                                console.log('[Record Form] Nested panes bulundu:', !!nestedPanes);
-                                
-                                if (nestedPanes) {
-                                    // Nested tab'lar data-nested-tab-id kullanıyor!
-                                    const activeChildPane = nestedPanes.querySelector('.tab-pane.active[data-nested-tab-id]');
-                                    console.log('[Record Form] Active child pane bulundu:', !!activeChildPane, activeChildPane);
-                                    
-                                    if (activeChildPane) {
-                                        const childTabId = activeChildPane.getAttribute('data-nested-tab-id');
-                                        console.log('[Record Form] Aktif child tab ID (nested):', childTabId);
-                                        tabId = childTabId;
-                                    } else {
-                                        console.log('[Record Form] WARNING: Active child yok, ilk child alınıyor...');
-                                        // Fallback: İlk nested tab-pane'i al
-                                        const firstPane = nestedPanes.querySelector('.tab-pane[data-nested-tab-id]');
-                                        if (firstPane) {
-                                            tabId = firstPane.getAttribute('data-nested-tab-id');
-                                            console.log('[Record Form] Fallback: İlk child tab ID:', tabId);
-                                        } else {
-                                            console.log('[Record Form] ERROR: Hiç nested tab-pane bulunamadı!');
-                                        }
-                                    }
-                                } else {
-                                    console.log('[Record Form] ERROR: Nested panes container bulunamadı!');
-                                }
-                            }
-                            
-                            // Bu tab'ın URL'ini bul ve reload et
-                            if (window.ArchiX?.TabHost?.reloadTabById) {
-                                console.log('[Record Form] reloadTabById() çağrılıyor...', tabId);
-                                // Nested tab için URL explicitly geç
-                                const reloadUrl = '/Definitions/Application';
-                                window.ArchiX.TabHost.reloadTabById(tabId, reloadUrl);
-                            } else {
-                                console.log('[Record Form] Fallback: pane içeriğini manuel yenile');
-                                window.location.href = '/Definitions/Application';
-                            }
-                        } else {
-                            console.log('[Record Form] ERROR: Parent pane bulunamadı, fallback redirect');
-                            window.location.href = '/Definitions/Application';
-                        }
+                        // Grid'i refresh et (reload DEĞİL - sadece data refresh)
+                console.log('[Record Form] Grid refresh ediliyor...');
+                const gridId = accordionEl.id.replace('grid-record-accordion-', '');
+                console.log('[Record Form] Grid ID:', gridId);
+
+                // List page URL: record endpoint'ten /Record'ı kaldır
+                let listUrl = window.location.pathname;
+                try {
+                    const u = new URL(targetUrl, window.location.origin);
+                    listUrl = u.pathname.replace(/\/Record$/i, '');
+                } catch {}
+                console.log('[Record Form] List URL:', listUrl);
+                
+                // Grid refresh fonksiyonu varsa çağır
+                if (window.refreshGrid && typeof window.refreshGrid === 'function') {
+                    console.log('[Record Form] refreshGrid() çağrılıyor...');
+                    window.refreshGrid(gridId, listUrl);
+                } else if (window[`refresh_${gridId}`]) {
+                    console.log('[Record Form] Grid-specific refresh fonksiyonu çağrılıyor...');
+                    window[`refresh_${gridId}`]();
+                } else {
+                    console.log('[Record Form] Grid refresh fonksiyonu yok - accordion kapatıldı, kullanıcı manuel refresh yapabilir');
+                    // NOT: window.location.reload() YAPMA - tüm tab'lar kaybolur!
+                    // Kullanıcı grid'in "Refresh" butonunu kullanabilir
+                }
+                        
+                        isSubmitting = false;
                     } else {
                         return res.text().then(html => {
                             // Validation error: show in accordion
+                            console.log('[Record Form] Validation error - accordion içeriği güncelleniyor');
                             isSubmitting = false;
                             const contentId = accordionEl.id.replace('grid-record-accordion-', '') + '-content';
                             const contentEl = document.getElementById(contentId);
@@ -201,7 +201,14 @@
                                 const parser = new DOMParser();
                                 const doc = parser.parseFromString(html, 'text/html');
                                 const main = doc.querySelector('#tab-main');
-                                if (main) contentEl.innerHTML = main.innerHTML;
+                                if (main) {
+                                    contentEl.innerHTML = main.innerHTML;
+                                    // ✅ YENİ: Inject edilen form'a handlerAttached ekle (double binding önleme)
+                                    const newForm = contentEl.querySelector('#recordForm');
+                                    if (newForm) {
+                                        newForm.dataset.handlerAttached = 'false'; // Script tekrar çalışacak
+                                    }
+                                }
                             }
                         });
                     }

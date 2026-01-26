@@ -58,44 +58,75 @@ public abstract class EntityListPageBase<TEntity> : PageModel where TEntity : Ba
 
     public async Task OnGetAsync([FromQuery] int? includeDeleted, CancellationToken ct)
     {
-        var query = GetQuery();
-
-        if (includeDeleted == 1)
+        try
         {
-            query = query.IgnoreQueryFilters();
-        }
+            var query = GetQuery();
 
-        var entities = await query.ToListAsync(ct);
-
-        var columns = GetColumns();
-        var rows = entities.Select(EntityToRow).ToList();
-
-        // Entity-specific delete button hiding (e.g., ApplicationId=1)
-        var hideDeleteForIds = entities.Where(ShouldHideDeleteButton).Select(e => e.Id).ToList();
-
-        Grid = new GridTableViewModel
-        {
-            Id = GridId,
-            Columns = columns,
-            Rows = rows,
-            ShowActions = true,
-            ShowToolbar = true,
-            HideDeleteForIds = hideDeleteForIds, // YENİ
-            Toolbar = new GridToolbarViewModel
+            if (includeDeleted == 1)
             {
-                TotalRecords = entities.Count,
-                IsFormOpenEnabled = 1,
-                RecordEndpoint = RecordEndpoint,
-                ShowDeletedToggle = true
+                query = query.IgnoreQueryFilters();
             }
-        };
+
+            var entities = await query.ToListAsync(ct);
+
+            var columns = GetColumns();
+            var rows = entities.Select(EntityToRow).ToList();
+
+            // Entity-specific delete button hiding (e.g., ApplicationId=1)
+            var hideDeleteForIds = entities.Where(ShouldHideDeleteButton).Select(e => e.Id).ToList();
+
+            Grid = new GridTableViewModel
+            {
+                Id = GridId,
+                Columns = columns,
+                Rows = rows,
+                ShowActions = true,
+                ShowToolbar = true,
+                HideDeleteForIds = hideDeleteForIds,
+                Toolbar = new GridToolbarViewModel
+                {
+                    TotalRecords = entities.Count,
+                    IsFormOpenEnabled = 1,
+                    RecordEndpoint = RecordEndpoint,
+                    ShowDeletedToggle = true
+                }
+            };
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[{EntityName}] OnGetAsync EXCEPTION: {ex.GetType().Name} - {ex.Message}");
+            
+            // Boş grid göster (kullanıcıya exception gösterme)
+            Grid = new GridTableViewModel
+            {
+                Id = GridId,
+                Columns = GetColumns(),
+                Rows = new List<Dictionary<string, object?>>(),
+                ShowActions = true,
+                ShowToolbar = true,
+                HideDeleteForIds = new List<int>(),
+                Toolbar = new GridToolbarViewModel
+                {
+                    TotalRecords = 0,
+                    IsFormOpenEnabled = 1,
+                    RecordEndpoint = RecordEndpoint,
+                    ShowDeletedToggle = true
+                }
+            };
+            
+            // ModelState'e hata ekle (kullanıcı görecek)
+            ModelState.AddModelError(string.Empty, "Veriler yüklenirken bir hata oluştu. Lütfen sayfayı yenileyin.");
+        }
     }
 
     /// <summary>
     /// Override to customize query (e.g., Include, Where).
+    /// Default behavior: Exclude soft-deleted records (StatusId != 6).
     /// </summary>
     protected virtual IQueryable<TEntity> GetQuery()
     {
-        return Db.Set<TEntity>().AsQueryable();
+        // BaseEntity'de StatusId property'si var
+        // Soft delete: StatusId = 6 (Deleted)
+        return Db.Set<TEntity>().Where(e => e.StatusId != 6);
     }
 }
