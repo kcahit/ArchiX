@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_NOTLAR", "_NOTLAR", "{8EC4
 	ProjectSection(SolutionItems) = preProject
 		docs\#17 Archix-Connection-CONTRIBUTING.md = docs\#17 Archix-Connection-CONTRIBUTING.md
 		docs\#32-Application-Tanim-Ekrani-V5.md = docs\#32-Application-Tanim-Ekrani-V5.md
+		docs\Debugging\application-record-accordion-issue.md = docs\Debugging\application-record-accordion-issue.md
 		.github\copilot-instructions.md = .github\copilot-instructions.md
 		docs\Yetki-Yonetimi.md = docs\Yetki-Yonetimi.md
 	EndProjectSection

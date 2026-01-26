@@ -1,9 +1,10 @@
 ﻿# Debug Log: Application Record Accordion Issue (#32)
 
-## Problem Tanımı
-- **Beklenen:** "Yeni Kayıt" butonu → Grid üstünde accordion expand + form içeride render
-- **Gözlenen:** "Yeni Kayıt" butonu → TabHost ile yeni tab açılıyor (eski davranış)
-- **Ekran:** Dashboard tab'ı açık, "Yeni Application" formu ayrı tab olarak render edilmiş
+## Problem Tanımı (GÜNCELLENDİ)
+- **Problem 1 (ÇÖZÜLDÜğü sanılmıştı):** "Yeni Kayıt" → Accordion'da açılıyordu ✅
+- **Problem 2 (YENİ):** Form submit → Dashboard tabının altında yanlış yerde render ediliyor ❌
+- **Problem 3:** "Kapat" butonu çalışmıyor ❌
+- **Problem 4:** Unsaved changes kontrolü yok ❌
 
 ## Denemeler
 
@@ -15,8 +16,26 @@
   - `openNewRecord()` güncellendi
   - Application.cshtml'de accordion component render edildi
 - Expected: "Yeni Kayıt" → accordion içinde form açılacak
-- Observed: TabHost ile yeni tab açıldı (screenshot mevcut)
-- F12 bulguları: (henüz alınmadı)
+- Observed: ✅ Accordion içinde açıldı (kullanıcı onayladı)
+
+### 2026-01-23 20:30 - Form Submit Fix + Unsaved Changes
+- Change:
+  1. `Record.cshtml`: Form'a AJAX submit eklendi
+     - Accordion içindeyse AJAX submit
+     - `X-Requested-With: XMLHttpRequest` header gönder
+     - Success → `window.ArchiX.TabHost.reloadCurrentTab()`
+  2. `EntityRecordPageBase.cs`: AJAX request tespiti düzeltildi
+     - `X-Requested-With` veya `X-ArchiX-Tab` header varsa `OkResult()` dön
+  3. `archix-tabhost.js`: `reloadCurrentTab()` async yap + düzelt
+     - `loadContent()` çağrısını düzelt (tek parametre)
+     - Pane'i manuel güncelle
+  4. `Record.cshtml`: Unsaved changes tracking ekle
+     - Form input'larda `data-form-dirty` flag
+     - `closeRecordForm()` → dirty kontrolü + confirm dialog
+- Expected:
+  - Form submit → Grid reload (doğru tabda)
+  - Kapat butonu → unsaved changes varsa confirm
+- Observed: (TEST EDİLECEK)
 
 ---
 
@@ -118,7 +137,345 @@ toggleIncludeDeleted('appgrid')
 
 ---
 
-## Sonraki Adım: KOD TEMİZLİĞİ
+## 13. SON FİX: reloadCurrentTab() Yeniden İmplementasyon
+
+### 2026-01-23 19:30 - Kök Neden: loadContent() Signature Hatası
+- Change: `reloadCurrentTab()` → `openTab()` mantığıyla yeniden yazıldı
+  - `loadContent(url)` sadece fetch yapıyor, pane inject etmiyor
+  - `openTab()` içinde `loadContent()` + `pane.innerHTML` + script re-execute yapılıyor
+  - `reloadCurrentTab()` aynı mantığı kopyaladı (async function, DOMParser, extract chain)
+- Expected: Checkbox tıkla → Backend'e request (`?includeDeleted=1`) → StatusId=6 kayıtlar gelsin
+- Observed: (MANUEL TEST BEKLENİYOR)
+
+**Kök Neden (Kod İncelemesinden):**
+- `reloadCurrentTab()` → `loadContent(targetUrl, pane, activeId, detail.title)` şeklinde çağrılıyordu
+- Ama `loadContent(url)` fonksiyonu sadece 1 parametre alıyor!
+- Fazla parametreler ignore ediliyordu → pane'e content inject edilmiyordu
+- `openTab()` mantığında:
+  1. `const result = await loadContent(url);` → fetch
+  2. `pane.innerHTML = ...` → inject
+  3. Scripts re-execute
+- Bu mantık `reloadCurrentTab()` içine kopyalandı
+
+**Fix:**
+- `reloadCurrentTab()` → async function
+- `loadContent()` → sadece fetch
+- Pane inject + extract chain + script re-execute logic eklendi
+
+---
+
+## Manuel Test (13. DENEME - KRİTİK)
+
+**Uygulama DURDUR + Rebuild + Başlat:**
+1. VS → Shift+F5
+2. Rebuild Solution (veya `dotnet clean` + `dotnet build`)
+3. F5 (Start)
+4. `/Definitions/Application` aç
+
+**Test Adımları:**
+1. "Silinmişleri Göster" checkbox tıkla
+2. **SQL Profiler** kontrol et → Transaction VAR MI? ✅/❌
+3. Grid'de StatusId=6 kayıtlar görünüyor mu? ✅/❌
+4. Network tab → Request URL: `/Definitions/Application?includeDeleted=1` ✅/❌
+5. Tab içinde refresh mi, Dashboard'a yönlendirme mi? (tab içinde olmalı) ✅/❌
+
+### 2026-01-23 19:35 - Test Sonucu: Dashboard içeriği geldi
+- Observed: ❌ "Definitions" tab'ı Dashboard içeriğini gösterdi (Weekly Sales, Today Order kartları)
+- Change: Console debug log'ları eklendi
+  - `toggleIncludeDeleted()` → tüm değişkenler + URL'ler log'lanıyor
+  - `reloadCurrentTab()` → activeId, oldUrl, newUrl, targetUrl log'lanıyor
+  - `loadContent()` → fetch URL log'lanıyor
+
+**Kök Neden (kullanıcı tespit etti):**
+- URL bar `/Dashboard` gösteriyor → **DOĞRU** (TabHost ana sayfa, değişmeyecek)
+- Tab adı "Definitions" → içinde `/Definitions/Application` gösterilmeli
+- `toggleIncludeDeleted()` → `window.location.search` kullanıyordu (boş string) → **YANLIŞ!**
+- Tab URL'in query string'ini almalı
+
+### 2026-01-23 19:40 - FIX: Tab URL Query String
+- Change: `toggleIncludeDeleted()` → `getCurrentTabUrl()` **tam URL** alıyor (pathname + search)
+  - `new URL(tabUrl, origin)` → URLSearchParams oluşturuluyor
+  - `window.location.search` yerine `urlObj.search` kullanılıyor
+- Expected: Checkbox tıkla → `/Definitions/Application?includeDeleted=1` fetch edilecek
+- Observed: (MANUEL TEST BEKLENİYOR)
+
+**Fix:**
+```javascript
+// ÖNCE (YANLIŞ):
+const params = new URLSearchParams(window.location.search); // boş!
+
+// SONRA (DOĞRU):
+let currentFullUrl = window.location.pathname + window.location.search;
+if (window.ArchiX?.TabHost?.getCurrentTabUrl) {
+    const tabUrl = window.ArchiX.TabHost.getCurrentTabUrl();
+    if (tabUrl) currentFullUrl = tabUrl;
+}
+const urlObj = new URL(currentFullUrl, window.location.origin);
+const params = new URLSearchParams(urlObj.search);
+```
+
+### 2026-01-23 19:50 - Test Sonucu: getCurrentTabUrl() NULL Döndü
+- Observed: Console log → **`getCurrentTabUrl() returned: null`** ← KÖK NEDEN!
+- Change: `getCurrentTabUrl()` içine debug log eklendi:
+  - `state.activeId` log
+  - `state.detailById` size log
+  - `state.tabs` array log
+- Expected: Console'da detay göreceğiz:
+  - `activeId` null mı?
+  - `detailById` boş mu?
+  - Tab hiç açılmamış mı?
+
+**Analiz:**
+- `getCurrentTabUrl()` null → `state.activeId` null VEYA `state.detailById.get(activeId)` undefined
+- Bu demek ki TabHost içinde "Application" tab'ı state'e kaydedilmemiş
+- Ya da sidebar'dan tıklama TabHost.openTab() çağırmıyor
+
+**Hipotez:**
+Sidebar link'ler `openTab()` çağırmıyor, doğrudan navigation yapıyor olabilir (TabHost bypass).
+
+### 2026-01-23 20:00 - KÖK NEDEN: Grup Tab Aktif (Nested Tab URL'i Alınmamış)
+- Observed: Console log → **`activeId: g_Definitions`** ← GRUP TAB!
+  - `state.detailById.get('g_Definitions')` → `detail.url` undefined (grup tab'ların URL'i yok)
+  - `getCurrentTabUrl()` → grup tab'ın URL'ini döndürmeye çalışıyor (null)
+- Change: `getCurrentTabUrl()` → **nested tab URL'ini almak için fix**
+  - Grup tab tespiti: `detail.isGroup === true`
+  - Grup pane içindeki aktif nested tab'ı bul: `[data-nested-tab-id]`
+  - Nested tab'ın detail'ini `state.detailById` den al
+  - Nested tab'ın URL'ini döndür
+- Expected: Checkbox tıkla → `/Definitions/Application?includeDeleted=1` fetch edilecek
+- Observed: (MANUEL TEST BEKLENİYOR - build iptal edildi)
+
+**Kök Neden:**
+- Sidebar'dan "Definitions" → "Application" tıklandığında:
+  1. "Definitions" grup tab'ı açılıyor (`g_Definitions`)
+  2. İçinde "Application" nested tab açılıyor
+  3. `state.activeId = 'g_Definitions'` (grup tab aktif)
+  4. `getCurrentTabUrl()` → grup tab'ın URL'i yok → **null**
+- Fix: Grup tab aktifse, nested host içindeki **aktif child tab'ın URL'ini** al
+
+**Fix Kodu:**
+```javascript
+// Grup tab ise, nested aktif tab'ı bul
+if (detail && detail.isGroup) {
+  const groupPane = document.querySelector(`.tab-pane[data-tab-id="${activeId}"]`);
+  const activeNestedLink = groupPane?.querySelector('[data-archix-nested-tabs] .nav-link.active[data-nested-tab-id]');
+  const nestedTabId = activeNestedLink?.getAttribute('data-nested-tab-id');
+  const nestedDetail = state.detailById.get(nestedTabId);
+  return nestedDetail?.url || null;
+}
+```
+
+### 2026-01-23 20:05 - YENİ SORUN: Script'ler Çalışmıyor
+- Observed: Console'da 2 kritik hata:
+  1. **`toggleIncludeDeleted is not defined`** ← Fonksiyon bulunamadı
+  2. **`__archixGridGetState is not a function`** ← Grid JS yüklenmemiş
+- Change: (henüz yapılmadı)
+- Expected: Script'ler tab reload'da re-execute edilmeli
+
+**Analiz:**
+- `reloadCurrentTab()` içinde script re-execute mantığı var (line 1304-1314)
+- Ama `pane.querySelectorAll('script')` boş döndüğü için çalışmıyor
+- Muhtemelen extract chain sırasında script'ler kesilmiş
+- Ya da `#tab-main` / `.archix-work-area` extract edilirken script tag'leri DOM'da kalmamış
+
+**Hipotezler:**
+1. Backend `_Layout.cshtml` içinde `<script src="archix.grid.component.js">` head/body'de ama extract edilen kısımda yok
+2. TabHost extract logic script tag'leri ignore ediyor
+3. GridToolbar `<script>` inline tag'i extract edilmiyor
+
+**Sonraki Adım:** Backend'de `X-ArchiX-Tab: 1` header geldiğinde hangi script'lerin render edildiğini kontrol et
+
+### 2026-01-23 20:10 - BUILD BAŞARILI
+- Change: `getCurrentTabUrl()` grup tab mantığı eklendi + build yapıldı
+- Expected: Uygulama başlatılacak, test edilecek
+- Observed: (MANUEL TEST BEKLENİYOR)
+
+**Build Durumu:**
+- ✅ ArchiX.Library.Web build başarılı
+- ✅ ArchiX.WebHost build başarılı (2 warning - EntityListPageBase duplicate)
+- ✅ JS dosyaları kopyalandı (CopyToHost)
+
+**Test Talimatları:**
+1. **Uygulamayı BAŞLAT** (Shift+F5 sonra F5)
+2. **F12 → Console** aç
+3. Sidebar → **"Application"** tıkla
+4. Console'da **`getCurrentTabUrl()`** log'larını kontrol et:
+   - `activeId is a GROUP TAB` görünüyor mu?
+   - `found nested active tab ID` görünüyor mu?
+   - `returning nested tab URL: /Definitions/Application` görünüyor mu?
+5. **"Silinmişleri Göster"** checkbox tıkla
+6. Console'da:
+   - `toggleIncludeDeleted is not defined` HALA VAR MI?
+   - `Final newUrl: /Definitions/Application?includeDeleted=1` görünüyor mu?
+7. Grid refresh oldu mu? StatusId=6 kayıtlar geldi mi?
+
+**SONUÇ BURAYA YAZILACAK (kullanıcı test edecek):**
+
+### 2026-01-23 20:15 - DETAYLI DEBUG LOG EKLENDİ + BUILD
+- Change: `getCurrentTabUrl()` içinde KAPSAMLI log eklendi:
+  - `detail.isGroup` kontrolü log'lanıyor
+  - `activeId.startsWith('g_')` kontrolü eklendi (fallback)
+  - `groupPane found` kontrolü
+  - `activeNestedLink found` kontrolü
+  - `nestedTabId` değeri
+  - `nestedDetail.url` değeri
+  - Her adımda log var
+- Expected: Console'da hangi adımda takıldığı net görünecek
+- Observed: (MANUEL TEST BEKLENİYOR)
+
+**YAPILANLAR:**
+1. Build tamamlandı (5.7s)
+2. `getCurrentTabUrl()` → grup tab kontrolü 2 şekilde: `activeId.startsWith('g_')` VEYA `detail.isGroup === true`
+3. Her adım debug log'lanıyor
+
+### 2026-01-23 20:20 - KÖK NEDEN BULUNDU: Nested Tab State'e Kaydedilmemiş!
+- Observed: Console log → **`nestedDetail: undefined`** ← KÖK NEDEN!
+  - `nestedTabId: t_a2zsyfk7Wksa631s` bulundu
+  - AMA `state.detailById.get(nestedTabId)` → undefined
+  - Nested tab açılırken `state.detailById.set()` çağrılmamış!
+- Change: `openInGroupTab()` fonksiyonuna **`state.detailById.set(childId, ...)` eklendi**
+  - Nested tab oluşturulduğunda state'e kaydediliyor (url, title, timestamp)
+  - Console log eklendi: "Nested tab registered"
+- Expected: `getCurrentTabUrl()` → nested tab URL'ini bulacak → `/Definitions/Application`
+- Observed: **MANUEL TEST BEKLENİYOR - kullanıcı mola verdi**
+
+**Kök Neden:**
+- Nested tab DOM'da oluşturuluyor (line 427-450)
+- AMA `state.detailById` Map'ine kayıt yapılmıyordu
+- `getCurrentTabUrl()` → `state.detailById.get(nestedTabId)` → undefined
+- Fix: `state.detailById.set(childId, { url, title, ... })` eklendi
+
+**Fix Kodu:**
+```javascript
+// Line 452 sonrası eklendi:
+state.detailById.set(childId, {
+  id: childId,
+  url: url,
+  title: childTitle,
+  openedAt: Date.now(),
+  lastActivatedAt: Date.now(),
+  isDirty: false,
+  warnedAt: null,
+  isPinned: false,
+  isGroup: false,
+  parentGroupId: groupId
+});
+```
+
+**Build Durumu:**
+- ✅ ArchiX.Library.Web build başarılı (2.2s)
+- ✅ ArchiX.WebHost build başarılı (1.5s)
+- ✅ JS dosyaları kopyalandı
+
+**SONRAKİ TEST ADIMLARI (kullanıcı döndüğünde):**
+1. **Shift+F5** (durdur)
+2. **F5** (başlat)
+3. F12 → Console aç
+4. Sidebar → "Application" tıkla
+5. Console'da:
+   - `[DEBUG] Nested tab registered in state.detailById:` görünecek mi?
+   - `[DEBUG] nestedDetail.url:` `/Definitions/Application` görünecek mi?
+6. **"Silinmişleri Göster"** checkbox tıkla
+7. Console'da:
+   - `[DEBUG] Final newUrl:` `/Definitions/Application?includeDeleted=1` görünecek mi?
+   - `Fetching URL:` `/Definitions/Application?includeDeleted=1` görünecek mi?
+8. ✅/❌ Grid refresh oldu mu?
+9. ✅/❌ StatusId=6 kayıtlar geldi mi?
+
+---
+
+## YENİ İŞ: FORM BAŞLIKLARI VE INPUT YÜKSEKLİĞİ DÜZENLEMESİ
+
+### 2026-01-23 20:30 - Form Başlıkları Silindi + Input Yüksekliği Azaltıldı
+- Change: 
+  1. **Form başlığı silindi (Record):** `Record.cshtml` içindeki `<h1>@ViewData["Title"]</h1>` kaldırıldı
+  2. **Form başlığı silindi (Liste):** `Application.cshtml` içindeki `<h1>Application Tanımları</h1>` kaldırıldı
+  3. **Form input yüksekliği 1/3 azaltıldı:** `form.css` içinde `padding: 12px → 8px` (vertical)
+  4. **Label → Input mesafesi azaltıldı:** `margin-bottom: 8px → 4px` (daha yakın)
+  5. **Textarea yüksekliği 1/3 azaltıldı:** `min-height: 100px → 66px`
+  6. **`.input-group-text` padding'i de azaltıldı:** Tutarlılık için aynı değişiklik
+- Expected: 
+  - Liste ve form sayfalarında başlık görünmeyecek
+  - Tüm input'lar (text, select, textarea) daha kısa görünecek
+  - Label'lar input'lara daha yakın
+  - Bu değişiklik **TÜM FORMLARDA** geçerli (sistem geneli)
+- Observed: ✅ Build başarılı (9.7s)
+
+**Değiştirilen Dosyalar:**
+1. `src/ArchiX.Library.Web/Pages/Definitions/Application.cshtml` 
+   - Line 10: `<h1 class="h4 mb-3">Application Tanımları</h1>` silindi
+2. `src/ArchiX.Library.Web/Pages/Definitions/Application/Record.cshtml` 
+   - Line 10: `<h1 class="h4 mb-3">@ViewData["Title"]</h1>` silindi
+3. `src/ArchiX.Library.Web/wwwroot/css/modern/05-pages/form.css`
+   - Line 10: `.form-control, .form-select` → `padding: 8px 15px` (12px'ten azaltıldı)
+   - Line 50: `.form-label` → `margin-bottom: 4px` (8px'ten azaltıldı)
+   - Line 73: `.input-group-text` → `padding: 8px 15px` (12px'ten azaltıldı)
+   - Line 259: `textarea.form-control` → `min-height: 66px` (100px'ten azaltıldı)
+
+**Test Talimatları:**
+1. F5 (uygulamayı başlat)
+2. Sidebar → Application 
+3. Grid sayfasında:
+   - ✅ "Application Tanımları" başlığı yok mu?
+4. Grid'den bir kayda tıkla (İncele/Düzenle):
+   - ✅ Form başlığı yok mu? (sadece input'lar görünüyor)
+   - ✅ Input'lar daha kısa mı? (öncekine göre 1/3 azalış)
+   - ✅ Label'lar input'lara daha yakın mı?
+   - ✅ Textarea (Açıklama alanı) daha kısa mı?
+
+### 2026-01-23 20:35 - SONRA YAPILACAK: Dinamik Form Alanları
+- Expected: Form alanları property tipine göre otomatik render:
+  - `bool` → checkbox
+  - `DateTime` → datetime-local input
+  - `int`, `decimal` → number input
+  - `string` (uzun) → textarea
+  - `string` (kısa) → text input
+  - `enum` → select dropdown
+
+**Plan:**
+1. `EntityRecordPageBase<TEntity, TFormModel>` içinde `GetFormFields()` method
+2. Reflection ile TFormModel property'leri + DataAnnotations okuma
+3. Partial View: `_FormFieldRenderer.cshtml` (tip bazlı render)
+4. Record.cshtml → `@await Html.PartialAsync("_FormFieldRenderer", Model.FormFields)`
+
+**Bu özellik daha sonra implement edilecek** (kullanıcı onayı gerekli)
+
+### 2026-01-23 20:40 - Form Etrafındaki Boşluk Yarıya İndirildi
+- Change:
+  1. **Record formu:** `container py-4` → `container py-2` (üst-alt padding yarıya indi)
+  2. **Liste sayfası:** Aynı değişiklik (tutarlılık için)
+  3. **Textarea rows:** `rows="3"` → `rows="2"` (Record.cshtml)
+  4. **Textarea min-height:** `66px` → `50px` (form.css)
+- Expected: Form ve grid sayfalarında etrafındaki boşluk yarıya inecek
+- Observed: ✅ Build başarılı (5.0s)
+
+**Değiştirilen Dosyalar:**
+1. `src/ArchiX.Library.Web/Pages/Definitions/Application/Record.cshtml`
+   - `container py-4` → `container py-2`
+   - `<textarea rows="3">` → `<textarea rows="2">`
+2. `src/ArchiX.Library.Web/Pages/Definitions/Application.cshtml`
+   - `container py-4` → `container py-2`
+3. `src/ArchiX.Library.Web/wwwroot/css/modern/05-pages/form.css`
+   - `textarea.form-control` → `min-height: 50px`
+
+**Test:**
+- F5 → Application → Grid aç
+- ✅ Üst-alt boşluk yarıya inmiş mi?
+- Record formu aç
+- ✅ Üst-alt boşluk yarıya inmiş mi?
+- ✅ Textarea daha kısa mı?
+
+---
+
+## ÖNCEKİ ÇALIŞMALAR (İPTAL EDİLDİ)
+
+Aşağıdaki tüm çalışmalar GERİ ALINDI:
+- `toggleIncludeDeleted()` fonksiyonu debug log'ları
+- `reloadCurrentTab()` async + extract logic
+- `getCurrentTabUrl()` grup tab mantığı
+- Nested tab `state.detailById.set()` fix'i
+
+Bu özellik tekrar gerekirse SIFIRDAN başlanacak.
 Gereksiz debug log'lar, yarım kodlar temizlenecek.
 
 **Network Tab (gerekli):**

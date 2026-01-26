@@ -6,10 +6,8 @@
 }
 
 <div id="tab-main">
-<div class="container py-4">
-    <h1 class="h4 mb-3">@ViewData["Title"]</h1>
-
-    <form method="post">
+<div class="container py-1">
+    <form method="post" id="recordForm" data-form-dirty="false">
         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
             
         <div class="card">
@@ -45,7 +43,7 @@
 
                     <div class="mb-3">
                         <label asp-for="Form.Description" class="form-label">Açıklama</label>
-                        <textarea asp-for="Form.Description" class="form-control" rows="3"></textarea>
+                        <textarea asp-for="Form.Description" class="form-control" rows="2"></textarea>
                         <span asp-validation-for="Form.Description" class="text-danger"></span>
                     </div>
 
@@ -77,20 +75,99 @@
     <partial name="_ValidationScriptsPartial" />
     
     <script>
-        function closeRecordForm() {
-            const accordionEl = document.querySelector('.accordion[id^="grid-record-accordion"]');
-            if (accordionEl) {
-                const accordionBody = accordionEl.querySelector('.accordion-collapse');
-                if (accordionBody && window.bootstrap?.Collapse) {
-                    const bsCollapse = window.bootstrap.Collapse.getInstance(accordionBody);
-                    if (bsCollapse) {
-                        bsCollapse.hide();
-                        setTimeout(() => { accordionEl.style.display = 'none'; }, 300);
-                        return;
+        (function() {
+            const form = document.getElementById('recordForm');
+            if (!form) return;
+
+            let originalValues = new FormData(form);
+            let isSubmitting = false;
+
+            // Track form changes
+            form.addEventListener('input', function() {
+                form.setAttribute('data-form-dirty', 'true');
+            });
+
+            // Intercept form submit for AJAX (accordion içindeyse)
+            form.addEventListener('submit', function(e) {
+                const accordionEl = document.querySelector('.accordion[id^="grid-record-accordion"]');
+                if (!accordionEl || !accordionEl.style.display || accordionEl.style.display === 'none') {
+                    return; // Normal submit (standalone page)
+                }
+
+                e.preventDefault();
+                isSubmitting = true;
+
+                const formData = new FormData(form);
+                const submitButton = e.submitter;
+                if (submitButton && submitButton.name) {
+                    formData.append(submitButton.name, submitButton.value || '');
+                }
+
+                // AJAX submit
+                fetch(form.action || window.location.href, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-ArchiX-Tab': '1'
+                    }
+                })
+                .then(res => {
+                    if (res.ok) {
+                        // Success: reload grid
+                        if (window.ArchiX?.TabHost?.reloadCurrentTab) {
+                            window.ArchiX.TabHost.reloadCurrentTab();
+                        } else {
+                            window.location.href = '/Definitions/Application';
+                        }
+                    } else {
+                        return res.text().then(html => {
+                            // Validation error: show in accordion
+                            const contentId = accordionEl.id.replace('grid-record-accordion-', '') + '-content';
+                            const contentEl = document.getElementById(contentId);
+                            if (contentEl) {
+                                const parser = new DOMParser();
+                                const doc = parser.parseFromString(html, 'text/html');
+                                const main = doc.querySelector('#tab-main');
+                                if (main) contentEl.innerHTML = main.innerHTML;
+                            }
+                        });
+                    }
+                })
+                .catch(err => {
+                    alert('Kayıt hatası: ' + err.message);
+                    isSubmitting = false;
+                });
+            });
+
+            window.closeRecordForm = function() {
+                if (isSubmitting) return;
+
+                const isDirty = form.getAttribute('data-form-dirty') === 'true';
+                
+                if (isDirty) {
+                    const result = confirm('Değişiklikler kaydedilmedi. Formu kapatmak istediğinize emin misiniz?');
+                    if (!result) return;
+                }
+
+                const accordionEl = document.querySelector('.accordion[id^="grid-record-accordion"]');
+                if (accordionEl) {
+                    const accordionBody = accordionEl.querySelector('.accordion-collapse');
+                    if (accordionBody && window.bootstrap?.Collapse) {
+                        const bsCollapse = window.bootstrap.Collapse.getInstance(accordionBody);
+                        if (bsCollapse) {
+                            bsCollapse.hide();
+                            setTimeout(() => { 
+                                accordionEl.style.display = 'none';
+                                form.reset();
+                                form.setAttribute('data-form-dirty', 'false');
+                            }, 300);
+                            return;
+                        }
                     }
                 }
-            }
-            window.location.href = '/Definitions/Application';
-        }
+                window.location.href = '/Definitions/Application';
+            };
+        })();
     </script>
 }

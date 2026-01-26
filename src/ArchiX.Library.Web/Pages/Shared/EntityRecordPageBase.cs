@@ -128,11 +128,11 @@ public abstract class EntityRecordPageBase<TEntity, TFormModel> : PageModel
     /// </summary>
     protected virtual IActionResult HandlePostSuccessRedirect()
     {
-        // Accordion içinden çağrılmışsa parent'ı refresh et
-        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        // Accordion içinden çağrılmışsa sadece 200 OK dön (frontend reload yapacak)
+        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || 
+            Request.Headers["X-ArchiX-Tab"] == "1")
         {
-            Response.Headers["X-ArchiX-Reload-Parent"] = "1";
-            return Content("<script>if(window.parent){window.parent.location.reload();}</script>", "text/html");
+            return new OkResult();
         }
 
         return RedirectToPage(ListPageUrl);
