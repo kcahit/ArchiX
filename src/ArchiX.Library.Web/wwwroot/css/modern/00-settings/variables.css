@@ -9,6 +9,9 @@
     --primary-color: #667eea;
     --secondary-color: #764ba2;
     --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    /* Alias/fallbacks for existing components */
+    --gradient-primary: var(--primary-gradient);
+    --color-primary-rgb: 102, 126, 234;
     
     --success-color: #28a745;
     --danger-color: #dc3545;

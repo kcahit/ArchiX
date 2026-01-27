@@ -53,7 +53,7 @@
 
         @if (!string.IsNullOrWhiteSpace(Model.RecordEndpoint) && Model.IsFormOpenEnabled == 1)
         {
-            <button class="btn btn-success btn-sm ms-2" onclick="openNewRecord('@Model.Id', '@Model.RecordEndpoint')">
+            <button id="@Model.Id-newRecordBtn" class="btn btn-success btn-sm ms-2" onclick="openNewRecord('@Model.Id', '@Model.RecordEndpoint')">
                 <i class="bi bi-plus-circle me-1"></i> Yeni Kayıt
             </button>
         }

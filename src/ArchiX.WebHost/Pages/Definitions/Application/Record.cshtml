@@ -7,6 +7,35 @@
 
 <div id="tab-main">
 <div class="container py-1">
+    <style>
+        /* Button visibility & sizing (page-specific) */
+        #tab-main .btn-primary {
+            --bs-btn-bg: var(--bs-primary);
+            --bs-btn-border-color: var(--bs-primary);
+            --bs-btn-color: #fff;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
+        #tab-main .record-form-actions .btn {
+            min-height: 38px;
+            padding: 8px 14px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        /* Close modal styling */
+        #recordCloseConfirm .modal-content {
+            background-color: #eef4ff;
+        }
+
+        #recordCloseConfirm .modal-footer .btn {
+            min-width: 110px;
+            font-weight: 700;
+        }
+    </style>
+
     <form method="post" id="recordForm" data-form-dirty="false">
         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
             
@@ -19,13 +48,13 @@
 
                     <div class="mb-3">
                         <label asp-for="Form.Code" class="form-label">Kod</label>
-                        <input asp-for="Form.Code" class="form-control" />
+                        <input asp-for="Form.Code" class="form-control" required />
                         <span asp-validation-for="Form.Code" class="text-danger"></span>
                     </div>
 
                     <div class="mb-3">
                         <label asp-for="Form.Name" class="form-label">Ad</label>
-                        <input asp-for="Form.Name" class="form-control" />
+                        <input asp-for="Form.Name" class="form-control" required />
                         <span asp-validation-for="Form.Name" class="text-danger"></span>
                     </div>
 
@@ -47,7 +76,7 @@
                         <span asp-validation-for="Form.Description" class="text-danger"></span>
                     </div>
 
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2 record-form-actions">
                         @if (Model.IsNew)
                         {
                             <button type="submit" asp-page-handler="Create" class="btn btn-primary">Kaydet</button>
@@ -68,6 +97,26 @@
                 </div>
             </div>
         </form>
+
+    <!-- Kapatma modalı (Kaydet / Kaydetme / İptal) -->
+    <div class="modal fade" id="recordCloseConfirm" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Değişiklikler kaydedilmedi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                </div>
+                <div class="modal-body">
+                    Değişiklikler kaydedilmedi. Ne yapmak istersiniz?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-action="save">Kaydet</button>
+                    <button type="button" class="btn btn-secondary" data-action="discard">Kaydetme</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">İptal</button>
+                </div>
+            </div>
+        </div>
+    </div>
     </div>
 
     <script>
@@ -82,59 +131,109 @@
                 return;
             }
 
-            // ✅ FIX: Event listener zaten eklenmiş mi kontrol et
-            if (form.dataset.handlerAttached === 'true') {
-                console.log('[Record Form INIT] Handler zaten eklenmiş, atlanıyor');
-                return;
-            }
-            
+            // Handler her zaman yeniden tanımlansın; submit binding tekil kalsın
+            const alreadyBound = form.dataset.handlerAttached === 'true';
             form.dataset.handlerAttached = 'true';
             let isSubmitting = false;
 
             // Track form changes
-            form.addEventListener('input', function() {
-                form.setAttribute('data-form-dirty', 'true');
-            });
+            if (!alreadyBound) {
+                form.addEventListener('input', function() {
+                    form.setAttribute('data-form-dirty', 'true');
+                });
+            }
 
-            // Intercept form submit for AJAX (accordion içindeyse)
-            form.addEventListener('submit', function(e) {
-                console.log('[Record Form] Submit event tetiklendi');
-                
+            // Statik modal referansı
+            const closeModalEl = document.getElementById('recordCloseConfirm');
+            let closeModalInst = null;
+            let plainBackdrop = null;
+
+            function showPlainModal(el) {
+                el.classList.add('show');
+                el.style.display = 'block';
+                el.removeAttribute('aria-hidden');
+                el.setAttribute('aria-modal', 'true');
+                plainBackdrop = document.createElement('div');
+                plainBackdrop.className = 'modal-backdrop fade show';
+                document.body.appendChild(plainBackdrop);
+            }
+
+            function hidePlainModal(el) {
+                el.classList.remove('show');
+                el.style.display = 'none';
+                el.setAttribute('aria-hidden', 'true');
+                el.removeAttribute('aria-modal');
+                if (plainBackdrop) {
+                    document.body.removeChild(plainBackdrop);
+                    plainBackdrop = null;
+                }
+            }
+
+            // Yardımcı: accordion'u kapat ve opsiyonel refresh
+            function closeAccordion({ refreshList, listUrl }) {
                 const accordionEl = document.querySelector('.accordion[id^="grid-record-accordion"]');
-                console.log('[Record Form] Accordion element:', accordionEl, 'display:', accordionEl?.style?.display);
-                
-                if (!accordionEl || !accordionEl.style.display || accordionEl.style.display === 'none') {
-                    console.log('[Record Form] Accordion görünür değil - normal submit');
-                    return; // Normal submit (standalone page)
+                if (!accordionEl) return;
+
+                const gridId = accordionEl.id.replace('grid-record-accordion-', '');
+                const accordionBody = accordionEl.querySelector('.accordion-collapse');
+                if (accordionBody && window.bootstrap?.Collapse) {
+                    const bsCollapse = window.bootstrap.Collapse.getInstance(accordionBody);
+                    if (bsCollapse) bsCollapse.hide();
                 }
 
-                console.log('[Record Form] Accordion içinde - AJAX submit başlıyor');
-                e.preventDefault();
-                isSubmitting = true;
+                setTimeout(() => {
+                    accordionEl.style.display = 'none';
+                    form.reset();
+                    form.setAttribute('data-form-dirty', 'false');
+                    if (window.setNewRecordButtonState) window.setNewRecordButtonState(gridId, false);
+                }, 300);
 
+                if (refreshList) {
+                    const targetListUrl = listUrl || window.location.pathname;
+                    if (window.refreshGrid && typeof window.refreshGrid === 'function') {
+                        window.refreshGrid(gridId, targetListUrl);
+                    } else if (window[`refresh_${gridId}`]) {
+                        window[`refresh_${gridId}`]();
+                    }
+                }
+            }
+
+            // Özel kapatma diyaloğu (Kaydet / Kaydetme / İptal)
+            function ensureCloseModal() {
+                if (!closeModalEl) return null;
+                if (window.bootstrap?.Modal) {
+                    closeModalInst = window.bootstrap.Modal.getOrCreateInstance(closeModalEl);
+                }
+                return closeModalEl;
+            }
+
+            function handleSave(targetUrl, submitter) {
                 const formData = new FormData(form);
-                const submitButton = e.submitter;
-                
-                // ✅ FIX: Button'da formaction varsa direkt kullan
-                let targetUrl = form.action || window.location.pathname;
-                
-                if (submitButton) {
-                    // Razor asp-page-handler="Update" → HTML'de formaction="/path?handler=Update" olur
-                    if (submitButton.hasAttribute('formaction')) {
-                        targetUrl = submitButton.getAttribute('formaction');
-                        console.log('[Record Form] formaction bulundu:', targetUrl);
-                    }
-                    
-                    // FormData'ya button name/value ekle (gerekirse)
-                    if (submitButton.name) {
-                        formData.append(submitButton.name, submitButton.value || '');
-                    }
+                if (submitter?.hasAttribute('formaction')) {
+                    targetUrl = submitter.getAttribute('formaction') || targetUrl;
                 }
-                
-                console.log('[Record Form] Submit başlıyor...');
-                console.log('[Record Form] Target URL:', targetUrl);
-                
-                fetch(targetUrl, {
+                if (submitter?.name) {
+                    formData.append(submitter.name, submitter.value || '');
+                }
+
+                // HTML5 validation: ilk hatalı alana odaklan
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    const firstInvalid = form.querySelector(':invalid');
+                    if (firstInvalid?.focus) firstInvalid.focus();
+                    isSubmitting = false;
+                    return Promise.resolve();
+                }
+
+                let listUrl = window.location.pathname;
+                try {
+                    const u = new URL(targetUrl, window.location.origin);
+                    listUrl = u.pathname.replace(/\/Record$/i, '');
+                } catch { }
+
+                console.log('[Record Form] Submit başlıyor...', targetUrl);
+
+                return fetch(targetUrl, {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -145,56 +244,13 @@
                 .then(res => {
                     console.log('[Record Form] Response:', res.status, res.ok);
                     if (res.ok) {
-                        // Success: Accordion'u kapat
-                        console.log('[Record Form] Success - accordion kapatılıyor...');
-                        
-                        const accordionBody = accordionEl.querySelector('.accordion-collapse');
-                        if (accordionBody && window.bootstrap?.Collapse) {
-                            const bsCollapse = window.bootstrap.Collapse.getInstance(accordionBody);
-                            if (bsCollapse) {
-                                bsCollapse.hide();
-                            }
-                        }
-                        
-                        // Accordion'u gizle
-                        setTimeout(() => {
-                            accordionEl.style.display = 'none';
-                            form.reset();
-                            form.setAttribute('data-form-dirty', 'false');
-                        }, 300);
-                        
-                        // Grid'i refresh et (reload DEĞİL - sadece data refresh)
-                console.log('[Record Form] Grid refresh ediliyor...');
-                const gridId = accordionEl.id.replace('grid-record-accordion-', '');
-                console.log('[Record Form] Grid ID:', gridId);
-
-                // List page URL: record endpoint'ten /Record'ı kaldır
-                let listUrl = window.location.pathname;
-                try {
-                    const u = new URL(targetUrl, window.location.origin);
-                    listUrl = u.pathname.replace(/\/Record$/i, '');
-                } catch {}
-                console.log('[Record Form] List URL:', listUrl);
-                
-                // Grid refresh fonksiyonu varsa çağır
-                if (window.refreshGrid && typeof window.refreshGrid === 'function') {
-                    console.log('[Record Form] refreshGrid() çağrılıyor...');
-                    window.refreshGrid(gridId, listUrl);
-                } else if (window[`refresh_${gridId}`]) {
-                    console.log('[Record Form] Grid-specific refresh fonksiyonu çağrılıyor...');
-                    window[`refresh_${gridId}`]();
-                } else {
-                    console.log('[Record Form] Grid refresh fonksiyonu yok - accordion kapatıldı, kullanıcı manuel refresh yapabilir');
-                    // NOT: window.location.reload() YAPMA - tüm tab'lar kaybolur!
-                    // Kullanıcı grid'in "Refresh" butonunu kullanabilir
-                }
-                        
+                        closeAccordion({ refreshList: true, listUrl });
                         isSubmitting = false;
                     } else {
                         return res.text().then(html => {
-                            // Validation error: show in accordion
-                            console.log('[Record Form] Validation error - accordion içeriği güncelleniyor');
                             isSubmitting = false;
+                            const accordionEl = document.querySelector('.accordion[id^="grid-record-accordion"]');
+                            if (!accordionEl) return;
                             const contentId = accordionEl.id.replace('grid-record-accordion-', '') + '-content';
                             const contentEl = document.getElementById(contentId);
                             if (contentEl) {
@@ -203,11 +259,8 @@
                                 const main = doc.querySelector('#tab-main');
                                 if (main) {
                                     contentEl.innerHTML = main.innerHTML;
-                                    // ✅ YENİ: Inject edilen form'a handlerAttached ekle (double binding önleme)
                                     const newForm = contentEl.querySelector('#recordForm');
-                                    if (newForm) {
-                                        newForm.dataset.handlerAttached = 'false'; // Script tekrar çalışacak
-                                    }
+                                    if (newForm) newForm.dataset.handlerAttached = 'false';
                                 }
                             }
                         });
@@ -217,35 +270,83 @@
                     alert('Kayıt hatası: ' + err.message);
                     isSubmitting = false;
                 });
-            });
+            }
+
+            // Intercept form submit for AJAX (accordion içindeyse)
+            if (!alreadyBound) {
+                form.addEventListener('submit', function(e) {
+                    console.log('[Record Form] Submit event tetiklendi');
+                    
+                    const accordionEl = document.querySelector('.accordion[id^="grid-record-accordion"]');
+                    console.log('[Record Form] Accordion element:', accordionEl, 'display:', accordionEl?.style?.display);
+                    
+                    if (!accordionEl || !accordionEl.style.display || accordionEl.style.display === 'none') {
+                        console.log('[Record Form] Accordion görünür değil - normal submit');
+                        return; // Normal submit (standalone page)
+                    }
+
+                    console.log('[Record Form] Accordion içinde - AJAX submit başlıyor');
+                    e.preventDefault();
+                    isSubmitting = true;
+
+                    const submitButton = e.submitter;
+                    let targetUrl = form.action || window.location.pathname;
+
+                    handleSave(targetUrl, submitButton);
+                });
+            }
 
             window.closeRecordForm = function() {
                 if (isSubmitting) return;
 
                 const isDirty = form.getAttribute('data-form-dirty') === 'true';
-                
-                if (isDirty) {
-                    const result = confirm('Değişiklikler kaydedilmedi. Formu kapatmak istediğinize emin misiniz?');
-                    if (!result) return;
+
+                // Değişiklik yoksa sessizce kapat
+                if (!isDirty) {
+                    closeAccordion({ refreshList: false });
+                    return;
                 }
 
-                const accordionEl = document.querySelector('.accordion[id^="grid-record-accordion"]');
-                if (accordionEl) {
-                    const accordionBody = accordionEl.querySelector('.accordion-collapse');
-                    if (accordionBody && window.bootstrap?.Collapse) {
-                        const bsCollapse = window.bootstrap.Collapse.getInstance(accordionBody);
-                        if (bsCollapse) {
-                            bsCollapse.hide();
-                            setTimeout(() => { 
-                                accordionEl.style.display = 'none';
-                                form.reset();
-                                form.setAttribute('data-form-dirty', 'false');
-                            }, 300);
-                            return;
-                        }
-                    }
+                const modalEl = document.getElementById('recordCloseConfirm');
+                if (!modalEl) {
+                    // Fallback: confirm (3 buton olmadığı durumda sadece kapatma iptal)
+                    const ok = confirm('Değişiklikler kaydedilmedi. Kapatmak istiyor musunuz?');
+                    if (ok) closeAccordion({ refreshList: false });
+                    return;
                 }
-                window.location.href = '/Definitions/Application';
+
+                const saveBtn = modalEl.querySelector('[data-action="save"]');
+                const discardBtn = modalEl.querySelector('[data-action="discard"]');
+                const cancelBtns = modalEl.querySelectorAll('[data-bs-dismiss="modal"]');
+
+                const onSave = () => {
+                    if (modal) modal.hide(); else hidePlainModal(modalEl);
+                    const primarySubmit = form.querySelector('button[type="submit"]');
+                    const targetUrl = form.action || window.location.pathname;
+                    handleSave(targetUrl, primarySubmit);
+                };
+
+                const onDiscard = () => {
+                    if (modal) modal.hide(); else hidePlainModal(modalEl);
+                    closeAccordion({ refreshList: false });
+                };
+
+                const onCancel = () => {
+                    if (modal) modal.hide(); else hidePlainModal(modalEl);
+                };
+
+                // Modal instance (bootstrap varsa)
+                const modal = window.bootstrap?.Modal?.getOrCreateInstance(modalEl);
+
+                if (saveBtn) saveBtn.onclick = onSave;
+                if (discardBtn) discardBtn.onclick = onDiscard;
+                cancelBtns.forEach(btn => btn.onclick = onCancel);
+
+                if (modal) {
+                    modal.show();
+                } else {
+                    showPlainModal(modalEl);
+                }
             };
         })();
     </script>

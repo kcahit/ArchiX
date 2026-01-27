@@ -3,6 +3,18 @@
 (function (window) {
     const states = {};
 
+    function setNewRecordButtonState(gridId, disabled) {
+        const btn = document.getElementById(`${gridId}-newRecordBtn`);
+        if (!btn) return;
+        const isDisabled = !!disabled;
+        btn.disabled = isDisabled;
+        btn.classList.toggle('disabled', isDisabled);
+        btn.classList.toggle('opacity-50', isDisabled);
+        btn.style.pointerEvents = isDisabled ? 'none' : '';
+        btn.setAttribute('aria-disabled', isDisabled ? 'true' : 'false');
+        console.log('[Grid] setNewRecordButtonState', { gridId, disabled: isDisabled, exists: !!btn });
+    }
+
     function getCsrfToken() {
         const cookie = document.cookie.split('; ').find(x => x.startsWith('ax.af='));
         if (cookie) {
@@ -167,6 +179,7 @@
             const title = id ? `Application #${id}` : 'Yeni Application';
 
             // Accordion içinde göster
+            if (window.setNewRecordButtonState) window.setNewRecordButtonState(tableId, true);
             if (window.showRecordInAccordion) {
                 window.showRecordInAccordion(tableId, url, title);
             } else {
@@ -595,6 +608,11 @@
 
         if (!contentEl || !accordionContainer) return;
 
+        // Yeni Kayıt butonunu devre dışı bırak (form açıkken)
+        if (window.setNewRecordButtonState) {
+            window.setNewRecordButtonState(gridId, true);
+        }
+
         // Accordion container'ı görünür yap
         accordionContainer.style.display = 'block';
 
@@ -625,6 +643,10 @@
             const main = doc.querySelector('#tab-main') || doc.querySelector('.archix-work-area') || doc.querySelector('main');
             contentEl.innerHTML = main ? main.innerHTML : html;
 
+            // Form yeniden yüklendiğinde handlerAttached flag'ini sıfırla ki yeni JS bağlansın
+            const newForm = contentEl.querySelector('#recordForm');
+            if (newForm) newForm.dataset.handlerAttached = 'false';
+
             // Form script'lerini yeniden çalıştır
             const scripts = contentEl.querySelectorAll('script');
             scripts.forEach(oldScript => {
@@ -643,4 +665,5 @@
     }
 
     window.showRecordInAccordion = showRecordInAccordion;
+    window.setNewRecordButtonState = setNewRecordButtonState;
 })(window);
