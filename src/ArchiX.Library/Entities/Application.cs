@@ -1,9 +1,9 @@
-using System.ComponentModel.DataAnnotations;
+ï»¿using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
 namespace ArchiX.Library.Entities
 {
-    /// <summary>Uygulama (tenant/proje) tanýmý.</summary>
+    /// <summary>Uygulama (tenant/proje) tanÄ±mÄ±.</summary>
     [Index(nameof(Code), IsUnique = true)]
     public sealed class Application : BaseEntity
     {
@@ -13,12 +13,12 @@ namespace ArchiX.Library.Entities
         [Required, MaxLength(200)]
         public string Name { get; set; } = null!;
 
-        // Zorunlu varsayýlan kültür (örn. tr-TR)
+        // Zorunlu varsayÄ±lan kÃ¼ltÃ¼r (Ã¶rn. tr-TR)
         [Required, MaxLength(10)]
         public string DefaultCulture { get; set; } = "tr-TR";
 
-        [MaxLength(100)]
-        public string? TimeZoneId { get; set; }
+        [Required, MaxLength(100)]
+        public string TimeZoneId { get; set; } = "Europe/Istanbul";
 
         [MaxLength(500)]
         public string? Description { get; set; }
