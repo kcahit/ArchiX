@@ -23,8 +23,8 @@ namespace ArchiX.Library.Entities
         [MaxLength(1000)]
         public string? Description { get; set; }
 
-        /// <summary>JSON template/örnek değer (opsiyonel)</summary>
-        public string? Template { get; set; }
+        /// <summary>JSON varsayılan değer/örnek (opsiyonel)</summary>
+        public string? Value { get; set; }
 
         // Navigation
         public ICollection<ParameterApplication> Applications { get; set; } = [];

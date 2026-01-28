@@ -78,7 +78,7 @@ public static class ConnectionStringsStartup
                 Key = Key,
                 ParameterDataTypeId = 15,
                 Description = "Tenant DB connection profiles (alias -> profile JSON)",
-                Template = json,
+                Value = json,
                 StatusId = BaseEntity.ApprovedStatusId,
                 CreatedBy = 0,
                 LastStatusBy = 0,

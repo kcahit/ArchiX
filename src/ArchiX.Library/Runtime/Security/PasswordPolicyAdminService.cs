@@ -75,11 +75,11 @@ internal sealed class PasswordPolicyAdminService : IPasswordPolicyAdminService
 
         if (PasswordPolicyIntegrityChecker.IsEnabled())
         {
-            if (string.IsNullOrWhiteSpace(parameter?.Template))
+            if (string.IsNullOrWhiteSpace(parameter?.Value))
             {
                 _logger.LogWarning("PasswordPolicy integrity signature missing for AppId {AppId}.", appId);
             }
-            else if (!PasswordPolicyIntegrityChecker.VerifySignature(appValue.Value, parameter.Template))
+            else if (!PasswordPolicyIntegrityChecker.VerifySignature(appValue.Value, parameter.Value))
             {
                 throw new InvalidOperationException("PasswordPolicy kaydı bütünlük doğrulamasından geçemedi.");
             }
@@ -133,7 +133,7 @@ internal sealed class PasswordPolicyAdminService : IPasswordPolicyAdminService
                     Key = ParameterKey,
                     ParameterDataTypeId = ParameterDataTypeId,
                     Description = "Security.PasswordPolicy",
-                    Template = signature,
+                    Value = signature,
                     StatusId = approvedStatusId,
                     CreatedAt = utcNow,
                     CreatedBy = SystemUserId,
@@ -186,8 +186,8 @@ internal sealed class PasswordPolicyAdminService : IPasswordPolicyAdminService
                 appValue.UpdatedBy = SystemUserId;
             }
 
-            // Template güncelle (parametre seviyesinde)
-            parameter.Template = signature;
+            // Template (imza) güncelle (parametre seviyesinde)
+            parameter.Value = signature;
             parameter.UpdatedAt = utcNow;
             parameter.UpdatedBy = SystemUserId;
 

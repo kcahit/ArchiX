@@ -28,7 +28,9 @@ public class RecordModel : EntityRecordPageBase<Library.Entities.Application, Ap
         entity.Code = form.Code;
         entity.Name = form.Name;
         entity.DefaultCulture = form.DefaultCulture;
-        entity.TimeZoneId = form.TimeZoneId;
+        entity.TimeZoneId = string.IsNullOrWhiteSpace(form.TimeZoneId)
+            ? entity.TimeZoneId
+            : form.TimeZoneId;
         entity.Description = form.Description;
     }
 }

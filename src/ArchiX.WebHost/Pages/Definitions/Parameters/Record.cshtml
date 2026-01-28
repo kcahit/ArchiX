@@ -1,0 +1,400 @@
+﻿@page "/Definitions/Parameters/Record"
+@model ArchiX.Library.Web.Pages.Definitions.Parameters.RecordModel
+@{
+    ViewData["Title"] = Model.IsNew ? "Yeni Parametre" : "Parametre Düzenle";
+    Layout = "~/Templates/Modern/Pages/Shared/_Layout.cshtml";
+}
+
+<div id="tab-main">
+<div class="container py-1">
+    <style>
+        /* Button visibility & sizing (page-specific) */
+        #tab-main .btn-primary {
+            --bs-btn-bg: var(--bs-primary);
+            --bs-btn-border-color: var(--bs-primary);
+            --bs-btn-color: #fff;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
+        #tab-main .record-form-actions .btn {
+            min-height: 38px;
+            padding: 8px 14px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        /* Close modal styling */
+        #recordCloseConfirm .modal-content {
+            background-color: #eef4ff;
+        }
+
+        #recordCloseConfirm .modal-footer .btn {
+            min-width: 110px;
+            font-weight: 700;
+        }
+    </style>
+
+    <form method="post" id="recordForm" data-form-dirty="false">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+            
+        <div class="card">
+            <div class="card-body">
+                @if (!Model.IsNew)
+                {
+                    <input type="hidden" name="id" value="@Model.Parameter!.Id" />
+                }
+
+                    <div class="mb-3">
+                        <label asp-for="Form.Group" class="form-label">Grup</label>
+                        <input asp-for="Form.Group" class="form-control" required />
+                        <span asp-validation-for="Form.Group" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Form.Key" class="form-label">Anahtar</label>
+                        <input asp-for="Form.Key" class="form-control" required />
+                        <span asp-validation-for="Form.Key" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Form.ParameterDataTypeId" class="form-label">Veri Tipi</label>
+                        <select asp-for="Form.ParameterDataTypeId" class="form-select" required data-parameter-type-select>
+                            <option value="">Seçiniz</option>
+                            @foreach (var dt in Model.DataTypes)
+                            {
+                                <option value="@dt.Id" data-category="@dt.Category" data-code="@dt.Code">@dt.Name</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Form.ParameterDataTypeId" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Form.Value" class="form-label">Değer</label>
+                        <input asp-for="Form.Value" type="text" class="form-control" data-value-input placeholder="Varsayılan değer" />
+                        <span asp-validation-for="Form.Value" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Form.Description" class="form-label">Açıklama</label>
+                        <textarea asp-for="Form.Description" class="form-control" rows="2"></textarea>
+                        <span asp-validation-for="Form.Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex gap-2 record-form-actions">
+                        @if (Model.IsNew)
+                        {
+                            <button type="submit" asp-page-handler="Create" class="btn btn-primary">Kaydet</button>
+                        }
+                        else
+                        {
+                            <button type="submit" asp-page-handler="Update" class="btn btn-primary">Güncelle</button>
+                            <button type="submit" asp-page-handler="Delete" class="btn btn-danger"
+                                    onclick="return confirm('ID @Model.Parameter?.Id numaralı parametreyi silmek istediğinizden emin misiniz?')">Sil</button>
+                        }
+
+                        <button type="button" class="btn btn-secondary" onclick="closeRecordForm()">Kapat</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+    <!-- Kapatma modalı (Kaydet / Kaydetme / İptal) -->
+    <div class="modal fade" id="recordCloseConfirm" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Değişiklikler kaydedilmedi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                </div>
+                <div class="modal-body">
+                    Değişiklikler kaydedilmedi. Ne yapmak istersiniz?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-action="save">Kaydet</button>
+                    <button type="button" class="btn btn-secondary" data-action="discard">Kaydetme</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">İptal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        console.log('[Parameter Record Form INIT] Script yüklendi - timestamp:', Date.now());
+        
+        (function() {
+            const form = document.getElementById('recordForm');
+            console.log('[Parameter Record Form INIT] Form bulundu:', !!form, form);
+            
+            if (!form) {
+                console.error('[Parameter Record Form INIT] ERROR: recordForm bulunamadı!');
+                return;
+            }
+
+            // Handler her zaman yeniden tanımlansın; submit binding tekil kalsın
+            const alreadyBound = form.dataset.handlerAttached === 'true';
+            form.dataset.handlerAttached = 'true';
+            let isSubmitting = false;
+
+            // Track form changes
+            if (!alreadyBound) {
+                form.addEventListener('input', function() {
+                    form.setAttribute('data-form-dirty', 'true');
+                });
+            }
+
+            const typeSelect = form.querySelector('[data-parameter-type-select]');
+            const valueInput = form.querySelector('[data-value-input]');
+
+            function applyValueInput(option) {
+                if (!valueInput) return;
+                const category = (option?.dataset.category || '').toLowerCase();
+                const code = parseInt(option?.dataset.code || '0', 10);
+                const nameText = (option?.textContent || '').toLowerCase();
+
+                // Varsayılan text
+                valueInput.type = 'text';
+                valueInput.removeAttribute('step');
+                valueInput.removeAttribute('inputmode');
+
+                // Sayısal
+                if (category === 'numeric' || (code >= 200 && code < 300)) {
+                    valueInput.type = 'number';
+                    valueInput.step = 'any';
+                    valueInput.inputMode = 'decimal';
+                    return;
+                }
+
+                // Tarih/Zaman
+                if (category === 'temporal' || (code >= 300 && code < 400)) {
+                    valueInput.type = 'datetime-local';
+                    return;
+                }
+
+                if (nameText.includes('date')) {
+                    valueInput.type = 'date';
+                }
+            }
+
+            if (typeSelect && valueInput) {
+                const selectedOption = typeSelect.selectedOptions[0];
+                applyValueInput(selectedOption);
+
+                if (!alreadyBound) {
+                    typeSelect.addEventListener('change', function (e) {
+                        const opt = e.target.selectedOptions[0];
+                        applyValueInput(opt);
+                    });
+                }
+            }
+
+            // Statik modal referansı
+            const closeModalEl = document.getElementById('recordCloseConfirm');
+            let closeModalInst = null;
+            let plainBackdrop = null;
+
+            function showPlainModal(el) {
+                el.classList.add('show');
+                el.style.display = 'block';
+                el.removeAttribute('aria-hidden');
+                el.setAttribute('aria-modal', 'true');
+                plainBackdrop = document.createElement('div');
+                plainBackdrop.className = 'modal-backdrop fade show';
+                document.body.appendChild(plainBackdrop);
+            }
+
+            function hidePlainModal(el) {
+                el.classList.remove('show');
+                el.style.display = 'none';
+                el.setAttribute('aria-hidden', 'true');
+                el.removeAttribute('aria-modal');
+                if (plainBackdrop) {
+                    document.body.removeChild(plainBackdrop);
+                    plainBackdrop = null;
+                }
+            }
+
+            // Yardımcı: accordion'u kapat ve opsiyonel refresh
+            function closeAccordion({ refreshList, listUrl }) {
+                const accordionEl = document.querySelector('.accordion[id^="grid-record-accordion"]');
+                if (!accordionEl) return;
+
+                const gridId = accordionEl.id.replace('grid-record-accordion-', '');
+                const accordionBody = accordionEl.querySelector('.accordion-collapse');
+                if (accordionBody && window.bootstrap?.Collapse) {
+                    const bsCollapse = window.bootstrap.Collapse.getInstance(accordionBody);
+                    if (bsCollapse) bsCollapse.hide();
+                }
+
+                setTimeout(() => {
+                    accordionEl.style.display = 'none';
+                    form.reset();
+                    form.setAttribute('data-form-dirty', 'false');
+                    if (window.setNewRecordButtonState) window.setNewRecordButtonState(gridId, false);
+                }, 300);
+
+                if (refreshList) {
+                    const targetListUrl = listUrl || window.location.pathname;
+                    if (window.refreshGrid && typeof window.refreshGrid === 'function') {
+                        window.refreshGrid(gridId, targetListUrl);
+                    } else if (window[`refresh_${gridId}`]) {
+                        window[`refresh_${gridId}`]();
+                    }
+                }
+            }
+
+            // Özel kapatma diyaloğu (Kaydet / Kaydetme / İptal)
+            function ensureCloseModal() {
+                if (!closeModalEl) return null;
+                if (window.bootstrap?.Modal) {
+                    closeModalInst = window.bootstrap.Modal.getOrCreateInstance(closeModalEl);
+                }
+                return closeModalEl;
+            }
+
+            function handleSave(targetUrl, submitter) {
+                const formData = new FormData(form);
+                if (submitter?.hasAttribute('formaction')) {
+                    targetUrl = submitter.getAttribute('formaction') || targetUrl;
+                }
+                if (submitter?.name) {
+                    formData.append(submitter.name, submitter.value || '');
+                }
+
+                // HTML5 validation: ilk hatalı alana odaklan
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    const firstInvalid = form.querySelector(':invalid');
+                    if (firstInvalid?.focus) firstInvalid.focus();
+                    isSubmitting = false;
+                    return Promise.resolve();
+                }
+
+                let listUrl = window.location.pathname;
+                try {
+                    const u = new URL(targetUrl, window.location.origin);
+                    listUrl = u.pathname.replace(/\/Record$/i, '');
+                } catch { }
+
+                console.log('[Parameter Record Form] Submit başlıyor...', targetUrl);
+
+                return fetch(targetUrl, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-ArchiX-Tab': '1'
+                    }
+                })
+                .then(res => {
+                    console.log('[Parameter Record Form] Response:', res.status, res.ok);
+                    if (res.ok) {
+                        closeAccordion({ refreshList: true, listUrl });
+                        isSubmitting = false;
+                    } else {
+                        return res.text().then(html => {
+                            isSubmitting = false;
+                            const accordionEl = document.querySelector('.accordion[id^="grid-record-accordion"]');
+                            if (!accordionEl) return;
+                            const contentId = accordionEl.id.replace('grid-record-accordion-', '') + '-content';
+                            const contentEl = document.getElementById(contentId);
+                            if (contentEl) {
+                                const parser = new DOMParser();
+                                const doc = parser.parseFromString(html, 'text/html');
+                                const main = doc.querySelector('#tab-main');
+                                if (main) {
+                                    contentEl.innerHTML = main.innerHTML;
+                                    const newForm = contentEl.querySelector('#recordForm');
+                                    if (newForm) newForm.dataset.handlerAttached = 'false';
+                                }
+                            }
+                        });
+                    }
+                })
+                .catch(err => {
+                    alert('Kayıt hatası: ' + err.message);
+                    isSubmitting = false;
+                });
+            }
+
+            // Intercept form submit for AJAX (accordion içindeyse)
+            if (!alreadyBound) {
+                form.addEventListener('submit', function(e) {
+                    console.log('[Parameter Record Form] Submit event tetiklendi');
+                    
+                    const accordionEl = document.querySelector('.accordion[id^="grid-record-accordion"]');
+                    console.log('[Parameter Record Form] Accordion element:', accordionEl, 'display:', accordionEl?.style?.display);
+                    
+                    if (!accordionEl || !accordionEl.style.display || accordionEl.style.display === 'none') {
+                        console.log('[Parameter Record Form] Accordion görünür değil - normal submit');
+                        return; // Normal submit (standalone page)
+                    }
+
+                    console.log('[Parameter Record Form] Accordion içinde - AJAX submit başlıyor');
+                    e.preventDefault();
+                    isSubmitting = true;
+
+                    const submitButton = e.submitter;
+                    let targetUrl = form.action || window.location.pathname;
+
+                    handleSave(targetUrl, submitButton);
+                });
+            }
+
+            window.closeRecordForm = function() {
+                if (isSubmitting) return;
+
+                const isDirty = form.getAttribute('data-form-dirty') === 'true';
+
+                // Değişiklik yoksa sessizce kapat
+                if (!isDirty) {
+                    closeAccordion({ refreshList: false });
+                    return;
+                }
+
+                const modalEl = document.getElementById('recordCloseConfirm');
+                if (!modalEl) {
+                    // Fallback: confirm (3 buton olmadığı durumda sadece kapatma iptal)
+                    const ok = confirm('Değişiklikler kaydedilmedi. Kapatmak istiyor musunuz?');
+                    if (ok) closeAccordion({ refreshList: false });
+                    return;
+                }
+
+                const saveBtn = modalEl.querySelector('[data-action="save"]');
+                const discardBtn = modalEl.querySelector('[data-action="discard"]');
+                const cancelBtns = modalEl.querySelectorAll('[data-bs-dismiss="modal"]');
+
+                const onSave = () => {
+                    if (modal) modal.hide(); else hidePlainModal(modalEl);
+                    const primarySubmit = form.querySelector('button[type="submit"]');
+                    const targetUrl = form.action || window.location.pathname;
+                    handleSave(targetUrl, primarySubmit);
+                };
+
+                const onDiscard = () => {
+                    if (modal) modal.hide(); else hidePlainModal(modalEl);
+                    closeAccordion({ refreshList: false });
+                };
+
+                const onCancel = () => {
+                    if (modal) modal.hide(); else hidePlainModal(modalEl);
+                };
+
+                // Modal instance (bootstrap varsa)
+                const modal = window.bootstrap?.Modal?.getOrCreateInstance(modalEl);
+
+                if (saveBtn) saveBtn.onclick = onSave;
+                if (discardBtn) discardBtn.onclick = onDiscard;
+                cancelBtns.forEach(btn => btn.onclick = onCancel);
+
+                if (modal) {
+                    modal.show();
+                } else {
+                    showPlainModal(modalEl);
+                }
+            };
+        })();
+    </script>
+</div>

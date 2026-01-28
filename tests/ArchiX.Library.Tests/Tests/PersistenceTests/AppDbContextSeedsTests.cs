@@ -85,7 +85,7 @@ IF DB_ID('{dbName}') IS NOT NULL BEGIN ALTER DATABASE [{dbName}] SET SINGLE_USER
                     var tfValue = tfParam.Applications.FirstOrDefault(a => a.ApplicationId == 1);
                     Assert.NotNull(tfValue);
                     Assert.Contains("\"defaultChannel\": \"Email\"", tfValue!.Value);
-                    Assert.NotNull(tfParam.Template);
+                    Assert.NotNull(tfParam.Value);
                     Assert.Equal(3 /*Approved*/, tfParam.StatusId);
                 }
             }

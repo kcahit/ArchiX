@@ -332,7 +332,7 @@ namespace ArchiX.Library.Context
                     Key = "Options",
                     ParameterDataTypeId = 15, // JSON
                     Description = "İkili doğrulama varsayılan kanal ve seçenekleri",
-                    Template = "{\n  \"defaultChannel\": \"Sms\",\n  \"channels\": {\n    \"Sms\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Email\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Authenticator\": { \"digits\": 6, \"periodSeconds\": 30, \"hashAlgorithm\": \"SHA1\" }\n  }\n}",
+                    Value = "{\n  \"defaultChannel\": \"Sms\",\n  \"channels\": {\n    \"Sms\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Email\": { \"codeLength\": 6, \"expirySeconds\": 300 },\n    \"Authenticator\": { \"digits\": 6, \"periodSeconds\": 30, \"hashAlgorithm\": \"SHA1\" }\n  }\n}",
                     StatusId = BaseEntity.ApprovedStatusId,
                     CreatedBy = 0,
                     LastStatusBy = 0,
@@ -347,7 +347,7 @@ namespace ArchiX.Library.Context
                     Key = "PasswordPolicy",
                     ParameterDataTypeId = 15, // JSON
                     Description = "Parola politikası ve hash parametreleri",
-                    Template = "{\n  \"version\": 1,\n  \"minLength\": 12,\n  \"maxLength\": 128,\n  \"requireUpper\": true,\n  \"requireLower\": true,\n  \"requireDigit\": true,\n  \"requireSymbol\": true,\n  \"allowedSymbols\": \"\",\n  \"minDistinctChars\": 0,\n  \"maxRepeatedSequence\": 0,\n  \"blockList\": [],\n  \"historyCount\": 0,\n  \"lockoutThreshold\": 0,\n  \"lockoutSeconds\": 0,\n  \"hash\": {\n    \"algorithm\": \"Argon2id\",\n    \"memoryKb\": 0,\n    \"parallelism\": 0,\n    \"iterations\": 0,\n    \"saltLength\": 0,\n    \"hashLength\": 0,\n    \"fallback\": { \"algorithm\": \"PBKDF2-SHA512\", \"iterations\": 0 },\n    \"pepperEnabled\": false\n  }\n}",
+                    Value = "{\n  \"version\": 1,\n  \"minLength\": 12,\n  \"maxLength\": 128,\n  \"requireUpper\": true,\n  \"requireLower\": true,\n  \"requireDigit\": true,\n  \"requireSymbol\": true,\n  \"allowedSymbols\": \"\",\n  \"minDistinctChars\": 0,\n  \"maxRepeatedSequence\": 0,\n  \"blockList\": [],\n  \"historyCount\": 0,\n  \"lockoutThreshold\": 0,\n  \"lockoutSeconds\": 0,\n  \"hash\": {\n    \"algorithm\": \"Argon2id\",\n    \"memoryKb\": 0,\n    \"parallelism\": 0,\n    \"iterations\": 0,\n    \"saltLength\": 0,\n    \"hashLength\": 0,\n    \"fallback\": { \"algorithm\": \"PBKDF2-SHA512\", \"iterations\": 0 },\n    \"pepperEnabled\": false\n  }\n}",
                     StatusId = BaseEntity.ApprovedStatusId,
                     CreatedBy = 0,
                     LastStatusBy = 0,
@@ -362,7 +362,7 @@ namespace ArchiX.Library.Context
                     Key = "TabbedOptions",
                     ParameterDataTypeId = 15, // JSON
                     Description = "#42 TabbedOptions JSON. navigationMode=Mod(Tabbed/FullPage); tabbed.maxOpenTabs=Maks tab; tabbed.tabAutoCloseMinutes=Oto kapanış(dk); tabbed.autoCloseWarningSeconds=Uyarı(sn); tabbed.enableNestedTabs=Nested tab; tabbed.requireTabContext=Direct link engeli.",
-                    Template = "{\n  \"version\": 1,\n  \"navigationMode\": \"Tabbed\",\n  \"tabbed\": {\n    \"maxOpenTabs\": 15,\n    \"onMaxTabReached\": {\n      \"behavior\": \"Block\",\n      \"message\": \"Açık tab sayısı 15 limitine geldi. Lütfen açık tablardan birini kapatınız.\"\n    },\n    \"enableNestedTabs\": false,\n    \"requireTabContext\": true,\n    \"tabAutoCloseMinutes\": 10,\n    \"autoCloseWarningSeconds\": 30,\n    \"tabTitleUniqueSuffix\": { \"format\": \"_{000}\", \"start\": 1 }\n  },\n  \"fullPage\": {\n    \"defaultLandingRoute\": \"/Dashboard\",\n    \"openReportsInNewWindow\": false,\n    \"confirmOnUnsavedChanges\": true,\n    \"deepLinkEnabled\": true,\n    \"errorMode\": \"DefaultErrorPage\",\n    \"enableKeepAlive\": true,\n    \"sessionTimeoutWarningSeconds\": 60\n  }\n}",
+                    Value = "{\n  \"version\": 1,\n  \"navigationMode\": \"Tabbed\",\n  \"tabbed\": {\n    \"maxOpenTabs\": 15,\n    \"onMaxTabReached\": {\n      \"behavior\": \"Block\",\n      \"message\": \"Açık tab sayısı 15 limitine geldi. Lütfen açık tablardan birini kapatınız.\"\n    },\n    \"enableNestedTabs\": false,\n    \"requireTabContext\": true,\n    \"tabAutoCloseMinutes\": 10,\n    \"autoCloseWarningSeconds\": 30,\n    \"tabTitleUniqueSuffix\": { \"format\": \"_{000}\", \"start\": 1 }\n  },\n  \"fullPage\": {\n    \"defaultLandingRoute\": \"/Dashboard\",\n    \"openReportsInNewWindow\": false,\n    \"confirmOnUnsavedChanges\": true,\n    \"deepLinkEnabled\": true,\n    \"errorMode\": \"DefaultErrorPage\",\n    \"enableKeepAlive\": true,\n    \"sessionTimeoutWarningSeconds\": 60\n  }\n}",
                     StatusId = BaseEntity.ApprovedStatusId,
                     CreatedBy = 0,
                     LastStatusBy = 0,
@@ -378,7 +378,7 @@ namespace ArchiX.Library.Context
                     Key = "TimeoutOptions",
                     ParameterDataTypeId = 15, // JSON
                     Description = "#57 UI timeout parametreleri (session, warning, tab request timeout)",
-                    Template = "{\"sessionTimeoutSeconds\":645,\"sessionWarningSeconds\":45,\"tabRequestTimeoutMs\":30000}",
+                    Value = "{\"sessionTimeoutSeconds\":645,\"sessionWarningSeconds\":45,\"tabRequestTimeoutMs\":30000}",
                     StatusId = BaseEntity.ApprovedStatusId,
                     CreatedBy = 0,
                     LastStatusBy = 0,
@@ -393,7 +393,7 @@ namespace ArchiX.Library.Context
                     Key = "HttpPoliciesOptions",
                     ParameterDataTypeId = 15, // JSON
                     Description = "#57 HTTP retry ve timeout politikaları",
-                    Template = "{\"retryCount\":2,\"baseDelayMs\":200,\"timeoutSeconds\":30}",
+                    Value = "{\"retryCount\":2,\"baseDelayMs\":200,\"timeoutSeconds\":30}",
                     StatusId = BaseEntity.ApprovedStatusId,
                     CreatedBy = 0,
                     LastStatusBy = 0,
@@ -408,7 +408,7 @@ namespace ArchiX.Library.Context
                     Key = "AttemptLimiterOptions",
                     ParameterDataTypeId = 15, // JSON
                     Description = "#57 Güvenlik attempt limiter parametreleri",
-                    Template = "{\"window\":600,\"maxAttempts\":5,\"cooldownSeconds\":300}",
+                    Value = "{\"window\":600,\"maxAttempts\":5,\"cooldownSeconds\":300}",
                     StatusId = BaseEntity.ApprovedStatusId,
                     CreatedBy = 0,
                     LastStatusBy = 0,
@@ -423,7 +423,7 @@ namespace ArchiX.Library.Context
                     Key = "ParameterRefresh",
                     ParameterDataTypeId = 15, // JSON
                     Description = "#57 Parametre cache TTL süreleri",
-                    Template = "{\"uiCacheTtlSeconds\":300,\"httpCacheTtlSeconds\":60,\"securityCacheTtlSeconds\":30}",
+                    Value = "{\"uiCacheTtlSeconds\":300,\"httpCacheTtlSeconds\":60,\"securityCacheTtlSeconds\":30}",
                     StatusId = BaseEntity.ApprovedStatusId,
                     CreatedBy = 0,
                     LastStatusBy = 0,
