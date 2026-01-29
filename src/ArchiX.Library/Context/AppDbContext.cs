@@ -182,7 +182,6 @@ namespace ArchiX.Library.Context
                     Id = index + 1,
                     ApplicationId = 1,
                     Word = word,
-                    RowId = new Guid($"00000000-0000-0000-0000-{index:D12}"),
                     CreatedAt = baseTime.AddSeconds(index),
                     CreatedBy = 0,
                     StatusId = BaseEntity.ApprovedStatusId,
@@ -337,7 +336,6 @@ namespace ArchiX.Library.Context
                     CreatedBy = 0,
                     LastStatusBy = 0,
                     IsProtected = true,
-                    RowId = new Guid("00000000-0000-0000-0000-000000000001"),
                     CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
                 },
                 new Parameter
@@ -352,7 +350,6 @@ namespace ArchiX.Library.Context
                     CreatedBy = 0,
                     LastStatusBy = 0,
                     IsProtected = true,
-                    RowId = new Guid("00000000-0000-0000-0000-000000000002"),
                     CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
                 },
                 new Parameter
@@ -367,7 +364,6 @@ namespace ArchiX.Library.Context
                     CreatedBy = 0,
                     LastStatusBy = 0,
                     IsProtected = true,
-                    RowId = new Guid("00000000-0000-0000-0000-000000000003"),
                     CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
                 },
                 // #57 yeni parametreler
@@ -383,7 +379,6 @@ namespace ArchiX.Library.Context
                     CreatedBy = 0,
                     LastStatusBy = 0,
                     IsProtected = true,
-                    RowId = new Guid("00000000-0000-0000-0000-000000000004"),
                     CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
                 },
                 new Parameter
@@ -398,7 +393,6 @@ namespace ArchiX.Library.Context
                     CreatedBy = 0,
                     LastStatusBy = 0,
                     IsProtected = true,
-                    RowId = new Guid("00000000-0000-0000-0000-000000000005"),
                     CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
                 },
                 new Parameter
@@ -413,7 +407,6 @@ namespace ArchiX.Library.Context
                     CreatedBy = 0,
                     LastStatusBy = 0,
                     IsProtected = true,
-                    RowId = new Guid("00000000-0000-0000-0000-000000000006"),
                     CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
                 },
                 new Parameter
@@ -428,7 +421,6 @@ namespace ArchiX.Library.Context
                     CreatedBy = 0,
                     LastStatusBy = 0,
                     IsProtected = true,
-                    RowId = new Guid("00000000-0000-0000-0000-000000000007"),
                     CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
                 }
             );
@@ -446,7 +438,6 @@ namespace ArchiX.Library.Context
                     CreatedBy = 0,
                     LastStatusBy = 0,
                     IsProtected = true,
-                    RowId = new Guid("10000000-0000-0000-0000-000000000001"),
                     CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
                 },
                 // Security/PasswordPolicy (Id=2)
@@ -460,7 +451,6 @@ namespace ArchiX.Library.Context
                     CreatedBy = 0,
                     LastStatusBy = 0,
                     IsProtected = true,
-                    RowId = new Guid("10000000-0000-0000-0000-000000000002"),
                     CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
                 },
                 // UI/TabbedOptions (Id=3)
@@ -474,7 +464,6 @@ namespace ArchiX.Library.Context
                     CreatedBy = 0,
                     LastStatusBy = 0,
                     IsProtected = true,
-                    RowId = new Guid("10000000-0000-0000-0000-000000000003"),
                     CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
                 },
                 // #57 yeni parametre değerleri
@@ -489,7 +478,6 @@ namespace ArchiX.Library.Context
                     CreatedBy = 0,
                     LastStatusBy = 0,
                     IsProtected = true,
-                    RowId = new Guid("10000000-0000-0000-0000-000000000004"),
                     CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
                 },
                 // HTTP/HttpPoliciesOptions (Id=5)
@@ -503,7 +491,6 @@ namespace ArchiX.Library.Context
                     CreatedBy = 0,
                     LastStatusBy = 0,
                     IsProtected = true,
-                    RowId = new Guid("10000000-0000-0000-0000-000000000005"),
                     CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
                 },
                 // Security/AttemptLimiterOptions (Id=6)
@@ -517,7 +504,6 @@ namespace ArchiX.Library.Context
                     CreatedBy = 0,
                     LastStatusBy = 0,
                     IsProtected = true,
-                    RowId = new Guid("10000000-0000-0000-0000-000000000006"),
                     CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
                 },
                 // System/ParameterRefresh (Id=7)
@@ -531,7 +517,6 @@ namespace ArchiX.Library.Context
                     CreatedBy = 0,
                     LastStatusBy = 0,
                     IsProtected = true,
-                    RowId = new Guid("10000000-0000-0000-0000-000000000007"),
                     CreatedAt = new DateTimeOffset(2025, 1, 22, 0, 0, 0, TimeSpan.Zero)
                 }
             );
