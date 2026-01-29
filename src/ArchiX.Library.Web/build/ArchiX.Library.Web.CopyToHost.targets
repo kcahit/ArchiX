@@ -27,7 +27,8 @@
 
 		<ItemGroup>
 			<_AxLibWwwrootFiles Include="$(_AxLibraryWebWwwrootDir)**\*" />
-			<_AxLibPagesFiles Include="$(_AxLibraryWebPagesDir)**\*" />
+			<_AxLibPagesFiles Include="$(_AxLibraryWebPagesDir)**\*"
+				Exclude="$(_AxLibraryWebPagesDir)Shared\EntityListPageBase.cs;$(_AxLibraryWebPagesDir)Shared\EntityRecordPageBase.cs" />
 			<_AxLibTemplatesFiles Include="$(_AxLibraryWebTemplatesDir)**\*" />
 		</ItemGroup>
 
