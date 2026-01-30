@@ -1,9 +1,8 @@
-﻿using ArchiX.Library.Configuration;
-using ArchiX.Library.Context;
+﻿using ArchiX.Library.Context;
 using ArchiX.Library.Web.Extensions;
 using ArchiX.Library.Web.Middleware;
-using ArchiX.Library.Services.Menu;
 using ArchiX.WebHostDLL.Data;
+
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 

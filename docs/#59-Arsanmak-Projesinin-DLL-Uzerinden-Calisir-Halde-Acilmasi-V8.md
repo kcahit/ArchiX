@@ -26,6 +26,7 @@
 - ArchiX.WebHostDLL projesi de ArchiX.WebHost peojesi ile aynı dizinde/hizada create edilecek (D:\_git\ArchiX\Dev\ArchiX\src)
 - Her işin sonunda muhakkkaa build et mesajlara bak ve düzelt. Warning. message ve ya error varsa düzeltmeden devam etme.
 - Eğer tst kodun varsa kendin mukakkka testleri kendin çalıştır ve onayla.
+- Migration dosyaları üretilmeyeceği bu dosyaların EF tarafından üretileceği bilinmelidir.
 
 **Prensipler:**
 - ArchiX.Library ve ArchiX.Library.Web birer NuGet paketi olarak yayınlanacak
