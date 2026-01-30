@@ -23,6 +23,7 @@
 - **ArchiX.WebHost'u devreden çıkarmak için bu çalışma yapılıyor ama bu iş kapsamında ArchiX.WebHost asla dokunulmayacaktır**
 - ArchiX.WebHostDLL gerçek müşteri projelerini simüle edecek (NuGet paketleri üzerinden)
 - ArchiX solution içinde çalışma yapılacak (workspace avantajı)
+- ArchiX.WebHostDLL projesi de ArchiX.WebHost peojesi ile aynı dizinde/hizada create edilecek (D:\_git\ArchiX\Dev\ArchiX\src)
 
 **Prensipler:**
 - ArchiX.Library ve ArchiX.Library.Web birer NuGet paketi olarak yayınlanacak
@@ -49,6 +50,7 @@
 - `ArchiX.Library`: Core library (entities, DbContext, services, abstractions)
 - `ArchiX.Library.Web`: Web katmanı (Razor Pages, ViewComponents, wwwroot, JS/CSS)
 - `ArchiX.WebHost`: Test harness (**bu projeye dokunulmayacak**)
+- 
 
 **Hedef Yapı (Production Simülasyonu):**
 - ArchiX.Library → NuGet paketi olarak yayınlanacak
