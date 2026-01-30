@@ -36,6 +36,11 @@
 			<AutoGen>True</AutoGen>
 			<DependentUpon>%(Filename).resx</DependentUpon>
 		</Compile>
+		<!-- Skip culture-specific resx from satellite packing to avoid NU5026 in CI -->
+		<EmbeddedResource Update="Resources\PasswordValidation.en-US.resx">
+			<GenerateResource>false</GenerateResource>
+			<Pack>false</Pack>
+		</EmbeddedResource>
 	</ItemGroup>
 
 	<!-- ASP.NET Core HTTP türleri için şart -->
