@@ -1,0 +1,19 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ArchiX WebHostDLL</title>
+    <link rel="stylesheet" href="~/_content/ArchiX.Library.Web/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <h1>ArchiX WebHostDLL</h1>
+    </header>
+    <div class="container">
+        @RenderBody()
+    </div>
+    <script src="~/_content/ArchiX.Library.Web/js/archix/tabbed/archix-tabhost.js" asp-append-version="true"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

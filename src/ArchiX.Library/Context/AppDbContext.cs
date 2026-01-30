@@ -528,6 +528,38 @@ namespace ArchiX.Library.Context
             modelBuilder.ApplyRestrictDeleteBehavior();
         }
 
+	public override int SaveChanges()
+	{
+		EnforceSystemApplicationProtection();
+		return base.SaveChanges();
+	}
+
+	public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+	{
+		EnforceSystemApplicationProtection();
+		return base.SaveChangesAsync(cancellationToken);
+	}
+
+	private void EnforceSystemApplicationProtection()
+	{
+		foreach (var entry in ChangeTracker.Entries<Application>())
+		{
+			if (entry.Entity.Id != 1) continue;
+			switch (entry.State)
+			{
+				case EntityState.Deleted:
+					throw new InvalidOperationException("System application (Id=1) cannot be deleted.");
+				case EntityState.Modified:
+					var statusProp = entry.Property(nameof(BaseEntity.StatusId));
+					if (statusProp.IsModified && statusProp.CurrentValue is int status && (status == BaseEntity.DeletedStatusId || status == 5))
+					{
+						throw new InvalidOperationException("System application (Id=1) cannot be disabled or deleted.");
+					}
+					break;
+			}
+		}
+	}
+
         public async Task EnsureCoreSeedsAndBindAsync(CancellationToken ct = default)
         {
             DraftStatusId = await Set<Statu>().Where(x => x.Code == "DFT").Select(x => x.Id).SingleAsync(ct);

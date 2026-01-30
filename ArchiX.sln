@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_NOTLAR", "_NOTLAR", "{8EC4
 	ProjectSection(SolutionItems) = preProject
 		docs\#17 Archix-Connection-CONTRIBUTING.md = docs\#17 Archix-Connection-CONTRIBUTING.md
 		docs\#32-Application-Tanim-Ekrani-V5.md = docs\#32-Application-Tanim-Ekrani-V5.md
+		docs\#59-Arsanmak-Projesinin-DLL-Uzerinden-Calisir-Halde-Acilmasi-V8.md = docs\#59-Arsanmak-Projesinin-DLL-Uzerinden-Calisir-Halde-Acilmasi-V8.md
 		.github\copilot-instructions.md = .github\copilot-instructions.md
 		docs\Yetki-Yonetimi.md = docs\Yetki-Yonetimi.md
 	EndProjectSection
@@ -36,6 +37,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DataSets", "DataSets", "{25
 		docs\#17 Archix-Connection-CONTRIBUTING.md = docs\#17 Archix-Connection-CONTRIBUTING.md
 		docs\DataSets\Arsanmak_KarZarar.ndjson = docs\DataSets\Arsanmak_KarZarar.ndjson
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiX.WebHostDLL", "src\ArchiX.WebHostDLL\ArchiX.WebHostDLL.csproj", "{A0DC2151-A8FD-4ACD-49B3-BF1F8B7277FF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -119,6 +122,18 @@ Global
 		{A5EC1A76-804E-41D7-9561-B3EE7AF9B032}.Release|x64.Build.0 = Release|Any CPU
 		{A5EC1A76-804E-41D7-9561-B3EE7AF9B032}.Release|x86.ActiveCfg = Release|Any CPU
 		{A5EC1A76-804E-41D7-9561-B3EE7AF9B032}.Release|x86.Build.0 = Release|Any CPU
+		{A0DC2151-A8FD-4ACD-49B3-BF1F8B7277FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0DC2151-A8FD-4ACD-49B3-BF1F8B7277FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0DC2151-A8FD-4ACD-49B3-BF1F8B7277FF}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A0DC2151-A8FD-4ACD-49B3-BF1F8B7277FF}.Debug|x64.Build.0 = Debug|Any CPU
+		{A0DC2151-A8FD-4ACD-49B3-BF1F8B7277FF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A0DC2151-A8FD-4ACD-49B3-BF1F8B7277FF}.Debug|x86.Build.0 = Debug|Any CPU
+		{A0DC2151-A8FD-4ACD-49B3-BF1F8B7277FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0DC2151-A8FD-4ACD-49B3-BF1F8B7277FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0DC2151-A8FD-4ACD-49B3-BF1F8B7277FF}.Release|x64.ActiveCfg = Release|Any CPU
+		{A0DC2151-A8FD-4ACD-49B3-BF1F8B7277FF}.Release|x64.Build.0 = Release|Any CPU
+		{A0DC2151-A8FD-4ACD-49B3-BF1F8B7277FF}.Release|x86.ActiveCfg = Release|Any CPU
+		{A0DC2151-A8FD-4ACD-49B3-BF1F8B7277FF}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,11 @@
+﻿@model IReadOnlyList<ArchiX.Library.Models.MenuItem>
+<nav class="archix-sidebar">
+    <ul class="archix-sidebar-list">
+        @foreach (var item in Model)
+        {
+            <li class="archix-sidebar-item" data-id="@item.Id">
+                <a href="@item.Url">@item.Title</a>
+            </li>
+        }
+    </ul>
+</nav>

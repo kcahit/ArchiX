@@ -24,6 +24,8 @@
 - ArchiX.WebHostDLL gerçek müşteri projelerini simüle edecek (NuGet paketleri üzerinden)
 - ArchiX solution içinde çalışma yapılacak (workspace avantajı)
 - ArchiX.WebHostDLL projesi de ArchiX.WebHost peojesi ile aynı dizinde/hizada create edilecek (D:\_git\ArchiX\Dev\ArchiX\src)
+- Her işin sonunda muhakkkaa build et mesajlara bak ve düzelt. Warning. message ve ya error varsa düzeltmeden devam etme.
+- Eğer tst kodun varsa kendin mukakkka testleri kendin çalıştır ve onayla.
 
 **Prensipler:**
 - ArchiX.Library ve ArchiX.Library.Web birer NuGet paketi olarak yayınlanacak
@@ -1106,6 +1108,19 @@ public class MyBackgroundService : BackgroundService
 
 ## 4) YAPILACAK İŞLER
 
+#### İş Durumu Logu
+- 4.1 — ArchiX.Library Paket Hazırlığı ==> Başlandı. Bitti.
+- 4.2 — ArchiX.Library.Web RCL Dönüşümü ==> Başlandı. Bitti.
+- 4.3 — AppDbContext ve Global Filter ==> Başlandı. Bitti.
+- 4.4 — AddArchiX Extension Metodu ==> Başlandı. Bitti.
+- 4.5 — UseArchiX Middleware ==> Başlandı. Bitti.
+- 4.6 — ParameterService ve Fallback ==> Başlandı. Bitti.
+- 4.7 — MenuService ve Dinamik Navigation ==> Başlandı. Bitti.
+- 4.8 — Sidebar ViewComponent ==> Başlandı. Bitti.
+- 4.9 — ArchiX.WebHostDLL Projesi Oluşturma ==> Başlandı. Bitti.
+- 4.10 — ApplicationDbContext ve Design-Time Factory ==> Başlandı. Bitti.
+- 4.11 — WebHostDLL Program.cs Entegrasyonu ==> Başlandı. Bitti.
+
 ### İş 4.1 — ArchiX.Library Paket Hazırlığı
 - **Bağımlılık:** Tasarım 2.1.1, 2.1.4
 - **Aksiyon:**
@@ -1184,7 +1199,7 @@ public class MyBackgroundService : BackgroundService
   - `IDesignTimeDbContextFactory` implement et
   - Seed metodu hazırla (Dev/Prod guard ekle, idempotent)
 
-### İş 4.11 — WebHostDLL Program.cs Entegrasyonu
+### İş 4.11 — WebHostDLL Program.cs Entegrasyonu ==> buraya kadar olan tüm işler bitti. sıdaki işeri yapmaya başlanmadı daha
 - **Bağımlılık:** İş 4.9, 4.10, Tasarım 2.3.3
 - **Aksiyon:**
   - `AddArchiX` çağrısı ekle

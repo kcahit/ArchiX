@@ -4,6 +4,18 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageId>ArchiX.Library</PackageId>
+		<Version>1.0.0</Version>
+		<Authors>ArchiX Team</Authors>
+		<Company>ArchiX</Company>
+		<PackageDescription>ArchiX core library: entities, EF Core DbContext, services, abstractions.</PackageDescription>
+		<RepositoryUrl>https://github.com/kcahit/ArchiX</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/kcahit/ArchiX</PackageProjectUrl>
+		<PackageTags>archix;erp;library;efcore</PackageTags>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<IncludeSatelliteAssembliesInPackage>false</IncludeSatelliteAssembliesInPackage>
+		<GenerateSatelliteAssemblies>false</GenerateSatelliteAssemblies>
 	</PropertyGroup>
 	<ItemGroup>
 		<Compile Remove="Infrastructure\Others\**" />

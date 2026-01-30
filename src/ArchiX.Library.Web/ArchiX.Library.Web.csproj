@@ -5,6 +5,16 @@
     <Nullable>enable</Nullable>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     <RazorLangVersion>Latest</RazorLangVersion>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageId>ArchiX.Library.Web</PackageId>
+		<Version>1.0.0</Version>
+		<Authors>ArchiX Team</Authors>
+		<Company>ArchiX</Company>
+		<PackageDescription>ArchiX Razor Class Library with pages, components, and static web assets.</PackageDescription>
+		<RepositoryUrl>https://github.com/kcahit/ArchiX</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/kcahit/ArchiX</PackageProjectUrl>
+		<PackageTags>archix;erp;razor-pages;rcl</PackageTags>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Templates\Modern\Pages\Definitions\**" />
@@ -17,6 +27,10 @@
     <ProjectReference Include="..\ArchiX.Library\ArchiX.Library.csproj" />
   </ItemGroup>
 
+	<ItemGroup>
+		<EmbeddedResource Include="wwwroot\**\*" />
+	</ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="FluentValidation" Version="11.6.0" />
@@ -28,7 +42,6 @@
 
   <ItemGroup>
     <Folder Include="Abstractions\Security\" />
-    <Folder Include="Middleware\" />
     <Folder Include="Views\Shared\Components\LayoutMode\" />
     <Folder Include="wwwroot\images\" />
   </ItemGroup>
