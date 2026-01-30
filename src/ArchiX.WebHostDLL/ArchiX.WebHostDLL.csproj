@@ -5,8 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="ArchiX.Library" Version="1.0.0" />
-    <PackageReference Include="ArchiX.Library.Web" Version="1.0.0" />
+    <PackageReference Include="ArchiX.Library" Version="1.0.0-beta.2" />
+    <PackageReference Include="ArchiX.Library.Web" Version="1.0.0-beta.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.12" PrivateAssets="all" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.12" PrivateAssets="all" />

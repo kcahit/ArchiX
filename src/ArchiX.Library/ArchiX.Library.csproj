@@ -7,7 +7,7 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>
 		<PackageId>ArchiX.Library</PackageId>
-		<Version>1.0.0-beta.1</Version>
+		<Version>1.0.0-beta.2</Version>
 		<Authors>ArchiX Team</Authors>
 		<Company>ArchiX</Company>
 		<PackageDescription>ArchiX core library: entities, EF Core DbContext, services, abstractions.</PackageDescription>
