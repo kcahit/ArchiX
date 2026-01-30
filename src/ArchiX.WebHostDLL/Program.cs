@@ -2,11 +2,9 @@
 using ArchiX.Library.Context;
 using ArchiX.Library.Web.Extensions;
 using ArchiX.Library.Web.Middleware;
-using ArchiX.Library.Web.ViewComponents;
-using ArchiX.Library.Web.Configuration;
 using ArchiX.Library.Services.Menu;
-using ArchiX.Library.Web;
 using ArchiX.WebHostDLL.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,6 +31,16 @@ builder.Services.AddHealthChecks()
     .AddDbContextCheck<AppDbContext>("ArchiXDb")
     .AddDbContextCheck<ApplicationDbContext>("ApplicationDb");
 
+// Security: cookie auth + authorization
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/Denied";
+        options.SlidingExpiration = true;
+    });
+builder.Services.AddAuthorization();
+
 builder.Services.AddRazorPages()
     .AddApplicationPart(typeof(ArchiX.Library.Web.Pipeline.Mediator).Assembly);
 
@@ -48,11 +56,27 @@ if (app.Environment.IsDevelopment())
     await appDb.Database.MigrateAsync();
 }
 
-app.UseStaticFiles();
+// Static files + cache policy
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        if (app.Environment.IsDevelopment())
+        {
+            ctx.Context.Response.Headers.CacheControl = "no-store, no-cache, must-revalidate";
+        }
+        else
+        {
+            const int seconds = 60 * 60 * 24 * 365; // 1 year
+            ctx.Context.Response.Headers.CacheControl = $"public,max-age={seconds},immutable";
+        }
+    }
+});
 app.UseArchiX();
 app.UseApplicationContext();
 
 app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapHealthChecks("/health");

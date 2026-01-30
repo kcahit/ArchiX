@@ -1120,6 +1120,18 @@ public class MyBackgroundService : BackgroundService
 - 4.9 — ArchiX.WebHostDLL Projesi Oluşturma ==> Başlandı. Bitti.
 - 4.10 — ApplicationDbContext ve Design-Time Factory ==> Başlandı. Bitti.
 - 4.11 — WebHostDLL Program.cs Entegrasyonu ==> Başlandı. Bitti.
+- 4.12 — İlk Migration (ArchiX DB) ==> Başlandı. Bitti. (Şema değişikliği yok, mevcut migration'lar yeterli.)
+- 4.13 — İlk Migration (Application DB) ==> Başlandı. Bitti. (InitialCreate üretildi.)
+- 4.14 — Migration Auto-Apply (Development) ==> Başlandı. Bitti. (Program.cs dev ortamında MigrateAsync içeriyor.)
+- 4.15 — ApplicationContext Middleware ==> Başlandı. Bitti.
+- 4.16 — Security Entegrasyonu ==> Başlandı. Bitti. (Cookie auth + authorization.)
+- 4.17 — Health Check ve Telemetry ==> Başlandı. Bitti. (HealthChecks eklendi.)
+- 4.18 — Connection String Yönetimi ==> Başlandı. Bitti. (Production appsettings placeholder, secrets için KeyVault/SecretManager.)
+- 4.19 — Static Assets Versiyonlama ==> Başlandı. Bitti. (StaticFileOptions ile cache header.)
+- 4.20 — Unit Testler ==> Başlandı. Bitti. (dotnet test ArchiX.sln -c Debug, 424 test geçti.)
+- 4.21 — CI/CD / publish ==> Henüz tasarlanmadı. (Öneri: GH Actions ile build/test/pack/push.)
+- 4.23 — Dokümantasyon ==> Başlandı. Bitti. (Stable rehberler eklendi.)
+ - 4.19 — Static Assets Versiyonlama ==> Başlandı. Bitti. (StaticFileOptions ile cache header.)
 
 ### İş 4.1 — ArchiX.Library Paket Hazırlığı
 - **Bağımlılık:** Tasarım 2.1.1, 2.1.4
