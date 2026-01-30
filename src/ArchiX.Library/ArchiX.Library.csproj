@@ -6,7 +6,7 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageId>ArchiX.Library</PackageId>
-		<Version>1.0.0</Version>
+		<Version>1.0.0-beta.1</Version>
 		<Authors>ArchiX Team</Authors>
 		<Company>ArchiX</Company>
 		<PackageDescription>ArchiX core library: entities, EF Core DbContext, services, abstractions.</PackageDescription>
@@ -17,6 +17,11 @@
 		<IncludeSatelliteAssembliesInPackage>false</IncludeSatelliteAssembliesInPackage>
 		<GenerateSatelliteAssemblies>false</GenerateSatelliteAssemblies>
 	</PropertyGroup>
+
+	<!-- Remove culture-specific resx so build doesn't expect satellite assemblies (fixes MSB3030/NU5026) -->
+	<ItemGroup>
+		<EmbeddedResource Remove="Resources\*.??-??.resx" />
+	</ItemGroup>
 	<ItemGroup>
 		<Compile Remove="Infrastructure\Others\**" />
 		<EmbeddedResource Remove="Infrastructure\Others\**" />
@@ -36,8 +41,8 @@
 			<AutoGen>True</AutoGen>
 			<DependentUpon>%(Filename).resx</DependentUpon>
 		</Compile>
-		<!-- Skip culture-specific resx from satellite packing to avoid NU5026 in CI -->
-		<EmbeddedResource Update="Resources\PasswordValidation.en-US.resx">
+		<!-- Skip all culture-specific resx files (e.g., *.en-US.resx, *.tr-TR.resx) from satellite packing to avoid NU5026 in CI -->
+		<EmbeddedResource Update="Resources\*.??-??.resx">
 			<GenerateResource>false</GenerateResource>
 			<Pack>false</Pack>
 		</EmbeddedResource>
