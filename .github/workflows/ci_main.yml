@@ -38,10 +38,12 @@ jobs:
       - name: Prepare local feed
         run: |
           mkdir -p ./.nuget/local
+          dotnet build src/ArchiX.Library/ArchiX.Library.csproj -c Release /p:GenerateRuntimeConfigurationFiles=true
+          dotnet build src/ArchiX.Library.Web/ArchiX.Library.Web.csproj -c Release /p:GenerateRuntimeConfigurationFiles=true
           dotnet pack src/ArchiX.Library/ArchiX.Library.csproj -c Release -o ./.nuget/local \
-            /p:GenerateSatelliteAssemblies=false /p:IncludeSatelliteAssembliesInPackage=false
+            /p:GenerateSatelliteAssemblies=false /p:IncludeSatelliteAssembliesInPackage=false /p:GenerateRuntimeConfigurationFiles=true
           dotnet pack src/ArchiX.Library.Web/ArchiX.Library.Web.csproj -c Release -o ./.nuget/local \
-            /p:GenerateSatelliteAssemblies=false /p:IncludeSatelliteAssembliesInPackage=false
+            /p:GenerateSatelliteAssemblies=false /p:IncludeSatelliteAssembliesInPackage=false /p:GenerateRuntimeConfigurationFiles=true
 
       - name: Restore
         run: dotnet restore ArchiX.sln --source "https://api.nuget.org/v3/index.json" --source "./.nuget/local"

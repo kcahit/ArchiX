@@ -5,7 +5,7 @@
 		<Nullable>enable</Nullable>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+		<GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>
 		<PackageId>ArchiX.Library</PackageId>
 		<Version>1.0.0-beta.1</Version>
 		<Authors>ArchiX Team</Authors>
