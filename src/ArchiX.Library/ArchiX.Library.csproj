@@ -15,6 +15,7 @@
 		<PackageProjectUrl>https://github.com/kcahit/ArchiX</PackageProjectUrl>
 		<PackageTags>archix;erp;library;efcore</PackageTags>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<!-- Exclude satellite assemblies from NuGet package (they're for build/test only) -->
 		<IncludeSatelliteAssembliesInPackage>false</IncludeSatelliteAssembliesInPackage>
 	</PropertyGroup>
 
@@ -29,13 +30,21 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<!-- Common passwords dictionary -->
 		<EmbeddedResource Include="Resources\common-passwords.txt" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<EmbeddedResource Update="Resources\*.resx">
+		<!-- Neutral resx with Designer.cs generation -->
+		<EmbeddedResource Update="Resources\PasswordValidation.resx">
 			<Generator>ResXFileCodeGenerator</Generator>
-			<LastGenOutput>%(Filename).Designer.cs</LastGenOutput>
+			<LastGenOutput>PasswordValidation.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+		<!-- Culture-specific resx: explicit Include for satellite generation -->
+		<EmbeddedResource Include="Resources\PasswordValidation.en-US.resx">
+			<WithCulture>true</WithCulture>
+			<LogicalName>ArchiX.Library.Resources.PasswordValidation.en-US.resources</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="Resources\PasswordValidation.tr-TR.resx">
+			<WithCulture>true</WithCulture>
+			<LogicalName>ArchiX.Library.Resources.PasswordValidation.tr-TR.resources</LogicalName>
 		</EmbeddedResource>
 		<Compile Update="Resources\*.Designer.cs">
 			<AutoGen>True</AutoGen>

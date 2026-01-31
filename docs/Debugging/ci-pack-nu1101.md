@@ -67,3 +67,29 @@
   3. `<IncludeSatelliteAssembliesInPackage>false</IncludeSatelliteAssembliesInPackage>` **kalıyor** (satellite'ler build/test için üretilsin, ama pack'e dahil edilmesin).
 - **Beklenen**: Build satellite üretecek, test projesi bunları kopyalayacak, testler geçecek. Pack NU5026 warning verebilir ama sorun yok (satellite'ler zaten pack'e dahil edilmiyor).
 - **Durum**: Commit/push bekleniyor (#14. deneme).
+
+## 2026-01-31 08:42 (TR) - ÇÖZ ÜM BULUNDU: Neutral Resx + Explicit Culture Include (#15 BAŞARILI)
+- **Gözlem**: #14 düzeltmesi sonrası lokal test, satellite'ler yine üretilmedi (`en-US/`, `tr-TR/` klasörleri boş).
+- **Kök Neden**: .NET SDK satellite logic: **neutral resx yoksa culture-specific resx'ler satellite üretmiyor**. `PasswordValidation.resx` (neutral/default) yoktu, sadece `.en-US` ve `.tr-TR` vardı.
+- **Keşif**: Lokal temiz build + verbose log: `CoreGenerateSatelliteAssemblies` target hiç çalışmadı → culture-specific resx'ler `EmbeddedResource` item list'ine eklenmemiş (SDK'nın wildcard pattern sadece neutral resx'i match etti).
+- **Çözüm (#15 - BAŞARILI)**:
+  1. **`PasswordValidation.resx` (neutral) oluşturuldu**: En-US default değerlerle (EMPTY, MIN_LENGTH, vb. tüm key'ler).
+  2. **Culture-specific resx'ler explicit `Include` ile eklendi**:
+     ```xml
+     <EmbeddedResource Include="Resources\PasswordValidation.en-US.resx">
+       <WithCulture>true</WithCulture>
+       <LogicalName>ArchiX.Library.Resources.PasswordValidation.en-US.resources</LogicalName>
+     </EmbeddedResource>
+     <EmbeddedResource Include="Resources\PasswordValidation.tr-TR.resx">
+       <WithCulture>true</WithCulture>
+       <LogicalName>ArchiX.Library.Resources.PasswordValidation.tr-TR.resources</LogicalName>
+     </EmbeddedResource>
+     ```
+  3. **Neutral resx sadece Designer.cs generate ediyor** (`<Generator>ResXFileCodeGenerator</Generator>`), culture-specific'ler etmiyor.
+  4. `<IncludeSatelliteAssembliesInPackage>false</IncludeSatelliteAssembliesInPackage>` geri eklendi (satellite'ler pack'e dahil edilmesin).
+- **Sonuç**: 
+  - `CoreGenerateSatelliteAssemblies` target çalıştı (1.7s).
+  - `src/ArchiX.Library/bin/Release/net9.0/en-US/ArchiX.Library.resources.dll` üretildi (5 KB).
+  - `src/ArchiX.Library/bin/Release/net9.0/tr-TR/ArchiX.Library.resources.dll` üretildi (5 KB).
+  - **Lokal tüm testler geçti**: 347 + 77 = 424 test, 0 fail! ✅
+- **Durum**: Commit/push bekleniyor (#15. deneme - kesin çözüm).
