@@ -12,3 +12,18 @@
 - Change: CI yine NU1101 (ArchiX.Library*, local + nuget.org yok) verdi. Versiyon: 1.0.0-beta.2.
 - Expected: Prepare local feed step paketleri üretip restore bulmalıydı.
 - Observed: CI restore'da ArchiX.Library / ArchiX.Library.Web bulunamadı; Prepare local feed adımının çıktısı doğrulanamadı.
+
+## 2026-01-31 00:05 (TR)
+- Change: CI yeniden restore denemesi (sources: nuget.org + ./.nuget/local), paketler ArchiX.Library/Web 1.0.0-beta.2 olmalı.
+- Expected: Prepare local feed paketi üretsin, restore beta.2 bulsun.
+- Observed: Olmadı. NU1101 (ArchiX.Library*, ./.nuget/local ve nuget.org'da yok) devam etti.
+
+## 2026-01-31 00:15 (TR) - Kök Neden Analizi
+- **Hipotez**: "Prepare local feed" adımındaki `dotnet pack` komutları sessizce başarısız oluyor, paketler üretilmiyor.
+- **Kanıt**: CI restore logunda ArchiX.Library/Web bulunamadı; pack adımı çıktısında paket üretimi onayı yok.
+- **Çözüm Denemesi**:
+  1. Pack komutlarına `--verbosity detailed` eklendi (hata mesajlarını görmek için).
+  2. "Verify local feed" adımı eklendi: `.nuget/local` içeriğini listeler, `ArchiX.Library.1.0.0-beta.2.nupkg` ve `ArchiX.Library.Web.1.0.0-beta.2.nupkg` yoksa hata verir.
+  3. Build komutlarına `--verbosity minimal` + echo çıktıları eklendi (hangi aşamada olduğunu görmek için).
+- **Beklenen**: Eğer pack başarısız oluyorsa verbose log hatayı gösterecek; eğer başarılı olursa verify adımı geçecek ve restore NU1101 vermeyecek.
+- **Durum**: Commit/push bekleniyor, sonraki CI run'ında log incelenecek.

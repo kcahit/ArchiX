@@ -38,12 +38,32 @@ jobs:
       - name: Prepare local feed
         run: |
           mkdir -p ./.nuget/local
-          dotnet build src/ArchiX.Library/ArchiX.Library.csproj -c Release /p:GenerateRuntimeConfigurationFiles=true
-          dotnet build src/ArchiX.Library.Web/ArchiX.Library.Web.csproj -c Release /p:GenerateRuntimeConfigurationFiles=true
-          dotnet pack src/ArchiX.Library/ArchiX.Library.csproj -c Release -o ./.nuget/local \
+          echo "Building ArchiX.Library..."
+          dotnet build src/ArchiX.Library/ArchiX.Library.csproj -c Release /p:GenerateRuntimeConfigurationFiles=true --verbosity minimal
+          echo "Packing ArchiX.Library..."
+          dotnet pack src/ArchiX.Library/ArchiX.Library.csproj -c Release -o ./.nuget/local --verbosity detailed \
             /p:GenerateSatelliteAssemblies=false /p:IncludeSatelliteAssembliesInPackage=false /p:GenerateRuntimeConfigurationFiles=true
-          dotnet pack src/ArchiX.Library.Web/ArchiX.Library.Web.csproj -c Release -o ./.nuget/local \
+          echo "Building ArchiX.Library.Web..."
+          dotnet build src/ArchiX.Library.Web/ArchiX.Library.Web.csproj -c Release /p:GenerateRuntimeConfigurationFiles=true --verbosity minimal
+          echo "Packing ArchiX.Library.Web..."
+          dotnet pack src/ArchiX.Library.Web/ArchiX.Library.Web.csproj -c Release -o ./.nuget/local --verbosity detailed \
             /p:GenerateSatelliteAssemblies=false /p:IncludeSatelliteAssembliesInPackage=false /p:GenerateRuntimeConfigurationFiles=true
+
+      - name: Verify local feed
+        run: |
+          echo "Contents of .nuget/local:"
+          ls -lah ./.nuget/local
+          echo "ArchiX packages:"
+          find ./.nuget/local -name 'ArchiX*.nupkg' -type f
+          if [ ! -f ./.nuget/local/ArchiX.Library.1.0.0-beta.2.nupkg ]; then
+            echo "ERROR: ArchiX.Library.1.0.0-beta.2.nupkg not found!"
+            exit 1
+          fi
+          if [ ! -f ./.nuget/local/ArchiX.Library.Web.1.0.0-beta.2.nupkg ]; then
+            echo "ERROR: ArchiX.Library.Web.1.0.0-beta.2.nupkg not found!"
+            exit 1
+          fi
+          echo "All packages verified."
 
       - name: Restore
         run: dotnet restore ArchiX.sln --source "https://api.nuget.org/v3/index.json" --source "./.nuget/local"
