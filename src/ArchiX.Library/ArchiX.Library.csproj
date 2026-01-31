@@ -16,7 +16,6 @@
 		<PackageTags>archix;erp;library;efcore</PackageTags>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<IncludeSatelliteAssembliesInPackage>false</IncludeSatelliteAssembliesInPackage>
-		<GenerateSatelliteAssemblies>false</GenerateSatelliteAssemblies>
 	</PropertyGroup>
 
 	<!-- Remove culture-specific resx so build doesn't expect satellite assemblies (fixes MSB3030/NU5026) -->
@@ -42,10 +41,6 @@
 			<AutoGen>True</AutoGen>
 			<DependentUpon>%(Filename).resx</DependentUpon>
 		</Compile>
-		<!-- Skip all culture-specific resx files (e.g., *.en-US.resx, *.tr-TR.resx) from satellite packing to avoid NU5026 in CI -->
-		<EmbeddedResource Update="Resources\*.??-??.resx">
-			<Pack>false</Pack>
-		</EmbeddedResource>
 	</ItemGroup>
 
 	<!-- ASP.NET Core HTTP türleri için şart -->

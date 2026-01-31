@@ -56,3 +56,14 @@
 - **Çözüm (#13)**: `src/ArchiX.Library/ArchiX.Library.csproj` içinde `GenerateResource=false` kaldırıldı. Resx'ler build/test için satellite üretecek, ama `<Pack>false</Pack>` sayesinde nupkg'ye dahil edilmeyecek (NU5026 önlenir).
 - **Beklenen**: Lokal `dotnet test` geçecek, CI test adımı 7 test fail vermeyecek.
 - **Durum**: Commit/push bekleniyor (#13. deneme).
+
+## 2026-01-31 08:30 (TR) - CI #13 Yine FAIL, Kök Neden: GenerateSatelliteAssemblies=false
+- **Gözlem**: CI #13 çalıştı, yine aynı 7 test fail. Build loglarında "CoreGenerateSatelliteAssemblies: Skipping target... up-to-date" → satellite'ler üretilmiş ama testler fail.
+- **Kök Neden Bulundu**: `src/ArchiX.Library/ArchiX.Library.csproj` satır 19'da `<GenerateSatelliteAssemblies>false</GenerateSatelliteAssemblies>` property'si var → bu satellite üretimini **tamamen** kapatıyor. `<EmbeddedResource>` item-level `GenerateResource` metadata'sından daha güçlü.
+- **Kanıt**: Build log'da "up-to-date" diyor ama "Skipping" → eski artifact'ler var, yeni üretim yok. Test projesine satellite'ler kopyalanmıyor.
+- **Çözüm (#14)**:
+  1. `<GenerateSatelliteAssemblies>false</GenerateSatelliteAssemblies>` satırı tamamen kaldırıldı (default `true` olacak).
+  2. `<EmbeddedResource Update ... Pack=false>` bloğu kaldırıldı (gereksiz; zaten `IncludeSatelliteAssembliesInPackage=false` var).
+  3. `<IncludeSatelliteAssembliesInPackage>false</IncludeSatelliteAssembliesInPackage>` **kalıyor** (satellite'ler build/test için üretilsin, ama pack'e dahil edilmesin).
+- **Beklenen**: Build satellite üretecek, test projesi bunları kopyalayacak, testler geçecek. Pack NU5026 warning verebilir ama sorun yok (satellite'ler zaten pack'e dahil edilmiyor).
+- **Durum**: Commit/push bekleniyor (#14. deneme).
