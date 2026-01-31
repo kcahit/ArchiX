@@ -48,3 +48,11 @@
 - **Çözüm**: Kullanıcı son değişiklikleri commit/push etmeli. Yeni CI run'ında restore `${GITHUB_WORKSPACE}/.nuget/local` tam path'ini kullanacak.
 - **Beklenen**: Commit/push sonrası restore NU1101 vermeyecek.
 - **Durum**: Commit/push bekleniyor (#12. deneme).
+
+## 2026-01-31 08:22 (TR) - CI Restore OK, Tests FAIL (Culture-Specific Resx)
+- **Gözlem**: CI restore adımı başarılı (tam path fix edilmiş), paketler bulundu. Build başarılı. Test adımında 7 test fail.
+- **Başarısız testler**: Hepsi `PasswordValidationMessageProviderTests` → localized string'leri bulamıyor (beklenen "Parola boş olamaz.", gerçek "EMPTY").
+- **Kök Neden**: `<GenerateResource>false</GenerateResource>` ile culture-specific resx'ler (örn. `PasswordValidation.en-US.resx`) satellite assembly üretmiyor → runtime'da resource bulunamıyor.
+- **Çözüm (#13)**: `src/ArchiX.Library/ArchiX.Library.csproj` içinde `GenerateResource=false` kaldırıldı. Resx'ler build/test için satellite üretecek, ama `<Pack>false</Pack>` sayesinde nupkg'ye dahil edilmeyecek (NU5026 önlenir).
+- **Beklenen**: Lokal `dotnet test` geçecek, CI test adımı 7 test fail vermeyecek.
+- **Durum**: Commit/push bekleniyor (#13. deneme).

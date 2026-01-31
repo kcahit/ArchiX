@@ -44,7 +44,6 @@
 		</Compile>
 		<!-- Skip all culture-specific resx files (e.g., *.en-US.resx, *.tr-TR.resx) from satellite packing to avoid NU5026 in CI -->
 		<EmbeddedResource Update="Resources\*.??-??.resx">
-			<GenerateResource>false</GenerateResource>
 			<Pack>false</Pack>
 		</EmbeddedResource>
 	</ItemGroup>
