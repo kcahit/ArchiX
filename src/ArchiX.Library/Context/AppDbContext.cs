@@ -33,6 +33,8 @@ namespace ArchiX.Library.Context
         public DbSet<ReportDatasetTypeGroup> ReportDatasetTypeGroups => Set<ReportDatasetTypeGroup>();
         public DbSet<ReportDatasetType> ReportDatasetTypes => Set<ReportDatasetType>();
         public DbSet<ReportDataset> ReportDatasets => Set<ReportDataset>();
+        
+        public DbSet<Menu> Menus => Set<Menu>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -53,6 +55,22 @@ namespace ArchiX.Library.Context
                 e.Property(x => x.TimeZoneId).HasMaxLength(100);
                 e.Property(x => x.Description).HasMaxLength(500);
                 e.HasIndex(x => x.Code).IsUnique();
+            });
+
+            // Menu entity
+            modelBuilder.Entity<Menu>(e =>
+            {
+                e.HasKey(x => x.Id);
+                e.Property(x => x.Title).IsRequired().HasMaxLength(200);
+                e.Property(x => x.Url).HasMaxLength(300);
+                e.Property(x => x.Icon).HasMaxLength(100);
+                e.HasIndex(x => new { x.ApplicationId, x.SortOrder });
+                
+                // FK: Menu.ApplicationId → Application.Id
+                e.HasOne<Application>()
+                    .WithMany()
+                    .HasForeignKey(x => x.ApplicationId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<Statu>(e =>
