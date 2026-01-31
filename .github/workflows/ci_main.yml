@@ -37,36 +37,39 @@ jobs:
 
       - name: Prepare local feed
         run: |
-          mkdir -p ./.nuget/local
+          FEED_PATH="${GITHUB_WORKSPACE}/.nuget/local"
+          mkdir -p "${FEED_PATH}"
+          echo "Feed path: ${FEED_PATH}"
           echo "Building ArchiX.Library..."
-          dotnet build src/ArchiX.Library/ArchiX.Library.csproj -c Release /p:GenerateRuntimeConfigurationFiles=true --verbosity minimal
+          dotnet build src/ArchiX.Library/ArchiX.Library.csproj -c Release --verbosity minimal
           echo "Packing ArchiX.Library..."
-          dotnet pack src/ArchiX.Library/ArchiX.Library.csproj -c Release -o ./.nuget/local --verbosity detailed \
-            /p:GenerateSatelliteAssemblies=false /p:IncludeSatelliteAssembliesInPackage=false /p:GenerateRuntimeConfigurationFiles=true
+          dotnet pack src/ArchiX.Library/ArchiX.Library.csproj -c Release -o "${FEED_PATH}" --no-build --verbosity normal
           echo "Building ArchiX.Library.Web..."
-          dotnet build src/ArchiX.Library.Web/ArchiX.Library.Web.csproj -c Release /p:GenerateRuntimeConfigurationFiles=true --verbosity minimal
+          dotnet build src/ArchiX.Library.Web/ArchiX.Library.Web.csproj -c Release --verbosity minimal
           echo "Packing ArchiX.Library.Web..."
-          dotnet pack src/ArchiX.Library.Web/ArchiX.Library.Web.csproj -c Release -o ./.nuget/local --verbosity detailed \
-            /p:GenerateSatelliteAssemblies=false /p:IncludeSatelliteAssembliesInPackage=false /p:GenerateRuntimeConfigurationFiles=true
+          dotnet pack src/ArchiX.Library.Web/ArchiX.Library.Web.csproj -c Release -o "${FEED_PATH}" --no-build --verbosity normal
 
       - name: Verify local feed
         run: |
-          echo "Contents of .nuget/local:"
-          ls -lah ./.nuget/local
-          echo "ArchiX packages:"
-          find ./.nuget/local -name 'ArchiX*.nupkg' -type f
-          if [ ! -f ./.nuget/local/ArchiX.Library.1.0.0-beta.2.nupkg ]; then
+          FEED_PATH="${GITHUB_WORKSPACE}/.nuget/local"
+          echo "=== Verifying local feed at ${FEED_PATH} ==="
+          ls -lah "${FEED_PATH}" || echo "Directory does not exist!"
+          echo "=== ArchiX packages ==="
+          find "${FEED_PATH}" -name 'ArchiX*.nupkg' -type f || echo "No packages found!"
+          if [ ! -f "${FEED_PATH}/ArchiX.Library.1.0.0-beta.2.nupkg" ]; then
             echo "ERROR: ArchiX.Library.1.0.0-beta.2.nupkg not found!"
             exit 1
           fi
-          if [ ! -f ./.nuget/local/ArchiX.Library.Web.1.0.0-beta.2.nupkg ]; then
+          if [ ! -f "${FEED_PATH}/ArchiX.Library.Web.1.0.0-beta.2.nupkg" ]; then
             echo "ERROR: ArchiX.Library.Web.1.0.0-beta.2.nupkg not found!"
             exit 1
           fi
-          echo "All packages verified."
+          echo "=== All packages verified successfully ==="
 
       - name: Restore
-        run: dotnet restore ArchiX.sln --source "https://api.nuget.org/v3/index.json" --source "./.nuget/local"
+        run: |
+          FEED_PATH="${GITHUB_WORKSPACE}/.nuget/local"
+          dotnet restore ArchiX.sln --source https://api.nuget.org/v3/index.json --source "${FEED_PATH}"
 
       - name: Clean (Release)
         run: dotnet clean ArchiX.sln -c Release

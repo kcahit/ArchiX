@@ -27,3 +27,24 @@
   3. Build komutlarına `--verbosity minimal` + echo çıktıları eklendi (hangi aşamada olduğunu görmek için).
 - **Beklenen**: Eğer pack başarısız oluyorsa verbose log hatayı gösterecek; eğer başarılı olursa verify adımı geçecek ve restore NU1101 vermeyecek.
 - **Durum**: Commit/push bekleniyor, sonraki CI run'ında log incelenecek.
+
+## 2026-01-31 00:25 (TR) - Path Problemi Hipotezi
+- **Gözlem**: Kullanıcı hâlâ aynı NU1101 hatası aldı. "Verify local feed" adımı logunda görünmedi (commit edilmemiş veya o adıma gelemedi).
+- **Yeni Hipotez**: Linux CI'da relative path (`./.nuget/local`) working directory farkından dolayı sorunlu olabilir. Pack komutu bir dizinde, restore başka dizinde çalışıyor olabilir.
+- **Kanıt**: Lokal makinede (Windows) aynı komutlar `--source ./.nuget/local` ile başarılı; CI'da (Linux) relative path çözümlenemiyor olabilir.
+- **Çözüm Denemesi (#11)**:
+  1. `FEED_PATH="${GITHUB_WORKSPACE}/.nuget/local"` tam path kullanıldı (her adımda tutarlı).
+  2. Pack komutlarında `--no-build` eklendi (build zaten yapıldı, gereksiz MSBuild property karışımını önlemek için).
+  3. Restore komutunda tırnak kullanılmadı (`--source ${FEED_PATH}` yerine `--source "${FEED_PATH}"`).
+  4. Verify adımı daha detaylı çıktı verecek şekilde düzenlendi (`|| echo` fallback'leri eklendi).
+- **Beklenen**: Tam path kullanılınca pack ve restore aynı feed'i görecek; verify adımı paketleri bulacak; restore NU1101 vermeyecek.
+- **Durum**: Commit/push bekleniyor.
+
+## 2026-01-31 00:35 (TR) - Verify Başarılı, Restore Hâlâ Relative Path
+- **Gözlem**: Kullanıcı ekran görüntüsü paylaştı. "Verify local feed" adımı **başarılı** (satır 31: "All packages verified."). Paketler üretildi ve doğrulandı.
+- **Sorun**: Restore adımı (satır 2) **hâlâ eski komutu kullanıyor**: `--source "./.nuget/local"` (relative path).
+- **Kök Neden**: Son yaptığım değişiklik (tam path kullanımı) henüz commit/push edilmemiş veya CI eski commit'i çalıştırmış.
+- **Kanıt**: Verify adımı paketleri buldu (relative path çalıştı), ama restore adımı başka bir working directory'den çalışıyor ve relative path'i çözemiyor.
+- **Çözüm**: Kullanıcı son değişiklikleri commit/push etmeli. Yeni CI run'ında restore `${GITHUB_WORKSPACE}/.nuget/local` tam path'ini kullanacak.
+- **Beklenen**: Commit/push sonrası restore NU1101 vermeyecek.
+- **Durum**: Commit/push bekleniyor (#12. deneme).
